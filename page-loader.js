@@ -2,32 +2,56 @@
 (function() {
     'use strict';
 
-    const pageLoader = document.getElementById('pageLoader');
+    let pageLoader = null;
+    let isNavigating = false;
     
-    // Mostrar spinner ao iniciar navegação
+    // Obter referência do loader
+    function getLoader() {
+        if (!pageLoader) {
+            pageLoader = document.getElementById('pageLoader');
+        }
+        return pageLoader;
+    }
+    
+    // Mostrar spinner
     function showLoader() {
-        if (pageLoader) {
-            pageLoader.classList.add('active');
+        const loader = getLoader();
+        if (loader) {
+            isNavigating = true;
+            loader.style.display = 'flex';
+            loader.style.opacity = '0';
+            // Forçar reflow
+            requestAnimationFrame(() => {
+                loader.classList.add('active');
+                loader.style.opacity = '1';
+            });
         }
     }
 
-    // Esconder spinner quando página carregar
+    // Esconder spinner
     function hideLoader() {
-        if (pageLoader) {
-            pageLoader.classList.remove('active');
+        const loader = getLoader();
+        if (loader && !isNavigating) {
+            loader.classList.remove('active');
+            setTimeout(() => {
+                if (loader) {
+                    loader.style.display = 'none';
+                    loader.style.opacity = '0';
+                }
+            }, 300);
         }
     }
 
-    // Interceptar todos os links internos
+    // Interceptar cliques em links
     function initPageLoader() {
-        // Mostrar loader imediatamente ao clicar em links
+        // Interceptar TODOS os cliques primeiro (capture phase)
         document.addEventListener('click', function(e) {
             const link = e.target.closest('a[href]');
             if (!link) return;
 
             const href = link.getAttribute('href');
             
-            // Apenas links internos (não externos, não âncoras, não javascript:)
+            // Verificar se é link interno válido
             if (href && 
                 !href.startsWith('http') && 
                 !href.startsWith('//') && 
@@ -37,42 +61,65 @@
                 !href.startsWith('tel:') &&
                 link.target !== '_blank' &&
                 !e.ctrlKey &&
-                !e.metaKey) {
+                !e.metaKey &&
+                !e.shiftKey) {
                 
-                // Mostrar spinner imediatamente
+                // Prevenir navegação imediata
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                
+                // Mostrar spinner
                 showLoader();
+                
+                // Navegar após garantir que spinner apareceu
+                setTimeout(() => {
+                    window.location.href = href;
+                }, 200);
+                
+                return false;
             }
-        }, true); // Use capture phase para pegar antes de qualquer outro handler
+        }, true); // CAPTURE PHASE - executa ANTES de qualquer outro handler
 
-        // Esconder loader quando página carregar completamente
+        // Esconder loader quando página nova carregar
         if (document.readyState === 'complete') {
-            hideLoader();
+            isNavigating = false;
+            setTimeout(hideLoader, 1000);
         } else {
-            window.addEventListener('load', hideLoader);
-            // Fallback: esconder após 2 segundos mesmo se load não disparar
-            setTimeout(hideLoader, 2000);
-        }
-
-        // Esconder loader quando DOM estiver pronto (para páginas que carregam rápido)
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', function() {
-                // Aguardar um pouco para garantir que conteúdo está renderizado
-                setTimeout(hideLoader, 300);
+            window.addEventListener('load', function() {
+                isNavigating = false;
+                setTimeout(hideLoader, 800);
             });
-        } else {
-            setTimeout(hideLoader, 300);
+            
+            // Fallback
+            document.addEventListener('DOMContentLoaded', function() {
+                setTimeout(() => {
+                    if (!isNavigating) {
+                        hideLoader();
+                    }
+                }, 1000);
+            });
         }
     }
 
-    // Inicializar quando script carregar
+    // Inicializar imediatamente
     if (document.readyState === 'loading') {
+        // Se ainda está carregando, esperar DOM
         document.addEventListener('DOMContentLoaded', initPageLoader);
+        // Mas mostrar loader se já estiver carregando
+        setTimeout(() => {
+            if (document.readyState !== 'complete') {
+                isNavigating = false;
+                hideLoader();
+            }
+        }, 500);
     } else {
+        // DOM já carregou, inicializar e esconder loader
         initPageLoader();
+        isNavigating = false;
+        setTimeout(hideLoader, 500);
     }
 
-    // Expor funções globalmente para uso manual se necessário
+    // Expor funções globalmente
     window.showPageLoader = showLoader;
     window.hidePageLoader = hideLoader;
 })();
-
