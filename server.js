@@ -383,17 +383,41 @@ app.get('/api/health', (req, res) => {
 
 // Listar produtos (público)
 app.get('/api/products', async (req, res) => {
+    let client = null;
     try {
         const { category, search, minPrice, maxPrice } = req.query;
         
         // PostgreSQL direto - sem abstrações
         if (process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL) {
             const { Client } = require('pg');
-            const client = new Client({
-                connectionString: process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL
+            const connectionString = process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL;
+            
+            client = new Client({
+                connectionString: connectionString,
+                connectionTimeoutMillis: 5000,
+                query_timeout: 10000
             });
             
             await client.connect();
+            
+            // Verificar se tabela existe, se não criar
+            await client.query(`
+                CREATE TABLE IF NOT EXISTS products (
+                    id SERIAL PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    description TEXT,
+                    price REAL NOT NULL,
+                    category TEXT,
+                    image_url TEXT,
+                    stock INTEGER DEFAULT 0,
+                    active INTEGER DEFAULT 1,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    images_json TEXT,
+                    original_price REAL,
+                    sku TEXT
+                )
+            `);
             
             let query = 'SELECT * FROM products WHERE active = 1';
             const params = [];
@@ -427,7 +451,6 @@ app.get('/api/products', async (req, res) => {
             query += ' ORDER BY created_at DESC';
 
             const result = await client.query(query, params);
-            await client.end();
             
             res.setHeader('Content-Type', 'application/json');
             res.setHeader('Access-Control-Allow-Origin', '*');
@@ -473,6 +496,14 @@ app.get('/api/products', async (req, res) => {
     } catch (error) {
         console.error('❌ Erro:', error.message);
         res.status(500).json({ error: 'Erro ao buscar produtos', message: error.message });
+    } finally {
+        if (client) {
+            try {
+                await client.end();
+            } catch (e) {
+                // Ignorar erro ao fechar
+            }
+        }
     }
 });
 
