@@ -550,12 +550,24 @@ app.get('/api/products', async (req, res) => {
     
     try {
         // Verificar todas as variáveis possíveis do Vercel
-        const connectionString = process.env.POSTGRES_URL || 
-                                 process.env.POSTGRES_PRISMA_URL || 
-                                 process.env.PRISMA_DATABASE_URL ||
-                                 process.env.DATABASE_URL ||
-                                 process.env.POSTGRES_URL_NON_POOLING ||
-                                 process.env.POSTGRES_URL_NONPOOLING;
+        let connectionString = process.env.POSTGRES_URL || 
+                              process.env.POSTGRES_PRISMA_URL || 
+                              process.env.DATABASE_URL ||
+                              process.env.POSTGRES_URL_NON_POOLING ||
+                              process.env.POSTGRES_URL_NONPOOLING;
+        
+        // PRISMA_DATABASE_URL pode começar com "prisma+" - não funciona com pg.Client
+        // Usar POSTGRES_URL ao invés
+        if (!connectionString && process.env.PRISMA_DATABASE_URL) {
+            // Se só tiver PRISMA_DATABASE_URL, tentar extrair a URL real
+            const prismaUrl = process.env.PRISMA_DATABASE_URL;
+            if (prismaUrl.startsWith('prisma+')) {
+                // Não podemos usar prisma+ URLs diretamente
+                console.log('⚠️ PRISMA_DATABASE_URL com prisma+ não suportado, use POSTGRES_URL');
+            } else {
+                connectionString = prismaUrl;
+            }
+        }
         
         if (!connectionString) {
             console.log('⚠️ PostgreSQL não configurado, usando SQLite');
