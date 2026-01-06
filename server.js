@@ -376,6 +376,7 @@ app.get('/api/health', async (req, res) => {
         // Verificar todas as variáveis possíveis do Vercel
         const postgresUrl = process.env.POSTGRES_URL || 
                            process.env.POSTGRES_PRISMA_URL || 
+                           process.env.PRISMA_DATABASE_URL ||
                            process.env.DATABASE_URL ||
                            process.env.POSTGRES_URL_NON_POOLING ||
                            process.env.POSTGRES_URL_NONPOOLING;
@@ -549,6 +550,7 @@ app.get('/api/products', async (req, res) => {
         // Verificar todas as variáveis possíveis do Vercel
         const connectionString = process.env.POSTGRES_URL || 
                                  process.env.POSTGRES_PRISMA_URL || 
+                                 process.env.PRISMA_DATABASE_URL ||
                                  process.env.DATABASE_URL ||
                                  process.env.POSTGRES_URL_NON_POOLING ||
                                  process.env.POSTGRES_URL_NONPOOLING;
