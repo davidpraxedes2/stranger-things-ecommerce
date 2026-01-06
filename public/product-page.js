@@ -60,19 +60,21 @@ function renderProduct(product) {
     // Set title
     document.getElementById('productTitle').textContent = product.name || 'Produto';
 
-    // Set price
+    // Set price - converter para número (PostgreSQL retorna DECIMAL como string)
     const priceEl = document.getElementById('productPrice');
-    const hasDiscount = product.original_price && product.original_price > product.price;
+    const price = parseFloat(product.price) || 0;
+    const originalPrice = product.original_price ? parseFloat(product.original_price) : null;
+    const hasDiscount = originalPrice && originalPrice > price;
     
     if (hasDiscount) {
         priceEl.innerHTML = `
             <span class="product-price-old" style="font-size: 1.5rem; text-decoration: line-through; color: var(--text-light-gray); margin-right: 0.5rem;">
-                R$ ${parseFloat(product.original_price).toFixed(2).replace('.', ',')}
+                R$ ${originalPrice.toFixed(2).replace('.', ',')}
             </span>
-            <span>R$ ${parseFloat(product.price).toFixed(2).replace('.', ',')}</span>
+            <span>R$ ${price.toFixed(2).replace('.', ',')}</span>
         `;
     } else {
-        priceEl.textContent = `R$ ${parseFloat(product.price).toFixed(2).replace('.', ',')}`;
+        priceEl.textContent = `R$ ${price.toFixed(2).replace('.', ',')}`;
     }
 
     // Set description

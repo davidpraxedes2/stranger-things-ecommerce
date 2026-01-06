@@ -405,6 +405,55 @@ app.get('/api/products', async (req, res) => {
     }
 });
 
+// Rota para buscar um produto específico por ID
+app.get('/api/products/:id', async (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    
+    let client = null;
+    
+    try {
+        const productId = parseInt(req.params.id);
+        
+        if (!productId || isNaN(productId)) {
+            return res.status(400).json({ error: 'ID de produto inválido' });
+        }
+        
+        const connectionString = process.env.POSTGRES_URL || 
+                                process.env.POSTGRES_PRISMA_URL || 
+                                process.env.DATABASE_URL;
+        
+        if (!connectionString) {
+            return res.status(500).json({ error: 'No database connection' });
+        }
+        
+        const { Client } = require('pg');
+        client = new Client({ connectionString });
+        await client.connect();
+        
+        // Buscar produto por ID
+        const result = await client.query('SELECT * FROM products WHERE id = $1 AND active = 1', [productId]);
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Produto não encontrado' });
+        }
+        
+        const product = result.rows[0];
+        console.log(`📦 Produto ${productId} encontrado:`, product.name);
+        res.json(product);
+        
+    } catch (error) {
+        console.error('ERRO ao buscar produto:', error.message);
+        res.status(500).json({ error: 'Erro ao buscar produto' });
+    } finally {
+        if (client) {
+            try {
+                await client.end();
+            } catch (e) {}
+        }
+    }
+});
+
 // Rota para forçar reimportação dos produtos
 app.get('/api/reimport-products', async (req, res) => {
     res.setHeader('Content-Type', 'application/json');
