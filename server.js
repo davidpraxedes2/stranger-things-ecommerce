@@ -1,10 +1,10 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const sqlite3 = require('sqlite3').verbose();
 const multer = require('multer');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const db = require('./db');
 require('dotenv').config();
 
 const app = express();
@@ -107,18 +107,18 @@ const upload = multer({
 });
 
 // Inicializar banco de dados
-const db = new sqlite3.Database('database.sqlite', (err) => {
-    if (err) {
-        console.error('Erro ao conectar ao banco de dados:', err.message);
-    } else {
-        console.log('Conectado ao banco de dados SQLite.');
+(async function initializeDB() {
+    try {
+        await db.initialize();
         initializeDatabase();
-        // Popular banco se estiver vazio (apenas em produção/Vercel)
-        if (process.env.NODE_ENV === 'production') {
+        // Popular banco se estiver vazio
+        setTimeout(() => {
             populateDatabaseIfEmpty();
-        }
+        }, 1000);
+    } catch (error) {
+        console.error('Erro ao inicializar banco de dados:', error);
     }
-});
+})();
 
 // Popular banco se estiver vazio
 function populateDatabaseIfEmpty() {
@@ -130,7 +130,7 @@ function populateDatabaseIfEmpty() {
     });
 }
 
-function createSampleProducts() {
+async function createSampleProducts() {
     const sampleProducts = [
         {
             name: 'Stranger Things - Camiseta Eleven',
@@ -160,17 +160,22 @@ function createSampleProducts() {
         VALUES (?, ?, ?, ?, ?, ?, ?)
     `);
 
-    sampleProducts.forEach((product) => {
-        stmt.run([
-            product.name,
-            product.description,
-            product.price,
-            product.category,
-            null,
-            product.stock,
-            1
-        ]);
-    });
+    for (const product of sampleProducts) {
+        await new Promise((resolve, reject) => {
+            stmt.run([
+                product.name,
+                product.description,
+                product.price,
+                product.category,
+                null,
+                product.stock,
+                1
+            ], (err) => {
+                if (err) reject(err);
+                else resolve();
+            });
+        });
+    }
 
     stmt.finalize((err) => {
         if (err) {
