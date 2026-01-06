@@ -369,7 +369,12 @@ const authenticateToken = (req, res, next) => {
 
 // Listar produtos (público)
 app.get('/api/products', (req, res) => {
+    const startTime = Date.now();
     console.log('📦 GET /api/products - Requisição recebida');
+    console.log('📍 Origem:', req.headers.origin || req.headers.referer);
+    console.log('⏰ Timestamp:', new Date().toISOString());
+    console.log('🗄️  Banco inicializado:', dbInitialized);
+    
     const { category, search, minPrice, maxPrice } = req.query;
     let query = 'SELECT * FROM products WHERE active = 1';
     const params = [];
