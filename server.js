@@ -1114,27 +1114,10 @@ if (require.main === module) {
 
 // Error handler global (deve ser o último middleware)
 app.use((err, req, res, next) => {
-    console.error('❌ Erro não tratado:', err);
-    console.error('❌ Stack:', err.stack);
-    
-    // Sempre retornar JSON, nunca HTML
+    console.error('❌ Erro:', err.message);
     res.status(err.status || 500).json({
         error: 'Erro interno do servidor',
-        message: err.message || 'Erro desconhecido',
-        details: process.env.NODE_ENV === 'development' ? err.stack : undefined
-    });
-});
-
-// Error handler global (deve ser o último middleware)
-app.use((err, req, res, next) => {
-    console.error('❌ Erro não tratado:', err);
-    console.error('❌ Stack:', err.stack);
-    
-    // Sempre retornar JSON, nunca HTML
-    res.status(err.status || 500).json({
-        error: 'Erro interno do servidor',
-        message: err.message || 'Erro desconhecido',
-        details: process.env.NODE_ENV === 'development' ? err.stack : undefined
+        message: err.message || 'Erro desconhecido'
     });
 });
 
