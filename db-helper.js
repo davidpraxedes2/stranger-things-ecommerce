@@ -34,7 +34,7 @@ if (!USE_POSTGRES) {
 const db = {
     // Run query (INSERT, UPDATE, DELETE)
     run: function(query, params = [], callback) {
-        if (USE_POSTGRES && pgClient) {
+        if (USE_POSTGRES) {
             return runPostgres(query, params, callback);
         } else {
             return runSQLite(query, params, callback);
@@ -43,7 +43,7 @@ const db = {
     
     // Get single row
     get: function(query, params = [], callback) {
-        if (USE_POSTGRES && pgClient) {
+        if (USE_POSTGRES) {
             return getPostgres(query, params, callback);
         } else {
             return getSQLite(query, params, callback);
@@ -52,7 +52,7 @@ const db = {
     
     // Get all rows
     all: function(query, params = [], callback) {
-        if (USE_POSTGRES && pgClient) {
+        if (USE_POSTGRES) {
             return allPostgres(query, params, callback);
         } else {
             return allSQLite(query, params, callback);
@@ -61,7 +61,7 @@ const db = {
     
     // Prepare statement
     prepare: function(query) {
-        if (USE_POSTGRES && pgClient) {
+        if (USE_POSTGRES) {
             return preparePostgres(query);
         } else {
             return sqliteDb.prepare(query);
