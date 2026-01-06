@@ -364,10 +364,33 @@ app.get('/api/products', async (req, res) => {
             console.log(`✅ ${count} produtos já existem no banco. Pulando importação.`);
         }
         
-        // Buscar produtos
+        // Buscar produtos - SEMPRE buscar, mesmo que tenha importado
         const result = await client.query('SELECT * FROM products WHERE active = 1 ORDER BY created_at DESC');
         const products = result.rows || [];
-        console.log(`📦 Retornando ${products.length} produtos`);
+        console.log(`📦 Retornando ${products.length} produtos da API`);
+        
+        // Verificar se há produtos mas a query retornou vazio
+        if (products.length === 0) {
+            const totalCount = await client.query('SELECT COUNT(*) as count FROM products');
+            const total = parseInt(totalCount.rows[0]?.count || 0);
+            console.log(`⚠️ Query retornou 0 produtos, mas há ${total} produtos no banco`);
+            
+            // Tentar buscar sem filtro de active
+            const allResult = await client.query('SELECT * FROM products ORDER BY created_at DESC LIMIT 10');
+            console.log(`📦 Produtos sem filtro active: ${allResult.rows.length}`);
+        }
+        
+        // Log do primeiro produto para debug
+        if (products.length > 0) {
+            console.log(`📦 Primeiro produto:`, {
+                id: products[0].id,
+                name: products[0].name?.substring(0, 50),
+                price: products[0].price,
+                image_url: products[0].image_url?.substring(0, 50),
+                active: products[0].active
+            });
+        }
+        
         res.json(products);
         
     } catch (error) {
