@@ -475,9 +475,21 @@ app.get('/api/reimport-products', async (req, res) => {
                     }
                 } catch (err) {
                     errors++;
-                    if (errors <= 5) {
+                    if (errors === 1) {
+                        // Logar o primeiro erro completo para debug
+                        console.error(`❌ PRIMEIRO ERRO ao importar produto ${i}:`, err.message);
+                        console.error('Stack completo:', err.stack);
+                        console.error('Produto completo:', JSON.stringify(product, null, 2));
+                        console.error('Valores tentados:', {
+                            name: (product.name || product.title || 'Produto sem nome').substring(0, 500),
+                            description: (product.description || '').substring(0, 2000),
+                            price: parseFloat(product.price) || 0,
+                            imageUrl: product.image || (product.images && product.images[0]) || null,
+                            category: (product.category || 'stranger-things').substring(0, 100),
+                            stock: product.inStock !== false ? 10 : 0
+                        });
+                    } else if (errors <= 5) {
                         console.error(`❌ Erro ao importar produto ${i}:`, err.message);
-                        console.error('Produto:', JSON.stringify(product).substring(0, 200));
                     }
                 }
             }
