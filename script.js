@@ -7,20 +7,29 @@ let products = [];
 
 // Load products from API
 async function loadProductsFromAPI() {
+    console.log('🔄 Carregando produtos da API...', API_URL);
     try {
         const response = await fetch(`${API_URL}/products`);
+        console.log('📡 Resposta da API:', response.status, response.statusText);
+        
         if (response.ok) {
             products = await response.json();
+            console.log(`✅ ${products.length} produtos carregados:`, products);
+            
             // Update render if products grid exists
             if (productsGrid) {
                 renderProducts();
+            } else {
+                console.warn('⚠️ productsGrid não encontrado no DOM');
             }
         } else {
-            console.error('Erro ao carregar produtos da API');
+            const errorText = await response.text();
+            console.error('❌ Erro ao carregar produtos da API:', response.status, errorText);
             products = [];
         }
     } catch (error) {
-        console.error('Erro ao conectar com API:', error);
+        console.error('❌ Erro ao conectar com API:', error);
+        console.error('URL tentada:', `${API_URL}/products`);
         products = [];
     }
 }

@@ -356,6 +356,7 @@ const authenticateToken = (req, res, next) => {
 
 // Listar produtos (público)
 app.get('/api/products', (req, res) => {
+    console.log('📦 GET /api/products - Requisição recebida');
     const { category, search, minPrice, maxPrice } = req.query;
     let query = 'SELECT * FROM products WHERE active = 1';
     const params = [];
@@ -383,11 +384,16 @@ app.get('/api/products', (req, res) => {
 
     query += ' ORDER BY created_at DESC';
 
+    console.log('🔍 Executando query:', query);
+    console.log('📋 Parâmetros:', params);
+
     db.all(query, params, (err, rows) => {
         if (err) {
+            console.error('❌ Erro na query:', err);
             res.status(500).json({ error: err.message });
             return;
         }
+        console.log(`✅ Retornando ${rows.length} produtos`);
         res.json(rows);
     });
 });
