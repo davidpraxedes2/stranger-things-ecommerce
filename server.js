@@ -382,77 +382,97 @@ app.get('/api/health', (req, res) => {
 });
 
 // Listar produtos (público)
-app.get('/api/products', (req, res) => {
-    const startTime = Date.now();
-    console.log('📦 GET /api/products - Requisição recebida');
-    console.log('📍 Origem:', req.headers.origin || req.headers.referer);
-    console.log('⏰ Timestamp:', new Date().toISOString());
-    console.log('🗄️  Banco inicializado:', dbInitialized);
-    
+app.get('/api/products', async (req, res) => {
     try {
         const { category, search, minPrice, maxPrice } = req.query;
-        let query = 'SELECT * FROM products WHERE active = 1';
-        const params = [];
-
-        if (category) {
-            query += ' AND category = ?';
-            params.push(category);
-        }
-
-        if (search) {
-            query += ' AND (name LIKE ? OR description LIKE ?)';
-            const searchTerm = `%${search}%`;
-            params.push(searchTerm, searchTerm);
-        }
-
-        if (minPrice) {
-            query += ' AND price >= ?';
-            params.push(parseFloat(minPrice));
-        }
-
-        if (maxPrice) {
-            query += ' AND price <= ?';
-            params.push(parseFloat(maxPrice));
-        }
-
-        query += ' ORDER BY created_at DESC';
-
-        console.log('🔍 Executando query:', query);
-        console.log('📋 Parâmetros:', params);
-
-        // Usar callback (db.all já trata PostgreSQL e SQLite)
-        db.all(query, params, (err, rows) => {
-            const duration = Date.now() - startTime;
-            console.log(`⏱️ Query executada em ${duration}ms`);
+        
+        // PostgreSQL direto - sem abstrações
+        if (process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL) {
+            const { Client } = require('pg');
+            const client = new Client({
+                connectionString: process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL
+            });
             
-            if (err) {
-                console.error('❌ Erro na query:', err);
-                console.error('❌ Mensagem:', err.message);
-                console.error('❌ Stack:', err.stack);
-                res.status(500).json({ 
-                    error: 'Erro ao buscar produtos',
-                    message: err.message,
-                    details: process.env.NODE_ENV === 'development' ? err.stack : undefined
-                });
-                return;
+            await client.connect();
+            
+            let query = 'SELECT * FROM products WHERE active = 1';
+            const params = [];
+            let paramIndex = 1;
+
+            if (category) {
+                query += ` AND category = $${paramIndex}`;
+                params.push(category);
+                paramIndex++;
             }
-            
-            // Garantir que sempre retorna um array
-            const safeRows = Array.isArray(rows) ? rows : [];
-            console.log(`✅ Retornando ${safeRows.length} produtos`);
-            console.log(`⏱️ Total: ${Date.now() - startTime}ms`);
+
+            if (search) {
+                query += ` AND (name LIKE $${paramIndex} OR description LIKE $${paramIndex + 1})`;
+                const searchTerm = `%${search}%`;
+                params.push(searchTerm, searchTerm);
+                paramIndex += 2;
+            }
+
+            if (minPrice) {
+                query += ` AND price >= $${paramIndex}`;
+                params.push(parseFloat(minPrice));
+                paramIndex++;
+            }
+
+            if (maxPrice) {
+                query += ` AND price <= $${paramIndex}`;
+                params.push(parseFloat(maxPrice));
+                paramIndex++;
+            }
+
+            query += ' ORDER BY created_at DESC';
+
+            const result = await client.query(query, params);
+            await client.end();
             
             res.setHeader('Content-Type', 'application/json');
             res.setHeader('Access-Control-Allow-Origin', '*');
-            res.json(safeRows);
-        });
+            res.json(result.rows || []);
+        } else {
+            // SQLite
+            let query = 'SELECT * FROM products WHERE active = 1';
+            const params = [];
+
+            if (category) {
+                query += ' AND category = ?';
+                params.push(category);
+            }
+
+            if (search) {
+                query += ' AND (name LIKE ? OR description LIKE ?)';
+                const searchTerm = `%${search}%`;
+                params.push(searchTerm, searchTerm);
+            }
+
+            if (minPrice) {
+                query += ' AND price >= ?';
+                params.push(parseFloat(minPrice));
+            }
+
+            if (maxPrice) {
+                query += ' AND price <= ?';
+                params.push(parseFloat(maxPrice));
+            }
+
+            query += ' ORDER BY created_at DESC';
+
+            db.all(query, params, (err, rows) => {
+                if (err) {
+                    res.status(500).json({ error: 'Erro ao buscar produtos', message: err.message });
+                    return;
+                }
+                res.setHeader('Content-Type', 'application/json');
+                res.setHeader('Access-Control-Allow-Origin', '*');
+                res.json(rows || []);
+            });
+        }
     } catch (error) {
-        console.error('❌ Erro ao processar requisição:', error);
-        console.error('❌ Stack:', error.stack);
-        res.status(500).json({ 
-            error: 'Erro interno do servidor',
-            message: error.message
-        });
+        console.error('❌ Erro:', error.message);
+        res.status(500).json({ error: 'Erro ao buscar produtos', message: error.message });
     }
 });
 
