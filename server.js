@@ -22,9 +22,25 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Servir arquivos estáticos da raiz (para index.html, styles.css, script.js, etc)
 app.use(express.static(__dirname));
 
-// Rota para servir index.html da raiz
+// Rotas para servir HTML files
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+app.get('/product.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'product.html'));
+});
+
+app.get('/checkout.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'checkout.html'));
+});
+
+app.get('/order-success.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'order-success.html'));
+});
+
+app.get('/admin.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
 // Configurar upload de imagens
