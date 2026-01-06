@@ -181,6 +181,7 @@ async function getPostgres(query, params, callback) {
 
 async function allPostgres(query, params, callback) {
     try {
+        console.log('🔍 allPostgres chamado com query:', query.substring(0, 100));
         let paramIndex = 1;
         const convertedQuery = query.replace(/\?/g, () => {
             const idx = paramIndex++;
@@ -188,13 +189,28 @@ async function allPostgres(query, params, callback) {
         }).replace(/INTEGER PRIMARY KEY AUTOINCREMENT/g, 'SERIAL PRIMARY KEY')
           .replace(/DATETIME DEFAULT CURRENT_TIMESTAMP/g, 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP');
         
+        console.log('🔍 Query convertida:', convertedQuery.substring(0, 100));
+        console.log('📋 Parâmetros:', params);
+        
         const { Client } = require('pg');
+        const connectionString = process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL;
+        
+        if (!connectionString) {
+            throw new Error('POSTGRES_URL não configurada');
+        }
+        
+        console.log('🔌 Conectando ao PostgreSQL...');
         const client = new Client({
-            connectionString: process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL
+            connectionString: connectionString
         });
         
         await client.connect();
+        console.log('✅ Conectado ao PostgreSQL');
+        
+        console.log('📤 Executando query...');
         const result = await client.query(convertedQuery, params);
+        console.log(`✅ Query executada, ${result.rows.length} linhas retornadas`);
+        
         await client.end();
         
         const rows = result.rows || [];
@@ -205,6 +221,8 @@ async function allPostgres(query, params, callback) {
             return rows;
         }
     } catch (error) {
+        console.error('❌ Erro em allPostgres:', error);
+        console.error('❌ Stack:', error.stack);
         if (callback) {
             callback(error, null);
         } else {

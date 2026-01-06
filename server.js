@@ -405,14 +405,29 @@ app.get('/api/products', (req, res) => {
     console.log('🔍 Executando query:', query);
     console.log('📋 Parâmetros:', params);
 
+    // Usar callback (db.all já trata PostgreSQL e SQLite)
     db.all(query, params, (err, rows) => {
+        const duration = Date.now() - startTime;
+        console.log(`⏱️ Query executada em ${duration}ms`);
+        
         if (err) {
             console.error('❌ Erro na query:', err);
-            res.status(500).json({ error: err.message });
+            console.error('❌ Stack:', err.stack);
+            res.status(500).json({ 
+                error: 'Erro ao buscar produtos',
+                message: err.message
+            });
             return;
         }
-        console.log(`✅ Retornando ${rows.length} produtos`);
-        res.json(rows);
+        
+        // Garantir que sempre retorna um array
+        const safeRows = Array.isArray(rows) ? rows : [];
+        console.log(`✅ Retornando ${safeRows.length} produtos`);
+        console.log(`⏱️ Total: ${Date.now() - startTime}ms`);
+        
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.json(safeRows);
     });
 });
 
