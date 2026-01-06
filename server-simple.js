@@ -159,7 +159,7 @@ app.get('/api/products', async (req, res) => {
         client = new Client({ connectionString });
         await client.connect();
         
-        // Criar tabela
+        // Criar tabela com todas as colunas necessárias
         await client.query(`
             CREATE TABLE IF NOT EXISTS products (
                 id SERIAL PRIMARY KEY,
@@ -170,7 +170,10 @@ app.get('/api/products', async (req, res) => {
                 image_url TEXT,
                 stock INTEGER DEFAULT 0,
                 active INTEGER DEFAULT 1,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                images_json TEXT,
+                original_price REAL,
+                sku TEXT
             )
         `);
         
