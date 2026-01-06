@@ -142,7 +142,12 @@ async function loadProduct() {
 
 // Render product
 function renderProduct(product) {
-    // Mostrar containers quando os dados carregarem
+    // Esconder loading e mostrar containers quando os dados carregarem
+    const loadingEl = document.getElementById('productLoading');
+    if (loadingEl) {
+        loadingEl.style.display = 'none';
+    }
+    
     const imagesContainer = document.getElementById('productImagesContainer');
     const infoContainer = document.getElementById('productInfoContainer');
     
