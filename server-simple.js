@@ -416,6 +416,69 @@ app.get('/api/health', (req, res) => {
     });
 });
 
+// Debug route - mostra informações sobre produtos e arquivos
+app.get('/api/debug', async (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    
+    const fs = require('fs');
+    const debug = {
+        timestamp: new Date().toISOString(),
+        dirname: __dirname,
+        cwd: process.cwd(),
+        files: [],
+        db: null
+    };
+    
+    // Listar arquivos JSON
+    try {
+        const files = fs.readdirSync(__dirname);
+        debug.files = files.filter(f => f.includes('netflix') || f.includes('gocase') || f.endsWith('.json')).slice(0, 20);
+    } catch (e) {
+        debug.filesError = e.message;
+    }
+    
+    // Verificar arquivo JSON
+    const netflixPath = path.join(__dirname, 'netflix-shop-products.json');
+    debug.netflixFile = {
+        path: netflixPath,
+        exists: fs.existsSync(netflixPath),
+        size: fs.existsSync(netflixPath) ? fs.statSync(netflixPath).size : 0
+    };
+    
+    // Verificar banco de dados
+    try {
+        const connectionString = process.env.POSTGRES_URL || 
+                                process.env.POSTGRES_PRISMA_URL || 
+                                process.env.DATABASE_URL;
+        
+        if (connectionString) {
+            const { Client } = require('pg');
+            const client = new Client({ connectionString });
+            await client.connect();
+            
+            const countResult = await client.query('SELECT COUNT(*) as count FROM products');
+            const count = parseInt(countResult.rows[0]?.count || 0);
+            
+            const sampleResult = await client.query('SELECT id, name, price FROM products LIMIT 5');
+            
+            debug.db = {
+                connected: true,
+                productCount: count,
+                sampleProducts: sampleResult.rows
+            };
+            
+            await client.end();
+        } else {
+            debug.db = { connected: false, error: 'No connection string' };
+        }
+    } catch (e) {
+        debug.db = { connected: false, error: e.message };
+    }
+    
+    res.json(debug);
+});
+
 // Error handler
 app.use((err, req, res, next) => {
     console.error('ERRO:', err.message);
