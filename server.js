@@ -1,23 +1,14 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const multer = require('multer');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const db = require('./db-helper');
 require('dotenv').config();
-
-// Verificar se está usando PostgreSQL
-const USE_POSTGRES = process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL;
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const JWT_SECRET = process.env.JWT_SECRET || 'stranger-things-secret-key-change-in-production';
 
 // Log de inicialização
 console.log('🚀 Servidor iniciando...');
 console.log('📦 Ambiente:', process.env.NODE_ENV || 'development');
-console.log('🗄️  PostgreSQL:', process.env.POSTGRES_URL ? 'Sim' : 'Não (usando SQLite)');
 
 // Middleware
 app.use(cors({
@@ -571,17 +562,8 @@ app.get('/api/products', async (req, res) => {
                                 process.env.POSTGRES_URL_NONPOOLING;
         
         if (!connectionString) {
-            // SQLite fallback
-            return new Promise((resolve) => {
-                db.all('SELECT * FROM products WHERE active = 1 ORDER BY created_at DESC', [], (err, rows) => {
-                    if (err) {
-                        res.json([]);
-                    } else {
-                        res.json(rows || []);
-                    }
-                    resolve();
-                });
-            });
+            // Sem banco configurado - retornar array vazio
+            return res.json([]);
         }
         
         // PostgreSQL - tudo automático
