@@ -9,9 +9,19 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Teko:wght@300;400;500;600;700&family=Merriweather:wght@300;400&display=swap" rel="stylesheet">
     <style>
+        /* Garantir que não haja overflow horizontal */
+        body {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        
         .product-page {
             padding-top: calc(var(--header-height-mobile) + var(--spacing-lg));
             min-height: 100vh;
+            width: 100%;
+            max-width: 100vw;
+            overflow-x: hidden;
+            box-sizing: border-box;
         }
 
         .product-container {
