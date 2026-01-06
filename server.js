@@ -121,11 +121,19 @@ const upload = multer({
 })();
 
 // Popular banco se estiver vazio
-function populateDatabaseIfEmpty() {
-    db.get('SELECT COUNT(*) as count FROM products', [], (err, row) => {
-        if (!err && row.count === 0) {
-            console.log('📦 Banco vazio detectado. Criando produtos de exemplo...');
-            createSampleProducts();
+async function populateDatabaseIfEmpty() {
+    db.get('SELECT COUNT(*) as count FROM products', [], async (err, row) => {
+        if (!err && row && row.count === 0) {
+            console.log('📦 Banco vazio detectado. Tentando importar produtos dos arquivos JSON...');
+            
+            // Tentar importar produtos reais primeiro
+            const imported = await tryImportProductsFromJSON();
+            
+            if (!imported) {
+                // Se não conseguiu importar, criar produtos de exemplo
+                console.log('📦 Criando produtos de exemplo...');
+                await createSampleProducts();
+            }
         }
     });
 }
