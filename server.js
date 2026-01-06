@@ -22,6 +22,43 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Servir arquivos estáticos da raiz (styles.css, script.js, logo.png, etc)
 app.use(express.static(__dirname));
 
+// Rotas explícitas para arquivos estáticos importantes (fallback para Vercel)
+app.get('/styles.css', (req, res) => {
+    res.sendFile(path.join(__dirname, 'styles.css'), {
+        headers: { 'Content-Type': 'text/css' }
+    });
+});
+
+app.get('/script.js', (req, res) => {
+    res.sendFile(path.join(__dirname, 'script.js'), {
+        headers: { 'Content-Type': 'application/javascript' }
+    });
+});
+
+app.get('/logo.png', (req, res) => {
+    res.sendFile(path.join(__dirname, 'logo.png'), {
+        headers: { 'Content-Type': 'image/png' }
+    });
+});
+
+app.get('/product-page.js', (req, res) => {
+    res.sendFile(path.join(__dirname, 'product-page.js'), {
+        headers: { 'Content-Type': 'application/javascript' }
+    });
+});
+
+app.get('/product-cart.js', (req, res) => {
+    res.sendFile(path.join(__dirname, 'product-cart.js'), {
+        headers: { 'Content-Type': 'application/javascript' }
+    });
+});
+
+app.get('/checkout.js', (req, res) => {
+    res.sendFile(path.join(__dirname, 'checkout.js'), {
+        headers: { 'Content-Type': 'application/javascript' }
+    });
+});
+
 // Rotas para servir HTML files
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
