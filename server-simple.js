@@ -9,11 +9,60 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Servir arquivos estáticos
-app.use(express.static(__dirname));
+// Servir arquivos estáticos PRIMEIRO (antes de outras rotas)
+app.use(express.static(__dirname, {
+    setHeaders: (res, filePath) => {
+        if (filePath.endsWith('.css')) {
+            res.setHeader('Content-Type', 'text/css');
+        } else if (filePath.endsWith('.js')) {
+            res.setHeader('Content-Type', 'application/javascript');
+        } else if (filePath.endsWith('.png')) {
+            res.setHeader('Content-Type', 'image/png');
+        }
+    }
+}));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Rota raiz
+// Rotas explícitas para arquivos críticos
+app.get('/styles.css', (req, res) => {
+    res.setHeader('Content-Type', 'text/css');
+    res.sendFile(path.join(__dirname, 'styles.css'));
+});
+
+app.get('/script.js', (req, res) => {
+    res.setHeader('Content-Type', 'application/javascript');
+    res.sendFile(path.join(__dirname, 'script.js'));
+});
+
+app.get('/logo.png', (req, res) => {
+    res.setHeader('Content-Type', 'image/png');
+    res.sendFile(path.join(__dirname, 'logo.png'));
+});
+
+app.get('/product-page.js', (req, res) => {
+    res.setHeader('Content-Type', 'application/javascript');
+    res.sendFile(path.join(__dirname, 'product-page.js'));
+});
+
+app.get('/product-cart.js', (req, res) => {
+    res.setHeader('Content-Type', 'application/javascript');
+    res.sendFile(path.join(__dirname, 'product-cart.js'));
+});
+
+app.get('/checkout.js', (req, res) => {
+    res.setHeader('Content-Type', 'application/javascript');
+    res.sendFile(path.join(__dirname, 'checkout.js'));
+});
+
+app.get('/product.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'product.html'));
+});
+
+app.get('/checkout.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'checkout.html'));
+});
+
+// Rota raiz - DEVE SER A ÚLTIMA
 app.get('/', (req, res) => {
     try {
         res.sendFile(path.join(__dirname, 'index.html'));
