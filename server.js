@@ -16,10 +16,13 @@ try {
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const JWT_SECRET = process.env.JWT_SECRET || 'stranger-things-secret-key-change-in-production';
 
 // Log de inicialização
 console.log('🚀 Servidor iniciando...');
