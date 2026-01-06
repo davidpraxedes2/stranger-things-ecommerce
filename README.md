@@ -1,107 +1,82 @@
-# Stranger Things E-commerce
+# 🎬 Stranger Things E-commerce
 
-E-commerce completo com tema Stranger Things, incluindo backend Node.js, banco de dados SQLite e painel administrativo.
+E-commerce completo inspirado em Stranger Things com sistema de admin, carrinho de compras, checkout e mais.
 
 ## 🚀 Funcionalidades
 
-### Frontend
-- Design mobile-first responsivo
-- Tema Stranger Things com efeitos neon
-- Carrinho de compras (LocalStorage)
-- Página de produto individual
-- Menu mobile com drawer lateral
-- Integração com API backend
+- ✅ **Vitrine de Produtos** - Catálogo completo com badges de desconto
+- ✅ **Página de Produto** - Galeria de fotos, seletor de variantes, informações detalhadas
+- ✅ **Carrinho de Compras** - Sistema completo com backend
+- ✅ **Checkout** - Processo de compra completo
+- ✅ **Admin Panel** - Gestão de produtos, clientes e pedidos
+- ✅ **Design Moderno** - Interface limpa e profissional
 
-### Backend
-- API REST completa (Node.js + Express)
-- Banco de dados SQLite
-- Autenticação JWT para admin
-- Upload de imagens para produtos
-- CRUD completo de produtos
-- Sistema de pedidos
+## 📦 Tecnologias
 
-### Painel Admin
-- Dashboard com estatísticas
-- Gerenciamento de produtos (criar, editar, deletar)
-- Gerenciamento de pedidos
-- Upload de imagens
-- Autenticação segura
+- **Frontend:** HTML, CSS, JavaScript
+- **Backend:** Node.js, Express.js
+- **Database:** SQLite
+- **Autenticação:** JWT
 
-## 📦 Instalação
+## 🔧 Instalação Local
 
-1. Instale as dependências:
+1. Clone o repositório:
+```bash
+git clone https://github.com/davidpraxedes2/stranger-things-ecommerce.git
+cd stranger-things-ecommerce
+```
+
+2. Instale as dependências:
 ```bash
 npm install
 ```
 
-2. Inicie o servidor:
+3. Inicie o servidor:
 ```bash
 npm start
 ```
 
-Ou para desenvolvimento com auto-reload:
-```bash
-npm run dev
-```
+4. Acesse:
+- **Loja:** http://localhost:3000
+- **Admin:** http://localhost:3000/admin.html
+  - Usuário: `admin`
+  - Senha: `admin123`
 
-3. Acesse:
-- **Frontend:** http://localhost:3000
-- **Painel Admin:** http://localhost:3000/admin.html
+## 🌐 Deploy na Vercel
 
-## 🔐 Credenciais Padrão do Admin
+O projeto está configurado para deploy na Vercel. Basta conectar o repositório GitHub na Vercel e fazer o deploy.
 
-- **Usuário:** admin
-- **Senha:** admin123
+**Importante:** 
+- Configure variáveis de ambiente se necessário
+- O banco de dados SQLite será recriado a cada deploy (usar banco externo em produção)
 
-⚠️ **Importante:** Altere a senha padrão em produção!
-
-## 📁 Estrutura do Projeto
+## 📝 Estrutura do Projeto
 
 ```
-.
-├── server.js              # Servidor Express
-├── package.json           # Dependências
-├── database.sqlite        # Banco de dados (gerado automaticamente)
-├── public/
-│   ├── index.html         # Página inicial
-│   ├── product.html       # Página de produto
-│   ├── admin.html         # Painel admin
-│   ├── admin.js           # JS do painel admin
-│   ├── admin.css          # CSS do painel admin
-│   ├── styles.css         # CSS principal
-│   ├── script.js          # JS principal
-│   └── uploads/           # Uploads de imagens
-│       └── products/
+├── public/          # Arquivos estáticos e admin
+├── server.js        # Servidor Express principal
+├── index.html       # Página inicial
+├── product.html     # Página de produto
+├── checkout.html    # Página de checkout
+├── styles.css       # Estilos principais
+├── script.js        # JavaScript da loja
+└── package.json     # Dependências
 ```
 
-## 🛠️ API Endpoints
+## 🎨 Recursos
 
-### Públicos
-- `GET /api/products` - Listar produtos
-- `GET /api/products/:id` - Buscar produto por ID
-- `POST /api/orders` - Criar pedido
+- Design responsivo
+- Sistema de carrinho com sessão
+- Gestão completa de produtos no admin
+- Gestão de clientes
+- Sistema de pedidos
+- Galeria de imagens em produtos
+- Seletor de variantes (tamanhos)
 
-### Admin (requer autenticação)
-- `POST /api/auth/login` - Login
-- `GET /api/admin/stats` - Estatísticas
-- `GET /api/admin/products` - Listar todos os produtos
-- `POST /api/admin/products` - Criar produto
-- `PUT /api/admin/products/:id` - Atualizar produto
-- `DELETE /api/admin/products/:id` - Deletar produto
-- `GET /api/admin/orders` - Listar pedidos
-- `PUT /api/admin/orders/:id` - Atualizar status do pedido
+## 📄 Licença
 
-## 🎨 Tecnologias
+Este projeto é de uso pessoal/educacional.
 
-- **Frontend:** HTML5, CSS3, JavaScript (Vanilla)
-- **Backend:** Node.js, Express
-- **Banco de Dados:** SQLite
-- **Autenticação:** JWT
-- **Upload:** Multer
+---
 
-## 📝 Notas
-
-- O banco de dados é criado automaticamente na primeira execução
-- Imagens são salvas em `public/uploads/products/`
-- O carrinho usa LocalStorage do navegador
-- Em produção, configure variáveis de ambiente (JWT_SECRET, etc.)
+Desenvolvido com ❤️ inspirado em Stranger Things
