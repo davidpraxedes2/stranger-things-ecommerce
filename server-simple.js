@@ -632,6 +632,244 @@ app.get('/api/reimport-products', async (req, res) => {
     }
 });
 
+// ===== ROTAS DE CARRINHO =====
+function getSessionId(req) {
+    return req.headers['x-session-id'] || req.body.session_id || req.query.session_id || 'default';
+}
+
+// Criar tabela de carrinho se não existir
+async function ensureCartTable(client) {
+    await client.query(`
+        CREATE TABLE IF NOT EXISTS cart_items (
+            id SERIAL PRIMARY KEY,
+            session_id VARCHAR(255) NOT NULL,
+            product_id INTEGER NOT NULL,
+            quantity INTEGER DEFAULT 1,
+            price DECIMAL(10,2) NOT NULL,
+            selected_variant VARCHAR(50),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+        )
+    `);
+    // Criar índice para melhor performance
+    await client.query(`
+        CREATE INDEX IF NOT EXISTS idx_cart_session_id ON cart_items(session_id)
+    `);
+}
+
+// Buscar carrinho
+app.get('/api/cart', async (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    
+    let client = null;
+    
+    try {
+        const sessionId = getSessionId(req);
+        const connectionString = process.env.POSTGRES_URL || 
+                                process.env.POSTGRES_PRISMA_URL || 
+                                process.env.DATABASE_URL;
+        
+        if (!connectionString) {
+            return res.json({ items: [], total: 0 });
+        }
+        
+        const { Client } = require('pg');
+        client = new Client({ connectionString });
+        await client.connect();
+        await ensureCartTable(client);
+        
+        const result = await client.query(`
+            SELECT ci.*, p.name, p.image_url, p.sku 
+            FROM cart_items ci
+            JOIN products p ON ci.product_id = p.id
+            WHERE ci.session_id = $1
+            ORDER BY ci.created_at DESC
+        `, [sessionId]);
+        
+        const items = result.rows || [];
+        const total = items.reduce((sum, item) => sum + (parseFloat(item.price || 0) * (item.quantity || 0)), 0);
+        
+        res.json({ items, total });
+        
+    } catch (error) {
+        console.error('Erro ao buscar carrinho:', error);
+        res.json({ items: [], total: 0 });
+    } finally {
+        if (client) {
+            try {
+                await client.end();
+            } catch (e) {}
+        }
+    }
+});
+
+// Adicionar item ao carrinho
+app.post('/api/cart/add', async (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    
+    let client = null;
+    
+    try {
+        const sessionId = getSessionId(req);
+        const { product_id, quantity = 1, selected_variant, price } = req.body;
+        
+        if (!product_id || !price) {
+            return res.status(400).json({ error: 'Dados inválidos' });
+        }
+        
+        const connectionString = process.env.POSTGRES_URL || 
+                                process.env.POSTGRES_PRISMA_URL || 
+                                process.env.DATABASE_URL;
+        
+        if (!connectionString) {
+            return res.status(500).json({ error: 'No database connection' });
+        }
+        
+        const { Client } = require('pg');
+        client = new Client({ connectionString });
+        await client.connect();
+        await ensureCartTable(client);
+        
+        // Verificar se o produto já está no carrinho
+        const existingResult = await client.query(`
+            SELECT * FROM cart_items 
+            WHERE session_id = $1 AND product_id = $2 AND (selected_variant = $3 OR (selected_variant IS NULL AND $3 IS NULL))
+        `, [sessionId, product_id, selected_variant || null]);
+        
+        if (existingResult.rows.length > 0) {
+            // Atualizar quantidade
+            const existing = existingResult.rows[0];
+            const newQuantity = existing.quantity + quantity;
+            await client.query(`
+                UPDATE cart_items 
+                SET quantity = $1, price = $2
+                WHERE id = $3
+            `, [newQuantity, price, existing.id]);
+            
+            res.json({ success: true, message: 'Item atualizado no carrinho', id: existing.id });
+        } else {
+            // Adicionar novo item
+            const insertResult = await client.query(`
+                INSERT INTO cart_items (session_id, product_id, quantity, selected_variant, price)
+                VALUES ($1, $2, $3, $4, $5)
+                RETURNING id
+            `, [sessionId, product_id, quantity, selected_variant || null, price]);
+            
+            res.json({ success: true, message: 'Item adicionado ao carrinho', id: insertResult.rows[0].id });
+        }
+        
+    } catch (error) {
+        console.error('Erro ao adicionar ao carrinho:', error);
+        res.status(500).json({ error: error.message });
+    } finally {
+        if (client) {
+            try {
+                await client.end();
+            } catch (e) {}
+        }
+    }
+});
+
+// Atualizar quantidade do item
+app.put('/api/cart/update/:id', async (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    
+    let client = null;
+    
+    try {
+        const { id } = req.params;
+        const { quantity } = req.body;
+        const sessionId = getSessionId(req);
+        
+        if (!quantity || quantity < 1) {
+            return res.status(400).json({ error: 'Quantidade inválida' });
+        }
+        
+        const connectionString = process.env.POSTGRES_URL || 
+                                process.env.POSTGRES_PRISMA_URL || 
+                                process.env.DATABASE_URL;
+        
+        if (!connectionString) {
+            return res.status(500).json({ error: 'No database connection' });
+        }
+        
+        const { Client } = require('pg');
+        client = new Client({ connectionString });
+        await client.connect();
+        
+        const result = await client.query(`
+            UPDATE cart_items 
+            SET quantity = $1
+            WHERE id = $2 AND session_id = $3
+        `, [quantity, id, sessionId]);
+        
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: 'Item não encontrado' });
+        }
+        
+        res.json({ success: true, message: 'Quantidade atualizada' });
+        
+    } catch (error) {
+        console.error('Erro ao atualizar carrinho:', error);
+        res.status(500).json({ error: error.message });
+    } finally {
+        if (client) {
+            try {
+                await client.end();
+            } catch (e) {}
+        }
+    }
+});
+
+// Remover item do carrinho
+app.delete('/api/cart/remove/:id', async (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    
+    let client = null;
+    
+    try {
+        const { id } = req.params;
+        const sessionId = getSessionId(req);
+        
+        const connectionString = process.env.POSTGRES_URL || 
+                                process.env.POSTGRES_PRISMA_URL || 
+                                process.env.DATABASE_URL;
+        
+        if (!connectionString) {
+            return res.status(500).json({ error: 'No database connection' });
+        }
+        
+        const { Client } = require('pg');
+        client = new Client({ connectionString });
+        await client.connect();
+        
+        const result = await client.query(`
+            DELETE FROM cart_items 
+            WHERE id = $1 AND session_id = $2
+        `, [id, sessionId]);
+        
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: 'Item não encontrado' });
+        }
+        
+        res.json({ success: true, message: 'Item removido do carrinho' });
+        
+    } catch (error) {
+        console.error('Erro ao remover do carrinho:', error);
+        res.status(500).json({ error: error.message });
+    } finally {
+        if (client) {
+            try {
+                await client.end();
+            } catch (e) {}
+        }
+    }
+});
+
 // Health check
 app.get('/api/health', (req, res) => {
     res.json({ 

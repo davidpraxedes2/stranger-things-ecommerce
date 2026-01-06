@@ -1,6 +1,11 @@
 // Checkout Script
-const API_BASE = window.location.origin;
-const API_URL = `${API_BASE}/api`;
+// API Base URL - usar window para evitar conflitos
+if (typeof window.API_BASE === 'undefined') {
+    window.API_BASE = window.location.origin;
+    window.API_URL = `${window.API_BASE}/api`;
+}
+const API_BASE = window.API_BASE;
+const API_URL = window.API_URL;
 
 // Page Transition Effect
 function initPageTransitions() {

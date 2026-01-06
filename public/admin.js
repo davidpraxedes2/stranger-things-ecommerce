@@ -1,6 +1,10 @@
-// API Base URL - usar caminho relativo para funcionar em qualquer domínio
-const API_BASE = window.location.origin;
-const API_URL = `${API_BASE}/api`;
+// API Base URL - usar window para evitar conflitos
+if (typeof window.API_BASE === 'undefined') {
+    window.API_BASE = window.location.origin;
+    window.API_URL = `${window.API_BASE}/api`;
+}
+const API_BASE = window.API_BASE;
+const API_URL = window.API_URL;
 
 // Auth token
 let authToken = localStorage.getItem('admin_token');
@@ -147,7 +151,7 @@ function renderProductsTable(products) {
             </td>
             <td>${product.name}</td>
             <td>${product.category || '-'}</td>
-            <td>R$ ${product.price.toFixed(2).replace('.', ',')}</td>
+            <td>R$ ${(parseFloat(product.price) || 0).toFixed(2).replace('.', ',')}</td>
             <td>${product.stock || 0}</td>
             <td>
                 <span class="status-badge ${product.active ? 'active' : 'inactive'}">
