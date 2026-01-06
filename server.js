@@ -373,43 +373,65 @@ const authenticateToken = (req, res, next) => {
 // Health check
 app.get('/api/health', async (req, res) => {
     try {
-        const hasPostgres = !!(process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL);
+        // Verificar todas as variáveis possíveis do Vercel
+        const postgresUrl = process.env.POSTGRES_URL || 
+                           process.env.POSTGRES_PRISMA_URL || 
+                           process.env.DATABASE_URL ||
+                           process.env.POSTGRES_URL_NON_POOLING ||
+                           process.env.POSTGRES_URL_NONPOOLING;
         
-        if (hasPostgres) {
-            const { Client } = require('pg');
-            const client = new Client({
-                connectionString: process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL
-            });
-            
-            await client.connect();
-            
-            // Verificar se tabela existe
-            const tableCheck = await client.query(`
-                SELECT EXISTS (
-                    SELECT FROM information_schema.tables 
-                    WHERE table_name = 'products'
-                );
-            `);
-            
-            let count = 0;
-            if (tableCheck.rows[0].exists) {
-                const countResult = await client.query('SELECT COUNT(*) as count FROM products');
-                count = parseInt(countResult.rows[0].count);
+        const envVars = Object.keys(process.env).filter(k => 
+            k.includes('POSTGRES') || k.includes('DATABASE')
+        );
+        
+        if (postgresUrl) {
+            try {
+                const { Client } = require('pg');
+                const client = new Client({
+                    connectionString: postgresUrl
+                });
+                
+                await client.connect();
+                
+                // Verificar se tabela existe
+                const tableCheck = await client.query(`
+                    SELECT EXISTS (
+                        SELECT FROM information_schema.tables 
+                        WHERE table_name = 'products'
+                    );
+                `);
+                
+                let count = 0;
+                if (tableCheck.rows[0].exists) {
+                    const countResult = await client.query('SELECT COUNT(*) as count FROM products');
+                    count = parseInt(countResult.rows[0].count);
+                }
+                
+                await client.end();
+                
+                res.json({ 
+                    status: 'ok', 
+                    database: 'PostgreSQL',
+                    tableExists: tableCheck.rows[0].exists,
+                    productCount: count,
+                    envVarsFound: envVars,
+                    timestamp: new Date().toISOString()
+                });
+            } catch (pgError) {
+                res.json({
+                    status: 'error',
+                    database: 'PostgreSQL (erro na conexão)',
+                    error: pgError.message,
+                    envVarsFound: envVars,
+                    timestamp: new Date().toISOString()
+                });
             }
-            
-            await client.end();
-            
-            res.json({ 
-                status: 'ok', 
-                database: 'PostgreSQL',
-                tableExists: tableCheck.rows[0].exists,
-                productCount: count,
-                timestamp: new Date().toISOString()
-            });
         } else {
             res.json({ 
-                status: 'ok', 
-                database: 'SQLite',
+                status: 'warning', 
+                database: 'SQLite (PostgreSQL não configurado)',
+                hint: 'Configure POSTGRES_URL no Vercel',
+                envVarsFound: envVars,
                 timestamp: new Date().toISOString()
             });
         }
@@ -422,8 +444,16 @@ app.get('/api/health', async (req, res) => {
     }
 });
 
-// Endpoint para popular banco manualmente
+// Endpoint para popular banco manualmente (GET e POST)
+app.get('/api/populate', async (req, res) => {
+    return handlePopulate(req, res);
+});
+
 app.post('/api/populate', async (req, res) => {
+    return handlePopulate(req, res);
+});
+
+async function handlePopulate(req, res) {
     try {
         if (!process.env.POSTGRES_URL && !process.env.POSTGRES_PRISMA_URL && !process.env.DATABASE_URL) {
             return res.status(400).json({ error: 'PostgreSQL não configurado' });
@@ -516,8 +546,12 @@ app.get('/api/products', async (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     
     try {
-        // Verificar se tem PostgreSQL
-        const connectionString = process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL;
+        // Verificar todas as variáveis possíveis do Vercel
+        const connectionString = process.env.POSTGRES_URL || 
+                                 process.env.POSTGRES_PRISMA_URL || 
+                                 process.env.DATABASE_URL ||
+                                 process.env.POSTGRES_URL_NON_POOLING ||
+                                 process.env.POSTGRES_URL_NONPOOLING;
         
         if (!connectionString) {
             // SQLite fallback
