@@ -2,13 +2,6 @@
   "version": 2,
   "builds": [
     {
-      "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "."
-      }
-    },
-    {
       "src": "server.js",
       "use": "@vercel/node"
     }
@@ -17,13 +10,6 @@
     {
       "src": "/api/(.*)",
       "dest": "/server.js"
-    },
-    {
-      "src": "/(.*\\.(css|js|png|jpg|jpeg|gif|svg|ico|json|woff|woff2|ttf|eot))",
-      "headers": {
-        "Content-Type": "text/plain"
-      },
-      "dest": "/$1"
     },
     {
       "src": "/(.*)",
