@@ -194,6 +194,86 @@ async function createSampleProducts() {
     });
 }
 
+// Tentar importar produtos dos arquivos JSON
+async function tryImportProductsFromJSON() {
+    try {
+        const fs = require('fs');
+        const allProducts = [];
+
+        // Importar produtos da Netflix Shop
+        if (fs.existsSync('netflix-shop-products.json')) {
+            const netflixData = JSON.parse(fs.readFileSync('netflix-shop-products.json', 'utf8'));
+            const netflixProducts = netflixData.products || [];
+            allProducts.push(...netflixProducts);
+        }
+
+        // Importar produtos da GoCase
+        if (fs.existsSync('gocase-products-api.json')) {
+            const gocaseData = JSON.parse(fs.readFileSync('gocase-products-api.json', 'utf8'));
+            const gocaseProducts = gocaseData.products || [];
+            if (gocaseProducts.length > 0) {
+                allProducts.push(...gocaseProducts);
+            }
+        }
+
+        if (allProducts.length === 0) {
+            return false;
+        }
+
+        console.log(`📥 Importando ${allProducts.length} produtos dos arquivos JSON...`);
+
+        let imported = 0;
+        for (const product of allProducts) {
+            try {
+                const imagesJson = product.images ? JSON.stringify(product.images) : null;
+                const imageUrl = product.image || (product.images && product.images[0]) || null;
+                const price = parseFloat(product.price) || 0;
+                const originalPrice = product.originalPrice ? parseFloat(product.originalPrice) : null;
+
+                await new Promise((resolve, reject) => {
+                    db.run(`
+                        INSERT INTO products (name, description, price, category, image_url, stock, active, images_json, original_price, sku)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    `, [
+                        product.name || 'Produto sem nome',
+                        product.description || '',
+                        price,
+                        product.category || 'stranger-things',
+                        imageUrl,
+                        product.inStock !== false ? 10 : 0,
+                        1,
+                        imagesJson,
+                        originalPrice,
+                        product.sku || null
+                    ], (err) => {
+                        if (err && !err.message.includes('UNIQUE constraint') && !err.message.includes('duplicate')) {
+                            reject(err);
+                        } else {
+                            resolve();
+                        }
+                    });
+                });
+
+                imported++;
+                if (imported % 100 === 0) {
+                    console.log(`   ✅ Importados ${imported}/${allProducts.length} produtos...`);
+                }
+            } catch (error) {
+                // Ignorar erros de duplicação
+                if (!error.message.includes('UNIQUE') && !error.message.includes('duplicate')) {
+                    console.error(`Erro ao importar produto:`, error.message);
+                }
+            }
+        }
+
+        console.log(`✅ ${imported} produtos importados com sucesso!`);
+        return imported > 0;
+    } catch (error) {
+        console.log('⚠️  Erro ao importar produtos dos arquivos JSON:', error.message);
+        return false;
+    }
+}
+
 // Criar tabelas
 function initializeDatabase() {
     // Tabela de produtos
