@@ -2,17 +2,17 @@
 const API_BASE = window.location.origin;
 const API_URL = `${API_BASE}/api`;
 
+// Exportar para uso em product-cart.js
+window.API_BASE = API_BASE;
+window.API_URL = API_URL;
+
 // Get product ID from URL
 const urlParams = new URLSearchParams(window.location.search);
 let productId = parseInt(urlParams.get('id')) || null;
 
-// Se não tiver ID na URL, tentar pegar do hash ou outro lugar
-if (!productId) {
-    const hashMatch = window.location.hash.match(/id=(\d+)/);
-    if (hashMatch) {
-        productId = parseInt(hashMatch[1]);
-    }
-}
+// Log para debug
+console.log('🔍 URL atual:', window.location.href);
+console.log('🔍 productId extraído:', productId);
 
 let currentProduct = null;
 let currentQuantity = 1;
