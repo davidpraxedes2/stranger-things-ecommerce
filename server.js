@@ -877,7 +877,7 @@ app.get('/api/admin/products', authenticateToken, (req, res) => {
 });
 
 // Criar produto (admin)
-app.post('/api/admin/products', authenticateToken, upload.single('image'), (req, res) => {
+app.post('/api/admin/products', authenticateToken, (req, res) => {
     const { name, description, price, category, stock } = req.body;
     const image_url = req.file ? `/uploads/products/${req.file.filename}` : null;
 
@@ -899,7 +899,7 @@ app.post('/api/admin/products', authenticateToken, upload.single('image'), (req,
 });
 
 // Atualizar produto (admin)
-app.put('/api/admin/products/:id', authenticateToken, upload.single('image'), (req, res) => {
+app.put('/api/admin/products/:id', authenticateToken, (req, res) => {
     const { id } = req.params;
     const { name, description, price, category, stock, active } = req.body;
 
