@@ -1,7 +1,21 @@
+// Wrapper para evitar crash no require
+let db = null;
+try {
+    db = require('./db-helper');
+} catch (error) {
+    console.error('Erro ao carregar db-helper:', error.message);
+    // Criar um mock db para não crashar
+    db = {
+        get: () => {},
+        all: () => {},
+        run: () => {},
+        prepare: () => {}
+    };
+}
+
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const db = require('./db-helper');
 require('dotenv').config();
 
 const app = express();
