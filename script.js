@@ -15,14 +15,22 @@ async function loadProductsFromAPI() {
     
     try {
         console.log('📤 Enviando requisição fetch...');
+        
+        // Adicionar timeout de 10 segundos
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        
         const response = await fetch(fullUrl, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             },
-            mode: 'cors'
+            mode: 'cors',
+            signal: controller.signal
         });
+        
+        clearTimeout(timeoutId);
         console.log('📡 Resposta recebida!');
         console.log('📡 Status da resposta:', response.status, response.statusText);
         
