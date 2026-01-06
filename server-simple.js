@@ -123,6 +123,9 @@ app.get('/', (req, res) => {
     }
 });
 
+// Servir arquivos estáticos da pasta public com prefixo /public
+app.use('/public', express.static(path.join(__dirname, 'public')));
+
 // Rota de produtos - VERSÃO ULTRA SIMPLIFICADA
 app.get('/api/products', async (req, res) => {
     res.setHeader('Content-Type', 'application/json');
