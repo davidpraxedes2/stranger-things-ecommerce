@@ -329,8 +329,11 @@ async function loadRelatedProducts() {
 // Render related products
 function renderRelatedProducts(products, container) {
     container.innerHTML = products.map(product => {
-        const hasDiscount = product.original_price && product.original_price > product.price;
-        const discountPercent = hasDiscount ? Math.round(((product.original_price - product.price) / product.original_price) * 100) : 0;
+        // Converter preços para números (PostgreSQL retorna DECIMAL como string)
+        const price = parseFloat(product.price) || 0;
+        const originalPrice = product.original_price ? parseFloat(product.original_price) : null;
+        const hasDiscount = originalPrice && originalPrice > price;
+        const discountPercent = hasDiscount ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0;
         
         return `
         <a href="product.html?id=${product.id}" class="product-card">
