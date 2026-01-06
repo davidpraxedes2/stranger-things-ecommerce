@@ -126,34 +126,49 @@ async function loadProduct() {
             currentProduct = product;
             renderProduct(product);
         } else {
-            document.getElementById('productTitle').textContent = 'Produto não encontrado';
+            const titleEl = document.getElementById('productTitle');
+            const infoContainer = document.getElementById('productInfoContainer');
+            if (titleEl) titleEl.textContent = 'Produto não encontrado';
+            if (infoContainer) infoContainer.style.display = 'block';
         }
     } catch (error) {
         console.error('Erro ao carregar produto:', error);
-        document.getElementById('productTitle').textContent = 'Erro ao carregar produto';
+        const titleEl = document.getElementById('productTitle');
+        const infoContainer = document.getElementById('productInfoContainer');
+        if (titleEl) titleEl.textContent = 'Erro ao carregar produto';
+        if (infoContainer) infoContainer.style.display = 'block';
     }
 }
 
 // Render product
 function renderProduct(product) {
+    // Mostrar containers quando os dados carregarem
+    const imagesContainer = document.getElementById('productImagesContainer');
+    const infoContainer = document.getElementById('productInfoContainer');
+    
     // Set title
-    document.getElementById('productTitle').textContent = product.name || 'Produto';
+    const titleEl = document.getElementById('productTitle');
+    if (titleEl) {
+        titleEl.textContent = product.name || 'Produto';
+    }
 
     // Set price - converter para número (PostgreSQL retorna DECIMAL como string)
     const priceEl = document.getElementById('productPrice');
-    const price = parseFloat(product.price) || 0;
-    const originalPrice = product.original_price ? parseFloat(product.original_price) : null;
-    const hasDiscount = originalPrice && originalPrice > price;
-    
-    if (hasDiscount) {
-        priceEl.innerHTML = `
-            <span class="product-price-old" style="font-size: 1.5rem; text-decoration: line-through; color: var(--text-light-gray); margin-right: 0.5rem;">
-                R$ ${originalPrice.toFixed(2).replace('.', ',')}
-            </span>
-            <span>R$ ${price.toFixed(2).replace('.', ',')}</span>
-        `;
-    } else {
-        priceEl.textContent = `R$ ${price.toFixed(2).replace('.', ',')}`;
+    if (priceEl) {
+        const price = parseFloat(product.price) || 0;
+        const originalPrice = product.original_price ? parseFloat(product.original_price) : null;
+        const hasDiscount = originalPrice && originalPrice > price;
+        
+        if (hasDiscount) {
+            priceEl.innerHTML = `
+                <span class="product-price-old" style="font-size: 1.5rem; text-decoration: line-through; color: var(--text-light-gray); margin-right: 0.5rem;">
+                    R$ ${originalPrice.toFixed(2).replace('.', ',')}
+                </span>
+                <span>R$ ${price.toFixed(2).replace('.', ',')}</span>
+            `;
+        } else {
+            priceEl.textContent = `R$ ${price.toFixed(2).replace('.', ',')}`;
+        }
     }
 
     // Set description
