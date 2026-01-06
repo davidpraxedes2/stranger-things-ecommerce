@@ -402,9 +402,26 @@ app.get('/api/reimport-products', async (req, res) => {
         client = new Client({ connectionString });
         await client.connect();
         
-        // Limpar todos os produtos
-        await client.query('DELETE FROM products');
-        console.log('🗑️ Todos os produtos deletados');
+        // Dropar e recriar a tabela para garantir estrutura correta
+        console.log('🗑️ Recriando tabela products...');
+        await client.query('DROP TABLE IF EXISTS products CASCADE');
+        await client.query(`
+            CREATE TABLE products (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(500) NOT NULL,
+                description TEXT,
+                price DECIMAL(10,2) NOT NULL,
+                category VARCHAR(100),
+                image_url TEXT,
+                stock INTEGER DEFAULT 0,
+                active INTEGER DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                images_json TEXT,
+                original_price DECIMAL(10,2),
+                sku VARCHAR(100)
+            )
+        `);
+        console.log('✅ Tabela products recriada com sucesso');
         
         // Importar produtos reais
         const fs = require('fs');
