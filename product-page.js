@@ -1,6 +1,9 @@
 // Product Page Script
-const API_BASE = window.location.origin;
-const API_URL = `${API_BASE}/api`;
+// Expose API_BASE and API_URL on window for use in other scripts
+window.API_BASE = window.location.origin;
+window.API_URL = `${window.API_BASE}/api`;
+const API_BASE = window.API_BASE;
+const API_URL = window.API_URL;
 
 // Get product ID from URL
 const urlParams = new URLSearchParams(window.location.search);
@@ -36,7 +39,12 @@ window.reloadCart = function() {
 // Load product data
 async function loadProduct() {
     if (!productId) {
-        document.getElementById('productTitle').textContent = 'Produto não encontrado';
+        const titleEl = document.getElementById('productTitle');
+        if (titleEl) titleEl.textContent = 'Produto não encontrado';
+        const loadingEl = document.getElementById('productLoading');
+        if (loadingEl) loadingEl.style.display = 'none';
+        const infoContainer = document.getElementById('productInfoContainer');
+        if (infoContainer) infoContainer.style.display = 'block';
         return;
     }
 
@@ -47,37 +55,67 @@ async function loadProduct() {
             currentProduct = product;
             renderProduct(product);
         } else {
-            document.getElementById('productTitle').textContent = 'Produto não encontrado';
+            const titleEl = document.getElementById('productTitle');
+            if (titleEl) titleEl.textContent = 'Produto não encontrado';
+            const loadingEl = document.getElementById('productLoading');
+            if (loadingEl) loadingEl.style.display = 'none';
+            const infoContainer = document.getElementById('productInfoContainer');
+            if (infoContainer) infoContainer.style.display = 'block';
         }
     } catch (error) {
         console.error('Erro ao carregar produto:', error);
-        document.getElementById('productTitle').textContent = 'Erro ao carregar produto';
+        const titleEl = document.getElementById('productTitle');
+        if (titleEl) titleEl.textContent = 'Erro ao carregar produto';
+        const loadingEl = document.getElementById('productLoading');
+        if (loadingEl) loadingEl.style.display = 'none';
+        const infoContainer = document.getElementById('productInfoContainer');
+        if (infoContainer) infoContainer.style.display = 'block';
     }
 }
 
 // Render product
 function renderProduct(product) {
-    // Set title
-    document.getElementById('productTitle').textContent = product.name || 'Produto';
-
-    // Set price
-    const priceEl = document.getElementById('productPrice');
-    const hasDiscount = product.original_price && product.original_price > product.price;
+    // Hide loading and show containers when data loads
+    const loadingEl = document.getElementById('productLoading');
+    if (loadingEl) {
+        loadingEl.style.display = 'none';
+    }
     
-    if (hasDiscount) {
-        priceEl.innerHTML = `
-            <span class="product-price-old" style="font-size: 1.5rem; text-decoration: line-through; color: var(--text-light-gray); margin-right: 0.5rem;">
-                R$ ${parseFloat(product.original_price).toFixed(2).replace('.', ',')}
-            </span>
-            <span>R$ ${parseFloat(product.price).toFixed(2).replace('.', ',')}</span>
-        `;
-    } else {
-        priceEl.textContent = `R$ ${parseFloat(product.price).toFixed(2).replace('.', ',')}`;
+    const imagesContainer = document.getElementById('productImagesContainer');
+    const infoContainer = document.getElementById('productInfoContainer');
+    if (imagesContainer) imagesContainer.style.display = 'flex';
+    if (infoContainer) infoContainer.style.display = 'block';
+    
+    // Set title
+    const titleEl = document.getElementById('productTitle');
+    if (titleEl) {
+        titleEl.textContent = product.name || 'Produto';
+    }
+
+    // Set price - convert to number (PostgreSQL returns DECIMAL as string)
+    const priceEl = document.getElementById('productPrice');
+    if (priceEl) {
+        const price = parseFloat(product.price) || 0;
+        const originalPrice = product.original_price ? parseFloat(product.original_price) : null;
+        const hasDiscount = originalPrice && originalPrice > price;
+        
+        if (hasDiscount) {
+            priceEl.innerHTML = `
+                <span class="product-price-old" style="font-size: 1.5rem; text-decoration: line-through; color: var(--text-light-gray); margin-right: 0.5rem;">
+                    R$ ${originalPrice.toFixed(2).replace('.', ',')}
+                </span>
+                <span>R$ ${price.toFixed(2).replace('.', ',')}</span>
+            `;
+        } else {
+            priceEl.textContent = `R$ ${price.toFixed(2).replace('.', ',')}`;
+        }
     }
 
     // Set description
     const descEl = document.getElementById('productDescription');
-    descEl.innerHTML = `<p>${(product.description || 'Produto de alta qualidade.').replace(/\n/g, '</p><p>')}</p>`;
+    if (descEl) {
+        descEl.innerHTML = `<p>${(product.description || 'Produto de alta qualidade.').replace(/\n/g, '</p><p>')}</p>`;
+    }
 
     // Set images
     let images = [];
@@ -113,13 +151,15 @@ function renderProduct(product) {
 
 // Setup variants
 function setupVariants(product) {
+    // Convert price to number (PostgreSQL returns DECIMAL as string)
+    const productPrice = parseFloat(product.price) || 0;
     // Default variants (tamanhos)
     const defaultVariants = [
-        { id: 'P', name: 'P', price: product.price, available: true },
-        { id: 'M', name: 'M', price: product.price, available: true },
-        { id: 'G', name: 'G', price: product.price, available: true },
-        { id: 'GG', name: 'GG', price: product.price, available: true },
-        { id: 'XG', name: 'XG', price: product.price, available: true }
+        { id: 'P', name: 'P', price: productPrice, available: true },
+        { id: 'M', name: 'M', price: productPrice, available: true },
+        { id: 'G', name: 'G', price: productPrice, available: true },
+        { id: 'GG', name: 'GG', price: productPrice, available: true },
+        { id: 'XG', name: 'XG', price: productPrice, available: true }
     ];
 
     availableVariants = defaultVariants;
@@ -264,7 +304,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 const variantInfo = selectedVariant ? `${selectedVariant.name}` : null;
-                const price = selectedVariant?.price || currentProduct.price;
+                const productPrice = parseFloat(currentProduct.price) || 0;
+                const price = selectedVariant?.price || productPrice;
 
                 const response = await fetch(`${API_URL}/cart/add`, {
                     method: 'POST',
@@ -327,8 +368,11 @@ async function loadRelatedProducts() {
 // Render related products
 function renderRelatedProducts(products, container) {
     container.innerHTML = products.map(product => {
-        const hasDiscount = product.original_price && product.original_price > product.price;
-        const discountPercent = hasDiscount ? Math.round(((product.original_price - product.price) / product.original_price) * 100) : 0;
+        // Convert prices to numbers (PostgreSQL returns DECIMAL as string)
+        const price = parseFloat(product.price) || 0;
+        const originalPrice = product.original_price ? parseFloat(product.original_price) : null;
+        const hasDiscount = originalPrice && originalPrice > price;
+        const discountPercent = hasDiscount ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0;
         
         return `
         <a href="product.html?id=${product.id}" class="product-card">
@@ -345,8 +389,8 @@ function renderRelatedProducts(products, container) {
                 <h3 class="product-name">${product.name}</h3>
                 <p class="product-description">${(product.description || '').substring(0, 60)}...</p>
                 <div class="product-price">
-                    ${hasDiscount ? `<span class="product-price-old">R$ ${parseFloat(product.original_price).toFixed(2).replace('.', ',')}</span>` : ''}
-                    <span>R$ ${product.price.toFixed(2).replace('.', ',')}</span>
+                    ${hasDiscount && originalPrice ? `<span class="product-price-old">R$ ${originalPrice.toFixed(2).replace('.', ',')}</span>` : ''}
+                    <span>R$ ${price.toFixed(2).replace('.', ',')}</span>
                 </div>
             </div>
         </a>
