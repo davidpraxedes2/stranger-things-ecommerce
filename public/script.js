@@ -430,8 +430,11 @@ function renderProducts(container = productsGrid, limit = null) {
     console.log(`🎨 Renderizando ${productsToRender.length} produtos no container:`, container.id || 'sem id');
     
     container.innerHTML = productsToRender.map(product => {
-        const hasDiscount = product.original_price && product.original_price > product.price;
-        const discountPercent = hasDiscount ? Math.round(((product.original_price - product.price) / product.original_price) * 100) : 0;
+        // Converter preços para números (PostgreSQL retorna DECIMAL como string)
+        const price = parseFloat(product.price) || 0;
+        const originalPrice = product.original_price ? parseFloat(product.original_price) : null;
+        const hasDiscount = originalPrice && originalPrice > price;
+        const discountPercent = hasDiscount ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0;
         
         return `
         <a href="product.html?id=${product.id}" class="product-card">
@@ -448,8 +451,8 @@ function renderProducts(container = productsGrid, limit = null) {
                 <h3 class="product-name">${product.name}</h3>
                 <p class="product-description">${product.description || ''}</p>
                 <div class="product-price">
-                    ${hasDiscount ? `<span class="product-price-old">R$ ${parseFloat(product.original_price).toFixed(2).replace('.', ',')}</span>` : ''}
-                    <span>R$ ${product.price.toFixed(2).replace('.', ',')}</span>
+                    ${hasDiscount ? `<span class="product-price-old">R$ ${originalPrice.toFixed(2).replace('.', ',')}</span>` : ''}
+                    <span>R$ ${price.toFixed(2).replace('.', ',')}</span>
                 </div>
                 <button class="add-to-cart" onclick="event.preventDefault(); addToCart(${product.id});">
                     ADICIONAR AO CARRINHO
