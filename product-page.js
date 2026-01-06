@@ -36,6 +36,16 @@ window.reloadCart = function() {
     }
 };
 
+// Load product immediately if DOM is ready, otherwise wait for DOMContentLoaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        loadProduct();
+    });
+} else {
+    // DOM already loaded, load product immediately
+    loadProduct();
+}
+
 // Load product data
 async function loadProduct() {
     if (!productId) {
