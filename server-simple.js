@@ -377,6 +377,7 @@ app.get('/api/reimport-products', async (req, res) => {
         
         // Limpar todos os produtos
         await client.query('DELETE FROM products');
+        console.log('🗑️ Todos os produtos deletados');
         
         // Importar produtos reais
         const fs = require('fs');
@@ -385,43 +386,117 @@ app.get('/api/reimport-products', async (req, res) => {
         const netflixPaths = [
             path.join(__dirname, 'netflix-shop-products.json'),
             path.join(process.cwd(), 'netflix-shop-products.json'),
-            '/var/task/netflix-shop-products.json'
+            '/var/task/netflix-shop-products.json',
+            path.join(__dirname, '..', 'netflix-shop-products.json')
         ];
         
+        console.log('🔍 Procurando arquivo netflix-shop-products.json...');
+        let netflixFound = false;
+        let netflixData = null;
+        
         for (const netflixPath of netflixPaths) {
-            if (fs.existsSync(netflixPath)) {
-                const netflixData = JSON.parse(fs.readFileSync(netflixPath, 'utf8'));
-                if (netflixData.products && Array.isArray(netflixData.products)) {
-                    allProducts.push(...netflixData.products);
-                    break;
+            try {
+                console.log(`🔍 Testando: ${netflixPath}`);
+                if (fs.existsSync(netflixPath)) {
+                    console.log(`✅ Arquivo encontrado em: ${netflixPath}`);
+                    const fileContent = fs.readFileSync(netflixPath, 'utf8');
+                    console.log(`📄 Tamanho do arquivo: ${fileContent.length} caracteres`);
+                    netflixData = JSON.parse(fileContent);
+                    console.log(`📊 Estrutura do JSON:`, Object.keys(netflixData));
+                    
+                    if (netflixData.products && Array.isArray(netflixData.products)) {
+                        console.log(`✅ Array de produtos encontrado com ${netflixData.products.length} itens`);
+                        allProducts.push(...netflixData.products);
+                        netflixFound = true;
+                        break;
+                    } else {
+                        console.error(`❌ netflixData.products não é um array. Tipo:`, typeof netflixData.products);
+                        console.error(`📊 Chaves disponíveis:`, Object.keys(netflixData));
+                    }
+                } else {
+                    console.log(`❌ Arquivo não existe em: ${netflixPath}`);
+                }
+            } catch (err) {
+                console.error(`❌ Erro ao ler ${netflixPath}:`, err.message);
+                console.error('Stack:', err.stack);
+            }
+        }
+        
+        if (!netflixFound) {
+            return res.status(500).json({ 
+                error: 'Arquivo netflix-shop-products.json não encontrado ou inválido',
+                paths: netflixPaths,
+                dirname: __dirname,
+                cwd: process.cwd()
+            });
+        }
+        
+        if (allProducts.length === 0) {
+            return res.status(500).json({ 
+                error: 'Array de produtos está vazio',
+                netflixDataKeys: netflixData ? Object.keys(netflixData) : null,
+                netflixDataProductsType: netflixData && netflixData.products ? typeof netflixData.products : null
+            });
+        }
+        
+        console.log(`📥 Iniciando importação de ${allProducts.length} produtos...`);
+        let imported = 0;
+        let errors = 0;
+        
+        // Limitar a 1000 produtos para não exceder timeout
+        const maxProducts = Math.min(allProducts.length, 1000);
+        const productsToImport = allProducts.slice(0, maxProducts);
+        console.log(`📦 Importando ${maxProducts} produtos (de ${allProducts.length} total)...`);
+        
+        await client.query('BEGIN');
+        
+        try {
+            for (let i = 0; i < productsToImport.length; i++) {
+                const product = productsToImport[i];
+                try {
+                    const name = (product.name || product.title || 'Produto sem nome').substring(0, 500);
+                    const description = (product.description || '').substring(0, 2000);
+                    const price = parseFloat(product.price) || 0;
+                    const imageUrl = product.image || (product.images && product.images[0]) || null;
+                    const imagesJson = product.images ? JSON.stringify(product.images).substring(0, 10000) : null;
+                    const originalPrice = product.originalPrice ? parseFloat(product.originalPrice) : null;
+                    const sku = (product.sku || null) ? String(product.sku).substring(0, 100) : null;
+                    const category = (product.category || 'stranger-things').substring(0, 100);
+                    const stock = product.inStock !== false ? 10 : 0;
+                    
+                    await client.query(`
+                        INSERT INTO products (name, description, price, category, image_url, stock, active, images_json, original_price, sku)
+                        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+                    `, [name, description, price, category, imageUrl, stock, 1, imagesJson, originalPrice, sku]);
+                    imported++;
+                    
+                    if (imported % 100 === 0) {
+                        console.log(`📊 Progresso: ${imported}/${productsToImport.length} produtos importados...`);
+                    }
+                } catch (err) {
+                    errors++;
+                    if (errors <= 5) {
+                        console.error(`❌ Erro ao importar produto ${i}:`, err.message);
+                        console.error('Produto:', JSON.stringify(product).substring(0, 200));
+                    }
                 }
             }
+            
+            await client.query('COMMIT');
+            console.log(`✅ ${imported} produtos importados com sucesso! (${errors} erros)`);
+        } catch (err) {
+            await client.query('ROLLBACK');
+            console.error('❌ Erro na transação:', err.message);
+            throw err;
         }
         
-        let imported = 0;
-        for (const product of allProducts) {
-            try {
-                const name = product.name || product.title || 'Produto sem nome';
-                const description = product.description || '';
-                const price = parseFloat(product.price) || 0;
-                const imageUrl = product.image || (product.images && product.images[0]) || null;
-                const imagesJson = product.images ? JSON.stringify(product.images) : null;
-                const originalPrice = product.originalPrice ? parseFloat(product.originalPrice) : null;
-                const sku = product.sku || null;
-                const category = product.category || 'stranger-things';
-                const stock = product.inStock !== false ? 10 : 0;
-                
-                await client.query(`
-                    INSERT INTO products (name, description, price, category, image_url, stock, active, images_json, original_price, sku)
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-                `, [name, description, price, category, imageUrl, stock, 1, imagesJson, originalPrice, sku]);
-                imported++;
-            } catch (err) {
-                console.error('Erro ao importar produto:', err.message);
-            }
-        }
-        
-        res.json({ success: true, imported });
+        res.json({ 
+            success: true, 
+            imported, 
+            errors, 
+            total: allProducts.length,
+            importedFrom: maxProducts
+        });
     } catch (error) {
         res.status(500).json({ error: error.message });
     } finally {
