@@ -16,11 +16,15 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Servir arquivos estáticos de public
-app.use(express.static(path.join(__dirname, 'public')));
+// Servir arquivos estáticos - ordem importante!
+// Primeiro arquivos da raiz (styles.css, script.js, logo.png, etc)
+app.use(express.static(__dirname, {
+    index: false, // Não servir index.html como padrão
+    extensions: ['html', 'css', 'js', 'png', 'jpg', 'jpeg', 'gif', 'svg', 'ico', 'json']
+}));
 
-// Servir arquivos estáticos da raiz (para index.html, styles.css, script.js, etc)
-app.use(express.static(__dirname));
+// Depois arquivos de public
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Rotas para servir HTML files
 app.get('/', (req, res) => {
