@@ -7,15 +7,24 @@ let products = [];
 
 // Load products from API
 async function loadProductsFromAPI() {
-    console.log('🔄 Carregando produtos da API...', `${API_URL}/products`);
+    const fullUrl = `${API_URL}/products`;
+    console.log('🔄 Carregando produtos da API...');
+    console.log('🌐 URL completa:', fullUrl);
+    console.log('🌐 API_BASE:', API_BASE);
+    console.log('🌐 API_URL:', API_URL);
+    
     try {
-        const response = await fetch(`${API_URL}/products`, {
+        console.log('📤 Enviando requisição fetch...');
+        const response = await fetch(fullUrl, {
             method: 'GET',
             headers: {
-                'Content-Type': 'application/json'
-            }
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            mode: 'cors'
         });
-        console.log('📡 Resposta da API:', response.status, response.statusText);
+        console.log('📡 Resposta recebida!');
+        console.log('📡 Status da resposta:', response.status, response.statusText);
         
         console.log('📡 Status da resposta:', response.status, response.statusText);
         console.log('📡 Headers:', Object.fromEntries(response.headers.entries()));
