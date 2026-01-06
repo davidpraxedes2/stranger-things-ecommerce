@@ -312,7 +312,8 @@ async function initializePostgres() {
 }
 
 function initializeSQLite() {
-    // This will be called from server.js initializeDatabase()
+    // SQLite initialization happens in server.js initializeDatabase()
+    // This function is a placeholder for consistency
 }
 
 module.exports = db;

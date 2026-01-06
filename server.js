@@ -4,7 +4,7 @@ const path = require('path');
 const multer = require('multer');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const db = require('./db');
+const db = require('./db-helper');
 require('dotenv').config();
 
 const app = express();
