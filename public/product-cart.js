@@ -1,14 +1,11 @@
 // Cart functionality for product page
-// Usar API_BASE e API_URL já declarados em product-page.js, ou declarar se não existirem
+// Usar API_BASE e API_URL já declarados em product-page.js
+// Não redeclarar const - apenas usar as variáveis globais diretamente
+// Se não existirem, declarar apenas uma vez
 if (typeof window.API_BASE === 'undefined') {
     window.API_BASE = window.location.origin;
+    window.API_URL = `${window.API_BASE}/api`;
 }
-if (typeof window.API_URL === 'undefined') {
-    window.API_URL = `${window.API_BASE || window.location.origin}/api`;
-}
-// Não redeclarar, apenas usar as variáveis globais
-const API_BASE = window.API_BASE;
-const API_URL = window.API_URL;
 
 let sessionId = localStorage.getItem('cart_session_id') || 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 if (!localStorage.getItem('cart_session_id')) {
@@ -27,7 +24,7 @@ let cart = [];
 // Load cart from API
 async function loadCartFromAPI() {
     try {
-        const response = await fetch(`${API_URL}/cart?session_id=${sessionId}`, {
+        const response = await fetch(`${window.API_URL || window.location.origin + '/api'}/cart?session_id=${sessionId}`, {
             headers: getCartHeaders()
         });
         
@@ -131,7 +128,7 @@ async function updateCartQuantity(cartItemId, quantity) {
     }
 
     try {
-        const response = await fetch(`${API_URL}/cart/update/${cartItemId}`, {
+        const response = await fetch(`${window.API_URL || window.location.origin + '/api'}/cart/update/${cartItemId}`, {
             method: 'PUT',
             headers: getCartHeaders(),
             body: JSON.stringify({ quantity: quantity, session_id: sessionId })
@@ -148,7 +145,7 @@ async function updateCartQuantity(cartItemId, quantity) {
 // Remove item
 async function removeCartItem(cartItemId) {
     try {
-        const response = await fetch(`${API_URL}/cart/remove/${cartItemId}`, {
+        const response = await fetch(`${window.API_URL || window.location.origin + '/api'}/cart/remove/${cartItemId}`, {
             method: 'DELETE',
             headers: getCartHeaders()
         });

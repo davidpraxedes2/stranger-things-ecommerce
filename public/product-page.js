@@ -466,8 +466,8 @@ function renderRelatedProducts(products, container) {
                 <h3 class="product-name">${product.name}</h3>
                 <p class="product-description">${(product.description || '').substring(0, 60)}...</p>
                 <div class="product-price">
-                    ${hasDiscount ? `<span class="product-price-old">R$ ${parseFloat(product.original_price).toFixed(2).replace('.', ',')}</span>` : ''}
-                    <span>R$ ${parseFloat(product.price || 0).toFixed(2).replace('.', ',')}</span>
+                    ${hasDiscount ? `<span class="product-price-old">R$ ${originalPrice.toFixed(2).replace('.', ',')}</span>` : ''}
+                    <span>R$ ${price.toFixed(2).replace('.', ',')}</span>
                 </div>
             </div>
         </a>
