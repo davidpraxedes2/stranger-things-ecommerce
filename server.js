@@ -28,6 +28,19 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Servir arquivos estáticos
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(__dirname));
+
+// Rota raiz - servir index.html
+app.get('/', (req, res) => {
+    try {
+        res.sendFile(path.join(__dirname, 'index.html'));
+    } catch (error) {
+        res.status(500).send('Erro ao carregar página');
+    }
+});
+
 // Servir arquivos estáticos de public
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -541,7 +554,7 @@ async function handlePopulate(req, res) {
     }
 });
 
-// Listar produtos (público) - VERSÃO ULTRA SIMPLIFICADA
+// Listar produtos (público) - VERSÃO ULTRA SIMPLIFICADA COM TRATAMENTO DE ERRO
 app.get('/api/products', async (req, res) => {
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -558,15 +571,25 @@ app.get('/api/products', async (req, res) => {
         
         if (!connectionString) {
             // SQLite fallback
-            db.all('SELECT * FROM products WHERE active = 1 ORDER BY created_at DESC', [], (err, rows) => {
-                res.json(rows || []);
+            return new Promise((resolve) => {
+                db.all('SELECT * FROM products WHERE active = 1 ORDER BY created_at DESC', [], (err, rows) => {
+                    if (err) {
+                        res.json([]);
+                    } else {
+                        res.json(rows || []);
+                    }
+                    resolve();
+                });
             });
-            return;
         }
         
         // PostgreSQL - tudo automático
         const { Client } = require('pg');
-        client = new Client({ connectionString });
+        client = new Client({ 
+            connectionString: connectionString,
+            connectionTimeoutMillis: 5000
+        });
+        
         await client.connect();
         
         // Criar tabela automaticamente
@@ -590,7 +613,7 @@ app.get('/api/products', async (req, res) => {
         
         // Verificar se tem produtos, se não tiver, criar alguns
         const countResult = await client.query('SELECT COUNT(*) as count FROM products');
-        const count = parseInt(countResult.rows[0].count);
+        const count = parseInt(countResult.rows[0]?.count || 0);
         
         if (count === 0) {
             // Criar produtos automaticamente
@@ -607,13 +630,17 @@ app.get('/api/products', async (req, res) => {
         res.json(result.rows || []);
         
     } catch (error) {
-        console.error('ERRO:', error.message);
-        res.json([]); // Sempre retornar array
+        console.error('ERRO /api/products:', error.message);
+        console.error('Stack:', error.stack);
+        // SEMPRE retornar array vazio, nunca crashar
+        res.status(200).json([]);
     } finally {
         if (client) {
             try {
                 await client.end();
-            } catch (e) {}
+            } catch (e) {
+                // Ignorar erro ao fechar
+            }
         }
     }
 });
