@@ -297,7 +297,11 @@
             function showLoader() {
                 const loader = getLoader();
                 if (loader) {
-                    loader.style.cssText = 'display: flex !important; opacity: 1 !important; visibility: visible !important; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 999999; background: #000;';
+                    // Apenas forçar display e posição, manter CSS de animação
+                    loader.style.display = 'flex';
+                    loader.style.visibility = 'visible';
+                    loader.style.opacity = '1';
+                    loader.style.zIndex = '999999';
                     loader.classList.add('active');
                 }
             }
