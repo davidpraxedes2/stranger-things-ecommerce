@@ -7,17 +7,33 @@ let products = [];
 
 // Load products from API
 async function loadProductsFromAPI() {
-    console.log('🔄 Carregando produtos da API...', API_URL);
+    console.log('🔄 Carregando produtos da API...', `${API_URL}/products`);
     try {
-        const response = await fetch(`${API_URL}/products`);
+        const response = await fetch(`${API_URL}/products`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
         console.log('📡 Resposta da API:', response.status, response.statusText);
         
+        console.log('📡 Status da resposta:', response.status, response.statusText);
+        console.log('📡 Headers:', Object.fromEntries(response.headers.entries()));
+        
         if (response.ok) {
-            products = await response.json();
-            console.log(`✅ ${products.length} produtos carregados:`, products);
+            const data = await response.json();
+            products = Array.isArray(data) ? data : [];
+            console.log(`✅ ${products.length} produtos carregados`);
+            
+            if (products.length > 0) {
+                console.log('📦 Primeiro produto:', products[0]);
+            } else {
+                console.warn('⚠️ Nenhum produto retornado da API');
+            }
             
             // Update render if products grid exists
             if (productsGrid) {
+                console.log('🎨 Renderizando produtos...');
                 renderProducts();
             } else {
                 console.warn('⚠️ productsGrid não encontrado no DOM');
@@ -29,6 +45,9 @@ async function loadProductsFromAPI() {
         }
     } catch (error) {
         console.error('❌ Erro ao conectar com API:', error);
+        console.error('❌ Tipo do erro:', error.name);
+        console.error('❌ Mensagem:', error.message);
+        console.error('❌ Stack:', error.stack);
         console.error('URL tentada:', `${API_URL}/products`);
         products = [];
     }
