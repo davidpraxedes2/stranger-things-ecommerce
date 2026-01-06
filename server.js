@@ -657,9 +657,14 @@ app.delete('/api/admin/customers/:id', authenticateToken, (req, res) => {
     });
 });
 
-// Iniciar servidor
-app.listen(PORT, () => {
-    console.log(`Servidor rodando em http://localhost:${PORT}`);
-    console.log(`Painel admin: http://localhost:${PORT}/admin.html`);
-});
+// Iniciar servidor (apenas em desenvolvimento local)
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
+        console.log(`📦 Admin: http://localhost:${PORT}/admin.html`);
+    });
+}
+
+// Exportar app para Vercel
+module.exports = app;
 
