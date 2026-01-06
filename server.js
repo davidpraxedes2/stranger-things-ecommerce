@@ -546,6 +546,8 @@ app.get('/api/products', async (req, res) => {
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Access-Control-Allow-Origin', '*');
     
+    let client = null;
+    
     try {
         // Verificar todas as variáveis possíveis do Vercel
         const connectionString = process.env.POSTGRES_URL || 
@@ -556,23 +558,31 @@ app.get('/api/products', async (req, res) => {
                                  process.env.POSTGRES_URL_NONPOOLING;
         
         if (!connectionString) {
+            console.log('⚠️ PostgreSQL não configurado, usando SQLite');
             // SQLite fallback
             db.all('SELECT * FROM products WHERE active = 1 ORDER BY created_at DESC', [], (err, rows) => {
                 if (err) {
-                    return res.status(500).json({ error: err.message });
+                    console.error('❌ Erro SQLite:', err);
+                    return res.json([]); // Retornar vazio ao invés de erro
                 }
                 res.json(rows || []);
             });
             return;
         }
         
+        console.log('🔌 Conectando ao PostgreSQL...');
         // PostgreSQL
         const { Client } = require('pg');
-        const client = new Client({ connectionString });
+        client = new Client({ 
+            connectionString: connectionString,
+            connectionTimeoutMillis: 10000
+        });
         
         await client.connect();
+        console.log('✅ Conectado ao PostgreSQL');
         
         // Criar tabela se não existir
+        console.log('📋 Criando/verificando tabela products...');
         await client.query(`
             CREATE TABLE IF NOT EXISTS products (
                 id SERIAL PRIMARY KEY,
@@ -590,19 +600,30 @@ app.get('/api/products', async (req, res) => {
                 sku TEXT
             )
         `);
+        console.log('✅ Tabela verificada');
         
         // Buscar produtos
+        console.log('🔍 Buscando produtos...');
         const result = await client.query('SELECT * FROM products WHERE active = 1 ORDER BY created_at DESC');
-        
-        await client.end();
+        console.log(`✅ ${result.rows.length} produtos encontrados`);
         
         // SEMPRE retornar array, mesmo vazio
         res.json(result.rows || []);
         
     } catch (error) {
-        console.error('ERRO /api/products:', error.message);
+        console.error('❌ ERRO /api/products:', error.message);
+        console.error('❌ Stack:', error.stack);
         // Retornar array vazio em caso de erro, não quebrar o frontend
         res.json([]);
+    } finally {
+        if (client) {
+            try {
+                await client.end();
+                console.log('🔌 Conexão fechada');
+            } catch (closeError) {
+                console.error('⚠️ Erro ao fechar conexão:', closeError.message);
+            }
+        }
     }
 });
 
