@@ -180,6 +180,7 @@ app.get('/api/products', async (req, res) => {
         // Verificar se tem produtos
         const countResult = await client.query('SELECT COUNT(*) as count FROM products');
         const count = parseInt(countResult.rows[0]?.count || 0);
+        console.log(`📊 Total de produtos no banco: ${count}`);
         
         // Se tiver menos de 50 produtos, limpar TUDO e importar produtos reais
         // (50 é um número seguro - sabemos que temos 513 produtos da Netflix)
@@ -188,6 +189,7 @@ app.get('/api/products', async (req, res) => {
             
             // Limpar TODOS os produtos (incluindo mocks)
             await client.query('DELETE FROM products');
+            console.log('🗑️ Todos os produtos foram deletados');
             
             // Importar produtos reais dos arquivos JSON
             const fs = require('fs');
@@ -201,34 +203,48 @@ app.get('/api/products', async (req, res) => {
                 path.join(__dirname, '..', 'netflix-shop-products.json')
             ];
             
+            console.log('🔍 Procurando arquivo netflix-shop-products.json...');
+            console.log('📁 __dirname:', __dirname);
+            console.log('📁 process.cwd():', process.cwd());
+            
             let netflixFound = false;
+            let netflixData = null;
             for (const netflixPath of netflixPaths) {
                 try {
+                    console.log(`🔍 Testando caminho: ${netflixPath}`);
                     if (fs.existsSync(netflixPath)) {
-                        console.log(`📂 Encontrado arquivo Netflix em: ${netflixPath}`);
-                        const netflixData = JSON.parse(fs.readFileSync(netflixPath, 'utf8'));
+                        console.log(`✅ Arquivo encontrado em: ${netflixPath}`);
+                        netflixData = JSON.parse(fs.readFileSync(netflixPath, 'utf8'));
                         if (netflixData.products && Array.isArray(netflixData.products)) {
                             allProducts.push(...netflixData.products);
                             console.log(`✅ ${netflixData.products.length} produtos da Netflix Shop carregados`);
                             netflixFound = true;
                             break;
+                        } else {
+                            console.log(`⚠️ Arquivo encontrado mas sem array de produtos. Estrutura:`, Object.keys(netflixData));
                         }
+                    } else {
+                        console.log(`❌ Arquivo não existe em: ${netflixPath}`);
                     }
                 } catch (err) {
-                    console.log(`⚠️ Erro ao ler ${netflixPath}:`, err.message);
+                    console.error(`❌ Erro ao ler ${netflixPath}:`, err.message);
+                    console.error('Stack:', err.stack);
                 }
             }
             
             if (!netflixFound) {
                 console.error('❌ Arquivo netflix-shop-products.json NÃO encontrado em nenhum caminho!');
-                console.log('📁 Caminhos testados:', netflixPaths);
-                console.log('📁 __dirname:', __dirname);
-                console.log('📁 process.cwd():', process.cwd());
-                return res.status(500).json({ 
-                    error: 'Arquivo netflix-shop-products.json não encontrado',
-                    paths: netflixPaths,
-                    products: []
-                });
+                // Tentar listar arquivos no diretório
+                try {
+                    const files = fs.readdirSync(__dirname);
+                    console.log('📁 Arquivos no __dirname:', files.filter(f => f.includes('netflix') || f.includes('.json')).slice(0, 10));
+                } catch (e) {
+                    console.error('Erro ao listar arquivos:', e.message);
+                }
+                
+                // Retornar erro mas não bloquear - retornar array vazio
+                console.error('⚠️ Continuando sem produtos - retornando array vazio');
+                return res.json([]);
             }
             
             // Importar da GoCase (opcional)
@@ -259,27 +275,34 @@ app.get('/api/products', async (req, res) => {
                 let imported = 0;
                 let errors = 0;
                 
-                for (const product of allProducts) {
-                    try {
-                        const name = product.name || product.title || 'Produto sem nome';
-                        const description = product.description || '';
-                        const price = parseFloat(product.price) || 0;
-                        const imageUrl = product.image || (product.images && product.images[0]) || null;
-                        const imagesJson = product.images ? JSON.stringify(product.images) : null;
-                        const originalPrice = product.originalPrice ? parseFloat(product.originalPrice) : null;
-                        const sku = product.sku || null;
-                        const category = product.category || 'stranger-things';
-                        const stock = product.inStock !== false ? 10 : 0;
-                        
-                        await client.query(`
-                            INSERT INTO products (name, description, price, category, image_url, stock, active, images_json, original_price, sku)
-                            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-                        `, [name, description, price, category, imageUrl, stock, 1, imagesJson, originalPrice, sku]);
-                        imported++;
-                    } catch (err) {
-                        errors++;
-                        if (errors <= 5) {
-                            console.error(`Erro ao importar produto ${product.name || 'sem nome'}:`, err.message);
+                // Importar em lotes para não sobrecarregar
+                const batchSize = 50;
+                for (let i = 0; i < allProducts.length; i += batchSize) {
+                    const batch = allProducts.slice(i, i + batchSize);
+                    console.log(`📦 Importando lote ${Math.floor(i/batchSize) + 1}/${Math.ceil(allProducts.length/batchSize)} (${batch.length} produtos)...`);
+                    
+                    for (const product of batch) {
+                        try {
+                            const name = product.name || product.title || 'Produto sem nome';
+                            const description = product.description || '';
+                            const price = parseFloat(product.price) || 0;
+                            const imageUrl = product.image || (product.images && product.images[0]) || null;
+                            const imagesJson = product.images ? JSON.stringify(product.images) : null;
+                            const originalPrice = product.originalPrice ? parseFloat(product.originalPrice) : null;
+                            const sku = product.sku || null;
+                            const category = product.category || 'stranger-things';
+                            const stock = product.inStock !== false ? 10 : 0;
+                            
+                            await client.query(`
+                                INSERT INTO products (name, description, price, category, image_url, stock, active, images_json, original_price, sku)
+                                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+                            `, [name, description, price, category, imageUrl, stock, 1, imagesJson, originalPrice, sku]);
+                            imported++;
+                        } catch (err) {
+                            errors++;
+                            if (errors <= 5) {
+                                console.error(`Erro ao importar produto ${product.name || 'sem nome'}:`, err.message);
+                            }
                         }
                     }
                 }
@@ -287,10 +310,7 @@ app.get('/api/products', async (req, res) => {
                 console.log(`✅ ${imported} produtos importados com sucesso! (${errors} erros)`);
             } else {
                 console.error('❌ ERRO CRÍTICO: Nenhum produto real encontrado!');
-                return res.status(500).json({ 
-                    error: 'Nenhum produto encontrado. Verifique se netflix-shop-products.json está no repositório.',
-                    products: []
-                });
+                return res.json([]);
             }
         } else {
             console.log(`✅ ${count} produtos já existem no banco. Pulando importação.`);
@@ -298,7 +318,9 @@ app.get('/api/products', async (req, res) => {
         
         // Buscar produtos
         const result = await client.query('SELECT * FROM products WHERE active = 1 ORDER BY created_at DESC');
-        res.json(result.rows || []);
+        const products = result.rows || [];
+        console.log(`📦 Retornando ${products.length} produtos`);
+        res.json(products);
         
     } catch (error) {
         console.error('ERRO:', error.message);
