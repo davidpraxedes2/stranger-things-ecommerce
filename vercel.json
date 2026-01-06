@@ -12,6 +12,13 @@
       "dest": "/server-simple.js"
     },
     {
+      "src": "/(.*\\.(css|js|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot))",
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable"
+      },
+      "dest": "/$1"
+    },
+    {
       "src": "/(.*)",
       "dest": "/server-simple.js"
     }
