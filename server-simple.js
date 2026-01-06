@@ -160,22 +160,49 @@ app.get('/api/products', async (req, res) => {
         await client.connect();
         
         // Criar tabela com todas as colunas necessárias
+        // Usar tipos mais específicos para evitar problemas
         await client.query(`
             CREATE TABLE IF NOT EXISTS products (
                 id SERIAL PRIMARY KEY,
-                name TEXT NOT NULL,
+                name VARCHAR(500) NOT NULL,
                 description TEXT,
-                price REAL NOT NULL,
-                category TEXT,
+                price DECIMAL(10,2) NOT NULL,
+                category VARCHAR(100),
                 image_url TEXT,
                 stock INTEGER DEFAULT 0,
                 active INTEGER DEFAULT 1,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 images_json TEXT,
-                original_price REAL,
-                sku TEXT
+                original_price DECIMAL(10,2),
+                sku VARCHAR(100)
             )
         `);
+        
+        // Garantir que as colunas existem (caso a tabela já exista sem essas colunas)
+        try {
+            const columns = await client.query(`
+                SELECT column_name 
+                FROM information_schema.columns 
+                WHERE table_name = 'products'
+            `);
+            const existingColumns = columns.rows.map(r => r.column_name);
+            console.log('📊 Colunas existentes:', existingColumns);
+            
+            if (!existingColumns.includes('images_json')) {
+                await client.query('ALTER TABLE products ADD COLUMN images_json TEXT');
+                console.log('✅ Coluna images_json adicionada');
+            }
+            if (!existingColumns.includes('original_price')) {
+                await client.query('ALTER TABLE products ADD COLUMN original_price DECIMAL(10,2)');
+                console.log('✅ Coluna original_price adicionada');
+            }
+            if (!existingColumns.includes('sku')) {
+                await client.query('ALTER TABLE products ADD COLUMN sku VARCHAR(100)');
+                console.log('✅ Coluna sku adicionada');
+            }
+        } catch (e) {
+            console.log('⚠️ Erro ao verificar/adicionar colunas:', e.message);
+        }
         
         // Verificar se tem produtos
         const countResult = await client.query('SELECT COUNT(*) as count FROM products');
