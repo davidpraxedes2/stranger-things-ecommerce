@@ -91,32 +91,42 @@ async function runPostgres(query, params, callback) {
     try {
         // Convert ? to $1, $2, etc
         let paramIndex = 1;
-        const convertedQuery = query.replace(/\?/g, () => {
+        let convertedQuery = query.replace(/\?/g, () => {
             const idx = paramIndex++;
             return `$${idx}`;
-        }).replace(/INTEGER PRIMARY KEY AUTOINCREMENT/g, 'SERIAL PRIMARY KEY')
-          .replace(/DATETIME DEFAULT CURRENT_TIMESTAMP/g, 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP');
+        });
+        
+        // Fix syntax differences
+        convertedQuery = convertedQuery
+            .replace(/INTEGER PRIMARY KEY AUTOINCREMENT/g, 'SERIAL PRIMARY KEY')
+            .replace(/DATETIME DEFAULT CURRENT_TIMESTAMP/g, 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP');
         
         // Handle INSERT OR IGNORE
-        let finalQuery = convertedQuery;
         if (query.includes('INSERT OR IGNORE')) {
-            // Extract table name and create ON CONFLICT
             const match = query.match(/INSERT OR IGNORE INTO (\w+)/);
             if (match) {
-                const tableName = match[1];
-                finalQuery = convertedQuery.replace(/INSERT OR IGNORE/, 'INSERT') + 
+                convertedQuery = convertedQuery.replace(/INSERT OR IGNORE/, 'INSERT') + 
                     ` ON CONFLICT DO NOTHING`;
             }
         }
         
-        const result = await pgClient.query(finalQuery, params);
+        // Use pg directly for raw queries (since @vercel/postgres sql template doesn't support raw strings well)
+        const { Client } = require('pg');
+        const client = new Client({
+            connectionString: process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL
+        });
+        
+        await client.connect();
+        const result = await client.query(convertedQuery, params);
         
         // Get last inserted ID if it's an INSERT
         let lastID = null;
-        if (finalQuery.trim().toUpperCase().startsWith('INSERT')) {
-            const idResult = await pgClient.query('SELECT LASTVAL() as id');
+        if (convertedQuery.trim().toUpperCase().startsWith('INSERT')) {
+            const idResult = await client.query('SELECT LASTVAL() as id');
             lastID = idResult.rows[0]?.id || null;
         }
+        
+        await client.end();
         
         const mockResult = {
             lastID: lastID,
@@ -144,7 +154,15 @@ async function getPostgres(query, params, callback) {
         }).replace(/INTEGER PRIMARY KEY AUTOINCREMENT/g, 'SERIAL PRIMARY KEY')
           .replace(/DATETIME DEFAULT CURRENT_TIMESTAMP/g, 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP');
         
-        const result = await pgClient.query(convertedQuery, params);
+        const { Client } = require('pg');
+        const client = new Client({
+            connectionString: process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL
+        });
+        
+        await client.connect();
+        const result = await client.query(convertedQuery, params);
+        await client.end();
+        
         const row = result.rows && result.rows[0] ? result.rows[0] : null;
         
         if (callback) {
@@ -170,7 +188,15 @@ async function allPostgres(query, params, callback) {
         }).replace(/INTEGER PRIMARY KEY AUTOINCREMENT/g, 'SERIAL PRIMARY KEY')
           .replace(/DATETIME DEFAULT CURRENT_TIMESTAMP/g, 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP');
         
-        const result = await pgClient.query(convertedQuery, params);
+        const { Client } = require('pg');
+        const client = new Client({
+            connectionString: process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL
+        });
+        
+        await client.connect();
+        const result = await client.query(convertedQuery, params);
+        await client.end();
+        
         const rows = result.rows || [];
         
         if (callback) {
@@ -198,7 +224,15 @@ function preparePostgres(query) {
                 }).replace(/INTEGER PRIMARY KEY AUTOINCREMENT/g, 'SERIAL PRIMARY KEY')
                   .replace(/DATETIME DEFAULT CURRENT_TIMESTAMP/g, 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP');
                 
-                await pgClient.query(convertedQuery, params);
+                const { Client } = require('pg');
+                const client = new Client({
+                    connectionString: process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL
+                });
+                
+                await client.connect();
+                await client.query(convertedQuery, params);
+                await client.end();
+                
                 if (callback) callback(null);
             } catch (error) {
                 if (callback) callback(error);
