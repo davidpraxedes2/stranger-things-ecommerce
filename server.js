@@ -132,22 +132,23 @@ const upload = multer({
 });
 
 // Inicializar banco de dados (não bloquear requisições)
-(async function initializeDB() {
-    try {
-        console.log('🔄 Inicializando banco de dados...');
-        await db.initialize();
-        console.log('✅ Banco inicializado');
-        initializeDatabase();
-        console.log('✅ Tabelas criadas/verificadas');
-        
-        // Popular banco se estiver vazio (em background, não bloqueia)
-        setImmediate(() => {
-            populateDatabaseIfEmpty();
-        });
-    } catch (error) {
-        console.error('❌ Erro ao inicializar banco de dados:', error);
-    }
-})();
+// DESABILITADO - tabelas serão criadas na primeira requisição
+// (async function initializeDB() {
+//     try {
+//         console.log('🔄 Inicializando banco de dados...');
+//         await db.initialize();
+//         console.log('✅ Banco inicializado');
+//         initializeDatabase();
+//         console.log('✅ Tabelas criadas/verificadas');
+//         
+//         // Popular banco se estiver vazio (em background, não bloqueia)
+//         setImmediate(() => {
+//             populateDatabaseIfEmpty();
+//         });
+//     } catch (error) {
+//         console.error('❌ Erro ao inicializar banco de dados:', error);
+//     }
+// })();
 
 // Popular banco se estiver vazio
 async function populateDatabaseIfEmpty() {
