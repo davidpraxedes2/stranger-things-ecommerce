@@ -18,16 +18,22 @@ if (process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.D
 
 let sqliteDb = null;
 
-if (!USE_POSTGRES) {
-    // Use SQLite (local development)
-    console.log('📦 Usando SQLite (desenvolvimento local)');
-    sqliteDb = new sqlite3.Database('database.sqlite', (err) => {
-        if (err) {
-            console.error('Erro ao conectar ao SQLite:', err.message);
-        } else {
-            console.log('✅ Conectado ao SQLite');
-        }
-    });
+// Só inicializar SQLite se não estiver no Vercel (que tem sistema de arquivos read-only)
+if (!USE_POSTGRES && !process.env.VERCEL) {
+    try {
+        // Use SQLite (local development)
+        console.log('📦 Usando SQLite (desenvolvimento local)');
+        sqliteDb = new sqlite3.Database('database.sqlite', (err) => {
+            if (err) {
+                console.error('Erro ao conectar ao SQLite:', err.message);
+            } else {
+                console.log('✅ Conectado ao SQLite');
+            }
+        });
+    } catch (error) {
+        console.error('Erro ao inicializar SQLite:', error.message);
+        sqliteDb = null;
+    }
 }
 
 // Helper functions
@@ -71,6 +77,12 @@ const db = {
 
 // SQLite functions
 function runSQLite(query, params, callback) {
+    if (!sqliteDb) {
+        if (callback) {
+            callback(new Error('SQLite não disponível no Vercel'), null);
+        }
+        return;
+    }
     sqliteDb.run(query, params, function(err) {
         if (callback) {
             callback(err, { lastID: this.lastID, changes: this.changes });
@@ -79,10 +91,22 @@ function runSQLite(query, params, callback) {
 }
 
 function getSQLite(query, params, callback) {
+    if (!sqliteDb) {
+        if (callback) {
+            callback(new Error('SQLite não disponível no Vercel'), null);
+        }
+        return;
+    }
     sqliteDb.get(query, params, callback);
 }
 
 function allSQLite(query, params, callback) {
+    if (!sqliteDb) {
+        if (callback) {
+            callback(new Error('SQLite não disponível no Vercel'), []);
+        }
+        return;
+    }
     sqliteDb.all(query, params, callback);
 }
 
