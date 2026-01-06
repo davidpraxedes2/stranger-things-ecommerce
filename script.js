@@ -742,7 +742,7 @@ if (document.getElementById('relatedProducts')) {
             <div class="product-info">
                 <h3 class="product-name">${product.name}</h3>
                 <p class="product-description">${product.description}</p>
-                <p class="product-price">R$ ${product.price.toFixed(2).replace('.', ',')}</p>
+                <p class="product-price">R$ ${parseFloat(product.price || 0).toFixed(2).replace('.', ',')}</p>
                 <button class="add-to-cart" onclick="event.preventDefault(); addToCart(${product.id});">
                     ADICIONAR AO CARRINHO
                 </button>
