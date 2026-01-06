@@ -538,7 +538,7 @@ async function handlePopulate(req, res) {
         console.error('Erro ao popular banco:', error);
         res.status(500).json({ error: error.message });
     }
-});
+}
 
 // Listar produtos (público) - VERSÃO ULTRA SIMPLIFICADA COM TRATAMENTO DE ERRO
 app.get('/api/products', async (req, res) => {
