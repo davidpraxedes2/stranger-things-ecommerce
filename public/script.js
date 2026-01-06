@@ -115,16 +115,10 @@ const navLinks = document.querySelectorAll('.nav-link');
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
-    // Render products if on homepage
-    if (productsGrid) {
-        renderProducts();
-    }
+    // NÃO renderizar produtos aqui - esperar loadProductsFromAPI() carregar primeiro
+    // Os produtos serão renderizados automaticamente quando loadProductsFromAPI() terminar
 
-    // Render featured products
-    const featuredProducts = document.getElementById('featuredProducts');
-    if (featuredProducts) {
-        renderProducts(featuredProducts, 4);
-    }
+    // Render featured products será feito depois que os produtos carregarem
 
     // Initialize cart UI
     updateCartUI();
