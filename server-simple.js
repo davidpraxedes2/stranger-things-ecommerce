@@ -9,58 +9,80 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Servir arquivos estáticos PRIMEIRO (antes de outras rotas)
-app.use(express.static(__dirname, {
-    setHeaders: (res, filePath) => {
-        if (filePath.endsWith('.css')) {
-            res.setHeader('Content-Type', 'text/css');
-        } else if (filePath.endsWith('.js')) {
-            res.setHeader('Content-Type', 'application/javascript');
-        } else if (filePath.endsWith('.png')) {
-            res.setHeader('Content-Type', 'image/png');
-        }
-    }
-}));
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Rotas explícitas para arquivos críticos
+// ROTAS DE ARQUIVOS ESTÁTICOS PRIMEIRO (ANTES DE TUDO)
 app.get('/styles.css', (req, res) => {
-    res.setHeader('Content-Type', 'text/css');
-    res.sendFile(path.join(__dirname, 'styles.css'));
+    try {
+        res.setHeader('Content-Type', 'text/css');
+        res.sendFile(path.join(__dirname, 'styles.css'));
+    } catch (error) {
+        res.status(404).send('CSS not found');
+    }
 });
 
 app.get('/script.js', (req, res) => {
-    res.setHeader('Content-Type', 'application/javascript');
-    res.sendFile(path.join(__dirname, 'script.js'));
+    try {
+        res.setHeader('Content-Type', 'application/javascript');
+        res.sendFile(path.join(__dirname, 'script.js'));
+    } catch (error) {
+        res.status(404).send('JS not found');
+    }
 });
 
 app.get('/logo.png', (req, res) => {
-    res.setHeader('Content-Type', 'image/png');
-    res.sendFile(path.join(__dirname, 'logo.png'));
+    try {
+        res.setHeader('Content-Type', 'image/png');
+        res.sendFile(path.join(__dirname, 'logo.png'));
+    } catch (error) {
+        res.status(404).send('Image not found');
+    }
 });
 
 app.get('/product-page.js', (req, res) => {
-    res.setHeader('Content-Type', 'application/javascript');
-    res.sendFile(path.join(__dirname, 'product-page.js'));
+    try {
+        res.setHeader('Content-Type', 'application/javascript');
+        res.sendFile(path.join(__dirname, 'product-page.js'));
+    } catch (error) {
+        res.status(404).send('JS not found');
+    }
 });
 
 app.get('/product-cart.js', (req, res) => {
-    res.setHeader('Content-Type', 'application/javascript');
-    res.sendFile(path.join(__dirname, 'product-cart.js'));
+    try {
+        res.setHeader('Content-Type', 'application/javascript');
+        res.sendFile(path.join(__dirname, 'product-cart.js'));
+    } catch (error) {
+        res.status(404).send('JS not found');
+    }
 });
 
 app.get('/checkout.js', (req, res) => {
-    res.setHeader('Content-Type', 'application/javascript');
-    res.sendFile(path.join(__dirname, 'checkout.js'));
+    try {
+        res.setHeader('Content-Type', 'application/javascript');
+        res.sendFile(path.join(__dirname, 'checkout.js'));
+    } catch (error) {
+        res.status(404).send('JS not found');
+    }
 });
 
 app.get('/product.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'product.html'));
+    try {
+        res.sendFile(path.join(__dirname, 'product.html'));
+    } catch (error) {
+        res.status(404).send('Page not found');
+    }
 });
 
 app.get('/checkout.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'checkout.html'));
+    try {
+        res.sendFile(path.join(__dirname, 'checkout.html'));
+    } catch (error) {
+        res.status(404).send('Page not found');
+    }
 });
+
+// Servir outros arquivos estáticos
+app.use(express.static(__dirname));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Rota raiz - DEVE SER A ÚLTIMA
 app.get('/', (req, res) => {
