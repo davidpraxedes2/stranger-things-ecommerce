@@ -371,139 +371,202 @@ const authenticateToken = (req, res, next) => {
 // ===== ROTAS PÚBLICAS =====
 
 // Health check
-app.get('/api/health', (req, res) => {
-    const hasPostgres = !!(process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL);
-    res.json({ 
-        status: 'ok', 
-        database: hasPostgres ? 'PostgreSQL' : 'SQLite',
-        initialized: dbInitialized,
-        timestamp: new Date().toISOString()
-    });
-});
-
-// Listar produtos (público)
-app.get('/api/products', async (req, res) => {
-    let client = null;
+app.get('/api/health', async (req, res) => {
     try {
-        const { category, search, minPrice, maxPrice } = req.query;
+        const hasPostgres = !!(process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL);
         
-        // PostgreSQL direto - sem abstrações
-        if (process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL) {
+        if (hasPostgres) {
             const { Client } = require('pg');
-            const connectionString = process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL;
-            
-            client = new Client({
-                connectionString: connectionString,
-                connectionTimeoutMillis: 5000,
-                query_timeout: 10000
+            const client = new Client({
+                connectionString: process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL
             });
             
             await client.connect();
             
-            // Verificar se tabela existe, se não criar
-            await client.query(`
-                CREATE TABLE IF NOT EXISTS products (
-                    id SERIAL PRIMARY KEY,
-                    name TEXT NOT NULL,
-                    description TEXT,
-                    price REAL NOT NULL,
-                    category TEXT,
-                    image_url TEXT,
-                    stock INTEGER DEFAULT 0,
-                    active INTEGER DEFAULT 1,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    images_json TEXT,
-                    original_price REAL,
-                    sku TEXT
-                )
+            // Verificar se tabela existe
+            const tableCheck = await client.query(`
+                SELECT EXISTS (
+                    SELECT FROM information_schema.tables 
+                    WHERE table_name = 'products'
+                );
             `);
             
-            let query = 'SELECT * FROM products WHERE active = 1';
-            const params = [];
-            let paramIndex = 1;
-
-            if (category) {
-                query += ` AND category = $${paramIndex}`;
-                params.push(category);
-                paramIndex++;
+            let count = 0;
+            if (tableCheck.rows[0].exists) {
+                const countResult = await client.query('SELECT COUNT(*) as count FROM products');
+                count = parseInt(countResult.rows[0].count);
             }
-
-            if (search) {
-                query += ` AND (name LIKE $${paramIndex} OR description LIKE $${paramIndex + 1})`;
-                const searchTerm = `%${search}%`;
-                params.push(searchTerm, searchTerm);
-                paramIndex += 2;
-            }
-
-            if (minPrice) {
-                query += ` AND price >= $${paramIndex}`;
-                params.push(parseFloat(minPrice));
-                paramIndex++;
-            }
-
-            if (maxPrice) {
-                query += ` AND price <= $${paramIndex}`;
-                params.push(parseFloat(maxPrice));
-                paramIndex++;
-            }
-
-            query += ' ORDER BY created_at DESC';
-
-            const result = await client.query(query, params);
             
-            res.setHeader('Content-Type', 'application/json');
-            res.setHeader('Access-Control-Allow-Origin', '*');
-            res.json(result.rows || []);
+            await client.end();
+            
+            res.json({ 
+                status: 'ok', 
+                database: 'PostgreSQL',
+                tableExists: tableCheck.rows[0].exists,
+                productCount: count,
+                timestamp: new Date().toISOString()
+            });
         } else {
-            // SQLite
-            let query = 'SELECT * FROM products WHERE active = 1';
-            const params = [];
-
-            if (category) {
-                query += ' AND category = ?';
-                params.push(category);
-            }
-
-            if (search) {
-                query += ' AND (name LIKE ? OR description LIKE ?)';
-                const searchTerm = `%${search}%`;
-                params.push(searchTerm, searchTerm);
-            }
-
-            if (minPrice) {
-                query += ' AND price >= ?';
-                params.push(parseFloat(minPrice));
-            }
-
-            if (maxPrice) {
-                query += ' AND price <= ?';
-                params.push(parseFloat(maxPrice));
-            }
-
-            query += ' ORDER BY created_at DESC';
-
-            db.all(query, params, (err, rows) => {
-                if (err) {
-                    res.status(500).json({ error: 'Erro ao buscar produtos', message: err.message });
-                    return;
-                }
-                res.setHeader('Content-Type', 'application/json');
-                res.setHeader('Access-Control-Allow-Origin', '*');
-                res.json(rows || []);
+            res.json({ 
+                status: 'ok', 
+                database: 'SQLite',
+                timestamp: new Date().toISOString()
             });
         }
     } catch (error) {
-        console.error('❌ Erro:', error.message);
-        res.status(500).json({ error: 'Erro ao buscar produtos', message: error.message });
-    } finally {
-        if (client) {
-            try {
-                await client.end();
-            } catch (e) {
-                // Ignorar erro ao fechar
-            }
+        res.status(500).json({ 
+            status: 'error',
+            message: error.message,
+            timestamp: new Date().toISOString()
+        });
+    }
+});
+
+// Endpoint para popular banco manualmente
+app.post('/api/populate', async (req, res) => {
+    try {
+        if (!process.env.POSTGRES_URL && !process.env.POSTGRES_PRISMA_URL && !process.env.DATABASE_URL) {
+            return res.status(400).json({ error: 'PostgreSQL não configurado' });
         }
+        
+        const { Client } = require('pg');
+        const client = new Client({
+            connectionString: process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL
+        });
+        
+        await client.connect();
+        
+        // Criar tabela
+        await client.query(`
+            CREATE TABLE IF NOT EXISTS products (
+                id SERIAL PRIMARY KEY,
+                name TEXT NOT NULL,
+                description TEXT,
+                price REAL NOT NULL,
+                category TEXT,
+                image_url TEXT,
+                stock INTEGER DEFAULT 0,
+                active INTEGER DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                images_json TEXT,
+                original_price REAL,
+                sku TEXT
+            )
+        `);
+        
+        // Verificar se já tem produtos
+        const countResult = await client.query('SELECT COUNT(*) as count FROM products');
+        const count = parseInt(countResult.rows[0].count);
+        
+        if (count === 0) {
+            // Inserir produtos de exemplo
+            const sampleProducts = [
+                {
+                    name: 'Stranger Things T-Shirt',
+                    description: 'Camiseta oficial Stranger Things',
+                    price: 79.90,
+                    category: 'stranger-things',
+                    image_url: 'https://via.placeholder.com/300',
+                    stock: 10,
+                    active: 1
+                },
+                {
+                    name: 'Stranger Things Poster',
+                    description: 'Pôster oficial da série',
+                    price: 29.90,
+                    category: 'stranger-things',
+                    image_url: 'https://via.placeholder.com/300',
+                    stock: 20,
+                    active: 1
+                },
+                {
+                    name: 'Stranger Things Mug',
+                    description: 'Caneca temática Stranger Things',
+                    price: 39.90,
+                    category: 'stranger-things',
+                    image_url: 'https://via.placeholder.com/300',
+                    stock: 15,
+                    active: 1
+                }
+            ];
+            
+            for (const product of sampleProducts) {
+                await client.query(`
+                    INSERT INTO products (name, description, price, category, image_url, stock, active)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7)
+                `, [product.name, product.description, product.price, product.category, product.image_url, product.stock, product.active]);
+            }
+            
+            await client.end();
+            res.json({ success: true, message: `${sampleProducts.length} produtos inseridos` });
+        } else {
+            await client.end();
+            res.json({ success: true, message: `Banco já possui ${count} produtos` });
+        }
+    } catch (error) {
+        console.error('Erro ao popular banco:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Listar produtos (público) - VERSÃO SIMPLIFICADA
+app.get('/api/products', async (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    
+    try {
+        // Verificar se tem PostgreSQL
+        const connectionString = process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL;
+        
+        if (!connectionString) {
+            // SQLite fallback
+            db.all('SELECT * FROM products WHERE active = 1 ORDER BY created_at DESC', [], (err, rows) => {
+                if (err) {
+                    return res.status(500).json({ error: err.message });
+                }
+                res.json(rows || []);
+            });
+            return;
+        }
+        
+        // PostgreSQL
+        const { Client } = require('pg');
+        const client = new Client({ connectionString });
+        
+        await client.connect();
+        
+        // Criar tabela se não existir
+        await client.query(`
+            CREATE TABLE IF NOT EXISTS products (
+                id SERIAL PRIMARY KEY,
+                name TEXT NOT NULL,
+                description TEXT,
+                price REAL NOT NULL,
+                category TEXT,
+                image_url TEXT,
+                stock INTEGER DEFAULT 0,
+                active INTEGER DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                images_json TEXT,
+                original_price REAL,
+                sku TEXT
+            )
+        `);
+        
+        // Buscar produtos
+        const result = await client.query('SELECT * FROM products WHERE active = 1 ORDER BY created_at DESC');
+        
+        await client.end();
+        
+        // SEMPRE retornar array, mesmo vazio
+        res.json(result.rows || []);
+        
+    } catch (error) {
+        console.error('ERRO /api/products:', error.message);
+        // Retornar array vazio em caso de erro, não quebrar o frontend
+        res.json([]);
     }
 });
 
