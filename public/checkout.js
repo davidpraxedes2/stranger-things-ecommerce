@@ -2,6 +2,47 @@
 const API_BASE = window.location.origin;
 const API_URL = `${API_BASE}/api`;
 
+// Page Transition Effect
+function initPageTransitions() {
+    document.querySelectorAll('a[href]').forEach(link => {
+        const href = link.getAttribute('href');
+        
+        if (href && 
+            !href.startsWith('http') && 
+            !href.startsWith('//') && 
+            !href.startsWith('#') && 
+            !href.startsWith('javascript:') &&
+            !href.startsWith('mailto:') &&
+            !href.startsWith('tel:')) {
+            
+            link.addEventListener('click', function(e) {
+                if (link.target === '_blank' || e.ctrlKey || e.metaKey) {
+                    return;
+                }
+                
+                e.preventDefault();
+                document.body.classList.add('fade-out');
+                setTimeout(() => {
+                    window.location.href = href;
+                }, 200);
+            });
+        }
+    });
+    
+    document.body.style.opacity = '0';
+    setTimeout(() => {
+        document.body.style.transition = 'opacity 0.3s ease-in-out';
+        document.body.style.opacity = '1';
+    }, 10);
+}
+
+// Inicializar transições
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPageTransitions);
+} else {
+    initPageTransitions();
+}
+
 let sessionId = localStorage.getItem('cart_session_id') || 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 if (!localStorage.getItem('cart_session_id')) {
     localStorage.setItem('cart_session_id', sessionId);
