@@ -113,8 +113,73 @@ const db = new sqlite3.Database('database.sqlite', (err) => {
     } else {
         console.log('Conectado ao banco de dados SQLite.');
         initializeDatabase();
+        // Popular banco se estiver vazio (apenas em produção/Vercel)
+        if (process.env.NODE_ENV === 'production') {
+            populateDatabaseIfEmpty();
+        }
     }
 });
+
+// Popular banco se estiver vazio
+function populateDatabaseIfEmpty() {
+    db.get('SELECT COUNT(*) as count FROM products', [], (err, row) => {
+        if (!err && row.count === 0) {
+            console.log('📦 Banco vazio detectado. Criando produtos de exemplo...');
+            createSampleProducts();
+        }
+    });
+}
+
+function createSampleProducts() {
+    const sampleProducts = [
+        {
+            name: 'Stranger Things - Camiseta Eleven',
+            description: 'Camiseta oficial com estampa exclusiva da Eleven, personagem icônico de Stranger Things.',
+            price: 89.90,
+            category: 'stranger-things',
+            stock: 10
+        },
+        {
+            name: 'Stranger Things - Moletom Hellfire Club',
+            description: 'Moletom oficial do Hellfire Club. Perfeito para os fãs da série.',
+            price: 149.90,
+            category: 'stranger-things',
+            stock: 10
+        },
+        {
+            name: 'Stranger Things - Capinha para Celular',
+            description: 'Capinha oficial Stranger Things com design exclusivo.',
+            price: 59.90,
+            category: 'stranger-things',
+            stock: 10
+        }
+    ];
+
+    const stmt = db.prepare(`
+        INSERT INTO products (name, description, price, category, image_url, stock, active)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    `);
+
+    sampleProducts.forEach((product) => {
+        stmt.run([
+            product.name,
+            product.description,
+            product.price,
+            product.category,
+            null,
+            product.stock,
+            1
+        ]);
+    });
+
+    stmt.finalize((err) => {
+        if (err) {
+            console.error('Erro ao criar produtos de exemplo:', err);
+        } else {
+            console.log('✅ Produtos de exemplo criados!');
+        }
+    });
+}
 
 // Criar tabelas
 function initializeDatabase() {
