@@ -182,9 +182,10 @@ app.get('/api/products', async (req, res) => {
         const count = parseInt(countResult.rows[0]?.count || 0);
         console.log(`📊 Total de produtos no banco: ${count}`);
         
-        // Se tiver menos de 50 produtos, limpar TUDO e importar produtos reais
+        // SEMPRE importar se tiver menos de 50 produtos
         // (50 é um número seguro - sabemos que temos 513 produtos da Netflix)
         if (count < 50) {
+            console.log(`🚀 Iniciando importação (count=${count} < 50)...`);
             console.log(`📊 Apenas ${count} produtos encontrados. Limpando e importando produtos reais...`);
             
             // Limpar TODOS os produtos (incluindo mocks)
@@ -303,6 +304,11 @@ app.get('/api/products', async (req, res) => {
                                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
                             `, [name, description, price, category, imageUrl, stock, 1, imagesJson, originalPrice, sku]);
                             imported++;
+                            
+                            // Log a cada 100 produtos
+                            if (imported % 100 === 0) {
+                                console.log(`📊 Progresso: ${imported}/${productsToImport.length} produtos importados...`);
+                            }
                         } catch (err) {
                             errors++;
                             if (errors <= 5) {
@@ -320,11 +326,13 @@ app.get('/api/products', async (req, res) => {
                     }
                 } catch (err) {
                     await client.query('ROLLBACK');
+                    console.error('❌ Erro na transação:', err.message);
                     throw err;
                 }
             } else {
-                console.error('❌ ERRO CRÍTICO: Nenhum produto real encontrado!');
-                return res.json([]);
+                console.error('❌ ERRO CRÍTICO: Nenhum produto real encontrado no array allProducts!');
+                console.log('📊 allProducts.length:', allProducts.length);
+                // NÃO retornar aqui - deixar continuar para buscar produtos existentes
             }
         } else {
             console.log(`✅ ${count} produtos já existem no banco. Pulando importação.`);
