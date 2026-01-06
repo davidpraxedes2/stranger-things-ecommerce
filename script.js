@@ -16,9 +16,12 @@ async function loadProductsFromAPI() {
     try {
         console.log('📤 Enviando requisição fetch...');
         
-        // Adicionar timeout de 10 segundos
+        // Adicionar timeout de 30 segundos (servidor pode estar inicializando banco)
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        const timeoutId = setTimeout(() => {
+            console.warn('⏱️ Timeout após 30 segundos - servidor pode estar inicializando');
+            controller.abort();
+        }, 30000);
         
         const response = await fetch(fullUrl, {
             method: 'GET',

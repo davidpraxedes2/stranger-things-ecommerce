@@ -11,6 +11,11 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'stranger-things-secret-key-change-in-production';
 
+// Log de inicialização
+console.log('🚀 Servidor iniciando...');
+console.log('📦 Ambiente:', process.env.NODE_ENV || 'development');
+console.log('🗄️  PostgreSQL:', process.env.POSTGRES_URL ? 'Sim' : 'Não (usando SQLite)');
+
 // Middleware
 app.use(cors({
     origin: '*',
