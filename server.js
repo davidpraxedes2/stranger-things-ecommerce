@@ -16,17 +16,11 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Servir arquivos estáticos da raiz (para index.html, styles.css, script.js, etc)
-app.use(express.static(__dirname, {
-    maxAge: '1d',
-    etag: false
-}));
-
 // Servir arquivos estáticos de public
-app.use('/public', express.static(path.join(__dirname, 'public'), {
-    maxAge: '1d',
-    etag: false
-}));
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Servir arquivos estáticos da raiz (para index.html, styles.css, script.js, etc)
+app.use(express.static(__dirname));
 
 // Rota para servir index.html da raiz
 app.get('/', (req, res) => {
