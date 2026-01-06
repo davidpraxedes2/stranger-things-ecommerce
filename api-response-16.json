@@ -1,0 +1,589 @@
+{
+  "url": "https://api.gocase.com.br/api/v2/shelf/7255?locale=pt-BR&currency=BRL&store=br&jd=42",
+  "status": 200,
+  "data": {
+    "label": "Stranger Things: Copo Térmico a partir de R$119,90!",
+    "type": "taxon",
+    "see_more": "https://www.gocase.com.br/copo-termico/?taxon=collections%2Fnetflix%2Fstranger-things&product_filter=copo-termico&page=1&sorting=favorites&new=1",
+    "products": [
+      {
+        "id": 79581,
+        "sku": "nfx-ctv-12",
+        "name": "Copo Térmico + Ebook -  Stranger Things - Pisca Pisca",
+        "seo_optimized_name": "Copo Térmico + Ebook -  Stranger Things - Pisca Pisca",
+        "slug": "copo-termico-ebook-stranger-things-pisca-pisca",
+        "price": "119.9",
+        "old_price": "169.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctv-12/360vibebranco-copovibe470ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-03-termicos/104140/360cervejabranco-copocerveja470/174827032679712501474493640570781.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-ctv-12",
+          "customizations": [
+            {
+              "id": 95867,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-03-termicos/104140/360cervejabranco-copocerveja470/1748270326797480809790629191224881.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-03-termicos/104140/360cervejabranco-copocerveja470/174827032679712501474493640570781.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-03-termicos/104140/360cervejabranco-copocerveja470/1748270326797480809790629191224881.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-03-termicos/104140/360cervejabranco-copocerveja470/174827032679712501474493640570781.png"
+              },
+              "engine_identifier": "nfx-st-03-termicos"
+            }
+          ],
+          "material": "360vibebranco-copovibe470ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "copoebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctv-12/360vibebranco-copovibe470ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-03-termicos/104140/360cervejabranco-copocerveja470/174827032679712501474493640570781.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360vibebranco-copovibe470ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/127836/original/temp_image20251103-8-l2xcb9.png",
+            "case_type_id": 1430,
+            "case_device_id": 5569,
+            "is_showcase_default": false,
+            "price": 119.9,
+            "old_price": 169.9
+          }
+        ],
+        "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/127836/original/temp_image20251103-8-l2xcb9.png",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 81864,
+        "promotion": [],
+        "badge": [],
+        "tag": [],
+        "customization_ids": [
+          95867
+        ]
+      },
+      {
+        "id": 80022,
+        "sku": "nfx-ctv-16",
+        "name": "Copo Térmico + Ebook - Stranger Things - Hellfire Club",
+        "seo_optimized_name": "Copo Térmico + Ebook - Stranger Things - Hellfire Club",
+        "slug": "copo-termico-ebook-stranger-things-hellfire-club",
+        "price": "119.9",
+        "old_price": "169.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctv-16/360vibebranco-copovibe470ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-43-termicos/104148/360cervejabranco-copocerveja470/17483406238302195021089897378335665.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-ctv-16",
+          "customizations": [
+            {
+              "id": 96347,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.280.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-43-termicos/104148/360cervejabranco-copocerveja470/17483406238306568003150093971464163.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-43-termicos/104148/360cervejabranco-copocerveja470/17483406238302195021089897378335665.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-43-termicos/104148/360cervejabranco-copocerveja470/17483406238306568003150093971464163.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-43-termicos/104148/360cervejabranco-copocerveja470/17483406238302195021089897378335665.png"
+              },
+              "engine_identifier": "nfx-st-43-termicos"
+            }
+          ],
+          "material": "360vibebranco-copovibe470ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "copoebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctv-16/360vibebranco-copovibe470ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-43-termicos/104148/360cervejabranco-copocerveja470/17483406238302195021089897378335665.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360vibebranco-copovibe470ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/125143/original/temp_image20250527-7-l32im8.png",
+            "case_type_id": 1430,
+            "case_device_id": 5569,
+            "is_showcase_default": false,
+            "price": 119.9,
+            "old_price": 169.9
+          },
+          {
+            "color": "000000",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctv-16/360vibepreto-copovibe470ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-43-termicos/104145/360cervejaazulmarinho-copocerveja470ebook/1748340624659372605852373500910124.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360vibepreto-copovibe470ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/125142/original/temp_image20250527-7-fifjur.png",
+            "case_type_id": 1431,
+            "case_device_id": 5568,
+            "is_showcase_default": false,
+            "price": 139.9,
+            "old_price": 189.9
+          }
+        ],
+        "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/125143/original/temp_image20250527-7-l32im8.png",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 82305,
+        "promotion": [],
+        "badge": [],
+        "tag": [],
+        "customization_ids": [
+          96347
+        ]
+      },
+      {
+        "id": 80018,
+        "sku": "nfx-ctv-13",
+        "name": "Copo Térmico + Ebook - Stranger Things - Logo",
+        "seo_optimized_name": "Copo Térmico + Ebook - Stranger Things - Logo",
+        "slug": "copo-termico-ebook-stranger-things-logo",
+        "price": "119.9",
+        "old_price": "169.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctv-13/360vibebranco-copovibe470ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-05-termicos/103910/360cervejabranco-copocerveja470/174768364239322070030021216682806662.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-ctv-13",
+          "customizations": [
+            {
+              "id": 96343,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-05-termicos/103910/360cervejabranco-copocerveja470/1747683642393556809998055365114312.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-05-termicos/103910/360cervejabranco-copocerveja470/174768364239322070030021216682806662.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-05-termicos/103910/360cervejabranco-copocerveja470/1747683642393556809998055365114312.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-05-termicos/103910/360cervejabranco-copocerveja470/174768364239322070030021216682806662.png"
+              },
+              "engine_identifier": "nfx-st-05-termicos"
+            }
+          ],
+          "material": "360vibebranco-copovibe470ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "copoebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctv-13/360vibebranco-copovibe470ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-05-termicos/103910/360cervejabranco-copocerveja470/174768364239322070030021216682806662.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360vibebranco-copovibe470ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/125130/original/temp_image20251101-7-1ke194k.png",
+            "case_type_id": 1430,
+            "case_device_id": 5569,
+            "is_showcase_default": false,
+            "price": 119.9,
+            "old_price": 169.9
+          },
+          {
+            "color": "000000",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctv-13/360vibepreto-copovibe470ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-05-termicos/103911/360cervejaazulmarinho-copocerveja470ebook/17476836427228723025766319776172697.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360vibepreto-copovibe470ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/125131/original/temp_image20251101-7-hvoz6m.png",
+            "case_type_id": 1431,
+            "case_device_id": 5568,
+            "is_showcase_default": false,
+            "price": 139.9,
+            "old_price": 189.9
+          }
+        ],
+        "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/125130/original/temp_image20251101-7-1ke194k.png",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 82301,
+        "promotion": [],
+        "badge": [],
+        "tag": [],
+        "customization_ids": [
+          96343
+        ]
+      },
+      {
+        "id": 79585,
+        "sku": "nfx-ctv-17",
+        "name": "Copo Térmico + Ebook -  Stranger Things - Stranger Squad",
+        "seo_optimized_name": "Copo Térmico + Ebook -  Stranger Things - Stranger Squad",
+        "slug": "copo-termico-ebook-stranger-things-stranger-squad",
+        "price": "139.9",
+        "old_price": "189.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctv-17/360vibepreto-copovibe470ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-46-termicos/104187/360cervejabranco-copocerveja470/1747850750447314506979317334167461.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-ctv-17",
+          "customizations": [
+            {
+              "id": 95871,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-46-termicos/104187/360cervejabranco-copocerveja470/1747850750447745807309682582406755.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-46-termicos/104187/360cervejabranco-copocerveja470/1747850750447314506979317334167461.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-46-termicos/104187/360cervejabranco-copocerveja470/1747850750447745807309682582406755.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-46-termicos/104187/360cervejabranco-copocerveja470/1747850750447314506979317334167461.png"
+              },
+              "engine_identifier": "nfx-st-46-termicos"
+            }
+          ],
+          "material": "360vibepreto-copovibe470ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "copoebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "000000",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctv-17/360vibepreto-copovibe470ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-46-termicos/104186/360cervejaazulmarinho-copocerveja470ebook/1747850748178132308202722400168417.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360vibepreto-copovibe470ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123387/original/temp_image20251101-7-1adlk8o.png",
+            "case_type_id": 1431,
+            "case_device_id": 5568,
+            "is_showcase_default": false,
+            "price": 139.9,
+            "old_price": 189.9
+          }
+        ],
+        "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123387/original/temp_image20251101-7-1adlk8o.png",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 81868,
+        "promotion": [],
+        "badge": [],
+        "tag": [],
+        "customization_ids": [
+          95871
+        ]
+      },
+      {
+        "id": 79583,
+        "sku": "nfx-ctv-14",
+        "name": "Copo Térmico + Ebook -  Stranger Things - Minimalist Icon",
+        "seo_optimized_name": "Copo Térmico + Ebook -  Stranger Things - Minimalist Icon",
+        "slug": "copo-termico-ebook-stranger-things-minimalist-icon",
+        "price": "119.9",
+        "old_price": "169.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctv-14/360vibebranco-copovibe470ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-37-termicos/104329/360cervejabranco-copocerveja470/17479140961469503741621913694565.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-ctv-14",
+          "customizations": [
+            {
+              "id": 95869,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-37-termicos/104329/360cervejabranco-copocerveja470/1747914096147336709029708143087212.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-37-termicos/104329/360cervejabranco-copocerveja470/17479140961469503741621913694565.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-37-termicos/104329/360cervejabranco-copocerveja470/1747914096147336709029708143087212.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-37-termicos/104329/360cervejabranco-copocerveja470/17479140961469503741621913694565.png"
+              },
+              "engine_identifier": "nfx-st-37-termicos"
+            }
+          ],
+          "material": "360vibebranco-copovibe470ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "copoebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctv-14/360vibebranco-copovibe470ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-37-termicos/104329/360cervejabranco-copocerveja470/17479140961469503741621913694565.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360vibebranco-copovibe470ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123382/original/temp_image20251103-7-vh27lj.png",
+            "case_type_id": 1430,
+            "case_device_id": 5569,
+            "is_showcase_default": false,
+            "price": 119.9,
+            "old_price": 169.9
+          },
+          {
+            "color": "000000",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctv-14/360vibepreto-copovibe470ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-37-termicos/104328/360cervejaazulmarinho-copocerveja470ebook/1747914096533976606033824793757977.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360vibepreto-copovibe470ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123381/original/temp_image20251103-7-1690omj.png",
+            "case_type_id": 1431,
+            "case_device_id": 5568,
+            "is_showcase_default": false,
+            "price": 139.9,
+            "old_price": 189.9
+          }
+        ],
+        "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123382/original/temp_image20251103-7-vh27lj.png",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 81866,
+        "promotion": [],
+        "badge": [],
+        "tag": [],
+        "customization_ids": [
+          95869
+        ]
+      },
+      {
+        "id": 80020,
+        "sku": "nfx-ctv-15",
+        "name": "Copo Térmico + Ebook - Stranger Things - Submundo",
+        "seo_optimized_name": "Copo Térmico + Ebook - Stranger Things - Submundo",
+        "slug": "copo-termico-ebook-stranger-things-submundo",
+        "price": "119.9",
+        "old_price": "169.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctv-15/360vibebranco-copovibe470ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-40-termicos/104995/360cervejabranco-copocerveja470/1748286516699263300670084846286314.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-ctv-15",
+          "customizations": [
+            {
+              "id": 96345,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-40-termicos/104995/360cervejabranco-copocerveja470/1748286516699700807538115722816363.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-40-termicos/104995/360cervejabranco-copocerveja470/1748286516699263300670084846286314.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-40-termicos/104995/360cervejabranco-copocerveja470/1748286516699700807538115722816363.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-40-termicos/104995/360cervejabranco-copocerveja470/1748286516699263300670084846286314.png"
+              },
+              "engine_identifier": "nfx-st-40-termicos"
+            }
+          ],
+          "material": "360vibebranco-copovibe470ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "copoebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctv-15/360vibebranco-copovibe470ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-40-termicos/104995/360cervejabranco-copocerveja470/1748286516699263300670084846286314.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360vibebranco-copovibe470ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/125137/original/temp_image20260101-7-43hvrg.png",
+            "case_type_id": 1430,
+            "case_device_id": 5569,
+            "is_showcase_default": false,
+            "price": 119.9,
+            "old_price": 169.9
+          },
+          {
+            "color": "000000",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctv-15/360vibepreto-copovibe470ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-40-termicos/104994/360cervejaazulmarinho-copocerveja470ebook/174828651788548608477284725763604.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360vibepreto-copovibe470ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/125135/original/temp_image20260101-7-6c98dz.png",
+            "case_type_id": 1431,
+            "case_device_id": 5568,
+            "is_showcase_default": false,
+            "price": 139.9,
+            "old_price": 189.9
+          },
+          {
+            "color": "2C5FB1",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctv-15/360vibeazulmarinho-copovibe470ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-40-termicos/104994/360cervejaazulmarinho-copocerveja470ebook/174828651788548608477284725763604.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360vibeazulmarinho-copovibe470ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/125136/original/temp_image20260101-7-oinhm7.png",
+            "case_type_id": 2940,
+            "case_device_id": 7631,
+            "is_showcase_default": false,
+            "price": 119.9,
+            "old_price": 169.9
+          },
+          {
+            "color": "015E00",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctv-15/360vibeverde-copovibe470ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-40-termicos/104994/360cervejaazulmarinho-copocerveja470ebook/174828651788548608477284725763604.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360vibeverde-copovibe470ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/181883/original/temp_image20260101-7-1cdp7o7.png",
+            "case_type_id": 4672,
+            "case_device_id": 9758,
+            "is_showcase_default": false,
+            "price": 169.9,
+            "old_price": 219.9
+          }
+        ],
+        "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/125137/original/temp_image20260101-7-43hvrg.png",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 82303,
+        "promotion": [],
+        "badge": [],
+        "tag": [],
+        "customization_ids": [
+          96345
+        ]
+      },
+      {
+        "id": 79587,
+        "sku": "nfx-ctv-18",
+        "name": "Copo Térmico + Ebook -  Stranger Things - Fire",
+        "seo_optimized_name": "Copo Térmico + Ebook -  Stranger Things - Fire",
+        "slug": "copo-termico-ebook-stranger-things-fire",
+        "price": "119.9",
+        "old_price": "169.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctv-18/360vibebranco-copovibe470ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-47-termicos/104324/360cervejabranco-copocerveja470/1747913442577076404771311522185212.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-ctv-18",
+          "customizations": [
+            {
+              "id": 95873,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-47-termicos/104324/360cervejabranco-copocerveja470/1747913442577399507825611734418857.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-47-termicos/104324/360cervejabranco-copocerveja470/1747913442577076404771311522185212.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-47-termicos/104324/360cervejabranco-copocerveja470/1747913442577399507825611734418857.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-47-termicos/104324/360cervejabranco-copocerveja470/1747913442577076404771311522185212.png"
+              },
+              "engine_identifier": "nfx-st-47-termicos"
+            }
+          ],
+          "material": "360vibebranco-copovibe470ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "copoebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctv-18/360vibebranco-copovibe470ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-47-termicos/104324/360cervejabranco-copocerveja470/1747913442577076404771311522185212.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360vibebranco-copovibe470ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123391/original/temp_image20251112-7-1p35h23.png",
+            "case_type_id": 1430,
+            "case_device_id": 5569,
+            "is_showcase_default": false,
+            "price": 119.9,
+            "old_price": 169.9
+          },
+          {
+            "color": "000000",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctv-18/360vibepreto-copovibe470ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-47-termicos/104323/360cervejaazulmarinho-copocerveja470ebook/17479134431348224013778703501412193.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360vibepreto-copovibe470ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123392/original/temp_image20251112-7-1l6w3lc.png",
+            "case_type_id": 1431,
+            "case_device_id": 5568,
+            "is_showcase_default": false,
+            "price": 139.9,
+            "old_price": 189.9
+          },
+          {
+            "color": "2C5FB1",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctv-18/360vibeazulmarinho-copovibe470ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-47-termicos/104323/360cervejaazulmarinho-copocerveja470ebook/17479134431348224013778703501412193.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360vibeazulmarinho-copovibe470ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123393/original/temp_image20251112-7-19pe1fl.png",
+            "case_type_id": 2940,
+            "case_device_id": 7631,
+            "is_showcase_default": false,
+            "price": 119.9,
+            "old_price": 169.9
+          },
+          {
+            "color": "015E00",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctv-18/360vibeverde-copovibe470ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-47-termicos/104323/360cervejaazulmarinho-copocerveja470ebook/17479134431348224013778703501412193.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360vibeverde-copovibe470ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/182698/original/temp_image20251112-7-hjx9ig.png",
+            "case_type_id": 4672,
+            "case_device_id": 9758,
+            "is_showcase_default": false,
+            "price": 169.9,
+            "old_price": 219.9
+          }
+        ],
+        "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123391/original/temp_image20251112-7-1p35h23.png",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 81870,
+        "promotion": [],
+        "badge": [],
+        "tag": [],
+        "customization_ids": [
+          95873
+        ]
+      }
+    ],
+    "case_device_id": null
+  },
+  "headers": {
+    "access-control-allow-credentials": "true",
+    "access-control-allow-methods": "GET, POST, PATCH, PUT, DELETE, OPTIONS",
+    "access-control-allow-origin": "https://www.gocase.com.br",
+    "access-control-expose-headers": "Cache-Control, Content-Language, Content-Length, Content-Type, Expires, Last-Modified, Pragma",
+    "access-control-max-age": "86400",
+    "age": "89",
+    "cache-control": "max-age=0, public, s-maxage=120, stale-while-revalidate=30, stale-if-error=30",
+    "cf-cache-status": "HIT",
+    "cf-ray": "9b96766a3865b871-GRU",
+    "content-encoding": "br",
+    "content-type": "application/json; charset=utf-8",
+    "date": "Mon, 05 Jan 2026 22:37:51 GMT",
+    "etag": "W/\"877c70430817e1d60cdd7011626a1d7b\"",
+    "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+    "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=AtrZbCd%2FokZpABEjrfPNbHZkEm4zKNQBPoe3PESyZ98cg1%2F%2F4FSk57NNfNYUbV%2BVcrqQ0VmpsNUvPmAQ0ULvLNAT0PEfVMWiq%2BFpP4McjzY%3D\"}]}",
+    "server": "cloudflare",
+    "strict-transport-security": "max-age=0; includeSubDomains",
+    "vary": "Origin, accept-encoding",
+    "x-content-type-options": "nosniff",
+    "x-envoy-upstream-service-time": "333",
+    "x-frame-options": "SAMEORIGIN",
+    "x-request-id": "90f10f77-a1fb-4baa-a256-192e86a0be8c",
+    "x-runtime": "0.319546",
+    "x-xss-protection": "1; mode=block"
+  }
+}

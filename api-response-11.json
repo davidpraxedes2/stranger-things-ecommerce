@@ -1,0 +1,1970 @@
+{
+  "url": "https://api.gocase.com.br/api/v2/shelf/7251?locale=pt-BR&currency=BRL&store=br&jd=42",
+  "status": 200,
+  "data": {
+    "label": "Garrafa Térmica Fresh + MIMO!",
+    "type": "taxon",
+    "see_more": "https://www.gocase.com.br/garrafas-termicas-ebook//?product_filter=garrafas-termicas-ebook&page=1&sorting=favorites&new=1&taxon=collections%2Fnetflix%2Fstranger-things",
+    "products": [
+      {
+        "id": 91140,
+        "sku": "nfx-gtf-32",
+        "name": "Garrafa Térmica Fresh + Ebook - Stranger Things - Itens",
+        "seo_optimized_name": "Garrafa Térmica Fresh + Ebook - Stranger Things - Itens",
+        "slug": "garrafa-termica-fresh-ebook-stranger-things-itens",
+        "price": "189.9",
+        "old_price": "269.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-32/360freshbrancav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-squawk-itens-termicos/125174/360freshamarelo-garrafafresh650/1760448427131098507872180970170773.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-gtf-32",
+          "customizations": [
+            {
+              "id": 108533,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/st5-squawk-itens-termicos/125174/360freshamarelo-garrafafresh650/1760448427131517202226719882913153.png",
+                "pt_br": "prisma-render/prod-v2/previews/st5-squawk-itens-termicos/125174/360freshamarelo-garrafafresh650/1760448427131098507872180970170773.png",
+                "en_dark": "prisma-render/prod-v2/previews/st5-squawk-itens-termicos/125174/360freshamarelo-garrafafresh650/1760448427131517202226719882913153.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/st5-squawk-itens-termicos/125174/360freshamarelo-garrafafresh650/1760448427131098507872180970170773.png"
+              },
+              "engine_identifier": "st5-squawk-itens-termicos"
+            }
+          ],
+          "material": "360freshbrancav3-garrafafresh650ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "garrafaebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-32/360freshbrancav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-squawk-itens-termicos/125174/360freshamarelo-garrafafresh650/1760448427131098507872180970170773.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshbrancav3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/174009/original/temp_image20251014-7-8tb7z3.png",
+            "case_type_id": 1534,
+            "case_device_id": 5702,
+            "is_showcase_default": false,
+            "price": 189.9,
+            "old_price": 269.9
+          },
+          {
+            "color": "000000",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-32/360freshpretav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-squawk-itens-termicos/125173/360freshacai-garrafafresh650/17604484265509453011409804132174095.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshpretav3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/174011/original/temp_image20251014-7-cw41ca.png",
+            "case_type_id": 1537,
+            "case_device_id": 5705,
+            "is_showcase_default": false,
+            "price": 189.9,
+            "old_price": 269.9
+          },
+          {
+            "color": "C5B4E3",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-32/360freshlilasv3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-squawk-itens-termicos/125174/360freshamarelo-garrafafresh650/1760448427131098507872180970170773.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshlilasv3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/174016/original/temp_image20251014-7-15fv8kh.png",
+            "case_type_id": 1540,
+            "case_device_id": 5708,
+            "is_showcase_default": false,
+            "price": 219.9,
+            "old_price": 299.9
+          },
+          {
+            "color": "F5CBC8",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-32/360freshrosav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-squawk-itens-termicos/125174/360freshamarelo-garrafafresh650/1760448427131098507872180970170773.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshrosav3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/174006/original/temp_image20251014-7-16t6pj2.png",
+            "case_type_id": 1535,
+            "case_device_id": 5703,
+            "is_showcase_default": false,
+            "price": 199.9,
+            "old_price": 279.9
+          },
+          {
+            "color": "D25B73",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-32/360freshmelanciav3-garrafafresh950ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-squawk-itens-termicos/125171/360freshazulmarinhonfc-garrafafresh950/176044842718252105638199511915389.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshmelanciav3-garrafafresh950ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/174029/original/temp_image20251014-7-2gn0lk.png",
+            "case_type_id": 1541,
+            "case_device_id": 5725,
+            "is_showcase_default": false,
+            "price": 209.9,
+            "old_price": 289.9
+          },
+          {
+            "color": "003A70",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-32/360freshazulmarinhov3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-squawk-itens-termicos/125173/360freshacai-garrafafresh650/17604484265509453011409804132174095.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshazulmarinhov3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/174007/original/temp_image20251014-8-1n1xe2q.png",
+            "case_type_id": 1539,
+            "case_device_id": 5704,
+            "is_showcase_default": false,
+            "price": 199.9,
+            "old_price": 279.9
+          },
+          {
+            "color": "BDE9C9",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-32/360freshturquesav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-squawk-itens-termicos/125174/360freshamarelo-garrafafresh650/1760448427131098507872180970170773.png&expires=yes",
+            "default": true,
+            "in_stock": false,
+            "material": "360freshturquesav3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/174010/original/temp_image20251014-8-ap05a8.png",
+            "case_type_id": 1536,
+            "case_device_id": 5706,
+            "is_showcase_default": false,
+            "price": 179.9,
+            "old_price": 259.9
+          },
+          {
+            "color": "94A9CB",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-32/360freshazulclarov3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-squawk-itens-termicos/125174/360freshamarelo-garrafafresh650/1760448427131098507872180970170773.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshazulclarov3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/174020/original/temp_image20251014-7-1clfgk4.png",
+            "case_type_id": 1538,
+            "case_device_id": 5707,
+            "is_showcase_default": false,
+            "price": 189.9,
+            "old_price": 269.9
+          },
+          {
+            "color": "89375E",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-32/360freshvinho-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-squawk-itens-termicos/125173/360freshacai-garrafafresh650/17604484265509453011409804132174095.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshvinho-garrafafresh650ebook",
+            "case_type_id": 3881,
+            "case_device_id": 9774,
+            "is_showcase_default": false,
+            "price": 209.9,
+            "old_price": 289.9
+          },
+          {
+            "color": "63403A",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-32/360freshmarrom-garrafafresh950ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-squawk-itens-termicos/125171/360freshazulmarinhonfc-garrafafresh950/176044842718252105638199511915389.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshmarrom-garrafafresh950ebook",
+            "case_type_id": 2214,
+            "case_device_id": 9768,
+            "is_showcase_default": false,
+            "price": 229.9,
+            "old_price": 309.9
+          }
+        ],
+        "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/174009/original/temp_image20251014-7-8tb7z3.png",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 93423,
+        "promotion": [],
+        "badge": {
+          "label": "GANHE UM MIMO",
+          "hex_color": "#de7993",
+          "image": null
+        },
+        "tag": [],
+        "customization_ids": [
+          108533
+        ]
+      },
+      {
+        "id": 94169,
+        "sku": "nfx-gtf-51",
+        "name": "Garrafa Térmica Fresh + Ebook - Stranger Things - Anatomia do Demogorgon",
+        "seo_optimized_name": "Garrafa Térmica Fresh + Ebook - Stranger Things - Anatomia do Demogorgon",
+        "slug": "garrafa-termica-fresh-ebook-stranger-things-anatomia-do-demogorgon",
+        "price": "189.9",
+        "old_price": "269.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-51/360freshbrancav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-anatomia-demogorgon-termicos/130034/360freshamarelo-garrafafresh650/1763551545639045503179785706444167.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-gtf-51",
+          "customizations": [
+            {
+              "id": 111661,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/st5-anatomia-demogorgon-termicos/130034/360freshamarelo-garrafafresh650/176355154563951041830872192001656.png",
+                "pt_br": "prisma-render/prod-v2/previews/st5-anatomia-demogorgon-termicos/130034/360freshamarelo-garrafafresh650/1763551545639045503179785706444167.png",
+                "en_dark": "prisma-render/prod-v2/previews/st5-anatomia-demogorgon-termicos/130034/360freshamarelo-garrafafresh650/176355154563951041830872192001656.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/st5-anatomia-demogorgon-termicos/130034/360freshamarelo-garrafafresh650/1763551545639045503179785706444167.png"
+              },
+              "engine_identifier": "st5-anatomia-demogorgon-termicos"
+            }
+          ],
+          "material": "360freshbrancav3-garrafafresh650ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "garrafaebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-51/360freshbrancav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-anatomia-demogorgon-termicos/130034/360freshamarelo-garrafafresh650/1763551545639045503179785706444167.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshbrancav3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/190629/original/temp_image20251119-7-3j52jv.png",
+            "case_type_id": 1534,
+            "case_device_id": 5702,
+            "is_showcase_default": false,
+            "price": 189.9,
+            "old_price": 269.9
+          },
+          {
+            "color": "000000",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-51/360freshpretav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-anatomia-demogorgon-termicos/130033/360freshacai-garrafafresh650/1763551757023182204288334616257371.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshpretav3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/190632/original/temp_image20251119-7-ryh7d0.png",
+            "case_type_id": 1537,
+            "case_device_id": 5705,
+            "is_showcase_default": false,
+            "price": 189.9,
+            "old_price": 269.9
+          },
+          {
+            "color": "003A70",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-51/360freshazulmarinhov3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-anatomia-demogorgon-termicos/130033/360freshacai-garrafafresh650/1763551757023182204288334616257371.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshazulmarinhov3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/190631/original/temp_image20251119-7-a7qze9.png",
+            "case_type_id": 1539,
+            "case_device_id": 5704,
+            "is_showcase_default": false,
+            "price": 199.9,
+            "old_price": 279.9
+          },
+          {
+            "color": "F1ECE1",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-51/360freshoffwhite-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-anatomia-demogorgon-termicos/130034/360freshamarelo-garrafafresh650/1763551545639045503179785706444167.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshoffwhite-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/190634/original/temp_image20251119-7-i9g6oi.png",
+            "case_type_id": 3555,
+            "case_device_id": 8385,
+            "is_showcase_default": false,
+            "price": 199.9,
+            "old_price": 279.9
+          }
+        ],
+        "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/190629/original/temp_image20251119-7-3j52jv.png",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 96452,
+        "promotion": [],
+        "badge": {
+          "label": "GANHE UM MIMO",
+          "hex_color": "#de7993",
+          "image": null
+        },
+        "tag": [],
+        "customization_ids": [
+          111661
+        ]
+      },
+      {
+        "id": 79548,
+        "sku": "nfx-gtf-13",
+        "name": "Garrafa Térmica Fresh + Ebook - Stranger Things - Devil",
+        "seo_optimized_name": "Garrafa Térmica Fresh + Ebook - Stranger Things - Devil",
+        "slug": "garrafa-termica-fresh-ebook-stranger-things-devil",
+        "price": "189.9",
+        "old_price": "269.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-13/360freshbrancav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-14-termicos/104516/360freshamarelo-garrafafresh650/1747931622696473105285287046669473.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-gtf-13",
+          "customizations": [
+            {
+              "id": 95834,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-14-termicos/104516/360freshamarelo-garrafafresh650/17479316226968782023535782503184666.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-14-termicos/104516/360freshamarelo-garrafafresh650/1747931622696473105285287046669473.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-14-termicos/104516/360freshamarelo-garrafafresh650/17479316226968782023535782503184666.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-14-termicos/104516/360freshamarelo-garrafafresh650/1747931622696473105285287046669473.png"
+              },
+              "engine_identifier": "nfx-st-14-termicos"
+            }
+          ],
+          "material": "360freshbrancav3-garrafafresh650ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "garrafaebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-13/360freshbrancav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-14-termicos/104516/360freshamarelo-garrafafresh650/1747931622696473105285287046669473.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshbrancav3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/122803/original/temp_image20251102-7-1hkh1z.png",
+            "case_type_id": 1534,
+            "case_device_id": 5702,
+            "is_showcase_default": false,
+            "price": 189.9,
+            "old_price": 269.9
+          },
+          {
+            "color": "F1ECE1",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-13/360freshoffwhite-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-14-termicos/104516/360freshamarelo-garrafafresh650/1747931622696473105285287046669473.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshoffwhite-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/122805/original/temp_image20251102-7-yyi6jt.png",
+            "case_type_id": 3555,
+            "case_device_id": 8385,
+            "is_showcase_default": false,
+            "price": 199.9,
+            "old_price": 279.9
+          }
+        ],
+        "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/122803/original/temp_image20251102-7-1hkh1z.png",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 81831,
+        "promotion": [],
+        "badge": {
+          "label": "GANHE UM MIMO",
+          "hex_color": "#de7993",
+          "image": null
+        },
+        "tag": [],
+        "customization_ids": [
+          95834
+        ]
+      },
+      {
+        "id": 79566,
+        "sku": "nfx-gtf-22",
+        "name": "Garrafa Térmica Fresh + Ebook - Stranger Things - Inverso",
+        "seo_optimized_name": "Garrafa Térmica Fresh + Ebook - Stranger Things - Inverso",
+        "slug": "garrafa-termica-fresh-ebook-stranger-things-inverso",
+        "price": "189.9",
+        "old_price": "269.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-22/360freshbrancav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-41-termicos/104003/360freshazulmarinhonfc-garrafafresh950/17483470628288002022166896964384109.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-gtf-22",
+          "customizations": [
+            {
+              "id": 95852,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-41-termicos/104003/360freshazulmarinhonfc-garrafafresh950/1748347062829193407199573723255706.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-41-termicos/104003/360freshazulmarinhonfc-garrafafresh950/17483470628288002022166896964384109.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-41-termicos/104003/360freshazulmarinhonfc-garrafafresh950/1748347062829193407199573723255706.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-41-termicos/104003/360freshazulmarinhonfc-garrafafresh950/17483470628288002022166896964384109.png"
+              },
+              "engine_identifier": "nfx-st-41-termicos"
+            }
+          ],
+          "material": "360freshbrancav3-garrafafresh650ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "garrafaebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-22/360freshbrancav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-41-termicos/105145/360freshamarelo-garrafafresh650/174973072573894409485830096924284.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshbrancav3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/130629/original/temp_image20260101-7-7uwonv.png",
+            "case_type_id": 1534,
+            "case_device_id": 5702,
+            "is_showcase_default": false,
+            "price": 189.9,
+            "old_price": 269.9
+          },
+          {
+            "color": "F1ECE1",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-22/360freshoffwhite-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-41-termicos/105145/360freshamarelo-garrafafresh650/174973072573894409485830096924284.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshoffwhite-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/130630/original/temp_image20260101-7-eb3moo.png",
+            "case_type_id": 3555,
+            "case_device_id": 8385,
+            "is_showcase_default": false,
+            "price": 199.9,
+            "old_price": 279.9
+          }
+        ],
+        "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/130629/original/temp_image20260101-7-7uwonv.png",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 81849,
+        "promotion": [],
+        "badge": {
+          "label": "GANHE UM MIMO",
+          "hex_color": "#de7993",
+          "image": null
+        },
+        "tag": [],
+        "customization_ids": [
+          95852
+        ]
+      },
+      {
+        "id": 91609,
+        "sku": "nfx-gtf-45",
+        "name": "Garrafa Térmica Fresh + Ebook - Stranger Things - Experiment Lab",
+        "seo_optimized_name": "Garrafa Térmica Fresh + Ebook - Stranger Things - Experiment Lab",
+        "slug": "garrafa-termica-fresh-ebook-stranger-things-experiment-lab",
+        "price": "189.9",
+        "old_price": "269.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-45/360freshbrancav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-experiment-lab-termicos/125611/360freshamarelo-garrafafresh650/176053392974813708149586064490272.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-gtf-45",
+          "customizations": [
+            {
+              "id": 109041,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/st5-experiment-lab-termicos/125611/360freshamarelo-garrafafresh650/17605339297485416010403854383503963.png",
+                "pt_br": "prisma-render/prod-v2/previews/st5-experiment-lab-termicos/125611/360freshamarelo-garrafafresh650/176053392974813708149586064490272.png",
+                "en_dark": "prisma-render/prod-v2/previews/st5-experiment-lab-termicos/125611/360freshamarelo-garrafafresh650/17605339297485416010403854383503963.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/st5-experiment-lab-termicos/125611/360freshamarelo-garrafafresh650/176053392974813708149586064490272.png"
+              },
+              "engine_identifier": "st5-experiment-lab-termicos"
+            }
+          ],
+          "material": "360freshbrancav3-garrafafresh650ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "garrafaebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-45/360freshbrancav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-experiment-lab-termicos/125611/360freshamarelo-garrafafresh650/176053392974813708149586064490272.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshbrancav3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/178521/original/temp_image20251017-8-4taewu.png",
+            "case_type_id": 1534,
+            "case_device_id": 5702,
+            "is_showcase_default": false,
+            "price": 189.9,
+            "old_price": 269.9
+          },
+          {
+            "color": "C5B4E3",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-45/360freshlilasv3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-experiment-lab-termicos/125611/360freshamarelo-garrafafresh650/176053392974813708149586064490272.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshlilasv3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/178519/original/temp_image20251017-7-1ut4dir.png",
+            "case_type_id": 1540,
+            "case_device_id": 5708,
+            "is_showcase_default": false,
+            "price": 219.9,
+            "old_price": 299.9
+          },
+          {
+            "color": "F5CBC8",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-45/360freshrosav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-experiment-lab-termicos/125611/360freshamarelo-garrafafresh650/176053392974813708149586064490272.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshrosav3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/178515/original/temp_image20251017-7-oi830r.png",
+            "case_type_id": 1535,
+            "case_device_id": 5703,
+            "is_showcase_default": false,
+            "price": 199.9,
+            "old_price": 279.9
+          },
+          {
+            "color": "D25B73",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-45/360freshmelanciav3-garrafafresh950ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-experiment-lab-termicos/125599/360freshoffwhite-garrafafresh950ebook/1760533733112023409254192652002889.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshmelanciav3-garrafafresh950ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/178529/original/temp_image20251017-7-1qljnoy.png",
+            "case_type_id": 1541,
+            "case_device_id": 5725,
+            "is_showcase_default": false,
+            "price": 209.9,
+            "old_price": 289.9
+          },
+          {
+            "color": "BDE9C9",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-45/360freshturquesav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-experiment-lab-termicos/125611/360freshamarelo-garrafafresh650/176053392974813708149586064490272.png&expires=yes",
+            "default": true,
+            "in_stock": false,
+            "material": "360freshturquesav3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/178514/original/temp_image20251017-7-szsn55.png",
+            "case_type_id": 1536,
+            "case_device_id": 5706,
+            "is_showcase_default": false,
+            "price": 179.9,
+            "old_price": 259.9
+          },
+          {
+            "color": "F1ECE1",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-45/360freshoffwhite-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-experiment-lab-termicos/125611/360freshamarelo-garrafafresh650/176053392974813708149586064490272.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshoffwhite-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/178517/original/temp_image20251017-7-190joq6.png",
+            "case_type_id": 3555,
+            "case_device_id": 8385,
+            "is_showcase_default": false,
+            "price": 199.9,
+            "old_price": 279.9
+          },
+          {
+            "color": "94A9CB",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-45/360freshazulclarov3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-experiment-lab-termicos/125611/360freshamarelo-garrafafresh650/176053392974813708149586064490272.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshazulclarov3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/178518/original/temp_image20251017-7-2u8cdx.png",
+            "case_type_id": 1538,
+            "case_device_id": 5707,
+            "is_showcase_default": false,
+            "price": 189.9,
+            "old_price": 269.9
+          },
+          {
+            "color": "FF974D",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-45/360freshlaranja-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-experiment-lab-termicos/125611/360freshamarelo-garrafafresh650/176053392974813708149586064490272.png&expires=yes",
+            "default": true,
+            "in_stock": false,
+            "material": "360freshlaranja-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/178520/original/temp_image20251017-7-u6rz4a.png",
+            "case_type_id": 2181,
+            "case_device_id": 7136,
+            "is_showcase_default": false,
+            "price": 179.9,
+            "old_price": 259.9
+          },
+          {
+            "color": "C0FE4D",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-45/360freshlemon-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-experiment-lab-termicos/125611/360freshamarelo-garrafafresh650/176053392974813708149586064490272.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshlemon-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/178516/original/temp_image20251017-7-yg2ccz.png",
+            "case_type_id": 2215,
+            "case_device_id": 7138,
+            "is_showcase_default": false,
+            "price": 199.9,
+            "old_price": 279.9
+          }
+        ],
+        "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/178521/original/temp_image20251017-8-4taewu.png",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 93892,
+        "promotion": [],
+        "badge": {
+          "label": "GANHE UM MIMO",
+          "hex_color": "#de7993",
+          "image": null
+        },
+        "tag": [],
+        "customization_ids": [
+          109041
+        ]
+      },
+      {
+        "id": 91613,
+        "sku": "nfx-gtf-47",
+        "name": "Garrafa Térmica Fresh + Ebook - Stranger Things - The Upside Down Pixel Art",
+        "seo_optimized_name": "Garrafa Térmica Fresh + Ebook - Stranger Things - The Upside Down Pixel Art",
+        "slug": "garrafa-termica-fresh-ebook-stranger-things-the-upside-down-pixel-art",
+        "price": "189.9",
+        "old_price": "269.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-47/360freshbrancav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-the-upside-down-pixel-art-termicos/125793/360freshamarelo-garrafafresh650/17605543285101755009272644614115721.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-gtf-47",
+          "customizations": [
+            {
+              "id": 109045,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/st5-the-upside-down-pixel-art-termicos/125793/360freshamarelo-garrafafresh650/1760554328510574304325898163256029.png",
+                "pt_br": "prisma-render/prod-v2/previews/st5-the-upside-down-pixel-art-termicos/125793/360freshamarelo-garrafafresh650/17605543285101755009272644614115721.png",
+                "en_dark": "prisma-render/prod-v2/previews/st5-the-upside-down-pixel-art-termicos/125793/360freshamarelo-garrafafresh650/1760554328510574304325898163256029.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/st5-the-upside-down-pixel-art-termicos/125793/360freshamarelo-garrafafresh650/17605543285101755009272644614115721.png"
+              },
+              "engine_identifier": "st5-the-upside-down-pixel-art-termicos"
+            }
+          ],
+          "material": "360freshbrancav3-garrafafresh650ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "garrafaebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-47/360freshbrancav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-the-upside-down-pixel-art-termicos/125793/360freshamarelo-garrafafresh650/17605543285101755009272644614115721.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshbrancav3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/178599/original/temp_image20251229-7-6wbsma.png",
+            "case_type_id": 1534,
+            "case_device_id": 5702,
+            "is_showcase_default": false,
+            "price": 189.9,
+            "old_price": 269.9
+          },
+          {
+            "color": "000000",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-47/360freshpretav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-the-upside-down-pixel-art-termicos/125794/360freshacai-garrafafresh650/176055443531166960891624622963573.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshpretav3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/178606/original/temp_image20251229-7-44l7ea.png",
+            "case_type_id": 1537,
+            "case_device_id": 5705,
+            "is_showcase_default": true,
+            "price": 189.9,
+            "old_price": 269.9
+          },
+          {
+            "color": "C5B4E3",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-47/360freshlilasv3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-the-upside-down-pixel-art-termicos/125793/360freshamarelo-garrafafresh650/17605543285101755009272644614115721.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshlilasv3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/178610/original/temp_image20251229-7-1pzga9p.png",
+            "case_type_id": 1540,
+            "case_device_id": 5708,
+            "is_showcase_default": false,
+            "price": 219.9,
+            "old_price": 299.9
+          },
+          {
+            "color": "F5CBC8",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-47/360freshrosav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-the-upside-down-pixel-art-termicos/125793/360freshamarelo-garrafafresh650/17605543285101755009272644614115721.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshrosav3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/178603/original/temp_image20251229-7-nra94o.png",
+            "case_type_id": 1535,
+            "case_device_id": 5703,
+            "is_showcase_default": false,
+            "price": 199.9,
+            "old_price": 279.9
+          },
+          {
+            "color": "D25B73",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-47/360freshmelanciav3-garrafafresh950ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-the-upside-down-pixel-art-termicos/125800/360freshazulmarinhonfc-garrafafresh950/1760555151367185805556639196120539.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshmelanciav3-garrafafresh950ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/178620/original/temp_image20251229-7-5vxfvc.png",
+            "case_type_id": 1541,
+            "case_device_id": 5725,
+            "is_showcase_default": false,
+            "price": 209.9,
+            "old_price": 289.9
+          },
+          {
+            "color": "003A70",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-47/360freshazulmarinhov3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-the-upside-down-pixel-art-termicos/125794/360freshacai-garrafafresh650/176055443531166960891624622963573.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshazulmarinhov3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/178602/original/temp_image20251229-7-1x8bdop.png",
+            "case_type_id": 1539,
+            "case_device_id": 5704,
+            "is_showcase_default": false,
+            "price": 199.9,
+            "old_price": 279.9
+          },
+          {
+            "color": "BDE9C9",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-47/360freshturquesav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-the-upside-down-pixel-art-termicos/125793/360freshamarelo-garrafafresh650/17605543285101755009272644614115721.png&expires=yes",
+            "default": true,
+            "in_stock": false,
+            "material": "360freshturquesav3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/178600/original/temp_image20251229-7-1il11q9.png",
+            "case_type_id": 1536,
+            "case_device_id": 5706,
+            "is_showcase_default": false,
+            "price": 179.9,
+            "old_price": 259.9
+          },
+          {
+            "color": "94A9CB",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-47/360freshazulclarov3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-the-upside-down-pixel-art-termicos/125793/360freshamarelo-garrafafresh650/17605543285101755009272644614115721.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshazulclarov3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/178612/original/temp_image20251229-7-1eqlqbh.png",
+            "case_type_id": 1538,
+            "case_device_id": 5707,
+            "is_showcase_default": false,
+            "price": 189.9,
+            "old_price": 269.9
+          },
+          {
+            "color": "89375E",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-47/360freshvinho-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-the-upside-down-pixel-art-termicos/125794/360freshacai-garrafafresh650/176055443531166960891624622963573.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshvinho-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/199189/original/temp_image20251229-7-nr75nd.png",
+            "case_type_id": 3881,
+            "case_device_id": 9774,
+            "is_showcase_default": false,
+            "price": 209.9,
+            "old_price": 289.9
+          },
+          {
+            "color": "63403A",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-47/360freshmarrom-garrafafresh950ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-the-upside-down-pixel-art-termicos/125800/360freshazulmarinhonfc-garrafafresh950/1760555151367185805556639196120539.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshmarrom-garrafafresh950ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/199191/original/temp_image20251229-7-1ocllpj.png",
+            "case_type_id": 2214,
+            "case_device_id": 9768,
+            "is_showcase_default": false,
+            "price": 229.9,
+            "old_price": 309.9
+          }
+        ],
+        "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/178599/original/temp_image20251229-7-6wbsma.png",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 93896,
+        "promotion": [],
+        "badge": {
+          "label": "GANHE UM MIMO",
+          "hex_color": "#de7993",
+          "image": null
+        },
+        "tag": [],
+        "customization_ids": [
+          109045
+        ]
+      },
+      {
+        "id": 79550,
+        "sku": "nfx-gtf-14",
+        "name": "Garrafa Térmica Fresh + Ebook - Stranger Things - Pisca Pisca",
+        "seo_optimized_name": "Garrafa Térmica Fresh + Ebook - Stranger Things - Pisca Pisca",
+        "slug": "garrafa-termica-fresh-ebook-stranger-things-pisca-pisca",
+        "price": "189.9",
+        "old_price": "269.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-14/360freshbrancav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-03-termicos/103966/360freshareia-garrafafresh950/1748270085959573509718907962939616.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-gtf-14",
+          "customizations": [
+            {
+              "id": 95836,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-03-termicos/103966/360freshareia-garrafafresh950/1748270085960661208691184641676905.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-03-termicos/103966/360freshareia-garrafafresh950/1748270085959573509718907962939616.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-03-termicos/103966/360freshareia-garrafafresh950/1748270085960661208691184641676905.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-03-termicos/103966/360freshareia-garrafafresh950/1748270085959573509718907962939616.png"
+              },
+              "engine_identifier": "nfx-st-03-termicos"
+            }
+          ],
+          "material": "360freshbrancav3-garrafafresh650ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "garrafaebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-14/360freshbrancav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-03-termicos/103970/360freshamarelo-garrafafresh650/1748270049861318601486885276927319.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshbrancav3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/122810/original/temp_image20251101-7-1blw1dp.png",
+            "case_type_id": 1534,
+            "case_device_id": 5702,
+            "is_showcase_default": false,
+            "price": 189.9,
+            "old_price": 269.9
+          },
+          {
+            "color": "C5B4E3",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-14/360freshlilasv3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-03-termicos/103970/360freshamarelo-garrafafresh650/1748270049861318601486885276927319.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshlilasv3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/122817/original/temp_image20251101-7-35jbe4.png",
+            "case_type_id": 1540,
+            "case_device_id": 5708,
+            "is_showcase_default": false,
+            "price": 219.9,
+            "old_price": 299.9
+          },
+          {
+            "color": "F5CBC8",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-14/360freshrosav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-03-termicos/103970/360freshamarelo-garrafafresh650/1748270049861318601486885276927319.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshrosav3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/122813/original/temp_image20251101-7-anq45v.png",
+            "case_type_id": 1535,
+            "case_device_id": 5703,
+            "is_showcase_default": false,
+            "price": 199.9,
+            "old_price": 279.9
+          },
+          {
+            "color": "D25B73",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-14/360freshmelanciav3-garrafafresh950ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-03-termicos/103964/360lifeoffwhite-copolife1180/1748270018233612805055684557130868.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshmelanciav3-garrafafresh950ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/122823/original/temp_image20251101-7-1y4wdou.png",
+            "case_type_id": 1541,
+            "case_device_id": 5725,
+            "is_showcase_default": false,
+            "price": 209.9,
+            "old_price": 289.9
+          },
+          {
+            "color": "BDE9C9",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-14/360freshturquesav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-03-termicos/103970/360freshamarelo-garrafafresh650/1748270049861318601486885276927319.png&expires=yes",
+            "default": true,
+            "in_stock": false,
+            "material": "360freshturquesav3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/122812/original/temp_image20251101-7-ehnt1w.png",
+            "case_type_id": 1536,
+            "case_device_id": 5706,
+            "is_showcase_default": false,
+            "price": 179.9,
+            "old_price": 259.9
+          },
+          {
+            "color": "F1ECE1",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-14/360freshoffwhite-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-03-termicos/103970/360freshamarelo-garrafafresh650/1748270049861318601486885276927319.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshoffwhite-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/122815/original/temp_image20251101-7-bk1ix3.png",
+            "case_type_id": 3555,
+            "case_device_id": 8385,
+            "is_showcase_default": false,
+            "price": 199.9,
+            "old_price": 279.9
+          },
+          {
+            "color": "94A9CB",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-14/360freshazulclarov3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-03-termicos/103970/360freshamarelo-garrafafresh650/1748270049861318601486885276927319.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshazulclarov3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/122820/original/temp_image20251101-7-tb76x5.png",
+            "case_type_id": 1538,
+            "case_device_id": 5707,
+            "is_showcase_default": false,
+            "price": 189.9,
+            "old_price": 269.9
+          },
+          {
+            "color": "FF974D",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-14/360freshlaranja-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-03-termicos/103970/360freshamarelo-garrafafresh650/1748270049861318601486885276927319.png&expires=yes",
+            "default": true,
+            "in_stock": false,
+            "material": "360freshlaranja-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/122816/original/temp_image20251101-8-tobez7.png",
+            "case_type_id": 2181,
+            "case_device_id": 7136,
+            "is_showcase_default": false,
+            "price": 179.9,
+            "old_price": 259.9
+          },
+          {
+            "color": "C0FE4D",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-14/360freshlemon-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-03-termicos/103970/360freshamarelo-garrafafresh650/1748270049861318601486885276927319.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshlemon-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/122814/original/temp_image20251101-7-1miphx9.png",
+            "case_type_id": 2215,
+            "case_device_id": 7138,
+            "is_showcase_default": false,
+            "price": 199.9,
+            "old_price": 279.9
+          }
+        ],
+        "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/122810/original/temp_image20251101-7-1blw1dp.png",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 81833,
+        "promotion": [],
+        "badge": {
+          "label": "GANHE UM MIMO",
+          "hex_color": "#de7993",
+          "image": null
+        },
+        "tag": [],
+        "customization_ids": [
+          95836
+        ]
+      },
+      {
+        "id": 79560,
+        "sku": "nfx-gtf-19",
+        "name": "Garrafa Térmica Fresh + Ebook - Stranger Things - Logo Stickers",
+        "seo_optimized_name": "Garrafa Térmica Fresh + Ebook - Stranger Things - Logo Stickers",
+        "slug": "garrafa-termica-fresh-ebook-stranger-things-logo-stickers",
+        "price": "189.9",
+        "old_price": "269.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-19/360freshbrancav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-38-termicos/104391/360freshamarelo-garrafafresh650/1748280982066217408186208065161069.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-gtf-19",
+          "customizations": [
+            {
+              "id": 95846,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-38-termicos/104391/360freshamarelo-garrafafresh650/1748280982066582707478948958538308.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-38-termicos/104391/360freshamarelo-garrafafresh650/1748280982066217408186208065161069.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-38-termicos/104391/360freshamarelo-garrafafresh650/1748280982066582707478948958538308.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-38-termicos/104391/360freshamarelo-garrafafresh650/1748280982066217408186208065161069.png"
+              },
+              "engine_identifier": "nfx-st-38-termicos"
+            }
+          ],
+          "material": "360freshbrancav3-garrafafresh650ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "garrafaebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-19/360freshbrancav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-38-termicos/104391/360freshamarelo-garrafafresh650/1748280982066217408186208065161069.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshbrancav3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/122918/original/temp_image20251101-7-tgydwj.png",
+            "case_type_id": 1534,
+            "case_device_id": 5702,
+            "is_showcase_default": false,
+            "price": 189.9,
+            "old_price": 269.9
+          },
+          {
+            "color": "C5B4E3",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-19/360freshlilasv3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-38-termicos/104391/360freshamarelo-garrafafresh650/1748280982066217408186208065161069.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshlilasv3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/122920/original/temp_image20251101-7-156al5h.png",
+            "case_type_id": 1540,
+            "case_device_id": 5708,
+            "is_showcase_default": false,
+            "price": 219.9,
+            "old_price": 299.9
+          },
+          {
+            "color": "F5CBC8",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-19/360freshrosav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-38-termicos/104391/360freshamarelo-garrafafresh650/1748280982066217408186208065161069.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshrosav3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/122924/original/temp_image20251101-7-2esydo.png",
+            "case_type_id": 1535,
+            "case_device_id": 5703,
+            "is_showcase_default": false,
+            "price": 199.9,
+            "old_price": 279.9
+          },
+          {
+            "color": "D25B73",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-19/360freshmelanciav3-garrafafresh950ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-38-termicos/104383/360freshazulmarinhonfc-garrafafresh950/1748280991401392506583323341568953.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshmelanciav3-garrafafresh950ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/122932/original/temp_image20251101-7-1sg6ms9.png",
+            "case_type_id": 1541,
+            "case_device_id": 5725,
+            "is_showcase_default": false,
+            "price": 209.9,
+            "old_price": 289.9
+          },
+          {
+            "color": "BDE9C9",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-19/360freshturquesav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-38-termicos/104391/360freshamarelo-garrafafresh650/1748280982066217408186208065161069.png&expires=yes",
+            "default": true,
+            "in_stock": false,
+            "material": "360freshturquesav3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/122926/original/temp_image20251101-7-175tjkx.png",
+            "case_type_id": 1536,
+            "case_device_id": 5706,
+            "is_showcase_default": false,
+            "price": 179.9,
+            "old_price": 259.9
+          },
+          {
+            "color": "F1ECE1",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-19/360freshoffwhite-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-38-termicos/104391/360freshamarelo-garrafafresh650/1748280982066217408186208065161069.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshoffwhite-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/122915/original/temp_image20251101-7-3o4ner.png",
+            "case_type_id": 3555,
+            "case_device_id": 8385,
+            "is_showcase_default": false,
+            "price": 199.9,
+            "old_price": 279.9
+          },
+          {
+            "color": "94A9CB",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-19/360freshazulclarov3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-38-termicos/104391/360freshamarelo-garrafafresh650/1748280982066217408186208065161069.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshazulclarov3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/122925/original/temp_image20251101-7-u9vsln.png",
+            "case_type_id": 1538,
+            "case_device_id": 5707,
+            "is_showcase_default": false,
+            "price": 189.9,
+            "old_price": 269.9
+          },
+          {
+            "color": "FF974D",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-19/360freshlaranja-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-38-termicos/104391/360freshamarelo-garrafafresh650/1748280982066217408186208065161069.png&expires=yes",
+            "default": true,
+            "in_stock": false,
+            "material": "360freshlaranja-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/122921/original/temp_image20251101-7-1mnnkd1.png",
+            "case_type_id": 2181,
+            "case_device_id": 7136,
+            "is_showcase_default": false,
+            "price": 179.9,
+            "old_price": 259.9
+          },
+          {
+            "color": "C0FE4D",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-19/360freshlemon-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-38-termicos/104391/360freshamarelo-garrafafresh650/1748280982066217408186208065161069.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshlemon-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/122917/original/temp_image20251101-7-qx2w9z.png",
+            "case_type_id": 2215,
+            "case_device_id": 7138,
+            "is_showcase_default": false,
+            "price": 199.9,
+            "old_price": 279.9
+          },
+          {
+            "color": "FF74CD",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-19/360freshpink-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-38-termicos/104392/360freshazulmarinhonfc-garrafafresh650/17482809855796363051119220513126.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshpink-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/122916/original/temp_image20251101-7-g7pwqx.png",
+            "case_type_id": 3554,
+            "case_device_id": 8380,
+            "is_showcase_default": false,
+            "price": 199.9,
+            "old_price": 279.9
+          },
+          {
+            "color": "E63333",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-19/360freshvermelho-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-38-termicos/104392/360freshazulmarinhonfc-garrafafresh650/17482809855796363051119220513126.png&expires=yes",
+            "default": true,
+            "in_stock": false,
+            "material": "360freshvermelho-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/122922/original/temp_image20251101-7-nq691h.png",
+            "case_type_id": 2184,
+            "case_device_id": 7133,
+            "is_showcase_default": false,
+            "price": 179.9,
+            "old_price": 259.9
+          }
+        ],
+        "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/122918/original/temp_image20251101-7-tgydwj.png",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 81843,
+        "promotion": [],
+        "badge": {
+          "label": "GANHE UM MIMO",
+          "hex_color": "#de7993",
+          "image": null
+        },
+        "tag": [],
+        "customization_ids": [
+          95846
+        ]
+      },
+      {
+        "id": 79554,
+        "sku": "nfx-gtf-16",
+        "name": "Garrafa Térmica Fresh + Ebook - Stranger Things - Hellfire Club Pattern",
+        "seo_optimized_name": "Garrafa Térmica Fresh + Ebook - Stranger Things - Hellfire Club Pattern",
+        "slug": "garrafa-termica-fresh-ebook-stranger-things-hellfire-club-pattern",
+        "price": "189.9",
+        "old_price": "269.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-16/360freshbrancav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-36-termicos/103978/360freshamarelo-garrafafresh650/174783045194993190007308594524495948.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-gtf-16",
+          "customizations": [
+            {
+              "id": 95840,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-36-termicos/103978/360freshamarelo-garrafafresh650/1747830451950319508445518163769579.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-36-termicos/103978/360freshamarelo-garrafafresh650/174783045194993190007308594524495948.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-36-termicos/103978/360freshamarelo-garrafafresh650/1747830451950319508445518163769579.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-36-termicos/103978/360freshamarelo-garrafafresh650/174783045194993190007308594524495948.png"
+              },
+              "engine_identifier": "nfx-st-36-termicos"
+            }
+          ],
+          "material": "360freshbrancav3-garrafafresh650ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "garrafaebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-16/360freshbrancav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-36-termicos/103978/360freshamarelo-garrafafresh650/174783045194993190007308594524495948.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshbrancav3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/122858/original/temp_image20251102-7-ldwr0p.png",
+            "case_type_id": 1534,
+            "case_device_id": 5702,
+            "is_showcase_default": false,
+            "price": 189.9,
+            "old_price": 269.9
+          },
+          {
+            "color": "C5B4E3",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-16/360freshlilasv3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-36-termicos/103978/360freshamarelo-garrafafresh650/174783045194993190007308594524495948.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshlilasv3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/122867/original/temp_image20251102-7-1dz03cd.png",
+            "case_type_id": 1540,
+            "case_device_id": 5708,
+            "is_showcase_default": false,
+            "price": 219.9,
+            "old_price": 299.9
+          },
+          {
+            "color": "F5CBC8",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-16/360freshrosav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-36-termicos/103978/360freshamarelo-garrafafresh650/174783045194993190007308594524495948.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshrosav3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/122860/original/temp_image20251102-7-msje3i.png",
+            "case_type_id": 1535,
+            "case_device_id": 5703,
+            "is_showcase_default": false,
+            "price": 199.9,
+            "old_price": 279.9
+          },
+          {
+            "color": "D25B73",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-16/360freshmelanciav3-garrafafresh950ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-36-termicos/103975/360freshbrancav3-garrafafresh950ebook/17478304513903413015733262054380837.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshmelanciav3-garrafafresh950ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/122870/original/temp_image20251102-7-dipfsf.png",
+            "case_type_id": 1541,
+            "case_device_id": 5725,
+            "is_showcase_default": false,
+            "price": 209.9,
+            "old_price": 289.9
+          },
+          {
+            "color": "BDE9C9",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-16/360freshturquesav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-36-termicos/103978/360freshamarelo-garrafafresh650/174783045194993190007308594524495948.png&expires=yes",
+            "default": true,
+            "in_stock": false,
+            "material": "360freshturquesav3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/122859/original/temp_image20251102-7-18nysxz.png",
+            "case_type_id": 1536,
+            "case_device_id": 5706,
+            "is_showcase_default": false,
+            "price": 179.9,
+            "old_price": 259.9
+          },
+          {
+            "color": "F1ECE1",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-16/360freshoffwhite-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-36-termicos/103978/360freshamarelo-garrafafresh650/174783045194993190007308594524495948.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshoffwhite-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/122863/original/temp_image20251102-7-j1pz89.png",
+            "case_type_id": 3555,
+            "case_device_id": 8385,
+            "is_showcase_default": false,
+            "price": 199.9,
+            "old_price": 279.9
+          },
+          {
+            "color": "94A9CB",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-16/360freshazulclarov3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-36-termicos/103978/360freshamarelo-garrafafresh650/174783045194993190007308594524495948.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshazulclarov3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/122865/original/temp_image20251102-7-1elncjb.png",
+            "case_type_id": 1538,
+            "case_device_id": 5707,
+            "is_showcase_default": false,
+            "price": 189.9,
+            "old_price": 269.9
+          },
+          {
+            "color": "FF974D",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-16/360freshlaranja-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-36-termicos/103978/360freshamarelo-garrafafresh650/174783045194993190007308594524495948.png&expires=yes",
+            "default": true,
+            "in_stock": false,
+            "material": "360freshlaranja-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/122862/original/temp_image20251102-7-j5wfls.png",
+            "case_type_id": 2181,
+            "case_device_id": 7136,
+            "is_showcase_default": false,
+            "price": 179.9,
+            "old_price": 259.9
+          },
+          {
+            "color": "C0FE4D",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-16/360freshlemon-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-36-termicos/103978/360freshamarelo-garrafafresh650/174783045194993190007308594524495948.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshlemon-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/122861/original/temp_image20251102-7-13cota9.png",
+            "case_type_id": 2215,
+            "case_device_id": 7138,
+            "is_showcase_default": false,
+            "price": 199.9,
+            "old_price": 279.9
+          }
+        ],
+        "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/122858/original/temp_image20251102-7-ldwr0p.png",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 81837,
+        "promotion": [],
+        "badge": {
+          "label": "GANHE UM MIMO",
+          "hex_color": "#de7993",
+          "image": null
+        },
+        "tag": [],
+        "customization_ids": [
+          95840
+        ]
+      },
+      {
+        "id": 79574,
+        "sku": "nfx-gtf-26",
+        "name": "Garrafa Térmica Fresh + Ebook - Stranger Things - Noite em Hawkins",
+        "seo_optimized_name": "Garrafa Térmica Fresh + Ebook - Stranger Things - Noite em Hawkins",
+        "slug": "garrafa-termica-fresh-ebook-stranger-things-noite-em-hawkins",
+        "price": "189.9",
+        "old_price": "269.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-26/360freshbrancav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-45-termicos/104201/360freshpretav3-garrafafresh1200/17483734899801840319573174198755.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-gtf-26",
+          "customizations": [
+            {
+              "id": 95860,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-45-termicos/104201/360freshpretav3-garrafafresh1200/1748373489980671409705044164304765.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-45-termicos/104201/360freshpretav3-garrafafresh1200/17483734899801840319573174198755.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-45-termicos/104201/360freshpretav3-garrafafresh1200/1748373489980671409705044164304765.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-45-termicos/104201/360freshpretav3-garrafafresh1200/17483734899801840319573174198755.png"
+              },
+              "engine_identifier": "nfx-st-45-termicos"
+            }
+          ],
+          "material": "360freshbrancav3-garrafafresh650ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "garrafaebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-26/360freshbrancav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-45-termicos/104205/360freshamarelo-garrafafresh650/174837337234286430033453255048256136.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshbrancav3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123194/original/temp_image20251110-7-1mir4ou.png",
+            "case_type_id": 1534,
+            "case_device_id": 5702,
+            "is_showcase_default": false,
+            "price": 189.9,
+            "old_price": 269.9
+          },
+          {
+            "color": "000000",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-26/360freshpretav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-45-termicos/104204/360freshazulmarinhonfc-garrafafresh650/1748373391736791103740702530283444.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshpretav3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123186/original/temp_image20251110-7-pbe440.png",
+            "case_type_id": 1537,
+            "case_device_id": 5705,
+            "is_showcase_default": false,
+            "price": 189.9,
+            "old_price": 269.9
+          },
+          {
+            "color": "C5B4E3",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-26/360freshlilasv3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-45-termicos/104205/360freshamarelo-garrafafresh650/174837337234286430033453255048256136.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshlilasv3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123188/original/temp_image20251110-7-9rz9ag.png",
+            "case_type_id": 1540,
+            "case_device_id": 5708,
+            "is_showcase_default": false,
+            "price": 219.9,
+            "old_price": 299.9
+          },
+          {
+            "color": "F5CBC8",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-26/360freshrosav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-45-termicos/104205/360freshamarelo-garrafafresh650/174837337234286430033453255048256136.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshrosav3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123196/original/temp_image20251110-7-kyeorh.png",
+            "case_type_id": 1535,
+            "case_device_id": 5703,
+            "is_showcase_default": false,
+            "price": 199.9,
+            "old_price": 279.9
+          },
+          {
+            "color": "D25B73",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-26/360freshmelanciav3-garrafafresh950ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-45-termicos/104202/360freshazulmarinhonfc-garrafafresh950/1748372867717455908453539124979206.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshmelanciav3-garrafafresh950ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123204/original/temp_image20251110-7-119ehko.png",
+            "case_type_id": 1541,
+            "case_device_id": 5725,
+            "is_showcase_default": false,
+            "price": 209.9,
+            "old_price": 289.9
+          },
+          {
+            "color": "003A70",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-26/360freshazulmarinhov3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-45-termicos/104204/360freshazulmarinhonfc-garrafafresh650/1748373391736791103740702530283444.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshazulmarinhov3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123195/original/temp_image20251110-7-1spu993.png",
+            "case_type_id": 1539,
+            "case_device_id": 5704,
+            "is_showcase_default": false,
+            "price": 199.9,
+            "old_price": 279.9
+          },
+          {
+            "color": "BDE9C9",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-26/360freshturquesav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-45-termicos/104205/360freshamarelo-garrafafresh650/174837337234286430033453255048256136.png&expires=yes",
+            "default": true,
+            "in_stock": false,
+            "material": "360freshturquesav3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123197/original/temp_image20251110-7-16m0aaq.png",
+            "case_type_id": 1536,
+            "case_device_id": 5706,
+            "is_showcase_default": false,
+            "price": 179.9,
+            "old_price": 259.9
+          },
+          {
+            "color": "F1ECE1",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-26/360freshoffwhite-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-45-termicos/104205/360freshamarelo-garrafafresh650/174837337234286430033453255048256136.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshoffwhite-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123184/original/temp_image20251110-7-nuyhfz.png",
+            "case_type_id": 3555,
+            "case_device_id": 8385,
+            "is_showcase_default": false,
+            "price": 199.9,
+            "old_price": 279.9
+          },
+          {
+            "color": "94A9CB",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-26/360freshazulclarov3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-45-termicos/104205/360freshamarelo-garrafafresh650/174837337234286430033453255048256136.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshazulclarov3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123192/original/temp_image20251110-7-1i0ykd5.png",
+            "case_type_id": 1538,
+            "case_device_id": 5707,
+            "is_showcase_default": false,
+            "price": 189.9,
+            "old_price": 269.9
+          },
+          {
+            "color": "89375E",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-26/360freshvinho-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-45-termicos/104204/360freshazulmarinhonfc-garrafafresh650/1748373391736791103740702530283444.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshvinho-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/189074/original/temp_image20251110-7-t417gx.png",
+            "case_type_id": 3881,
+            "case_device_id": 9774,
+            "is_showcase_default": false,
+            "price": 209.9,
+            "old_price": 289.9
+          },
+          {
+            "color": "63403A",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-26/360freshmarrom-garrafafresh950ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-45-termicos/104202/360freshazulmarinhonfc-garrafafresh950/1748372867717455908453539124979206.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshmarrom-garrafafresh950ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/189075/original/temp_image20251110-7-7qcpcs.png",
+            "case_type_id": 2214,
+            "case_device_id": 9768,
+            "is_showcase_default": false,
+            "price": 229.9,
+            "old_price": 309.9
+          },
+          {
+            "color": "FF974D",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-26/360freshlaranja-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-45-termicos/104205/360freshamarelo-garrafafresh650/174837337234286430033453255048256136.png&expires=yes",
+            "default": true,
+            "in_stock": false,
+            "material": "360freshlaranja-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123190/original/temp_image20251110-7-y3vt25.png",
+            "case_type_id": 2181,
+            "case_device_id": 7136,
+            "is_showcase_default": false,
+            "price": 179.9,
+            "old_price": 259.9
+          },
+          {
+            "color": "C0FE4D",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-26/360freshlemon-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-45-termicos/104205/360freshamarelo-garrafafresh650/174837337234286430033453255048256136.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshlemon-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123187/original/temp_image20251110-7-l2x1an.png",
+            "case_type_id": 2215,
+            "case_device_id": 7138,
+            "is_showcase_default": false,
+            "price": 199.9,
+            "old_price": 279.9
+          },
+          {
+            "color": "FF74CD",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-26/360freshpink-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-45-termicos/104204/360freshazulmarinhonfc-garrafafresh650/1748373391736791103740702530283444.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshpink-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123185/original/temp_image20251110-7-z9igpx.png",
+            "case_type_id": 3554,
+            "case_device_id": 8380,
+            "is_showcase_default": false,
+            "price": 199.9,
+            "old_price": 279.9
+          },
+          {
+            "color": "8800C0",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-26/360freshroxo-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-45-termicos/104204/360freshazulmarinhonfc-garrafafresh650/1748373391736791103740702530283444.png&expires=yes",
+            "default": true,
+            "in_stock": false,
+            "material": "360freshroxo-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123191/original/temp_image20251110-7-1r4rqp8.png",
+            "case_type_id": 2183,
+            "case_device_id": 7135,
+            "is_showcase_default": false,
+            "price": 179.9,
+            "old_price": 259.9
+          },
+          {
+            "color": "E63333",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-26/360freshvermelho-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-45-termicos/104204/360freshazulmarinhonfc-garrafafresh650/1748373391736791103740702530283444.png&expires=yes",
+            "default": true,
+            "in_stock": false,
+            "material": "360freshvermelho-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123193/original/temp_image20251110-7-1r14wu6.png",
+            "case_type_id": 2184,
+            "case_device_id": 7133,
+            "is_showcase_default": false,
+            "price": 179.9,
+            "old_price": 259.9
+          }
+        ],
+        "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123194/original/temp_image20251110-7-1mir4ou.png",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 81857,
+        "promotion": [],
+        "badge": {
+          "label": "GANHE UM MIMO",
+          "hex_color": "#de7993",
+          "image": null
+        },
+        "tag": [],
+        "customization_ids": [
+          95860
+        ]
+      },
+      {
+        "id": 91611,
+        "sku": "nfx-gtf-46",
+        "name": "Garrafa Térmica Fresh + Ebook - Stranger Things - 8-bit Pattern",
+        "seo_optimized_name": "Garrafa Térmica Fresh + Ebook - Stranger Things - 8-bit Pattern",
+        "slug": "garrafa-termica-fresh-ebook-stranger-things-8-bit-pattern",
+        "price": "189.9",
+        "old_price": "269.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-46/360freshbrancav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-8-bit-pattern-termicos/125826/360freshazulmarinhonfc-garrafafresh950/176479269144383809469872777961551.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-gtf-46",
+          "customizations": [
+            {
+              "id": 109043,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/st5-8-bit-pattern-termicos/125826/360freshazulmarinhonfc-garrafafresh950/17647926914442391047836083584403644.png",
+                "pt_br": "prisma-render/prod-v2/previews/st5-8-bit-pattern-termicos/125826/360freshazulmarinhonfc-garrafafresh950/176479269144383809469872777961551.png",
+                "en_dark": "prisma-render/prod-v2/previews/st5-8-bit-pattern-termicos/125826/360freshazulmarinhonfc-garrafafresh950/17647926914442391047836083584403644.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/st5-8-bit-pattern-termicos/125826/360freshazulmarinhonfc-garrafafresh950/176479269144383809469872777961551.png"
+              },
+              "engine_identifier": "st5-8-bit-pattern-termicos"
+            }
+          ],
+          "material": "360freshbrancav3-garrafafresh650ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "garrafaebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-46/360freshbrancav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-8-bit-pattern-termicos/125827/360freshamarelo-garrafafresh650/1764792586842154701823027935547996.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshbrancav3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/178551/original/temp_image20251203-7-12y90i0.png",
+            "case_type_id": 1534,
+            "case_device_id": 5702,
+            "is_showcase_default": false,
+            "price": 189.9,
+            "old_price": 269.9
+          },
+          {
+            "color": "C5B4E3",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-46/360freshlilasv3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-8-bit-pattern-termicos/125827/360freshamarelo-garrafafresh650/1764792586842154701823027935547996.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshlilasv3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/178556/original/temp_image20251203-7-apao2a.png",
+            "case_type_id": 1540,
+            "case_device_id": 5708,
+            "is_showcase_default": false,
+            "price": 219.9,
+            "old_price": 299.9
+          },
+          {
+            "color": "F5CBC8",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-46/360freshrosav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-8-bit-pattern-termicos/125827/360freshamarelo-garrafafresh650/1764792586842154701823027935547996.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshrosav3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/178554/original/temp_image20251203-7-1eyr7wd.png",
+            "case_type_id": 1535,
+            "case_device_id": 5703,
+            "is_showcase_default": false,
+            "price": 199.9,
+            "old_price": 279.9
+          },
+          {
+            "color": "D25B73",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-46/360freshmelanciav3-garrafafresh950ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-8-bit-pattern-termicos/125826/360freshazulmarinhonfc-garrafafresh950/176479269144383809469872777961551.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshmelanciav3-garrafafresh950ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/178567/original/temp_image20251203-7-19zlvp.png",
+            "case_type_id": 1541,
+            "case_device_id": 5725,
+            "is_showcase_default": false,
+            "price": 209.9,
+            "old_price": 289.9
+          },
+          {
+            "color": "003A70",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-46/360freshazulmarinhov3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-8-bit-pattern-termicos/125828/360freshacai-garrafafresh650/176479221736928306004196613129554.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshazulmarinhov3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/178548/original/temp_image20251203-7-e5v6e3.png",
+            "case_type_id": 1539,
+            "case_device_id": 5704,
+            "is_showcase_default": false,
+            "price": 199.9,
+            "old_price": 279.9
+          },
+          {
+            "color": "BDE9C9",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-46/360freshturquesav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-8-bit-pattern-termicos/125827/360freshamarelo-garrafafresh650/1764792586842154701823027935547996.png&expires=yes",
+            "default": true,
+            "in_stock": false,
+            "material": "360freshturquesav3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/178550/original/temp_image20251203-7-k8n7ud.png",
+            "case_type_id": 1536,
+            "case_device_id": 5706,
+            "is_showcase_default": false,
+            "price": 179.9,
+            "old_price": 259.9
+          },
+          {
+            "color": "94A9CB",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-46/360freshazulclarov3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-8-bit-pattern-termicos/125827/360freshamarelo-garrafafresh650/1764792586842154701823027935547996.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshazulclarov3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/178561/original/temp_image20251203-7-bxw3a6.png",
+            "case_type_id": 1538,
+            "case_device_id": 5707,
+            "is_showcase_default": false,
+            "price": 189.9,
+            "old_price": 269.9
+          },
+          {
+            "color": "C0FE4D",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-46/360freshlemon-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-8-bit-pattern-termicos/125827/360freshamarelo-garrafafresh650/1764792586842154701823027935547996.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshlemon-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/178553/original/temp_image20251203-7-54encq.png",
+            "case_type_id": 2215,
+            "case_device_id": 7138,
+            "is_showcase_default": false,
+            "price": 199.9,
+            "old_price": 279.9
+          }
+        ],
+        "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/178551/original/temp_image20251203-7-12y90i0.png",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 93894,
+        "promotion": [],
+        "badge": {
+          "label": "GANHE UM MIMO",
+          "hex_color": "#de7993",
+          "image": null
+        },
+        "tag": [],
+        "customization_ids": [
+          109043
+        ]
+      },
+      {
+        "id": 91142,
+        "sku": "nfx-gtf-33",
+        "name": "Garrafa Térmica Fresh + Ebook - Stranger Things - Squawk Van Poster",
+        "seo_optimized_name": "Garrafa Térmica Fresh + Ebook - Stranger Things - Squawk Van Poster",
+        "slug": "garrafa-termica-fresh-ebook-stranger-things-squawk-van-poster",
+        "price": "189.9",
+        "old_price": "269.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-33/360freshbrancav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-squawk-van-poster-termicos/125448/360freshamarelo-garrafafresh650/17604484536765552020810545725732776.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-gtf-33",
+          "customizations": [
+            {
+              "id": 108535,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/st5-squawk-van-poster-termicos/125448/360freshamarelo-garrafafresh650/1760448453676953304959196743796792.png",
+                "pt_br": "prisma-render/prod-v2/previews/st5-squawk-van-poster-termicos/125448/360freshamarelo-garrafafresh650/17604484536765552020810545725732776.png",
+                "en_dark": "prisma-render/prod-v2/previews/st5-squawk-van-poster-termicos/125448/360freshamarelo-garrafafresh650/1760448453676953304959196743796792.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/st5-squawk-van-poster-termicos/125448/360freshamarelo-garrafafresh650/17604484536765552020810545725732776.png"
+              },
+              "engine_identifier": "st5-squawk-van-poster-termicos"
+            }
+          ],
+          "material": "360freshbrancav3-garrafafresh650ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "garrafaebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-33/360freshbrancav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-squawk-van-poster-termicos/125448/360freshamarelo-garrafafresh650/17604484536765552020810545725732776.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshbrancav3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/174063/original/temp_image20251014-7-i3q2bj.png",
+            "case_type_id": 1534,
+            "case_device_id": 5702,
+            "is_showcase_default": false,
+            "price": 189.9,
+            "old_price": 269.9
+          },
+          {
+            "color": "000000",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-33/360freshpretav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-squawk-van-poster-termicos/125439/360freshacai-garrafafresh650/17604484536864998044707099275358453.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshpretav3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/174067/original/temp_image20251014-7-uqvrfx.png",
+            "case_type_id": 1537,
+            "case_device_id": 5705,
+            "is_showcase_default": true,
+            "price": 189.9,
+            "old_price": 269.9
+          },
+          {
+            "color": "C5B4E3",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-33/360freshlilasv3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-squawk-van-poster-termicos/125448/360freshamarelo-garrafafresh650/17604484536765552020810545725732776.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshlilasv3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/174074/original/temp_image20251014-7-xo12oj.png",
+            "case_type_id": 1540,
+            "case_device_id": 5708,
+            "is_showcase_default": false,
+            "price": 219.9,
+            "old_price": 299.9
+          },
+          {
+            "color": "F5CBC8",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-33/360freshrosav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-squawk-van-poster-termicos/125448/360freshamarelo-garrafafresh650/17604484536765552020810545725732776.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshrosav3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/174064/original/temp_image20251014-7-wyh2dm.png",
+            "case_type_id": 1535,
+            "case_device_id": 5703,
+            "is_showcase_default": false,
+            "price": 199.9,
+            "old_price": 279.9
+          },
+          {
+            "color": "D25B73",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-33/360freshmelanciav3-garrafafresh950ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-squawk-van-poster-termicos/125438/360freshazulmarinhonfc-garrafafresh950/176044845345152190179575504532274.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshmelanciav3-garrafafresh950ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/174083/original/temp_image20251014-7-1ycwhyu.png",
+            "case_type_id": 1541,
+            "case_device_id": 5725,
+            "is_showcase_default": false,
+            "price": 209.9,
+            "old_price": 289.9
+          },
+          {
+            "color": "003A70",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-33/360freshazulmarinhov3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-squawk-van-poster-termicos/125439/360freshacai-garrafafresh650/17604484536864998044707099275358453.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshazulmarinhov3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/174061/original/temp_image20251014-7-wd4w8m.png",
+            "case_type_id": 1539,
+            "case_device_id": 5704,
+            "is_showcase_default": false,
+            "price": 199.9,
+            "old_price": 279.9
+          },
+          {
+            "color": "BDE9C9",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-33/360freshturquesav3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-squawk-van-poster-termicos/125448/360freshamarelo-garrafafresh650/17604484536765552020810545725732776.png&expires=yes",
+            "default": true,
+            "in_stock": false,
+            "material": "360freshturquesav3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/174068/original/temp_image20251014-7-1xvmacn.png",
+            "case_type_id": 1536,
+            "case_device_id": 5706,
+            "is_showcase_default": false,
+            "price": 179.9,
+            "old_price": 259.9
+          },
+          {
+            "color": "94A9CB",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-33/360freshazulclarov3-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-squawk-van-poster-termicos/125448/360freshamarelo-garrafafresh650/17604484536765552020810545725732776.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshazulclarov3-garrafafresh650ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/174079/original/temp_image20251014-7-fgt09m.png",
+            "case_type_id": 1538,
+            "case_device_id": 5707,
+            "is_showcase_default": false,
+            "price": 189.9,
+            "old_price": 269.9
+          },
+          {
+            "color": "89375E",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-33/360freshvinho-garrafafresh650ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-squawk-van-poster-termicos/125439/360freshacai-garrafafresh650/17604484536864998044707099275358453.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshvinho-garrafafresh650ebook",
+            "case_type_id": 3881,
+            "case_device_id": 9774,
+            "is_showcase_default": false,
+            "price": 209.9,
+            "old_price": 289.9
+          },
+          {
+            "color": "63403A",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtf-33/360freshmarrom-garrafafresh950ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-squawk-van-poster-termicos/125438/360freshazulmarinhonfc-garrafafresh950/176044845345152190179575504532274.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360freshmarrom-garrafafresh950ebook",
+            "case_type_id": 2214,
+            "case_device_id": 9768,
+            "is_showcase_default": false,
+            "price": 229.9,
+            "old_price": 309.9
+          }
+        ],
+        "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/174063/original/temp_image20251014-7-i3q2bj.png",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 93425,
+        "promotion": [],
+        "badge": {
+          "label": "GANHE UM MIMO",
+          "hex_color": "#de7993",
+          "image": null
+        },
+        "tag": [],
+        "customization_ids": [
+          108535
+        ]
+      }
+    ],
+    "case_device_id": null
+  },
+  "headers": {
+    "access-control-allow-credentials": "true",
+    "access-control-allow-methods": "GET, POST, PATCH, PUT, DELETE, OPTIONS",
+    "access-control-allow-origin": "https://www.gocase.com.br",
+    "access-control-expose-headers": "Cache-Control, Content-Language, Content-Length, Content-Type, Expires, Last-Modified, Pragma",
+    "access-control-max-age": "86400",
+    "age": "92",
+    "cache-control": "max-age=0, public, s-maxage=120, stale-while-revalidate=30, stale-if-error=30",
+    "cf-cache-status": "HIT",
+    "cf-ray": "9b967658c80fb871-GRU",
+    "content-encoding": "br",
+    "content-type": "application/json; charset=utf-8",
+    "date": "Mon, 05 Jan 2026 22:37:48 GMT",
+    "etag": "W/\"b88b51cd3f9b61aee0f96ad15dafb39c\"",
+    "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+    "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=NuuqbyNODYcjd3pNkx5RmgqpihBOhCzlLfiJTgICyiM1rwXOMchE2Q5fmUerSggssrZi%2BDP%2BmDupHqzJk7EJAWpsOvi96r7l3fm%2FEK98JW8%3D\"}]}",
+    "server": "cloudflare",
+    "strict-transport-security": "max-age=0; includeSubDomains",
+    "vary": "Origin, accept-encoding",
+    "x-content-type-options": "nosniff",
+    "x-envoy-upstream-service-time": "394",
+    "x-frame-options": "SAMEORIGIN",
+    "x-request-id": "acf57ada-bfe1-4565-854f-4629f81b06a1",
+    "x-runtime": "0.365469",
+    "x-xss-protection": "1; mode=block"
+  }
+}

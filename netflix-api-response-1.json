@@ -1,0 +1,57 @@
+{
+  "url": "https://www.netflix.shop/cdn/shopifycloud/storefront/assets/storefront/storefronts.specrules-dd5621a1.json",
+  "status": 200,
+  "data": {
+    "tag": "shopify_storefront",
+    "prefetch": [
+      {
+        "where": {
+          "or": [
+            {
+              "href_matches": "/(products|collections|pages|search|shop|blogs|policies){/*}?"
+            },
+            {
+              "href_matches": "/([a-z]{2,3}|zh-hans|zh-hant)(-[a-z]{2,3})?/(products|collections|pages|search|shop|blogs|policies){/*}?"
+            },
+            {
+              "href_matches": "/"
+            },
+            {
+              "href_matches": "/([a-z]{2,3}|zh-hans|zh-hant)(-[a-z]{2,3})?{/}?"
+            }
+          ]
+        },
+        "eagerness": "conservative"
+      }
+    ]
+  },
+  "headers": {
+    "accept-ranges": "bytes",
+    "access-control-allow-origin": "*",
+    "age": "492682",
+    "alt-svc": "h3=\":443\"; ma=86400",
+    "cache-control": "public, max-age=31536000",
+    "cf-cache-status": "HIT",
+    "cf-ray": "9b96e9e77b44e41d-GRU",
+    "content-length": "573",
+    "content-type": "application/speculationrules+json",
+    "date": "Mon, 05 Jan 2026 23:56:41 GMT",
+    "last-modified": "Thu, 25 Dec 2025 09:43:14 GMT",
+    "link": "<https://cdn.shopify.com/shopifycloud/storefront/assets/storefront/storefronts.specrules-dd5621a1.json>; rel=\"canonical\"",
+    "nel": "{\"success_fraction\":0.01,\"report_to\":\"cf-nel\",\"max_age\":604800}",
+    "priority": "u=4,i",
+    "report-to": "{\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report\\/v4?s=Bjkq%2Bt9Okv9OKVLiz%2FxOXbnCg4rSyK7wjz8m8r8Ugv6uBZBNkajGtrrH9V4DLd1t3R9tRLw5DmL%2FC5vu8H4c6k8FJtTJAQchPxr8%2FaHImrVpRUOh4vEgLVl6dVkv1f%2Bv0Lo%3D\"}],\"group\":\"cf-nel\",\"max_age\":604800}",
+    "server": "cloudflare",
+    "server-timing": "imagery;dur=34.422, imageryFetch;dur=34.096\ncfRequestDuration;dur=15.000105\ncfExtPri",
+    "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
+    "timing-allow-origin": "*",
+    "vary": "Accept-Encoding",
+    "x-content-type-options": "nosniff",
+    "x-dc": "gcp-us-east1,gcp-us-east1",
+    "x-download-options": "noopen",
+    "x-permitted-cross-domain-policies": "none",
+    "x-request-id": "609891e5-915a-4543-84e0-dd16f6010a97-1766655794",
+    "x-sorting-hat-podid": "-1",
+    "x-xss-protection": "1; mode=block"
+  }
+}

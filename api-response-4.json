@@ -1,0 +1,2344 @@
+{
+  "url": "https://api.gocase.com.br/api/v2/promotions?jd=42&locale=pt-BR&currency=BRL&store=br",
+  "status": 200,
+  "data": {
+    "free_shipping": [
+      {
+        "name": "Frete Grátis em pedidos com capinha acima de R$399,90 por região (TODOS ESTADOS",
+        "rules": [
+          {
+            "name": "device",
+            "attributes": {
+              "quantity": 1,
+              "exclude": true,
+              "device_ids": [
+                "3087",
+                "3219",
+                "3419",
+                "2791",
+                "4341"
+              ]
+            }
+          },
+          {
+            "name": "adjusted_total",
+            "attributes": {
+              "amount_min": "399.0",
+              "operator_min": "gt",
+              "amount_max": "9999999999.0",
+              "operator_max": "lt"
+            }
+          }
+        ]
+      }
+    ],
+    "fixed_shipping": [],
+    "free_installments": [
+      {
+        "name": "3x sem juros (em qualquer valor)",
+        "free_installments": 3,
+        "rules": [
+          {
+            "name": "adjusted_total",
+            "attributes": {
+              "amount_min": "199.89",
+              "operator_min": "gt",
+              "amount_max": "100000.0",
+              "operator_max": "lt"
+            }
+          }
+        ]
+      },
+      {
+        "name": "Mala de Bordo Trip - 6x sem juros",
+        "free_installments": 6,
+        "rules": [
+          {
+            "name": "product_type",
+            "attributes": {
+              "product_type": "travelcasecd"
+            }
+          }
+        ]
+      },
+      {
+        "name": "Mala de Bordo Trip - 6x sem juros",
+        "free_installments": 6,
+        "rules": [
+          {
+            "name": "product_type",
+            "attributes": {
+              "product_type": "malavoyage"
+            }
+          }
+        ]
+      },
+      {
+        "name": "Mochila de Carrinho Fun - 6x sem juros",
+        "free_installments": 6,
+        "rules": [
+          {
+            "name": "product_type_quantity",
+            "attributes": {
+              "quantity": 1,
+              "product_type": "mochilarodinhabts"
+            }
+          },
+          {
+            "name": "device",
+            "attributes": {
+              "quantity": 1,
+              "exclude": true,
+              "device_ids": [
+                "4341"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "choosable_gifts": [
+      {
+        "name": "Garrafa Urban + BASE DE SILICONE",
+        "gift_rules": {
+          "materials": [
+            "360urbanazul-garrafaurban500",
+            "360urbanazul-garrafaurban500ebook",
+            "360urbanbranca-garrafaurban500",
+            "360urbanbranca-garrafaurban500ebook",
+            "360urbanlilas-garrafaurban500ebook",
+            "360urbanmelancia-garrafaurban500ebook",
+            "360urbanpreta-garrafaurban500",
+            "360urbanpreta-garrafaurban500ebook",
+            "360urbanrosa-garrafaurban500",
+            "360urbanrosa-garrafaurban500ebook",
+            "360urbanturquesa-garrafaurban500",
+            "360urbanturquesa-garrafaurban500ebook"
+          ],
+          "product_types": [],
+          "unsupported_product_ids": [],
+          "random_order": true,
+          "match_color": false,
+          "gifts": []
+        },
+        "rules": []
+      },
+      {
+        "name": "Bolsa Joy + MIMO (Holografica / TrIp)",
+        "gift_rules": {
+          "materials": [
+            "joyazul-malajoy",
+            "joybroffwhite-malajoybr",
+            "joybrpreta-malajoybr",
+            "joybrrosa-malajoybr",
+            "joycoracoesflutuantesallblack-malajoy",
+            "joymapamundirosa-malajoy",
+            "joymarrom-malajoy",
+            "joymickey-malajoy",
+            "joyminnie-malajoy",
+            "joyoffwhite-malajoy",
+            "joypoeiradasestrelas-malajoy",
+            "joyworldtripbr-malajoybr",
+            "joyworldtrip-malajoy",
+            "joyworldtrip-malajoynfc",
+            "mala-joy-coracoes-flutuantes",
+            "mala-joy-coracoes-flutuantes-all-black",
+            "mala-joy-mapa-mundi",
+            "mala-joy-mapa-mundi-rosa",
+            "mala-joy-poeira-das-estrelas",
+            "mala-joy-sarja-preto",
+            "mala-joy-sarja-rosa",
+            "mala-joy-world-trip",
+            "sarjaoffwhite-malajoy",
+            "sarjapreta-malajoy",
+            "sarjarosa-malajoy",
+            "stitch-malajoy",
+            "stitch-malajoynfc"
+          ],
+          "product_types": [],
+          "unsupported_product_ids": [],
+          "random_order": false,
+          "match_color": false,
+          "gifts": [
+            {
+              "variant_id": "70341",
+              "name": "Gift Necessaire Holografica",
+              "image": "https://static-production.gocase.com.br/products/70696/product/02.jpg?1732805117",
+              "in_stock": true
+            }
+          ]
+        },
+        "rules": [
+          {
+            "name": "material_quantity",
+            "attributes": {
+              "materials": [
+                "mala-joy-coracoes-flutuantes",
+                "mala-joy-coracoes-flutuantes-all-black",
+                "mala-joy-mapa-mundi",
+                "mala-joy-mapa-mundi-rosa",
+                "mala-joy-poeira-das-estrelas",
+                "mala-joy-sarja-preto",
+                "mala-joy-sarja-rosa",
+                "mala-joy-world-trip",
+                "joyazul-malajoy",
+                "joybroffwhite-malajoybr",
+                "joybrpreta-malajoybr",
+                "joybrrosa-malajoybr",
+                "joycoracoesflutuantesallblack-malajoy",
+                "joymapamundirosa-malajoy",
+                "joymarrom-malajoy",
+                "joymickey-malajoy",
+                "joyminnie-malajoy",
+                "joyoffwhite-malajoy",
+                "joypoeiradasestrelas-malajoy",
+                "joyworldtripbr-malajoybr",
+                "joyworldtrip-malajoy",
+                "joyworldtrip-malajoynfc",
+                "sarjaoffwhite-malajoy",
+                "sarjapreta-malajoy",
+                "sarjarosa-malajoy",
+                "stitch-malajoy",
+                "stitch-malajoynfc"
+              ],
+              "quantity": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "Garrafa Fresh 950ml - Base Fit G - Escolha",
+        "gift_rules": {
+          "materials": [
+            "360freshazulclarov3-garrafafresh950",
+            "360freshazulclarov3-garrafafresh950ebook",
+            "360freshazulmarinhov3-garrafafresh950",
+            "360freshazulmarinhov3-garrafafresh950b2b",
+            "360freshazulmarinhov3-garrafafresh950ebook",
+            "360freshbrancav3-garrafafresh950",
+            "360freshbrancav3-garrafafresh950ebook",
+            "360freshdegraderosalilas-garrafafresh950ebook",
+            "360freshlaranja-garrafafresh950",
+            "360freshlaranja-garrafafresh950ebook",
+            "360freshlemon-garrafafresh950",
+            "360freshlemon-garrafafresh950ebook",
+            "360freshlilasv3-garrafafresh950",
+            "360freshlilasv3-garrafafresh950ebook",
+            "360freshmarrom-garrafafresh950ebook",
+            "360freshmelanciav3-garrafafresh950",
+            "360freshmelanciav3-garrafafresh950ebook",
+            "360freshoffwhite-garrafafresh950ebook",
+            "360freshpink-garrafafresh950ebook",
+            "360freshpretav3-garrafafresh950",
+            "360freshpretav3-garrafafresh950ebook",
+            "360freshrosav3-garrafafresh950",
+            "360freshrosav3-garrafafresh950ebook",
+            "360freshroxo-garrafafresh950",
+            "360freshroxo-garrafafresh950ebook",
+            "360freshturquesav3-garrafafresh950",
+            "360freshturquesav3-garrafafresh950ebook",
+            "360freshvermelho-garrafafresh950",
+            "360freshvermelho-garrafafresh950ebook",
+            "360freshvinho-garrafafresh950ebook"
+          ],
+          "product_types": [],
+          "unsupported_product_ids": [],
+          "random_order": true,
+          "match_color": false,
+          "gifts": [
+            {
+              "variant_id": "76837",
+              "name": "Gift - Tampa Pink - Garrafa Fresh",
+              "image": "https://static-production.gocase.com.br/products/71495/product/pinktampa.jpg?1745758499",
+              "in_stock": false
+            },
+            {
+              "variant_id": "80257",
+              "name": "Gift - Tampa Laranja - Garrafa Fresh",
+              "image": "https://static-production.gocase.com.br/products/71611/product/laranjaimgmaterial.jpg?1745758800",
+              "in_stock": true
+            },
+            {
+              "variant_id": "60748",
+              "name": "Gift - Tampa Lilás - Garrafa Fresh",
+              "image": "https://static-production.gocase.com.br/products/70194/product/lil%C3%A1s_02_f.jpg?1722868941",
+              "in_stock": true
+            },
+            {
+              "variant_id": "60744",
+              "name": "Gift - Tampa Branca - Garrafa Fresh",
+              "image": "https://static-production.gocase.com.br/products/70198/product/branca_02.jpg?1722869064",
+              "in_stock": true
+            },
+            {
+              "variant_id": "60745",
+              "name": "Gift - Tampa Preta - Garrafa Fresh",
+              "image": "https://static-production.gocase.com.br/products/70197/product/preta_02.jpg?1722869034",
+              "in_stock": true
+            },
+            {
+              "variant_id": "60746",
+              "name": "Gift - Tampa Rosa - Garrafa Fresh",
+              "image": "https://static-production.gocase.com.br/products/70196/product/rosa_02.jpg?1722869003",
+              "in_stock": true
+            },
+            {
+              "variant_id": "60747",
+              "name": "Gift - Tampa Turquesa - Garrafa Fresh",
+              "image": "https://static-production.gocase.com.br/products/70195/product/turquesa_02_f.jpg?1722868966",
+              "in_stock": false
+            },
+            {
+              "variant_id": "60749",
+              "name": "Gift - Tampa Azul Claro - Garrafa Fresh",
+              "image": "https://static-production.gocase.com.br/products/70193/product/azul_claro_02.jpg?1722868913",
+              "in_stock": true
+            },
+            {
+              "variant_id": "60750",
+              "name": "Gift - Tampa Azul Marinho - Garrafa Fresh",
+              "image": "https://static-production.gocase.com.br/products/70192/product/azul_marinho_02.jpg?1722868882",
+              "in_stock": true
+            },
+            {
+              "variant_id": "60751",
+              "name": "Gift - Tampa Melancia - Garrafa Fresh",
+              "image": "https://static-production.gocase.com.br/products/70191/product/melancia_02.jpg?1722868838",
+              "in_stock": true
+            },
+            {
+              "variant_id": "59591",
+              "name": "Gift Base de Silicone Slim 950ml / Roxo",
+              "image": "https://static-production.gocase.com.br/products/69838/product/roxo_950_1.jpg?1720647841",
+              "in_stock": false
+            },
+            {
+              "variant_id": "78855",
+              "name": "Gift Base Fit Lemon - G\t",
+              "image": "https://static-production.gocase.com.br/products/71535/product/_LF_1392_LEMON.jpg?1743448674",
+              "in_stock": false
+            },
+            {
+              "variant_id": "78851",
+              "name": "Gift Base Fit Pink - G\t",
+              "image": "https://static-production.gocase.com.br/products/71531/product/_LF_1392_PINK.jpg?1743448665",
+              "in_stock": true
+            }
+          ]
+        },
+        "rules": [
+          {
+            "name": "material_quantity",
+            "attributes": {
+              "materials": [
+                "360freshazulclarov3-garrafafresh950",
+                "360freshazulmarinhov3-garrafafresh950",
+                "360freshazulmarinhov3-garrafafresh950b2b",
+                "360freshbrancav3-garrafafresh950",
+                "360freshlaranja-garrafafresh950",
+                "360freshlemon-garrafafresh950",
+                "360freshlilasv3-garrafafresh950",
+                "360freshmelanciav3-garrafafresh950",
+                "360freshpretav3-garrafafresh950",
+                "360freshrosav3-garrafafresh950",
+                "360freshroxo-garrafafresh950",
+                "360freshturquesav3-garrafafresh950",
+                "360freshvermelho-garrafafresh950",
+                "360freshazulclarov3-garrafafresh950ebook",
+                "360freshazulmarinhov3-garrafafresh950ebook",
+                "360freshbrancav3-garrafafresh950ebook",
+                "360freshdegraderosalilas-garrafafresh950ebook",
+                "360freshlaranja-garrafafresh950ebook",
+                "360freshlemon-garrafafresh950ebook",
+                "360freshlilasv3-garrafafresh950ebook",
+                "360freshmarrom-garrafafresh950ebook",
+                "360freshmelanciav3-garrafafresh950ebook",
+                "360freshoffwhite-garrafafresh950ebook",
+                "360freshpink-garrafafresh950ebook",
+                "360freshpretav3-garrafafresh950ebook",
+                "360freshrosav3-garrafafresh950ebook",
+                "360freshroxo-garrafafresh950ebook",
+                "360freshturquesav3-garrafafresh950ebook",
+                "360freshvermelho-garrafafresh950ebook",
+                "360freshvinho-garrafafresh950ebook"
+              ],
+              "quantity": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "Lancheira Fruit/Mix + Marmita ou Garrafa Flow",
+        "gift_rules": {
+          "materials": [
+            "fruitazul-lancheirafruitbr",
+            "fruitazullavanda-lancheirafruit",
+            "fruitoffwhite-lancheirafruit",
+            "fruitpretabr-lancheirafruitbr",
+            "fruitpreta-lancheirafruit",
+            "fruitprorosa-lancheirafruit",
+            "fruitrosa-lancheirafruitbr",
+            "fruitrosaoffwhite-lancheirafruit",
+            "lancheira-mix-coracoes-flutuantes",
+            "lancheira-mix-coracoes-flutuantes-all-black",
+            "lancheira-mix-coracoes-flutuantes-all-black-nl",
+            "lancheira-mix-mapa-mundi-rosa",
+            "lancheira-mix-minha-paleta",
+            "lancheira-mix-poeira-das-estrelas",
+            "mixbrcoracoesflutuantes-lancheiramixbr",
+            "mixbrmapamundirosa-lancheiramixbr",
+            "mixcoracoesflutuantesallblack-lancheiramix",
+            "mixmapamundirosa-lancheiramix",
+            "mixmarrom-lancheiramix",
+            "mixmelancia-lancheiramix",
+            "mixmelancia-lancheiramixnfc",
+            "mixminhapaleta-lancheiramix",
+            "mixoffwhite-lancheiramix",
+            "mixpoeiradasestrelas-lancheiramix",
+            "mixpreta-lancheiramix"
+          ],
+          "product_types": [],
+          "unsupported_product_ids": [],
+          "random_order": true,
+          "match_color": false,
+          "gifts": [
+            {
+              "variant_id": "68933",
+              "name": "Gift Marmita Duo Preta",
+              "image": "https://static-production.gocase.com.br/products/70555/product/marmita_br_23-preta.jpg?1729697176",
+              "in_stock": false
+            },
+            {
+              "variant_id": "69067",
+              "name": "Gift Garrafa Flow Preta",
+              "image": "https://static-production.gocase.com.br/products/70651/product/preta.jpg?1730151880",
+              "in_stock": true
+            },
+            {
+              "variant_id": "69218",
+              "name": "Gift Garrafa Flow Branca",
+              "image": "https://static-production.gocase.com.br/products/70656/product/branca.jpg?1730291081",
+              "in_stock": true
+            },
+            {
+              "variant_id": "69219",
+              "name": "Gift Garrafa Flow Turquesa",
+              "image": "https://static-production.gocase.com.br/products/70655/product/turquesa.jpg?1730291055",
+              "in_stock": true
+            },
+            {
+              "variant_id": "69220",
+              "name": "Gift Garrafa Flow Rosa",
+              "image": "https://static-production.gocase.com.br/products/70654/product/rosa.jpg?1730291022",
+              "in_stock": true
+            },
+            {
+              "variant_id": "69221",
+              "name": "Gift Garrafa Flow Melancia",
+              "image": "https://static-production.gocase.com.br/products/70653/product/melancia.jpg?1730290991",
+              "in_stock": true
+            },
+            {
+              "variant_id": "69222",
+              "name": "Gift Garrafa Flow Azul",
+              "image": "https://static-production.gocase.com.br/products/70652/product/azul.jpg?1730290968",
+              "in_stock": true
+            },
+            {
+              "variant_id": "86792",
+              "name": "Gift Marmita Up - Rosa",
+              "image": "https://static-production.gocase.com.br/products/72003/product/01_up_rosa.jpg?1753290369",
+              "in_stock": true
+            },
+            {
+              "variant_id": "86791",
+              "name": "Gift Marmita Up - Azul Claro",
+              "image": "https://static-production.gocase.com.br/products/72004/product/01_up_azul_claro.jpg?1753290373",
+              "in_stock": true
+            },
+            {
+              "variant_id": "86790",
+              "name": "Gift Marmita Up - Melancia",
+              "image": "https://static-production.gocase.com.br/products/72005/product/01_up_melancia.jpg?1753290379",
+              "in_stock": true
+            }
+          ]
+        },
+        "rules": [
+          {
+            "name": "material_quantity",
+            "attributes": {
+              "materials": [
+                "lancheira-mix-coracoes-flutuantes",
+                "lancheira-mix-coracoes-flutuantes-all-black",
+                "lancheira-mix-coracoes-flutuantes-all-black-nl",
+                "lancheira-mix-mapa-mundi-rosa",
+                "lancheira-mix-minha-paleta",
+                "lancheira-mix-poeira-das-estrelas",
+                "fruitazul-lancheirafruitbr",
+                "fruitazullavanda-lancheirafruit",
+                "fruitoffwhite-lancheirafruit",
+                "fruitpretabr-lancheirafruitbr",
+                "fruitpreta-lancheirafruit",
+                "fruitprorosa-lancheirafruit",
+                "fruitrosa-lancheirafruitbr",
+                "fruitrosaoffwhite-lancheirafruit",
+                "mixcoracoesflutuantesallblack-lancheiramix",
+                "mixmapamundirosa-lancheiramix",
+                "mixmarrom-lancheiramix",
+                "mixmelancia-lancheiramix",
+                "mixmelancia-lancheiramixnfc",
+                "mixminhapaleta-lancheiramix",
+                "mixoffwhite-lancheiramix",
+                "mixpoeiradasestrelas-lancheiramix",
+                "mixpreta-lancheiramix"
+              ],
+              "quantity": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "Copo Life 1180ml / Garrafa Pro 750 - Base Fit M",
+        "gift_rules": {
+          "materials": [
+            "360lifeazulclaro-copolife1180ebook",
+            "360lifeazulmarinho-copolife1180ebook",
+            "360lifebranco-copolife1180ebook",
+            "360lifedegradelilaserosa-copolife1180ebook",
+            "360lifelaranja-copolife1180ebook",
+            "360lifelilas-copolife1180ebook",
+            "360lifeoffwhite-copolife1180ebook",
+            "360lifepink-copolife1180ebook",
+            "360lifepreto-copolife1180ebook",
+            "360liferosaclaro-copolife1180ebook",
+            "360probranco-garrafapro750ebook",
+            "360procinza-garrafapro750ebook",
+            "360propreta-garrafapro750ebook",
+            "360prorosaeroxo-garrafapro750ebook",
+            "360prorosa-garrafapro750ebook"
+          ],
+          "product_types": [],
+          "unsupported_product_ids": [],
+          "random_order": true,
+          "match_color": false,
+          "gifts": [
+            {
+              "variant_id": "78830",
+              "name": "Gift Base Fit Preta - M",
+              "image": "https://static-production.gocase.com.br/products/71515/product/_LF_1364_Preta.jpg?1743447829",
+              "in_stock": true
+            },
+            {
+              "variant_id": "78827",
+              "name": "Gift Base Fit Rosa - M",
+              "image": "https://static-production.gocase.com.br/products/71512/product/_LF_1374_Rosa.jpg?1743447684",
+              "in_stock": false
+            },
+            {
+              "variant_id": "78835",
+              "name": "Gift Base Fit Off White - M",
+              "image": "https://static-production.gocase.com.br/products/71520/product/_LF_1396_OFF_WHITE.jpg?1743447921",
+              "in_stock": true
+            },
+            {
+              "variant_id": "78831",
+              "name": "Gift Base Fit Pink - M",
+              "image": "https://static-production.gocase.com.br/products/71516/product/_LF_1396_PINK.jpg?1743447854",
+              "in_stock": false
+            },
+            {
+              "variant_id": "78841",
+              "name": "Gift Base Fit Branca - M",
+              "image": "https://static-production.gocase.com.br/products/71523/product/_LF_1396_Branca.jpg?1743447996",
+              "in_stock": true
+            },
+            {
+              "variant_id": "78839",
+              "name": "Gift Base Fit Azul Claro - M",
+              "image": "https://static-production.gocase.com.br/products/71522/product/_LF_1396_AZUL_CLARO.jpg?1743447992",
+              "in_stock": true
+            },
+            {
+              "variant_id": "78840",
+              "name": "Gift Base Fit Azul Marinho - M",
+              "image": "https://static-production.gocase.com.br/products/71524/product/_LF_1351_Marinho.jpg?1743447995",
+              "in_stock": true
+            },
+            {
+              "variant_id": "78836",
+              "name": "Gift Base Fit Lilás - M\t",
+              "image": "https://static-production.gocase.com.br/products/71521/product/_LF_1383_Lilas.jpg?1743447941",
+              "in_stock": true
+            }
+          ]
+        },
+        "rules": [
+          {
+            "name": "material_quantity",
+            "attributes": {
+              "materials": [
+                "360lifeazulclaro-copolife1180ebook",
+                "360lifeazulmarinho-copolife1180ebook",
+                "360lifebranco-copolife1180ebook",
+                "360lifedegradelilaserosa-copolife1180ebook",
+                "360lifelaranja-copolife1180ebook",
+                "360lifelilas-copolife1180ebook",
+                "360lifeoffwhite-copolife1180ebook",
+                "360lifepink-copolife1180ebook",
+                "360lifepreto-copolife1180ebook",
+                "360liferosaclaro-copolife1180ebook",
+                "360probranco-garrafapro750ebook",
+                "360procinza-garrafapro750ebook",
+                "360propreta-garrafapro750ebook",
+                "360prorosaeroxo-garrafapro750ebook",
+                "360prorosa-garrafapro750ebook"
+              ],
+              "quantity": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "Copo Life 880 / Garrafa Fun 460 - Base Fit P - Escolha",
+        "gift_rules": {
+          "materials": [
+            "360hangerazulclaro-hangerlife880ebook",
+            "360hangerbranco-hangerlife880ebook",
+            "360hangerlilas-hangerlife880ebook",
+            "360hangeroffwhite-hangerlife880ebook",
+            "360hangerpink-hangerlife880ebook",
+            "360hangerpreto-hangerlife880ebook",
+            "360hangerrosaclaro-hangerlife880ebook",
+            "360kidsazulclaro-garrafakids460ebook",
+            "360kidsbranco-garrafakids460ebook",
+            "360kidsmelancia-garrafakids460ebook",
+            "360kidspreto-garrafakids460ebook",
+            "360lifeazulclaro-copolife880ebook",
+            "360lifeazulmarinho-copolife880ebook",
+            "360lifebranco-copolife880ebook",
+            "360lifedegradelilaserosa-copolife880ebook",
+            "360lifelilas-copolife880ebook",
+            "360lifeoffwhite-copolife880ebook",
+            "360lifepink-copolife880ebook",
+            "360lifepreto-copolife880ebook",
+            "360liferosaclaro-copolife880ebook"
+          ],
+          "product_types": [],
+          "unsupported_product_ids": [],
+          "random_order": true,
+          "match_color": false,
+          "gifts": [
+            {
+              "variant_id": "78834",
+              "name": "Gift Base Fit Preta - P",
+              "image": "https://static-production.gocase.com.br/products/71519/product/imgmaterial_-_fitp_-_preto.jpg?1743447919",
+              "in_stock": true
+            },
+            {
+              "variant_id": "78833",
+              "name": "Gift Base Fit Pink - P",
+              "image": "https://static-production.gocase.com.br/products/71518/product/imgmaterial_-_fitp_-_pink.jpg?1743447910",
+              "in_stock": false
+            },
+            {
+              "variant_id": "78820",
+              "name": "Gift Base Fit Azul Claro - P",
+              "image": "https://static-production.gocase.com.br/products/71506/product/imgmaterial_-_fitp_AZUL_CLARO.jpg?1743443700",
+              "in_stock": true
+            },
+            {
+              "variant_id": "78829",
+              "name": "Gift Base Fit Melancia - P",
+              "image": "https://static-production.gocase.com.br/products/71514/product/imgmaterial_-_fitp_-_melancia.jpg?1743447771",
+              "in_stock": true
+            },
+            {
+              "variant_id": "78821",
+              "name": "Gift Base Fit Azul Marinho - P",
+              "image": "https://static-production.gocase.com.br/products/71508/product/imgmaterial_-_fitp_-_azul_marinho.jpg?1743447524",
+              "in_stock": true
+            },
+            {
+              "variant_id": "78822",
+              "name": "Gift Base Fit Branca - P",
+              "image": "https://static-production.gocase.com.br/products/71509/product/imgmaterial_-_fitp-_branco.jpg?1743447530",
+              "in_stock": true
+            },
+            {
+              "variant_id": "78823",
+              "name": "Gift Base Fit Laranja - P",
+              "image": "https://static-production.gocase.com.br/products/71510/product/imgmaterial_-_fitp_-_laranja.jpg?1743447541",
+              "in_stock": false
+            },
+            {
+              "variant_id": "78824",
+              "name": "Gift Base Fit Lemon - P",
+              "image": "https://static-production.gocase.com.br/products/71511/product/imgmaterial_-_fitp_LEMON.jpg?1743447605",
+              "in_stock": true
+            },
+            {
+              "variant_id": "78828",
+              "name": "Gift Base Fit Lilás - P",
+              "image": "https://static-production.gocase.com.br/products/71513/product/imgmaterial_-_fitp_-_lilas.jpg?1743447752",
+              "in_stock": true
+            },
+            {
+              "variant_id": "78842",
+              "name": "Gift Base Fit Vermelha - P",
+              "image": "https://static-production.gocase.com.br/products/71525/product/imgmaterial_-_fitp_-_VERMELHO.jpg?1743448071",
+              "in_stock": false
+            },
+            {
+              "variant_id": "78832",
+              "name": "Gift Base Fit Off White - P",
+              "image": "https://static-production.gocase.com.br/products/71517/product/imgmaterial_-_fitp_-_OFF_WHITE.jpg?1743447904",
+              "in_stock": false
+            },
+            {
+              "variant_id": "78845",
+              "name": "Gift Base Fit Rosa - P",
+              "image": "https://static-production.gocase.com.br/products/71528/product/img_material_-_fit_p_-_rosa_claro.jpg?1743448111",
+              "in_stock": true
+            },
+            {
+              "variant_id": "78844",
+              "name": "Gift Base Fit Turquesa - P",
+              "image": "https://static-production.gocase.com.br/products/71527/product/imgmaterial_-_fitp_-_TURQUESA.jpg?1743448103",
+              "in_stock": false
+            },
+            {
+              "variant_id": "78843",
+              "name": "Gift Base Fit Roxa - P",
+              "image": "https://static-production.gocase.com.br/products/71526/product/imgmaterial_-_fitp_-_roxo.jpg?1743448096",
+              "in_stock": false
+            }
+          ]
+        },
+        "rules": [
+          {
+            "name": "material_quantity",
+            "attributes": {
+              "materials": [
+                "360hangerazulclaro-hangerlife880ebook",
+                "360hangerbranco-hangerlife880ebook",
+                "360hangerlilas-hangerlife880ebook",
+                "360hangeroffwhite-hangerlife880ebook",
+                "360hangerpink-hangerlife880ebook",
+                "360hangerpreto-hangerlife880ebook",
+                "360hangerrosaclaro-hangerlife880ebook",
+                "360lifeazulclaro-copolife880ebook",
+                "360lifeazulmarinho-copolife880ebook",
+                "360lifebranco-copolife880ebook",
+                "360lifedegradelilaserosa-copolife880ebook",
+                "360lifelilas-copolife880ebook",
+                "360lifeoffwhite-copolife880ebook",
+                "360lifepink-copolife880ebook",
+                "360lifepreto-copolife880ebook",
+                "360liferosaclaro-copolife880ebook",
+                "360kidsazulclaro-garrafakids460ebook",
+                "360kidsbranco-garrafakids460ebook",
+                "360kidsmelancia-garrafakids460ebook",
+                "360kidspreto-garrafakids460ebook"
+              ],
+              "quantity": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "Mala de Bordo Trip + Kit Borracha Rodinhas",
+        "gift_rules": {
+          "materials": [
+            "tripmapamundirosa-mala20",
+            "tripoffwhite-mala20",
+            "trippoeiradasestrelas-mala20",
+            "trippreta-mala20",
+            "triprosa-mala20",
+            "tripturquesa-mala20"
+          ],
+          "product_types": [],
+          "unsupported_product_ids": [
+            "46946",
+            "53362"
+          ],
+          "random_order": true,
+          "match_color": false,
+          "gifts": [
+            {
+              "variant_id": "76096",
+              "name": "Gift Kit de Borracha protetora para rodinhas - Rosa - Mala Trip 20\"",
+              "image": "https://static-production.gocase.com.br/products/71462/product/gocase-1612-706.jpg?1739566606",
+              "in_stock": true
+            },
+            {
+              "variant_id": "76097",
+              "name": "Gift Kit de Borracha protetora para rodinhas - Cinza - Mala Trip 20\"",
+              "image": "https://static-production.gocase.com.br/products/71463/product/gocase-1612-701.jpg?1739566618",
+              "in_stock": true
+            },
+            {
+              "variant_id": "76098",
+              "name": "Gift Kit de Borracha protetora para rodinhas - Lilás - Mala Trip 20\"",
+              "image": "https://static-production.gocase.com.br/products/71464/product/gocase-1612-704.jpg?1739566620",
+              "in_stock": true
+            }
+          ]
+        },
+        "rules": [
+          {
+            "name": "material_quantity",
+            "attributes": {
+              "materials": [
+                "tripmapamundirosa-mala20",
+                "tripoffwhite-mala20",
+                "trippoeiradasestrelas-mala20",
+                "trippreta-mala20",
+                "triprosa-mala20",
+                "tripturquesa-mala20"
+              ],
+              "quantity": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "Garrafa Fresh 650/350 + Tampa ou Base Fit P",
+        "gift_rules": {
+          "materials": [
+            "360freshazulclarov3-garrafafresh650",
+            "360freshazulclarov3-garrafafresh650ebook",
+            "360freshazulmarinhov3-garrafafresh650",
+            "360freshazulmarinhov3-garrafafresh650ebook",
+            "360freshbrancav3-garrafafresh650",
+            "360freshbrancav3-garrafafresh650ebook",
+            "360freshdegraderosalilas-garrafafresh650ebook",
+            "360freshlaranja-garrafafresh650ebook",
+            "360freshlemon-garrafafresh650ebook",
+            "360freshlilasv3-garrafafresh650",
+            "360freshlilasv3-garrafafresh650ebook",
+            "360freshmarrom-garrafafresh650ebook",
+            "360freshmelanciav3-garrafafresh650",
+            "360freshmelanciav3-garrafafresh650ebook",
+            "360freshminiazul-garrafafresh350ebook",
+            "360freshminibranca-garrafafresh350ebook",
+            "360freshminimelancia-garrafafresh350ebook",
+            "360freshminipreta-garrafafresh350ebook",
+            "360freshoffwhite-garrafafresh650ebook",
+            "360freshpink-garrafafresh650",
+            "360freshpink-garrafafresh650ebook",
+            "360freshpretav3-garrafafresh650",
+            "360freshpretav3-garrafafresh650ebook",
+            "360freshrosav3-garrafafresh650",
+            "360freshrosav3-garrafafresh650ebook",
+            "360freshroxo-garrafafresh650ebook",
+            "360freshturquesav3-garrafafresh650",
+            "360freshturquesav3-garrafafresh650ebook",
+            "360freshvermelho-garrafafresh650ebook",
+            "360freshvinho-garrafafresh650ebook",
+            "360miniazul-garrafamini350ebook",
+            "360miniazulmarinho-garrafamini350ebook",
+            "360minibranca-garrafamini350ebook",
+            "360minidegradeazulerosa-garrafamini350ebook",
+            "360minilaranja-garrafamini350ebook",
+            "360minililas-garrafamini350ebook",
+            "360minimelancia-garrafamini350ebook",
+            "360minioffwhite-garrafamini350ebook",
+            "360minipink-garrafamini350ebook",
+            "360minipreta-garrafamini350ebook",
+            "360minirosa-garrafamini350ebook",
+            "360minivermelha-garrafamini350ebook"
+          ],
+          "product_types": [],
+          "unsupported_product_ids": [],
+          "random_order": true,
+          "match_color": false,
+          "gifts": [
+            {
+              "variant_id": "78834",
+              "name": "Gift Base Fit Preta - P",
+              "image": "https://static-production.gocase.com.br/products/71519/product/imgmaterial_-_fitp_-_preto.jpg?1743447919",
+              "in_stock": true
+            },
+            {
+              "variant_id": "78828",
+              "name": "Gift Base Fit Lilás - P",
+              "image": "https://static-production.gocase.com.br/products/71513/product/imgmaterial_-_fitp_-_lilas.jpg?1743447752",
+              "in_stock": true
+            },
+            {
+              "variant_id": "78829",
+              "name": "Gift Base Fit Melancia - P",
+              "image": "https://static-production.gocase.com.br/products/71514/product/imgmaterial_-_fitp_-_melancia.jpg?1743447771",
+              "in_stock": true
+            },
+            {
+              "variant_id": "59608",
+              "name": "Gift Base de Silicone Slim 650ml / Lemon",
+              "image": "https://static-production.gocase.com.br/products/69857/product/amarelo_650_1.jpg?1720650166",
+              "in_stock": true
+            },
+            {
+              "variant_id": "78822",
+              "name": "Gift Base Fit Branca - P",
+              "image": "https://static-production.gocase.com.br/products/71509/product/imgmaterial_-_fitp-_branco.jpg?1743447530",
+              "in_stock": true
+            },
+            {
+              "variant_id": "78845",
+              "name": "Gift Base Fit Rosa - P",
+              "image": "https://static-production.gocase.com.br/products/71528/product/img_material_-_fit_p_-_rosa_claro.jpg?1743448111",
+              "in_stock": true
+            },
+            {
+              "variant_id": "76837",
+              "name": "Gift - Tampa Pink - Garrafa Fresh",
+              "image": "https://static-production.gocase.com.br/products/71495/product/pinktampa.jpg?1745758499",
+              "in_stock": false
+            },
+            {
+              "variant_id": "80257",
+              "name": "Gift - Tampa Laranja - Garrafa Fresh",
+              "image": "https://static-production.gocase.com.br/products/71611/product/laranjaimgmaterial.jpg?1745758800",
+              "in_stock": true
+            },
+            {
+              "variant_id": "60748",
+              "name": "Gift - Tampa Lilás - Garrafa Fresh",
+              "image": "https://static-production.gocase.com.br/products/70194/product/lil%C3%A1s_02_f.jpg?1722868941",
+              "in_stock": true
+            },
+            {
+              "variant_id": "60744",
+              "name": "Gift - Tampa Branca - Garrafa Fresh",
+              "image": "https://static-production.gocase.com.br/products/70198/product/branca_02.jpg?1722869064",
+              "in_stock": true
+            },
+            {
+              "variant_id": "60745",
+              "name": "Gift - Tampa Preta - Garrafa Fresh",
+              "image": "https://static-production.gocase.com.br/products/70197/product/preta_02.jpg?1722869034",
+              "in_stock": true
+            },
+            {
+              "variant_id": "60746",
+              "name": "Gift - Tampa Rosa - Garrafa Fresh",
+              "image": "https://static-production.gocase.com.br/products/70196/product/rosa_02.jpg?1722869003",
+              "in_stock": true
+            },
+            {
+              "variant_id": "60747",
+              "name": "Gift - Tampa Turquesa - Garrafa Fresh",
+              "image": "https://static-production.gocase.com.br/products/70195/product/turquesa_02_f.jpg?1722868966",
+              "in_stock": false
+            },
+            {
+              "variant_id": "60749",
+              "name": "Gift - Tampa Azul Claro - Garrafa Fresh",
+              "image": "https://static-production.gocase.com.br/products/70193/product/azul_claro_02.jpg?1722868913",
+              "in_stock": true
+            },
+            {
+              "variant_id": "60750",
+              "name": "Gift - Tampa Azul Marinho - Garrafa Fresh",
+              "image": "https://static-production.gocase.com.br/products/70192/product/azul_marinho_02.jpg?1722868882",
+              "in_stock": true
+            },
+            {
+              "variant_id": "60751",
+              "name": "Gift - Tampa Melancia - Garrafa Fresh",
+              "image": "https://static-production.gocase.com.br/products/70191/product/melancia_02.jpg?1722868838",
+              "in_stock": true
+            },
+            {
+              "variant_id": "78820",
+              "name": "Gift Base Fit Azul Claro - P",
+              "image": "https://static-production.gocase.com.br/products/71506/product/imgmaterial_-_fitp_AZUL_CLARO.jpg?1743443700",
+              "in_stock": true
+            },
+            {
+              "variant_id": "78821",
+              "name": "Gift Base Fit Azul Marinho - P",
+              "image": "https://static-production.gocase.com.br/products/71508/product/imgmaterial_-_fitp_-_azul_marinho.jpg?1743447524",
+              "in_stock": true
+            }
+          ]
+        },
+        "rules": [
+          {
+            "name": "material_quantity",
+            "attributes": {
+              "materials": [
+                "360freshazulclarov3-garrafafresh650",
+                "360freshazulmarinhov3-garrafafresh650",
+                "360freshbrancav3-garrafafresh650",
+                "360freshlilasv3-garrafafresh650",
+                "360freshmelanciav3-garrafafresh650",
+                "360freshpink-garrafafresh650",
+                "360freshpretav3-garrafafresh650",
+                "360freshrosav3-garrafafresh650",
+                "360freshturquesav3-garrafafresh650",
+                "360freshazulclarov3-garrafafresh650ebook",
+                "360freshazulmarinhov3-garrafafresh650ebook",
+                "360freshbrancav3-garrafafresh650ebook",
+                "360freshdegraderosalilas-garrafafresh650ebook",
+                "360freshlaranja-garrafafresh650ebook",
+                "360freshlemon-garrafafresh650ebook",
+                "360freshlilasv3-garrafafresh650ebook",
+                "360freshmarrom-garrafafresh650ebook",
+                "360freshmelanciav3-garrafafresh650ebook",
+                "360freshminiazul-garrafafresh350ebook",
+                "360freshminibranca-garrafafresh350ebook",
+                "360freshminimelancia-garrafafresh350ebook",
+                "360freshminipreta-garrafafresh350ebook",
+                "360freshoffwhite-garrafafresh650ebook",
+                "360freshpink-garrafafresh650ebook",
+                "360freshpretav3-garrafafresh650ebook",
+                "360freshrosav3-garrafafresh650ebook",
+                "360freshroxo-garrafafresh650ebook",
+                "360freshturquesav3-garrafafresh650ebook",
+                "360freshvermelho-garrafafresh650ebook",
+                "360freshvinho-garrafafresh650ebook",
+                "360miniazul-garrafamini350ebook",
+                "360miniazulmarinho-garrafamini350ebook",
+                "360minibranca-garrafamini350ebook",
+                "360minidegradeazulerosa-garrafamini350ebook",
+                "360minilaranja-garrafamini350ebook",
+                "360minililas-garrafamini350ebook",
+                "360minimelancia-garrafamini350ebook",
+                "360minioffwhite-garrafamini350ebook",
+                "360minipink-garrafamini350ebook",
+                "360minipreta-garrafamini350ebook",
+                "360minirosa-garrafamini350ebook",
+                "360minivermelha-garrafamini350ebook"
+              ],
+              "quantity": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "Mala Voyage + Kit Borracha Rodinhas / Capa Protetora",
+        "gift_rules": {
+          "materials": [
+            "malavoyagepreta-malavoyage"
+          ],
+          "product_types": [],
+          "unsupported_product_ids": [],
+          "random_order": false,
+          "match_color": false,
+          "gifts": [
+            {
+              "variant_id": "76096",
+              "name": "Gift Kit de Borracha protetora para rodinhas - Rosa - Mala Trip 20\"",
+              "image": "https://static-production.gocase.com.br/products/71462/product/gocase-1612-706.jpg?1739566606",
+              "in_stock": true
+            },
+            {
+              "variant_id": "76097",
+              "name": "Gift Kit de Borracha protetora para rodinhas - Cinza - Mala Trip 20\"",
+              "image": "https://static-production.gocase.com.br/products/71463/product/gocase-1612-701.jpg?1739566618",
+              "in_stock": true
+            },
+            {
+              "variant_id": "76098",
+              "name": "Gift Kit de Borracha protetora para rodinhas - Lilás - Mala Trip 20\"",
+              "image": "https://static-production.gocase.com.br/products/71464/product/gocase-1612-704.jpg?1739566620",
+              "in_stock": true
+            },
+            {
+              "variant_id": "75912",
+              "name": "Gift - Capa Protetora Mala de Bordo Trip 20\"",
+              "image": "https://static-production.gocase.com.br/products/71457/product/gocase-1612-713_capa_de_mala_ajustada_2.jpg?1739280248",
+              "in_stock": true
+            }
+          ]
+        },
+        "rules": [
+          {
+            "name": "material_quantity",
+            "attributes": {
+              "materials": [
+                "malavoyagepreta-malavoyage"
+              ],
+              "quantity": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "Tote Daily + MIMO (Organizador / Necessaire)",
+        "gift_rules": {
+          "materials": [
+            "toteamora-totebag",
+            "totebegemarrom-totebag",
+            "toteestreladacasa-totebag",
+            "totemarrom-totebag",
+            "toteoffwhite-totebag",
+            "totepreta-totebag",
+            "toterosa-totebag",
+            "toteroyalmarrom-totebag"
+          ],
+          "product_types": [],
+          "unsupported_product_ids": [],
+          "random_order": false,
+          "match_color": false,
+          "gifts": [
+            {
+              "variant_id": "70341",
+              "name": "Gift Necessaire Holografica",
+              "image": "https://static-production.gocase.com.br/products/70696/product/02.jpg?1732805117",
+              "in_stock": true
+            },
+            {
+              "variant_id": "70321",
+              "name": "Gift Organizador Marrom",
+              "image": "https://static-production.gocase.com.br/products/70694/product/_LF_1446.jpg?1745611680",
+              "in_stock": true
+            },
+            {
+              "variant_id": "70322",
+              "name": "Gift Organizador Cinza",
+              "image": "https://static-production.gocase.com.br/products/70695/product/_LF_1451.jpg?1745611744",
+              "in_stock": false
+            },
+            {
+              "variant_id": "68899",
+              "name": "Gift Organizador Preto",
+              "image": "https://static-production.gocase.com.br/products/70527/product/organizador_de_mala_preto_1.jpg?1729621698",
+              "in_stock": true
+            },
+            {
+              "variant_id": "68900",
+              "name": "Gift Organizador Rosa",
+              "image": "https://static-production.gocase.com.br/products/70534/product/organizador_de_mala_rosa_1.jpg?1729621923",
+              "in_stock": false
+            }
+          ]
+        },
+        "rules": [
+          {
+            "name": "material_quantity",
+            "attributes": {
+              "materials": [
+                "toteamora-totebag",
+                "totebegemarrom-totebag",
+                "toteestreladacasa-totebag",
+                "totemarrom-totebag",
+                "toteoffwhite-totebag",
+                "totepreta-totebag",
+                "toterosa-totebag",
+                "toteroyalmarrom-totebag"
+              ],
+              "quantity": 1
+            }
+          }
+        ]
+      }
+    ],
+    "gifts_actions": [
+      {
+        "name": "Garrafa Urban + BASE DE SILICONE",
+        "gift_rules": {
+          "materials": [
+            "360urbanazul-garrafaurban500",
+            "360urbanazul-garrafaurban500ebook",
+            "360urbanbranca-garrafaurban500",
+            "360urbanbranca-garrafaurban500ebook",
+            "360urbanlilas-garrafaurban500ebook",
+            "360urbanmelancia-garrafaurban500ebook",
+            "360urbanpreta-garrafaurban500",
+            "360urbanpreta-garrafaurban500ebook",
+            "360urbanrosa-garrafaurban500",
+            "360urbanrosa-garrafaurban500ebook",
+            "360urbanturquesa-garrafaurban500",
+            "360urbanturquesa-garrafaurban500ebook"
+          ],
+          "product_types": [],
+          "unsupported_product_ids": [],
+          "random_order": true,
+          "match_color": false,
+          "gifts": []
+        },
+        "rules": []
+      },
+      {
+        "name": "Bolsa Joy + MIMO (Holografica / TrIp)",
+        "gift_rules": {
+          "materials": [
+            "joyazul-malajoy",
+            "joybroffwhite-malajoybr",
+            "joybrpreta-malajoybr",
+            "joybrrosa-malajoybr",
+            "joycoracoesflutuantesallblack-malajoy",
+            "joymapamundirosa-malajoy",
+            "joymarrom-malajoy",
+            "joymickey-malajoy",
+            "joyminnie-malajoy",
+            "joyoffwhite-malajoy",
+            "joypoeiradasestrelas-malajoy",
+            "joyworldtripbr-malajoybr",
+            "joyworldtrip-malajoy",
+            "joyworldtrip-malajoynfc",
+            "mala-joy-coracoes-flutuantes",
+            "mala-joy-coracoes-flutuantes-all-black",
+            "mala-joy-mapa-mundi",
+            "mala-joy-mapa-mundi-rosa",
+            "mala-joy-poeira-das-estrelas",
+            "mala-joy-sarja-preto",
+            "mala-joy-sarja-rosa",
+            "mala-joy-world-trip",
+            "sarjaoffwhite-malajoy",
+            "sarjapreta-malajoy",
+            "sarjarosa-malajoy",
+            "stitch-malajoy",
+            "stitch-malajoynfc"
+          ],
+          "product_types": [],
+          "unsupported_product_ids": [],
+          "random_order": false,
+          "match_color": false,
+          "gifts": [
+            {
+              "variant_id": "70341",
+              "name": "Gift Necessaire Holografica",
+              "image": "https://static-production.gocase.com.br/products/70696/product/02.jpg?1732805117",
+              "in_stock": true
+            }
+          ]
+        },
+        "rules": [
+          {
+            "name": "material_quantity",
+            "attributes": {
+              "materials": [
+                "mala-joy-coracoes-flutuantes",
+                "mala-joy-coracoes-flutuantes-all-black",
+                "mala-joy-mapa-mundi",
+                "mala-joy-mapa-mundi-rosa",
+                "mala-joy-poeira-das-estrelas",
+                "mala-joy-sarja-preto",
+                "mala-joy-sarja-rosa",
+                "mala-joy-world-trip",
+                "joyazul-malajoy",
+                "joybroffwhite-malajoybr",
+                "joybrpreta-malajoybr",
+                "joybrrosa-malajoybr",
+                "joycoracoesflutuantesallblack-malajoy",
+                "joymapamundirosa-malajoy",
+                "joymarrom-malajoy",
+                "joymickey-malajoy",
+                "joyminnie-malajoy",
+                "joyoffwhite-malajoy",
+                "joypoeiradasestrelas-malajoy",
+                "joyworldtripbr-malajoybr",
+                "joyworldtrip-malajoy",
+                "joyworldtrip-malajoynfc",
+                "sarjaoffwhite-malajoy",
+                "sarjapreta-malajoy",
+                "sarjarosa-malajoy",
+                "stitch-malajoy",
+                "stitch-malajoynfc"
+              ],
+              "quantity": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "Garrafa Fresh 950ml - Base Fit G - Escolha",
+        "gift_rules": {
+          "materials": [
+            "360freshazulclarov3-garrafafresh950",
+            "360freshazulclarov3-garrafafresh950ebook",
+            "360freshazulmarinhov3-garrafafresh950",
+            "360freshazulmarinhov3-garrafafresh950b2b",
+            "360freshazulmarinhov3-garrafafresh950ebook",
+            "360freshbrancav3-garrafafresh950",
+            "360freshbrancav3-garrafafresh950ebook",
+            "360freshdegraderosalilas-garrafafresh950ebook",
+            "360freshlaranja-garrafafresh950",
+            "360freshlaranja-garrafafresh950ebook",
+            "360freshlemon-garrafafresh950",
+            "360freshlemon-garrafafresh950ebook",
+            "360freshlilasv3-garrafafresh950",
+            "360freshlilasv3-garrafafresh950ebook",
+            "360freshmarrom-garrafafresh950ebook",
+            "360freshmelanciav3-garrafafresh950",
+            "360freshmelanciav3-garrafafresh950ebook",
+            "360freshoffwhite-garrafafresh950ebook",
+            "360freshpink-garrafafresh950ebook",
+            "360freshpretav3-garrafafresh950",
+            "360freshpretav3-garrafafresh950ebook",
+            "360freshrosav3-garrafafresh950",
+            "360freshrosav3-garrafafresh950ebook",
+            "360freshroxo-garrafafresh950",
+            "360freshroxo-garrafafresh950ebook",
+            "360freshturquesav3-garrafafresh950",
+            "360freshturquesav3-garrafafresh950ebook",
+            "360freshvermelho-garrafafresh950",
+            "360freshvermelho-garrafafresh950ebook",
+            "360freshvinho-garrafafresh950ebook"
+          ],
+          "product_types": [],
+          "unsupported_product_ids": [],
+          "random_order": true,
+          "match_color": false,
+          "gifts": [
+            {
+              "variant_id": "76837",
+              "name": "Gift - Tampa Pink - Garrafa Fresh",
+              "image": "https://static-production.gocase.com.br/products/71495/product/pinktampa.jpg?1745758499",
+              "in_stock": false
+            },
+            {
+              "variant_id": "80257",
+              "name": "Gift - Tampa Laranja - Garrafa Fresh",
+              "image": "https://static-production.gocase.com.br/products/71611/product/laranjaimgmaterial.jpg?1745758800",
+              "in_stock": true
+            },
+            {
+              "variant_id": "60748",
+              "name": "Gift - Tampa Lilás - Garrafa Fresh",
+              "image": "https://static-production.gocase.com.br/products/70194/product/lil%C3%A1s_02_f.jpg?1722868941",
+              "in_stock": true
+            },
+            {
+              "variant_id": "60744",
+              "name": "Gift - Tampa Branca - Garrafa Fresh",
+              "image": "https://static-production.gocase.com.br/products/70198/product/branca_02.jpg?1722869064",
+              "in_stock": true
+            },
+            {
+              "variant_id": "60745",
+              "name": "Gift - Tampa Preta - Garrafa Fresh",
+              "image": "https://static-production.gocase.com.br/products/70197/product/preta_02.jpg?1722869034",
+              "in_stock": true
+            },
+            {
+              "variant_id": "60746",
+              "name": "Gift - Tampa Rosa - Garrafa Fresh",
+              "image": "https://static-production.gocase.com.br/products/70196/product/rosa_02.jpg?1722869003",
+              "in_stock": true
+            },
+            {
+              "variant_id": "60747",
+              "name": "Gift - Tampa Turquesa - Garrafa Fresh",
+              "image": "https://static-production.gocase.com.br/products/70195/product/turquesa_02_f.jpg?1722868966",
+              "in_stock": false
+            },
+            {
+              "variant_id": "60749",
+              "name": "Gift - Tampa Azul Claro - Garrafa Fresh",
+              "image": "https://static-production.gocase.com.br/products/70193/product/azul_claro_02.jpg?1722868913",
+              "in_stock": true
+            },
+            {
+              "variant_id": "60750",
+              "name": "Gift - Tampa Azul Marinho - Garrafa Fresh",
+              "image": "https://static-production.gocase.com.br/products/70192/product/azul_marinho_02.jpg?1722868882",
+              "in_stock": true
+            },
+            {
+              "variant_id": "60751",
+              "name": "Gift - Tampa Melancia - Garrafa Fresh",
+              "image": "https://static-production.gocase.com.br/products/70191/product/melancia_02.jpg?1722868838",
+              "in_stock": true
+            },
+            {
+              "variant_id": "59591",
+              "name": "Gift Base de Silicone Slim 950ml / Roxo",
+              "image": "https://static-production.gocase.com.br/products/69838/product/roxo_950_1.jpg?1720647841",
+              "in_stock": false
+            },
+            {
+              "variant_id": "78855",
+              "name": "Gift Base Fit Lemon - G\t",
+              "image": "https://static-production.gocase.com.br/products/71535/product/_LF_1392_LEMON.jpg?1743448674",
+              "in_stock": false
+            },
+            {
+              "variant_id": "78851",
+              "name": "Gift Base Fit Pink - G\t",
+              "image": "https://static-production.gocase.com.br/products/71531/product/_LF_1392_PINK.jpg?1743448665",
+              "in_stock": true
+            }
+          ]
+        },
+        "rules": [
+          {
+            "name": "material_quantity",
+            "attributes": {
+              "materials": [
+                "360freshazulclarov3-garrafafresh950",
+                "360freshazulmarinhov3-garrafafresh950",
+                "360freshazulmarinhov3-garrafafresh950b2b",
+                "360freshbrancav3-garrafafresh950",
+                "360freshlaranja-garrafafresh950",
+                "360freshlemon-garrafafresh950",
+                "360freshlilasv3-garrafafresh950",
+                "360freshmelanciav3-garrafafresh950",
+                "360freshpretav3-garrafafresh950",
+                "360freshrosav3-garrafafresh950",
+                "360freshroxo-garrafafresh950",
+                "360freshturquesav3-garrafafresh950",
+                "360freshvermelho-garrafafresh950",
+                "360freshazulclarov3-garrafafresh950ebook",
+                "360freshazulmarinhov3-garrafafresh950ebook",
+                "360freshbrancav3-garrafafresh950ebook",
+                "360freshdegraderosalilas-garrafafresh950ebook",
+                "360freshlaranja-garrafafresh950ebook",
+                "360freshlemon-garrafafresh950ebook",
+                "360freshlilasv3-garrafafresh950ebook",
+                "360freshmarrom-garrafafresh950ebook",
+                "360freshmelanciav3-garrafafresh950ebook",
+                "360freshoffwhite-garrafafresh950ebook",
+                "360freshpink-garrafafresh950ebook",
+                "360freshpretav3-garrafafresh950ebook",
+                "360freshrosav3-garrafafresh950ebook",
+                "360freshroxo-garrafafresh950ebook",
+                "360freshturquesav3-garrafafresh950ebook",
+                "360freshvermelho-garrafafresh950ebook",
+                "360freshvinho-garrafafresh950ebook"
+              ],
+              "quantity": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "Lancheira Fruit/Mix + Marmita ou Garrafa Flow",
+        "gift_rules": {
+          "materials": [
+            "fruitazul-lancheirafruitbr",
+            "fruitazullavanda-lancheirafruit",
+            "fruitoffwhite-lancheirafruit",
+            "fruitpretabr-lancheirafruitbr",
+            "fruitpreta-lancheirafruit",
+            "fruitprorosa-lancheirafruit",
+            "fruitrosa-lancheirafruitbr",
+            "fruitrosaoffwhite-lancheirafruit",
+            "lancheira-mix-coracoes-flutuantes",
+            "lancheira-mix-coracoes-flutuantes-all-black",
+            "lancheira-mix-coracoes-flutuantes-all-black-nl",
+            "lancheira-mix-mapa-mundi-rosa",
+            "lancheira-mix-minha-paleta",
+            "lancheira-mix-poeira-das-estrelas",
+            "mixbrcoracoesflutuantes-lancheiramixbr",
+            "mixbrmapamundirosa-lancheiramixbr",
+            "mixcoracoesflutuantesallblack-lancheiramix",
+            "mixmapamundirosa-lancheiramix",
+            "mixmarrom-lancheiramix",
+            "mixmelancia-lancheiramix",
+            "mixmelancia-lancheiramixnfc",
+            "mixminhapaleta-lancheiramix",
+            "mixoffwhite-lancheiramix",
+            "mixpoeiradasestrelas-lancheiramix",
+            "mixpreta-lancheiramix"
+          ],
+          "product_types": [],
+          "unsupported_product_ids": [],
+          "random_order": true,
+          "match_color": false,
+          "gifts": [
+            {
+              "variant_id": "68933",
+              "name": "Gift Marmita Duo Preta",
+              "image": "https://static-production.gocase.com.br/products/70555/product/marmita_br_23-preta.jpg?1729697176",
+              "in_stock": false
+            },
+            {
+              "variant_id": "69067",
+              "name": "Gift Garrafa Flow Preta",
+              "image": "https://static-production.gocase.com.br/products/70651/product/preta.jpg?1730151880",
+              "in_stock": true
+            },
+            {
+              "variant_id": "69218",
+              "name": "Gift Garrafa Flow Branca",
+              "image": "https://static-production.gocase.com.br/products/70656/product/branca.jpg?1730291081",
+              "in_stock": true
+            },
+            {
+              "variant_id": "69219",
+              "name": "Gift Garrafa Flow Turquesa",
+              "image": "https://static-production.gocase.com.br/products/70655/product/turquesa.jpg?1730291055",
+              "in_stock": true
+            },
+            {
+              "variant_id": "69220",
+              "name": "Gift Garrafa Flow Rosa",
+              "image": "https://static-production.gocase.com.br/products/70654/product/rosa.jpg?1730291022",
+              "in_stock": true
+            },
+            {
+              "variant_id": "69221",
+              "name": "Gift Garrafa Flow Melancia",
+              "image": "https://static-production.gocase.com.br/products/70653/product/melancia.jpg?1730290991",
+              "in_stock": true
+            },
+            {
+              "variant_id": "69222",
+              "name": "Gift Garrafa Flow Azul",
+              "image": "https://static-production.gocase.com.br/products/70652/product/azul.jpg?1730290968",
+              "in_stock": true
+            },
+            {
+              "variant_id": "86792",
+              "name": "Gift Marmita Up - Rosa",
+              "image": "https://static-production.gocase.com.br/products/72003/product/01_up_rosa.jpg?1753290369",
+              "in_stock": true
+            },
+            {
+              "variant_id": "86791",
+              "name": "Gift Marmita Up - Azul Claro",
+              "image": "https://static-production.gocase.com.br/products/72004/product/01_up_azul_claro.jpg?1753290373",
+              "in_stock": true
+            },
+            {
+              "variant_id": "86790",
+              "name": "Gift Marmita Up - Melancia",
+              "image": "https://static-production.gocase.com.br/products/72005/product/01_up_melancia.jpg?1753290379",
+              "in_stock": true
+            }
+          ]
+        },
+        "rules": [
+          {
+            "name": "material_quantity",
+            "attributes": {
+              "materials": [
+                "lancheira-mix-coracoes-flutuantes",
+                "lancheira-mix-coracoes-flutuantes-all-black",
+                "lancheira-mix-coracoes-flutuantes-all-black-nl",
+                "lancheira-mix-mapa-mundi-rosa",
+                "lancheira-mix-minha-paleta",
+                "lancheira-mix-poeira-das-estrelas",
+                "fruitazul-lancheirafruitbr",
+                "fruitazullavanda-lancheirafruit",
+                "fruitoffwhite-lancheirafruit",
+                "fruitpretabr-lancheirafruitbr",
+                "fruitpreta-lancheirafruit",
+                "fruitprorosa-lancheirafruit",
+                "fruitrosa-lancheirafruitbr",
+                "fruitrosaoffwhite-lancheirafruit",
+                "mixcoracoesflutuantesallblack-lancheiramix",
+                "mixmapamundirosa-lancheiramix",
+                "mixmarrom-lancheiramix",
+                "mixmelancia-lancheiramix",
+                "mixmelancia-lancheiramixnfc",
+                "mixminhapaleta-lancheiramix",
+                "mixoffwhite-lancheiramix",
+                "mixpoeiradasestrelas-lancheiramix",
+                "mixpreta-lancheiramix"
+              ],
+              "quantity": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "Copo Life 1180ml / Garrafa Pro 750 - Base Fit M",
+        "gift_rules": {
+          "materials": [
+            "360lifeazulclaro-copolife1180ebook",
+            "360lifeazulmarinho-copolife1180ebook",
+            "360lifebranco-copolife1180ebook",
+            "360lifedegradelilaserosa-copolife1180ebook",
+            "360lifelaranja-copolife1180ebook",
+            "360lifelilas-copolife1180ebook",
+            "360lifeoffwhite-copolife1180ebook",
+            "360lifepink-copolife1180ebook",
+            "360lifepreto-copolife1180ebook",
+            "360liferosaclaro-copolife1180ebook",
+            "360probranco-garrafapro750ebook",
+            "360procinza-garrafapro750ebook",
+            "360propreta-garrafapro750ebook",
+            "360prorosaeroxo-garrafapro750ebook",
+            "360prorosa-garrafapro750ebook"
+          ],
+          "product_types": [],
+          "unsupported_product_ids": [],
+          "random_order": true,
+          "match_color": false,
+          "gifts": [
+            {
+              "variant_id": "78830",
+              "name": "Gift Base Fit Preta - M",
+              "image": "https://static-production.gocase.com.br/products/71515/product/_LF_1364_Preta.jpg?1743447829",
+              "in_stock": true
+            },
+            {
+              "variant_id": "78827",
+              "name": "Gift Base Fit Rosa - M",
+              "image": "https://static-production.gocase.com.br/products/71512/product/_LF_1374_Rosa.jpg?1743447684",
+              "in_stock": false
+            },
+            {
+              "variant_id": "78835",
+              "name": "Gift Base Fit Off White - M",
+              "image": "https://static-production.gocase.com.br/products/71520/product/_LF_1396_OFF_WHITE.jpg?1743447921",
+              "in_stock": true
+            },
+            {
+              "variant_id": "78831",
+              "name": "Gift Base Fit Pink - M",
+              "image": "https://static-production.gocase.com.br/products/71516/product/_LF_1396_PINK.jpg?1743447854",
+              "in_stock": false
+            },
+            {
+              "variant_id": "78841",
+              "name": "Gift Base Fit Branca - M",
+              "image": "https://static-production.gocase.com.br/products/71523/product/_LF_1396_Branca.jpg?1743447996",
+              "in_stock": true
+            },
+            {
+              "variant_id": "78839",
+              "name": "Gift Base Fit Azul Claro - M",
+              "image": "https://static-production.gocase.com.br/products/71522/product/_LF_1396_AZUL_CLARO.jpg?1743447992",
+              "in_stock": true
+            },
+            {
+              "variant_id": "78840",
+              "name": "Gift Base Fit Azul Marinho - M",
+              "image": "https://static-production.gocase.com.br/products/71524/product/_LF_1351_Marinho.jpg?1743447995",
+              "in_stock": true
+            },
+            {
+              "variant_id": "78836",
+              "name": "Gift Base Fit Lilás - M\t",
+              "image": "https://static-production.gocase.com.br/products/71521/product/_LF_1383_Lilas.jpg?1743447941",
+              "in_stock": true
+            }
+          ]
+        },
+        "rules": [
+          {
+            "name": "material_quantity",
+            "attributes": {
+              "materials": [
+                "360lifeazulclaro-copolife1180ebook",
+                "360lifeazulmarinho-copolife1180ebook",
+                "360lifebranco-copolife1180ebook",
+                "360lifedegradelilaserosa-copolife1180ebook",
+                "360lifelaranja-copolife1180ebook",
+                "360lifelilas-copolife1180ebook",
+                "360lifeoffwhite-copolife1180ebook",
+                "360lifepink-copolife1180ebook",
+                "360lifepreto-copolife1180ebook",
+                "360liferosaclaro-copolife1180ebook",
+                "360probranco-garrafapro750ebook",
+                "360procinza-garrafapro750ebook",
+                "360propreta-garrafapro750ebook",
+                "360prorosaeroxo-garrafapro750ebook",
+                "360prorosa-garrafapro750ebook"
+              ],
+              "quantity": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "Copo Life 880 / Garrafa Fun 460 - Base Fit P - Escolha",
+        "gift_rules": {
+          "materials": [
+            "360hangerazulclaro-hangerlife880ebook",
+            "360hangerbranco-hangerlife880ebook",
+            "360hangerlilas-hangerlife880ebook",
+            "360hangeroffwhite-hangerlife880ebook",
+            "360hangerpink-hangerlife880ebook",
+            "360hangerpreto-hangerlife880ebook",
+            "360hangerrosaclaro-hangerlife880ebook",
+            "360kidsazulclaro-garrafakids460ebook",
+            "360kidsbranco-garrafakids460ebook",
+            "360kidsmelancia-garrafakids460ebook",
+            "360kidspreto-garrafakids460ebook",
+            "360lifeazulclaro-copolife880ebook",
+            "360lifeazulmarinho-copolife880ebook",
+            "360lifebranco-copolife880ebook",
+            "360lifedegradelilaserosa-copolife880ebook",
+            "360lifelilas-copolife880ebook",
+            "360lifeoffwhite-copolife880ebook",
+            "360lifepink-copolife880ebook",
+            "360lifepreto-copolife880ebook",
+            "360liferosaclaro-copolife880ebook"
+          ],
+          "product_types": [],
+          "unsupported_product_ids": [],
+          "random_order": true,
+          "match_color": false,
+          "gifts": [
+            {
+              "variant_id": "78834",
+              "name": "Gift Base Fit Preta - P",
+              "image": "https://static-production.gocase.com.br/products/71519/product/imgmaterial_-_fitp_-_preto.jpg?1743447919",
+              "in_stock": true
+            },
+            {
+              "variant_id": "78833",
+              "name": "Gift Base Fit Pink - P",
+              "image": "https://static-production.gocase.com.br/products/71518/product/imgmaterial_-_fitp_-_pink.jpg?1743447910",
+              "in_stock": false
+            },
+            {
+              "variant_id": "78820",
+              "name": "Gift Base Fit Azul Claro - P",
+              "image": "https://static-production.gocase.com.br/products/71506/product/imgmaterial_-_fitp_AZUL_CLARO.jpg?1743443700",
+              "in_stock": true
+            },
+            {
+              "variant_id": "78829",
+              "name": "Gift Base Fit Melancia - P",
+              "image": "https://static-production.gocase.com.br/products/71514/product/imgmaterial_-_fitp_-_melancia.jpg?1743447771",
+              "in_stock": true
+            },
+            {
+              "variant_id": "78821",
+              "name": "Gift Base Fit Azul Marinho - P",
+              "image": "https://static-production.gocase.com.br/products/71508/product/imgmaterial_-_fitp_-_azul_marinho.jpg?1743447524",
+              "in_stock": true
+            },
+            {
+              "variant_id": "78822",
+              "name": "Gift Base Fit Branca - P",
+              "image": "https://static-production.gocase.com.br/products/71509/product/imgmaterial_-_fitp-_branco.jpg?1743447530",
+              "in_stock": true
+            },
+            {
+              "variant_id": "78823",
+              "name": "Gift Base Fit Laranja - P",
+              "image": "https://static-production.gocase.com.br/products/71510/product/imgmaterial_-_fitp_-_laranja.jpg?1743447541",
+              "in_stock": false
+            },
+            {
+              "variant_id": "78824",
+              "name": "Gift Base Fit Lemon - P",
+              "image": "https://static-production.gocase.com.br/products/71511/product/imgmaterial_-_fitp_LEMON.jpg?1743447605",
+              "in_stock": true
+            },
+            {
+              "variant_id": "78828",
+              "name": "Gift Base Fit Lilás - P",
+              "image": "https://static-production.gocase.com.br/products/71513/product/imgmaterial_-_fitp_-_lilas.jpg?1743447752",
+              "in_stock": true
+            },
+            {
+              "variant_id": "78842",
+              "name": "Gift Base Fit Vermelha - P",
+              "image": "https://static-production.gocase.com.br/products/71525/product/imgmaterial_-_fitp_-_VERMELHO.jpg?1743448071",
+              "in_stock": false
+            },
+            {
+              "variant_id": "78832",
+              "name": "Gift Base Fit Off White - P",
+              "image": "https://static-production.gocase.com.br/products/71517/product/imgmaterial_-_fitp_-_OFF_WHITE.jpg?1743447904",
+              "in_stock": false
+            },
+            {
+              "variant_id": "78845",
+              "name": "Gift Base Fit Rosa - P",
+              "image": "https://static-production.gocase.com.br/products/71528/product/img_material_-_fit_p_-_rosa_claro.jpg?1743448111",
+              "in_stock": true
+            },
+            {
+              "variant_id": "78844",
+              "name": "Gift Base Fit Turquesa - P",
+              "image": "https://static-production.gocase.com.br/products/71527/product/imgmaterial_-_fitp_-_TURQUESA.jpg?1743448103",
+              "in_stock": false
+            },
+            {
+              "variant_id": "78843",
+              "name": "Gift Base Fit Roxa - P",
+              "image": "https://static-production.gocase.com.br/products/71526/product/imgmaterial_-_fitp_-_roxo.jpg?1743448096",
+              "in_stock": false
+            }
+          ]
+        },
+        "rules": [
+          {
+            "name": "material_quantity",
+            "attributes": {
+              "materials": [
+                "360hangerazulclaro-hangerlife880ebook",
+                "360hangerbranco-hangerlife880ebook",
+                "360hangerlilas-hangerlife880ebook",
+                "360hangeroffwhite-hangerlife880ebook",
+                "360hangerpink-hangerlife880ebook",
+                "360hangerpreto-hangerlife880ebook",
+                "360hangerrosaclaro-hangerlife880ebook",
+                "360lifeazulclaro-copolife880ebook",
+                "360lifeazulmarinho-copolife880ebook",
+                "360lifebranco-copolife880ebook",
+                "360lifedegradelilaserosa-copolife880ebook",
+                "360lifelilas-copolife880ebook",
+                "360lifeoffwhite-copolife880ebook",
+                "360lifepink-copolife880ebook",
+                "360lifepreto-copolife880ebook",
+                "360liferosaclaro-copolife880ebook",
+                "360kidsazulclaro-garrafakids460ebook",
+                "360kidsbranco-garrafakids460ebook",
+                "360kidsmelancia-garrafakids460ebook",
+                "360kidspreto-garrafakids460ebook"
+              ],
+              "quantity": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "Mala de Bordo Trip + Kit Borracha Rodinhas",
+        "gift_rules": {
+          "materials": [
+            "tripmapamundirosa-mala20",
+            "tripoffwhite-mala20",
+            "trippoeiradasestrelas-mala20",
+            "trippreta-mala20",
+            "triprosa-mala20",
+            "tripturquesa-mala20"
+          ],
+          "product_types": [],
+          "unsupported_product_ids": [
+            "46946",
+            "53362"
+          ],
+          "random_order": true,
+          "match_color": false,
+          "gifts": [
+            {
+              "variant_id": "76096",
+              "name": "Gift Kit de Borracha protetora para rodinhas - Rosa - Mala Trip 20\"",
+              "image": "https://static-production.gocase.com.br/products/71462/product/gocase-1612-706.jpg?1739566606",
+              "in_stock": true
+            },
+            {
+              "variant_id": "76097",
+              "name": "Gift Kit de Borracha protetora para rodinhas - Cinza - Mala Trip 20\"",
+              "image": "https://static-production.gocase.com.br/products/71463/product/gocase-1612-701.jpg?1739566618",
+              "in_stock": true
+            },
+            {
+              "variant_id": "76098",
+              "name": "Gift Kit de Borracha protetora para rodinhas - Lilás - Mala Trip 20\"",
+              "image": "https://static-production.gocase.com.br/products/71464/product/gocase-1612-704.jpg?1739566620",
+              "in_stock": true
+            }
+          ]
+        },
+        "rules": [
+          {
+            "name": "material_quantity",
+            "attributes": {
+              "materials": [
+                "tripmapamundirosa-mala20",
+                "tripoffwhite-mala20",
+                "trippoeiradasestrelas-mala20",
+                "trippreta-mala20",
+                "triprosa-mala20",
+                "tripturquesa-mala20"
+              ],
+              "quantity": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "Garrafa Fresh 650/350 + Tampa ou Base Fit P",
+        "gift_rules": {
+          "materials": [
+            "360freshazulclarov3-garrafafresh650",
+            "360freshazulclarov3-garrafafresh650ebook",
+            "360freshazulmarinhov3-garrafafresh650",
+            "360freshazulmarinhov3-garrafafresh650ebook",
+            "360freshbrancav3-garrafafresh650",
+            "360freshbrancav3-garrafafresh650ebook",
+            "360freshdegraderosalilas-garrafafresh650ebook",
+            "360freshlaranja-garrafafresh650ebook",
+            "360freshlemon-garrafafresh650ebook",
+            "360freshlilasv3-garrafafresh650",
+            "360freshlilasv3-garrafafresh650ebook",
+            "360freshmarrom-garrafafresh650ebook",
+            "360freshmelanciav3-garrafafresh650",
+            "360freshmelanciav3-garrafafresh650ebook",
+            "360freshminiazul-garrafafresh350ebook",
+            "360freshminibranca-garrafafresh350ebook",
+            "360freshminimelancia-garrafafresh350ebook",
+            "360freshminipreta-garrafafresh350ebook",
+            "360freshoffwhite-garrafafresh650ebook",
+            "360freshpink-garrafafresh650",
+            "360freshpink-garrafafresh650ebook",
+            "360freshpretav3-garrafafresh650",
+            "360freshpretav3-garrafafresh650ebook",
+            "360freshrosav3-garrafafresh650",
+            "360freshrosav3-garrafafresh650ebook",
+            "360freshroxo-garrafafresh650ebook",
+            "360freshturquesav3-garrafafresh650",
+            "360freshturquesav3-garrafafresh650ebook",
+            "360freshvermelho-garrafafresh650ebook",
+            "360freshvinho-garrafafresh650ebook",
+            "360miniazul-garrafamini350ebook",
+            "360miniazulmarinho-garrafamini350ebook",
+            "360minibranca-garrafamini350ebook",
+            "360minidegradeazulerosa-garrafamini350ebook",
+            "360minilaranja-garrafamini350ebook",
+            "360minililas-garrafamini350ebook",
+            "360minimelancia-garrafamini350ebook",
+            "360minioffwhite-garrafamini350ebook",
+            "360minipink-garrafamini350ebook",
+            "360minipreta-garrafamini350ebook",
+            "360minirosa-garrafamini350ebook",
+            "360minivermelha-garrafamini350ebook"
+          ],
+          "product_types": [],
+          "unsupported_product_ids": [],
+          "random_order": true,
+          "match_color": false,
+          "gifts": [
+            {
+              "variant_id": "78834",
+              "name": "Gift Base Fit Preta - P",
+              "image": "https://static-production.gocase.com.br/products/71519/product/imgmaterial_-_fitp_-_preto.jpg?1743447919",
+              "in_stock": true
+            },
+            {
+              "variant_id": "78828",
+              "name": "Gift Base Fit Lilás - P",
+              "image": "https://static-production.gocase.com.br/products/71513/product/imgmaterial_-_fitp_-_lilas.jpg?1743447752",
+              "in_stock": true
+            },
+            {
+              "variant_id": "78829",
+              "name": "Gift Base Fit Melancia - P",
+              "image": "https://static-production.gocase.com.br/products/71514/product/imgmaterial_-_fitp_-_melancia.jpg?1743447771",
+              "in_stock": true
+            },
+            {
+              "variant_id": "59608",
+              "name": "Gift Base de Silicone Slim 650ml / Lemon",
+              "image": "https://static-production.gocase.com.br/products/69857/product/amarelo_650_1.jpg?1720650166",
+              "in_stock": true
+            },
+            {
+              "variant_id": "78822",
+              "name": "Gift Base Fit Branca - P",
+              "image": "https://static-production.gocase.com.br/products/71509/product/imgmaterial_-_fitp-_branco.jpg?1743447530",
+              "in_stock": true
+            },
+            {
+              "variant_id": "78845",
+              "name": "Gift Base Fit Rosa - P",
+              "image": "https://static-production.gocase.com.br/products/71528/product/img_material_-_fit_p_-_rosa_claro.jpg?1743448111",
+              "in_stock": true
+            },
+            {
+              "variant_id": "76837",
+              "name": "Gift - Tampa Pink - Garrafa Fresh",
+              "image": "https://static-production.gocase.com.br/products/71495/product/pinktampa.jpg?1745758499",
+              "in_stock": false
+            },
+            {
+              "variant_id": "80257",
+              "name": "Gift - Tampa Laranja - Garrafa Fresh",
+              "image": "https://static-production.gocase.com.br/products/71611/product/laranjaimgmaterial.jpg?1745758800",
+              "in_stock": true
+            },
+            {
+              "variant_id": "60748",
+              "name": "Gift - Tampa Lilás - Garrafa Fresh",
+              "image": "https://static-production.gocase.com.br/products/70194/product/lil%C3%A1s_02_f.jpg?1722868941",
+              "in_stock": true
+            },
+            {
+              "variant_id": "60744",
+              "name": "Gift - Tampa Branca - Garrafa Fresh",
+              "image": "https://static-production.gocase.com.br/products/70198/product/branca_02.jpg?1722869064",
+              "in_stock": true
+            },
+            {
+              "variant_id": "60745",
+              "name": "Gift - Tampa Preta - Garrafa Fresh",
+              "image": "https://static-production.gocase.com.br/products/70197/product/preta_02.jpg?1722869034",
+              "in_stock": true
+            },
+            {
+              "variant_id": "60746",
+              "name": "Gift - Tampa Rosa - Garrafa Fresh",
+              "image": "https://static-production.gocase.com.br/products/70196/product/rosa_02.jpg?1722869003",
+              "in_stock": true
+            },
+            {
+              "variant_id": "60747",
+              "name": "Gift - Tampa Turquesa - Garrafa Fresh",
+              "image": "https://static-production.gocase.com.br/products/70195/product/turquesa_02_f.jpg?1722868966",
+              "in_stock": false
+            },
+            {
+              "variant_id": "60749",
+              "name": "Gift - Tampa Azul Claro - Garrafa Fresh",
+              "image": "https://static-production.gocase.com.br/products/70193/product/azul_claro_02.jpg?1722868913",
+              "in_stock": true
+            },
+            {
+              "variant_id": "60750",
+              "name": "Gift - Tampa Azul Marinho - Garrafa Fresh",
+              "image": "https://static-production.gocase.com.br/products/70192/product/azul_marinho_02.jpg?1722868882",
+              "in_stock": true
+            },
+            {
+              "variant_id": "60751",
+              "name": "Gift - Tampa Melancia - Garrafa Fresh",
+              "image": "https://static-production.gocase.com.br/products/70191/product/melancia_02.jpg?1722868838",
+              "in_stock": true
+            },
+            {
+              "variant_id": "78820",
+              "name": "Gift Base Fit Azul Claro - P",
+              "image": "https://static-production.gocase.com.br/products/71506/product/imgmaterial_-_fitp_AZUL_CLARO.jpg?1743443700",
+              "in_stock": true
+            },
+            {
+              "variant_id": "78821",
+              "name": "Gift Base Fit Azul Marinho - P",
+              "image": "https://static-production.gocase.com.br/products/71508/product/imgmaterial_-_fitp_-_azul_marinho.jpg?1743447524",
+              "in_stock": true
+            }
+          ]
+        },
+        "rules": [
+          {
+            "name": "material_quantity",
+            "attributes": {
+              "materials": [
+                "360freshazulclarov3-garrafafresh650",
+                "360freshazulmarinhov3-garrafafresh650",
+                "360freshbrancav3-garrafafresh650",
+                "360freshlilasv3-garrafafresh650",
+                "360freshmelanciav3-garrafafresh650",
+                "360freshpink-garrafafresh650",
+                "360freshpretav3-garrafafresh650",
+                "360freshrosav3-garrafafresh650",
+                "360freshturquesav3-garrafafresh650",
+                "360freshazulclarov3-garrafafresh650ebook",
+                "360freshazulmarinhov3-garrafafresh650ebook",
+                "360freshbrancav3-garrafafresh650ebook",
+                "360freshdegraderosalilas-garrafafresh650ebook",
+                "360freshlaranja-garrafafresh650ebook",
+                "360freshlemon-garrafafresh650ebook",
+                "360freshlilasv3-garrafafresh650ebook",
+                "360freshmarrom-garrafafresh650ebook",
+                "360freshmelanciav3-garrafafresh650ebook",
+                "360freshminiazul-garrafafresh350ebook",
+                "360freshminibranca-garrafafresh350ebook",
+                "360freshminimelancia-garrafafresh350ebook",
+                "360freshminipreta-garrafafresh350ebook",
+                "360freshoffwhite-garrafafresh650ebook",
+                "360freshpink-garrafafresh650ebook",
+                "360freshpretav3-garrafafresh650ebook",
+                "360freshrosav3-garrafafresh650ebook",
+                "360freshroxo-garrafafresh650ebook",
+                "360freshturquesav3-garrafafresh650ebook",
+                "360freshvermelho-garrafafresh650ebook",
+                "360freshvinho-garrafafresh650ebook",
+                "360miniazul-garrafamini350ebook",
+                "360miniazulmarinho-garrafamini350ebook",
+                "360minibranca-garrafamini350ebook",
+                "360minidegradeazulerosa-garrafamini350ebook",
+                "360minilaranja-garrafamini350ebook",
+                "360minililas-garrafamini350ebook",
+                "360minimelancia-garrafamini350ebook",
+                "360minioffwhite-garrafamini350ebook",
+                "360minipink-garrafamini350ebook",
+                "360minipreta-garrafamini350ebook",
+                "360minirosa-garrafamini350ebook",
+                "360minivermelha-garrafamini350ebook"
+              ],
+              "quantity": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "Mala Voyage + Kit Borracha Rodinhas / Capa Protetora",
+        "gift_rules": {
+          "materials": [
+            "malavoyagepreta-malavoyage"
+          ],
+          "product_types": [],
+          "unsupported_product_ids": [],
+          "random_order": false,
+          "match_color": false,
+          "gifts": [
+            {
+              "variant_id": "76096",
+              "name": "Gift Kit de Borracha protetora para rodinhas - Rosa - Mala Trip 20\"",
+              "image": "https://static-production.gocase.com.br/products/71462/product/gocase-1612-706.jpg?1739566606",
+              "in_stock": true
+            },
+            {
+              "variant_id": "76097",
+              "name": "Gift Kit de Borracha protetora para rodinhas - Cinza - Mala Trip 20\"",
+              "image": "https://static-production.gocase.com.br/products/71463/product/gocase-1612-701.jpg?1739566618",
+              "in_stock": true
+            },
+            {
+              "variant_id": "76098",
+              "name": "Gift Kit de Borracha protetora para rodinhas - Lilás - Mala Trip 20\"",
+              "image": "https://static-production.gocase.com.br/products/71464/product/gocase-1612-704.jpg?1739566620",
+              "in_stock": true
+            },
+            {
+              "variant_id": "75912",
+              "name": "Gift - Capa Protetora Mala de Bordo Trip 20\"",
+              "image": "https://static-production.gocase.com.br/products/71457/product/gocase-1612-713_capa_de_mala_ajustada_2.jpg?1739280248",
+              "in_stock": true
+            }
+          ]
+        },
+        "rules": [
+          {
+            "name": "material_quantity",
+            "attributes": {
+              "materials": [
+                "malavoyagepreta-malavoyage"
+              ],
+              "quantity": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "Tote Daily + MIMO (Organizador / Necessaire)",
+        "gift_rules": {
+          "materials": [
+            "toteamora-totebag",
+            "totebegemarrom-totebag",
+            "toteestreladacasa-totebag",
+            "totemarrom-totebag",
+            "toteoffwhite-totebag",
+            "totepreta-totebag",
+            "toterosa-totebag",
+            "toteroyalmarrom-totebag"
+          ],
+          "product_types": [],
+          "unsupported_product_ids": [],
+          "random_order": false,
+          "match_color": false,
+          "gifts": [
+            {
+              "variant_id": "70341",
+              "name": "Gift Necessaire Holografica",
+              "image": "https://static-production.gocase.com.br/products/70696/product/02.jpg?1732805117",
+              "in_stock": true
+            },
+            {
+              "variant_id": "70321",
+              "name": "Gift Organizador Marrom",
+              "image": "https://static-production.gocase.com.br/products/70694/product/_LF_1446.jpg?1745611680",
+              "in_stock": true
+            },
+            {
+              "variant_id": "70322",
+              "name": "Gift Organizador Cinza",
+              "image": "https://static-production.gocase.com.br/products/70695/product/_LF_1451.jpg?1745611744",
+              "in_stock": false
+            },
+            {
+              "variant_id": "68899",
+              "name": "Gift Organizador Preto",
+              "image": "https://static-production.gocase.com.br/products/70527/product/organizador_de_mala_preto_1.jpg?1729621698",
+              "in_stock": true
+            },
+            {
+              "variant_id": "68900",
+              "name": "Gift Organizador Rosa",
+              "image": "https://static-production.gocase.com.br/products/70534/product/organizador_de_mala_rosa_1.jpg?1729621923",
+              "in_stock": false
+            }
+          ]
+        },
+        "rules": [
+          {
+            "name": "material_quantity",
+            "attributes": {
+              "materials": [
+                "toteamora-totebag",
+                "totebegemarrom-totebag",
+                "toteestreladacasa-totebag",
+                "totemarrom-totebag",
+                "toteoffwhite-totebag",
+                "totepreta-totebag",
+                "toterosa-totebag",
+                "toteroyalmarrom-totebag"
+              ],
+              "quantity": 1
+            }
+          }
+        ]
+      }
+    ],
+    "cheapest_item_discount": [
+      {
+        "name": "Compre 2, Pague 1 (Só capinhas)",
+        "discount_rules": [
+          {
+            "quantity_trigger": "2",
+            "quantity_discount": "1",
+            "discount": "100",
+            "cumulative": "1",
+            "filter_type": "whitelist",
+            "product_type_codes": [
+              "case"
+            ],
+            "collection_id": "",
+            "blocklisted_materials": [
+              "casesiliconeblue-iphone11",
+              "casesiliconeblue-iphone15promax",
+              "casesiliconepink-iphone13",
+              "casesiliconepink-iphone14pro",
+              "casesiliconeblack-iphone15pro",
+              "casesiliconeoffwhite-iphone13",
+              "casesiliconeblue-iphone14",
+              "casesiliconeblack-iphone15promax",
+              "casesiliconepink-iphone12",
+              "casesiliconeblue-iphone14pro",
+              "casesiliconeblack-iphone14pro",
+              "casesiliconeblack-iphone12pro",
+              "casesiliconeoffwhite-iphone12pro",
+              "casesiliconepink-iphone12pro",
+              "casesiliconeblue-iphone13",
+              "casesiliconeblue-iphone15pro",
+              "casesiliconepink-iphone15pro",
+              "casesiliconeoffwhite-iphone14pro",
+              "casesiliconeoffwhite-iphone14promax",
+              "casesiliconepink-iphone14promax",
+              "casesiliconeblack-iphone14promax",
+              "casesiliconeblue-iphone14promax",
+              "casesiliconeoffwhite-iphone15",
+              "casesiliconepink-iphone15",
+              "casesiliconeblack-iphone15",
+              "casesiliconeblue-iphone15",
+              "casesiliconeoffwhite-iphone15pro",
+              "casesiliconeoffwhite-iphone15promax",
+              "casesiliconepink-iphone15promax",
+              "casesiliconeblack-iphone11",
+              "casesiliconeblack-iphone12",
+              "casesiliconeblack-iphone13",
+              "casesiliconeblack-iphone13promax",
+              "casesiliconeblack-iphone14",
+              "casesiliconeblue-iphone13promax",
+              "casesiliconeblue-iphone12pro",
+              "casesiliconeblue-iphone12",
+              "casesiliconepink-iphone14",
+              "casesiliconepink-iphone13promax",
+              "casesiliconepink-iphone11",
+              "casesiliconeoffwhite-iphone11",
+              "casesiliconeoffwhite-iphone12",
+              "casesiliconeoffwhite-iphone13promax",
+              "casesiliconeoffwhite-iphone14",
+              "casecouropreto-iphone16",
+              "casecouroazulescuro-iphone1314-nfc",
+              "casecouroazulescuro-iphone1314-b2b",
+              "casecouromarrom-iphone1314-b2b",
+              "casecouromarrom-iphone1314-nfc",
+              "casecouropreto-iphone1314-nfc",
+              "casecouropreto-iphone1314-b2b",
+              "casecouromarrom-iphone14promax-b2b",
+              "casecouromarrom-iphone14promax-nfc",
+              "casecouromarrom-iphone15promax-nfc",
+              "casecouromarrom-iphone15promax-b2b",
+              "casecouropreto-iphone14promax-nfc",
+              "casecouropreto-iphone14promax-b2b",
+              "casecouropreto-iphone15promax",
+              "casecouropreto-iphone15promax-nfc",
+              "casecouroazulescuro-iphone14promax",
+              "casecouropreto-iphone15promax-b2b",
+              "casecouroazulescuro-iphone14promax-b2b",
+              "casecouroazulescuro-iphone14promax-nfc",
+              "casecouroazulescuro-iphone15promax-b2b",
+              "casecouroazulescuro-iphone15promax",
+              "casecouroazulescuro-iphone15promax-nfc",
+              "casecouromarrom-iphone16-nfc",
+              "casecouromarrom-iphone16-b2b",
+              "casecouroazulescuro-iphone15pro-b2b",
+              "casecouropreto-iphone15pro-b2b",
+              "casecouroazulescuro-iphone16pro",
+              "casecouropreto-iphone15pro",
+              "casecouropreto-iphone15",
+              "casecouropreto-iphone16-b2b",
+              "casecouromarrom-iphone16promax",
+              "casecouropreto-iphone16pro",
+              "casecouromarrom-iphone15promax",
+              "casecouromarrom-iphone15pro",
+              "casecouropreto-iphone16-nfc",
+              "casecouroazulescuro-iphone15pro-nfc",
+              "casecouroazulescuro-iphone16-nfc",
+              "casecouroazulescuro-iphone16-b2b",
+              "casecouropreto-iphone15pro-nfc",
+              "casecouropreto-iphone15-nfc",
+              "casecouroazulescuro-iphone16promax",
+              "casecouromarrom-iphone16pro",
+              "casecouromarrom-iphone15pro-b2b",
+              "casecouromarrom-iphone15pro-nfc",
+              "casecouromarrom-iphone16pro-b2b",
+              "casecouropreto-iphone16promax",
+              "casecouroazulescuro-iphone15pro",
+              "casecouromarrom-iphone16pro-nfc",
+              "casecouropreto-iphone15-b2b",
+              "casecouropreto-iphone16pro-nfc",
+              "casecouropreto-iphone16pro-b2b",
+              "casecouromarrom-iphone15-nfc",
+              "casecouromarrom-iphone15-b2b",
+              "casecouroazulescuro-iphone16pro-nfc",
+              "casecouroazulescuro-iphone16pro-b2b",
+              "casecouroazulescuro-iphone15-b2b",
+              "casecouroazulescuro-iphone15-nfc",
+              "casecouroazulescuro-iphone16promax-b2b",
+              "casecouroazulescuro-iphone16promax-nfc",
+              "casecouromarrom-iphone16promax-nfc",
+              "casecouromarrom-iphone16promax-b2b",
+              "casecouropreto-iphone16promax-nfc",
+              "casecouropreto-iphone16promax-b2b",
+              "casecouroazulescuro-iphone16",
+              "casecouropreto-iphone14promax",
+              "casecouromarrom-iphone16",
+              "casecouromarrom-iphone14promax",
+              "jovislimair-joviy29"
+            ],
+            "limited_taxons": [
+              {
+                "taxon": "7029",
+                "quantity": "2"
+              }
+            ]
+          }
+        ],
+        "rules": []
+      }
+    ]
+  },
+  "headers": {
+    "access-control-allow-credentials": "true",
+    "access-control-allow-methods": "GET, POST, PATCH, PUT, DELETE, OPTIONS",
+    "access-control-allow-origin": "https://www.gocase.com.br",
+    "access-control-expose-headers": "Cache-Control, Content-Language, Content-Length, Content-Type, Expires, Last-Modified, Pragma",
+    "access-control-max-age": "86400",
+    "age": "9",
+    "cache-control": "public, max-age=360, s-maxage=360, stale-while-revalidate=30, stale-if-error=30",
+    "cf-cache-status": "HIT",
+    "cf-ray": "9b967624f824b871-GRU",
+    "content-encoding": "br",
+    "content-type": "application/json; charset=utf-8",
+    "date": "Mon, 05 Jan 2026 22:37:40 GMT",
+    "etag": "W/\"37aa038b3129ffaba9d3b6163ffbafc3\"",
+    "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+    "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=2%2BVpHA7HVejyYJFBYoitcJ9U1rr6YimmtAsErkhmcuTOlHl55of2BHw7%2FzWFTVeqAzeMzrFzSw4hZ7lRvfY%2BNGWBk7Br8HpwLrFIba0yRvc%3D\"}]}",
+    "server": "cloudflare",
+    "strict-transport-security": "max-age=0; includeSubDomains",
+    "vary": "Origin, accept-encoding",
+    "x-content-type-options": "nosniff",
+    "x-envoy-upstream-service-time": "1761",
+    "x-frame-options": "SAMEORIGIN",
+    "x-request-id": "274c61a5-89b3-4970-89cc-943c265732ba",
+    "x-runtime": "1.754739",
+    "x-xss-protection": "1; mode=block"
+  }
+}

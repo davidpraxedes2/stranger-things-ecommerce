@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Admin - Stranger Things Store</title>
+    <link rel="stylesheet" href="admin.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Teko:wght@300;400;500;600;700&family=Merriweather:wght@300;400&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div class="login-screen" id="loginScreen">
+        <div class="login-container">
+            <div class="login-header">
+                <h1 class="login-title">PAINEL ADMIN</h1>
+                <p class="login-subtitle">Stranger Things Store</p>
+            </div>
+            <form class="login-form" id="loginForm">
+                <div class="form-group">
+                    <label>Usuário ou Email</label>
+                    <input type="text" id="loginUsername" required>
+                </div>
+                <div class="form-group">
+                    <label>Senha</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">ENTRAR</button>
+                <div class="login-info">
+                    <p><strong>Usuário padrão:</strong> admin</p>
+                    <p><strong>Senha padrão:</strong> admin123</p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div class="admin-panel" id="adminPanel" style="display: none;">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>ADMIN</h2>
+                <button class="logout-btn" id="logoutBtn">SAIR</button>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#dashboard" class="nav-item active" data-section="dashboard">
+                    📊 Dashboard
+                </a>
+                <a href="#products" class="nav-item" data-section="products">
+                    📦 Produtos
+                </a>
+                <a href="#orders" class="nav-item" data-section="orders">
+                    🛒 Pedidos
+                </a>
+                <a href="#customers" class="nav-item" data-section="customers">
+                    👥 Clientes
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Section -->
+            <section class="content-section active" id="dashboardSection">
+                <h1 class="section-title">Dashboard</h1>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Total de Produtos</h3>
+                        <p class="stat-value" id="statProducts">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total de Pedidos</h3>
+                        <p class="stat-value" id="statOrders">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Receita Total</h3>
+                        <p class="stat-value" id="statRevenue">R$ 0,00</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Products Section -->
+            <section class="content-section" id="productsSection">
+                <div class="section-header">
+                    <h1 class="section-title">Produtos</h1>
+                    <button class="btn btn-primary" id="addProductBtn">+ NOVO PRODUTO</button>
+                </div>
+
+                <!-- Products List -->
+                <div class="products-table-container">
+                    <table class="products-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Imagem</th>
+                                <th>Nome</th>
+                                <th>Categoria</th>
+                                <th>Preço</th>
+                                <th>Estoque</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsTableBody">
+                            <!-- Products will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Product Modal -->
+                <div class="modal" id="productModal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2 id="modalTitle">NOVO PRODUTO</h2>
+                            <button class="modal-close" id="closeModal">&times;</button>
+                        </div>
+                        <form class="modal-body" id="productForm">
+                            <input type="hidden" id="productId">
+                            
+                            <div class="form-group">
+                                <label>Nome do Produto *</label>
+                                <input type="text" id="productName" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Descrição</label>
+                                <textarea id="productDescription" rows="4"></textarea>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Preço (R$) *</label>
+                                    <input type="number" id="productPrice" step="0.01" min="0" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Categoria</label>
+                                    <select id="productCategory">
+                                        <option value="camisetas">Camisetas</option>
+                                        <option value="moletons">Moletons</option>
+                                        <option value="acessorios">Acessórios</option>
+                                        <option value="colecionaveis">Colecionáveis</option>
+                                        <option value="canecas">Canecas</option>
+                                        <option value="posters">Posters</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Estoque</label>
+                                    <input type="number" id="productStock" min="0" value="0">
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Status</label>
+                                    <select id="productActive">
+                                        <option value="1">Ativo</option>
+                                        <option value="0">Inativo</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Imagem do Produto</label>
+                                <input type="file" id="productImage" accept="image/*">
+                                <div id="imagePreview"></div>
+                            </div>
+
+                            <div class="modal-actions">
+                                <button type="button" class="btn btn-secondary" id="cancelBtn">CANCELAR</button>
+                                <button type="submit" class="btn btn-primary">SALVAR</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Orders Section -->
+            <section class="content-section" id="ordersSection">
+                <h1 class="section-title">Pedidos</h1>
+                <div class="orders-table-container">
+                    <table class="orders-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Cliente</th>
+                                <th>Email</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Data</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTableBody">
+                            <!-- Orders will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Customers Section -->
+            <section class="content-section" id="customersSection">
+                <div class="section-header">
+                    <h1 class="section-title">Clientes</h1>
+                    <button class="btn btn-primary" id="addCustomerBtn">+ NOVO CLIENTE</button>
+                </div>
+                <div class="customers-table-container">
+                    <table class="customers-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nome</th>
+                                <th>Email</th>
+                                <th>Telefone</th>
+                                <th>CPF</th>
+                                <th>Cidade</th>
+                                <th>Data Cadastro</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customersTableBody">
+                            <!-- Customers will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Customer Modal -->
+                <div class="modal" id="customerModal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2 id="customerModalTitle">NOVO CLIENTE</h2>
+                            <button class="modal-close" id="closeCustomerModal">&times;</button>
+                        </div>
+                        <form class="modal-body" id="customerForm">
+                            <input type="hidden" id="customerId">
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Nome Completo *</label>
+                                    <input type="text" id="customerName" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Email *</label>
+                                    <input type="email" id="customerEmail" required>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Telefone</label>
+                                    <input type="text" id="customerPhone">
+                                </div>
+                                <div class="form-group">
+                                    <label>CPF</label>
+                                    <input type="text" id="customerCpf">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Endereço</label>
+                                <input type="text" id="customerAddress">
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Cidade</label>
+                                    <input type="text" id="customerCity">
+                                </div>
+                                <div class="form-group">
+                                    <label>Estado</label>
+                                    <input type="text" id="customerState" maxlength="2">
+                                </div>
+                                <div class="form-group">
+                                    <label>CEP</label>
+                                    <input type="text" id="customerZipCode">
+                                </div>
+                            </div>
+
+                            <div class="modal-actions">
+                                <button type="button" class="btn btn-secondary" id="cancelCustomerBtn">CANCELAR</button>
+                                <button type="submit" class="btn btn-primary">SALVAR</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>
+
+
+

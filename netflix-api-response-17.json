@@ -1,0 +1,262 @@
+{
+  "url": "https://sh.customily.com/api/settings?shop=ntflx-en-us-main-001.myshopify.com",
+  "status": 200,
+  "data": {
+    "enabled": true,
+    "customJs": "function customilySetup() {\n  let customilyAddToCart = document.querySelector(\"#customily-personalize-button\");\n  let customilyAddToCartDirect = document.querySelector(\"#customily-cart-btn\");\n  let defaultAddToCart = document.querySelector(\".product-form__submit\");\n\n  window.addEventListener('message', function (e) {\n    if (e.data.type == 'variant_changed') {\n      if (typeof e.data.variant == 'undefined') {\n        let customilyAddToCart = document.querySelector(\"#customily-personalize-button\");\n        let customilyAddToCartDirect = document.querySelector(\"#customily-cart-btn\");\n        let defaultAddToCart = document.querySelector(\".product-form__submit\");\n        if (customilyAddToCart) {\n          customilyAddToCart.innerText = 'Unavailable';\n          customilyAddToCart.classList.add(\"invalid-button\");\n        }\n        if (customilyAddToCartDirect) {\n          customilyAddToCartDirect.innerText = 'Unavailable';\n          customilyAddToCartDirect.classList.add(\"invalid-button\");\n        }\n\n      } else {\n        let customilyAddToCart = document.querySelector(\"#customily-personalize-button\");\n        let customilyAddToCartDirect = document.querySelector(\"#customily-cart-btn\");\n        let defaultAddToCart = document.querySelector(\".product-form__submit\");\n        let customilyInputs = document.querySelectorAll(\".customily_option input[type='text']\");\n        let invalidInputs = false;\n        customilyInputs.forEach((input) => {\n          if (input.classList.contains(\"invalid-input\")) {\n            invalidInputs = true;\n          }\n        });\n        if (invalidInputs == false) {\n          if (customilyAddToCart) {\n            customilyAddToCart.innerText = 'Personalize';\n            customilyAddToCart.classList.remove(\"invalid-button\");\n          }\n          if (customilyAddToCartDirect) {\n            customilyAddToCartDirect.innerText = 'Add to Cart';\n            customilyAddToCartDirect.classList.remove(\"invalid-button\");\n            \n          }\n        } else {\n          if (customilyAddToCart) {\n            customilyAddToCart.classList.add(\"invalid-button\");\n          }\n          if (customilyAddToCartDirect) {\n            customilyAddToCartDirect.classList.add(\"invalid-button\");\n            \n          }\n        }\n      }\n    }\n  });\n\n\n\n  let totalValidity = true;\n  document.addEventListener(\"keyup\", (event) => {\n    let target = event.target;\n    if (target.closest(\".customily_option\") && (target.nodeName == 'INPUT' && target.getAttribute(\"type\") == 'text')) {\n      let profanityFree = true;\n      let emptySpacesFree = true;\n      let totalValidityArray = [];\n      let inputValidity = true;\n      let inputValue = target.value;  \n      let profanityPhrases = ['$#!T', '$H!T', '$H1T', '$HIT', '@SS', '@SSES', '@SSHOLE', '@SS HOLE', 'A$$', 'A$$ES', 'A$$HOLE', 'A$$ HOLE', 'ANAL', 'ANUS', 'ARSE', 'ARSEHOLE', 'ARSE HOLE', 'ASSES', 'ASSHOLE', 'ASSHOLES', 'ASS HOLE', 'ASS HOLES', 'BASTARD', 'BASTARDS', 'BASTERD', 'BASTERDS', 'BASTURD', 'BASTURDS', 'BIATCH', 'BIATCHES', 'BITCH', 'BITCHES', 'BITCHING', 'BITCHY', 'BLOWJOB', 'BLOWJOBS', 'BLOW JOB', 'BLOW JOBS', 'BONER', 'BONERS', 'BONG', 'BONGS', 'BULLSHIT', 'BUMFUCK', 'BUNGHOLE', 'BUTTFUCK', 'BUTTFUCKER', 'BUTTFUCKERS', 'BUTTHEAD', 'BUTTHEADS', 'BUTTHOLE', 'BUTTHOLES', 'BULL SHIT', 'BUM FUCK', 'BUNG HOLE', 'BUTT FUCK', 'BUTT FUCKER', 'BUTT FUCKERS', 'BUTT HEAD', 'BUTT HEADS', 'BUTT HOLE', 'BUTT HOLES', 'CLIT', 'CLITORIS', 'COCKSUCKER', 'CORNHOLE', 'CORNHOLES', 'COCK SUCKER', 'CORN HOLE', 'CORN HOLES', 'CRAP', 'CRAPPY', 'CRAPTACULAR', 'CRAPY', 'CUM', 'CUMCATCHER', 'CUM CATCHER', 'CUMBUCKET', 'CUMGUZZLER', 'CUM BUCKET', 'CUM GUZZLER', 'CUMSHOT', 'CUM SHOT', 'CUNT', 'CUNTS', 'DAMMIT', 'DAMN', 'DAMNIT', 'DAMN-IT', 'DAMN IT', 'DAYGO', 'DEGO', 'DICKHEAD', 'DICK HEAD', 'DICKLESS', 'DICKWAD', 'DICKWADS', 'DICKWEED', 'DICKWEEDS', 'DICK WAD', 'DICK WADS', 'DICK WEED', 'DICK WEEDS', 'DIKE', 'DIKES', 'DILDO', 'DILDOS', 'DONKEY PUNCH', 'DONKEY PUNCHED', 'DONKEY PUNCHES', 'DONKEYPUNCH', 'DONKEYPUNCHED', 'DONKEYPUNCHES', 'DONKY PUNCH', 'DONKYPUNCH', 'DUMBASS', 'DUMBASSES', 'DUMBBITCH', 'DUMBBITCHES', 'DUMBFUCK', 'DUMBFUCKS', 'DUMB ASS', 'DUMB ASSES', 'DUMB BITCH', 'DUMB BITCHES', 'DUMB FUCK', 'DUMB FUCKS', 'DYKE', 'DYKES', 'EJACULATE', 'ERECTION', 'ERECTIONS', 'F.U.C.K.', 'F0NDLE', 'F4GG0TZ', 'FACKING', 'FAG', 'FAGS', 'FAGGEY', 'FAGGOT', 'FAGGOTS', 'FAGGY', 'FAGOT', 'FART', 'FATASS', 'FATASSES', 'FATFUCK', 'FATFUCKS', 'FATFUCKER', 'FATFUCKERS', 'FAT ASS', 'FAT ASSES', 'FAT FUCK', 'FAT FUCKS', 'FAT FUCKER', 'FAT FUCKERS', 'FATSO', 'FATSOS', 'FCKING', 'FCUK', 'FELLATE', 'FELLATIO', 'FONDLE', 'FORESKIN', 'FORE SKIN', 'FORNICATE', 'FORNICATES', 'FUCK', 'FUCKS', 'FUCKA', 'FUCKABLE', 'FUCKED', 'FUCKEDUP', 'FUCKED UP', 'FUCKER', 'FUCKERS', 'FUCKFACE', 'FUCKFEST', 'FUCKHEAD', 'FUCKHEADS', 'FUCKHER', 'FUCK FACE', 'FUCK FEST', 'FUCK HEAD', 'FUCK HEADS', 'FUCK HER', 'FUCKIN', 'FUCKING', 'FUCKIT', 'FUCKME', 'FUCKOFF', 'FUCKTARD', 'FUCKTURD', 'FUCK YOU', 'FUCK OFF', 'FUCK TARD', 'FUCK TURD', 'FUCK YOU', 'FUUCK', 'GANGBANG', 'GANGBANGER', 'GANG BANG', 'GANG BANGER', 'GODAMN', 'GOD DAM', 'GOD DAMIT', 'GOD DAMN', 'GOD DAMNED', 'GOD DAMNIT', 'GODAMN', 'GODDAM', 'GODDAMIT', 'GODDAMN', 'GODDAMNED', 'GODDAMNIT', 'HEBE', 'HELLNO', 'HELLYES', 'HELL NO', 'HELL YES', 'HONKERS', 'HONKEY', 'HOOTERS', 'HORE', 'HORES', 'HORNEY', 'HORNY', 'HORSESHIT', 'HORSE SHIT', 'HUSSY', 'JACKASS', 'JACKASSES', 'JACKOFF', 'JACKOFFS', 'JERKOFF', 'JERKOFFS', 'JACK ASS', 'JACK ASSES', 'JACK OFF', 'JACK OFFS', 'JERK OFF', 'JERK OFFS', 'JISM', 'JIZ', 'JIZIM', 'JIZZ', 'JIZZED', 'JIZZIM', 'KICK@SS', 'KICK @SS', 'KIKE', 'KIKES', 'KNOCKERS', 'KOON', 'KOONS', 'KRAP', 'KRAPPY', 'KUM', 'KUNT', 'LIMPDICK', 'LIMP DICK', 'MASTABATE', 'MASTABATER', 'MASTERBATE', 'MASTERBLASTER', 'MASTRABATOR', 'MOFO', 'MO FO', 'MOLEST', 'MOLESTER', 'MOLESTOR', 'MOTHERFUCK', 'MOTHERFUCKER', 'MUFFDIVE', 'MUFFDIVER', 'MUFFINDIVER', 'MUFFLIKCER', 'MOTHER FUCK', 'MOTHER FUCKER', 'MUFF DIVE', 'MUFF DIVER', 'MUFFIN DIVER', 'MUFF LIKCER', 'MUTHA', 'MUTHAFUCKA', 'MUTHAFUCKER', 'MUTHA FUCKA', 'MUTHA FUCKER', 'NAZI', 'NAZIS', 'NEGRO', 'NEGROS', 'NIGER', 'NIGERS', 'NIGGA', 'NIGGAS', 'NIGGAZ', 'NIGGAR', 'NIGGARS', 'NIGGER', 'NIGGERS', 'NIGGERZ', 'NOOKIE', 'NOONER', 'ORGASIM', 'ORGASM', 'ORGASMS', 'ORGASMA', 'ORGASMIC', 'ORGIES', 'ORGY', 'P|$$', 'P|$$ED!', 'P|$$EDOFF', 'P|$$ED OFF', 'P0RN', 'PECKER', 'PECKERS', 'PEE', 'PENIS', 'PENISES', 'PISED', 'PISEDOFF', 'PISED OFF', 'PISS', 'PISSED', 'PISSER', 'PISSES', 'PISSHEAD', 'PISS HEAD', 'PISSING', 'PISSY', 'POON', 'POONTANG', 'POON TANG', 'POOP', 'POOPER', 'PORCHMONKEY', 'PORCHMONKEYS', 'PORCHMONKIES', 'PORCH MONKEY', 'PORCH MONKEYS', 'PORCH MONKIES', 'PORKIN', 'PORKING', 'PORN', 'PORNO', 'PORNOGRAFX', 'PRICK', 'PROSTITUTE', 'PROSTITUTES', 'PUBIC', 'PUNTANG', 'PUN TANG', 'PUSSIES', 'PUSSY', 'QUEEF', 'QUEERS', 'RAPE', 'RAPED', 'RAPES', 'RAPIST', 'RECTUM', 'REEFER', 'RETARD', 'RETARDED', 'RETART', 'RIMJOB', 'SANDNIGER', 'SANDNIGERS', 'SANDNIGGA', 'SANDNIGGAS', 'SANDNIGGAZ', 'SANDNIGGAR', 'SANDNIGGARS', 'SANDNIGGER', 'SANDNIGGERS', 'SANDNIGGERZ', 'SAND NIGER', 'SAND NIGERS', 'SAND NIGGA', 'SAND NIGGAS', 'SAND NIGGAZ', 'SAND NIGGAR', 'SAND NIGGARS', 'SAND NIGGER', 'SAND NIGGERS', 'SAND NIGGERZ', 'SATAN', 'SCHLONG', 'SCHLONGS', 'SCROTUM', 'SEMEN', 'SEX', 'SEXUAL', 'SEXX', 'SEXXX', 'SEXXXUAL', 'Shit', 'SH!T', 'SH*T', 'SHAGGIN', 'SHAGGING', 'SHI+', 'SHIET', 'SHIT', 'SHIT4BRAINS', 'SHIT 4 BRAINS', 'SHITE', 'SHITED', 'SHITEY', 'SHITFACE', 'SHITFORBRAINS', 'SHIT FOR BRAINS', 'SHITHEAD', 'SHITHEADS', 'SHITHOLE', 'SHITLOAD', 'SHIT HEAD', 'SHIT HEADS', 'SHIT HOLE', 'SHIT LOAD', 'SHITS', 'SHITTED', 'SHITTER', 'SHITTIEST', 'SHITTING', 'SHITTS', 'SHITTY', 'SHITY', 'SHIZZY', 'SHlT', 'SKANK', 'SKANKWHORE', 'SKANKYWHORE', 'SKINFLUTE', 'SKUM', 'SKANK WHORE', 'SKANKY WHORE', 'SKIN FLUTE', 'SKUMBAG', 'SLANTEYE', 'SLEEZEBAG', 'SLEEZEBALL', 'SLIMEBALL', 'SLIMEBUCKET', 'SKUM BAG', 'SLANT EYE', 'SLEEZE BAG', 'SLEEZE BALL', 'SLIME BALL', 'SLIME BUCKET', 'SLUT', 'SLUTS', 'SLUTT', 'SLUTTING', 'SLUTTY', 'SMARTASS', 'SMARTASSES', 'SODOMITE', 'SODOMY', 'SONOFABITCH', 'SONOFBITCH', 'SON OF A BITCH', 'SON OF BITCH', 'SONOVABITCH', 'SONOVA BITCH', 'SUNOVABITCH', 'SUNOVA BITCH', 'SPERM', 'SPIC', 'SPICS', 'SPICK', 'SPICKS', 'STFU', 'TESTACLE', 'TESTACLES', 'TESTICLE', 'TESTICLES', 'THIRDLEG', 'THIRD LEG', 'TITS', 'TITTIES', 'TITTY', 'TITTYFUCK', 'TRAILERTRASH', 'TITTY FUCK', 'TRAILER TRASH', 'TRAMP', 'TURD', 'TWAT', 'UPTHEASS', 'UPTHEBUTT', 'UP THE ASS', 'UP THE BUTT', 'VAG', 'VAGINA', 'VAGINAS', 'VAGINAL', 'VULVA', 'WAP', 'WANKER', 'WANKERS', 'WEENIE', 'WEENIES', 'WHACKER', 'WHITETRASH', 'WHITE TRASH', 'WHORE', 'WHOREHOUSE', 'WHORE HOUSE', 'WHORES', 'WOP', 'BOOB', 'BOOBS', 'BOOBIES', 'COCK', 'COCKS', 'DICK', 'DICKS', 'DICK FACE', 'DICKFACE', 'DRUG', 'DRUGS', 'FUGLY', '$#!t', '$h!t', '$h1t', '$hit', '@ss', '@sses', '@sshole', '@ss hole', 'a$$', 'a$$es', 'a$$hole', 'a$$ hole', 'anal', 'anus', 'arse', 'arsehole', 'arse hole', 'asses', 'asshole', 'assholes', 'ass hole', 'ass holes', 'bastard', 'bastards', 'basterd', 'basterds', 'basturd', 'basturds', 'biatch', 'biatches', 'bitch', 'bitches', 'bitching', 'bitchy', 'blowjob', 'blowjobs', 'blow job', 'blow jobs', 'boner', 'boners', 'bong', 'bongs', 'bullshit', 'bumfuck', 'bunghole', 'buttfuck', 'buttfucker', 'buttfuckers', 'butthead', 'buttheads', 'butthole', 'buttholes', 'bull shit', 'bum fuck', 'bung hole', 'butt fuck', 'butt fucker', 'butt fuckers', 'butt head', 'butt heads', 'butt hole', 'butt holes', 'clit', 'clitoris', 'cocksucker', 'cornhole', 'cornholes', 'cock sucker', 'corn hole', 'corn holes', 'crap', 'crappy', 'craptacular', 'crapy', 'cum', 'cumcatcher', 'cum catcher', 'cumbucket', 'cumguzzler', 'cum bucket', 'cum guzzler', 'cumshot', 'cum shot', 'cunt', 'cunts', 'dammit', 'damn', 'damnit', 'damn-it', 'damn it', 'daygo', 'dego', 'dickhead', 'dick head', 'dickless', 'dickwad', 'dickwads', 'dickweed', 'dickweeds', 'dick wad', 'dick wads', 'dick weed', 'dick weeds', 'dike', 'dikes', 'dildo', 'dildos', 'donkey punch', 'donkey punched', 'donkey punches', 'donkeypunch', 'donkeypunched', 'donkeypunches', 'donky punch', 'donkypunch', 'dumbass', 'dumbasses', 'dumbbitch', 'dumbbitches', 'dumbfuck', 'dumbfucks', 'dumb ass', 'dumb asses', 'dumb bitch', 'dumb bitches', 'dumb fuck', 'dumb fucks', 'dyke', 'dykes', 'ejaculate', 'erection', 'erections', 'f.u.c.k.', 'f0ndle', 'f4gg0tz', 'facking', 'fag', 'fags', 'faggey', 'faggot', 'faggots', 'faggy', 'fagot', 'fart', 'fatass', 'fatasses', 'fatfuck', 'fatfucks', 'fatfucker', 'fatfuckers', 'fat ass', 'fat asses', 'fat fuck', 'fat fucks', 'fat fucker', 'fat fuckers', 'fatso', 'fatsos', 'fcking', 'fcuk', 'fellate', 'fellatio', 'fondle', 'foreskin', 'fore skin', 'fornicate', 'fornicates', 'fuck', 'fucks', 'fucka', 'fuckable', 'fucked', 'fuckedup', 'fucked up', 'fucker', 'fuckers', 'fuckface', 'fuckfest', 'fuckhead', 'fuckheads', 'fuckher', 'fuck face', 'fuck fest', 'fuck head', 'fuck heads', 'fuck her', 'fuckin', 'fucking', 'fuckit', 'fuckme', 'fuckoff', 'fucktard', 'fuckturd', 'fuck you', 'fuck off', 'fuck tard', 'fuck turd', 'fuck you', 'fuuck', 'gangbang', 'gangbanger', 'gang bang', 'gang banger', 'godamn', 'god dam', 'god damit', 'god damn', 'god damned', 'god damnit', 'godamn', 'goddam', 'goddamit', 'goddamn', 'goddamned', 'goddamnit', 'hebe', 'hellno', 'hellyes', 'hell no', 'hell yes', 'honkers', 'honkey', 'hooters', 'hore', 'hores', 'horney', 'horny', 'horseshit', 'horse shit', 'hussy', 'jackass', 'jackasses', 'jackoff', 'jackoffs', 'jerkoff', 'jerkoffs', 'jack ass', 'jack asses', 'jack off', 'jack offs', 'jerk off', 'jerk offs', 'jism', 'jiz', 'jizim', 'jizz', 'jizzed', 'jizzim', 'kick@ss', 'kick @ss', 'kike', 'kikes', 'knockers', 'koon', 'koons', 'krap', 'krappy', 'kum', 'kunt', 'limpdick', 'limp dick', 'mastabate', 'mastabater', 'masterbate', 'masterblaster', 'mastrabator', 'mofo', 'mo fo', 'molest', 'molester', 'molestor', 'motherfuck', 'motherfucker', 'muffdive', 'muffdiver', 'muffindiver', 'mufflikcer', 'mother fuck', 'mother fucker', 'muff dive', 'muff diver', 'muffin diver', 'muff likcer', 'mutha', 'muthafucka', 'muthafucker', 'mutha fucka', 'mutha fucker', 'nazi', 'nazis', 'negro', 'negros', 'niger', 'nigers', 'nigga', 'niggas', 'niggaz', 'niggar', 'niggars', 'nigger', 'niggers', 'niggerz', 'nookie', 'nooner', 'orgasim', 'orgasm', 'orgasms', 'orgasma', 'orgasmic', 'orgies', 'orgy', 'p|$$', 'p|$$ed!', 'p|$$edoff', 'p|$$ed off', 'p0rn', 'pecker', 'peckers', 'pee', 'penis', 'penises', 'pised', 'pisedoff', 'pised off', 'piss', 'pissed', 'pisser', 'pisses', 'pisshead', 'piss head', 'pissing', 'pissy', 'poon', 'poontang', 'poon tang', 'poop', 'pooper', 'porchmonkey', 'porchmonkeys', 'porchmonkies', 'porch monkey', 'porch monkeys', 'porch monkies', 'porkin', 'porking', 'porn', 'porno', 'pornografx', 'prick', 'prostitute', 'prostitutes', 'pubic', 'puntang', 'pun tang', 'pussies', 'pussy', 'queef', 'queers', 'rape', 'raped', 'rapes', 'rapist', 'rectum', 'reefer', 'retard', 'retarded', 'retart', 'rimjob', 'sandniger', 'sandnigers', 'sandnigga', 'sandniggas', 'sandniggaz', 'sandniggar', 'sandniggars', 'sandnigger', 'sandniggers', 'sandniggerz', 'sand niger', 'sand nigers', 'sand nigga', 'sand niggas', 'sand niggaz', 'sand niggar', 'sand niggars', 'sand nigger', 'sand niggers', 'sand niggerz', 'satan', 'schlong', 'schlongs', 'scrotum', 'semen', 'sex', 'sexual', 'sexx', 'sexxx', 'sexxxual', 'sh!t', 'sh*t', 'shaggin', 'shagging', 'shi+', 'shiet', 'shit', 'shit4brains', 'shit 4 brains', 'shite', 'shited', 'shitey', 'shitface', 'shitforbrains', 'shit for brains', 'shithead', 'shitheads', 'shithole', 'shitload', 'shit head', 'shit heads', 'shit hole', 'shit load', 'shits', 'shitted', 'shitter', 'shittiest', 'shitting', 'shitts', 'shitty', 'shity', 'shizzy', 'shlt', 'skank', 'skankwhore', 'skankywhore', 'skinflute', 'skum', 'skank whore', 'skanky whore', 'skin flute', 'skumbag', 'slanteye', 'sleezebag', 'sleezeball', 'slimeball', 'slimebucket', 'skum bag', 'slant eye', 'sleeze bag', 'sleeze ball', 'slime ball', 'slime bucket', 'slut', 'sluts', 'slutt', 'slutting', 'slutty', 'smartass', 'smartasses', 'sodomite', 'sodomy', 'sonofabitch', 'sonofbitch', 'son of a bitch', 'son of bitch', 'sonovabitch', 'sonova bitch', 'sunovabitch', 'sunova bitch', 'sperm', 'spic', 'spics', 'spick', 'spicks', 'stfu', 'testacle', 'testacles', 'testicle', 'testicles', 'thirdleg', 'third leg', 'tits', 'titties', 'titty', 'tittyfuck', 'trailertrash', 'titty fuck', 'trailer trash', 'tramp', 'turd', 'twat', 'uptheass', 'upthebutt', 'up the ass', 'up the butt', 'vag', 'vagina', 'vaginas', 'vaginal', 'vulva', 'wap', 'wanker', 'wankers', 'weenie', 'weenies', 'whacker', 'whitetrash', 'white trash', 'whore', 'whorehouse', 'whore house', 'whores', 'wop', 'boob', 'boobs', 'boobies', 'cock', 'cocks', 'dick', 'dicks', 'dick face', 'dickface', 'drug', 'drugs', 'fugly'];\n      profanityPhrases.forEach(profanity => {\n        if (inputValue.toLowerCase().trim().includes(profanity.toLowerCase())) {\n          inputValidity = false;\n          profanityFree = false;\n        }\n      });\n      if (inputValue.trim().length == 0) {\n        inputValidity = false;\n        emptySpacesFree = false;\n      }\n      if (!inputValidity) {\n        target.classList.add(\"invalid-input\");\n      } else {\n        target.classList.remove(\"invalid-input\");\n      }\n      if (!profanityFree) {\n        target.classList.add(\"invalid-input-profanity\");\n      } else {\n        target.classList.remove(\"invalid-input-profanity\");\n      }\n      if (!emptySpacesFree) {\n        target.classList.add(\"invalid-input-spaces\");\n      } else {\n        target.classList.remove(\"invalid-input-spaces\");\n      }\n\n      document.querySelectorAll(\".customily_option input[type='text']\").forEach((item) => {\n        let isValid = true;\n        let inputValue = item.value;\n        profanityPhrases.forEach(profanity => {\n          if (inputValue.toLowerCase().trim().includes(profanity.toLowerCase())) {\n            isValid = false;\n            profanityFree = false;\n          }\n        });\n\n        if (inputValue.trim().length == 0) {\n          isValid = false;\n          emptySpacesFree = false;\n        }\n        if (isValid) {\n          totalValidityArray.push(true);\n        } else {\n          totalValidityArray.push(false);\n        }\n      });\n\n      if (totalValidityArray.includes(false)) {\n        let customilyAddToCartDirect = document.querySelector(\"#customily-cart-btn\");\n        if (customilyAddToCartDirect) {\n          customilyAddToCartDirect.classList.add(\"invalid-button\");\n        }\n        if (!document.querySelector(\".customily-error-handler\")) {\n          let errorDiv = document.createElement('div');\n          errorDiv.classList.add(\"customily-error-handler\");\n          let cartButtonContainer = document.querySelector(\".customily-modal-container .cart-buttons\");\n          if (cartButtonContainer) {\n            cartButtonContainer.parentNode.insertBefore(errorDiv, cartButtonContainer);\n          } else {\n            let cartButtonContainer = document.querySelector(\".product-form__buttons\");\n            if (cartButtonContainer) {\n              cartButtonContainer.parentNode.insertBefore(errorDiv, cartButtonContainer);\n            }\n          }\n        }\n        \n        if (document.querySelector(\".customily-error-handler\")) {\n          \n          let profanityString = `<span class=\"profanity-string\">Please do not use profanity-- we will not process your request.</span>`;\n          let emptyString = `<span class=\"empty-string\">Oops, text must include at least 1 character!</span>`;\n          if (document.querySelector(\".invalid-input-profanity\")) {\n            document.querySelector(\".customily-error-handler\").innerHTML = profanityString;\n          }\n          if (document.querySelector(\".invalid-input-spaces\")) {\n            document.querySelector(\".customily-error-handler\").innerHTML = emptyString;\n          }\n        }\n      } else {\n        let customilyAddToCartDirect = document.querySelector(\"#customily-cart-btn\");\n        if (customilyAddToCartDirect) {\n          customilyAddToCartDirect.classList.remove(\"invalid-button\");\n        }\n\n        if (document.querySelector(\".customily-error-handler\")) {\n          document.querySelector(\".customily-error-handler\").remove();\n        }\n      }\n    }\n  });\n\n}\n\ncustomilySetup();",
+    "dropdown": {
+      "size": "medium",
+      "color": "rgba(114,88,224,1)",
+      "sizePx": 32,
+      "squared": true,
+      "enableSearch": false
+    },
+    "swatches": {
+      "size": "medium",
+      "color": "rgba(0,0,0,1)",
+      "sizePx": 0,
+      "squared": true
+    },
+    "useModal": true,
+    "customCss": ".options-control-button.disabled {\n  display: none !important;  \n}\n\n#customily-personalize-button {height: auto !important;}\n\n.customily-modal-container input.invalid-input {\n  outline: 0.2rem solid red !important;\n  width: 98% !important;\n}\n\n.customily-modal-container .option_name {\n  color: #333333 !important;\n}\n\n#customily-cart-btn.invalid-button,\n#customily-personalize-button.invalid-button {\ncursor: not-allowed !important;\nopacity: 0.5 !important;\npointer-events: none !important;\n}\n\n.customily-error-handler span {\nfont-size: 12px !important;\nline-height: normal !important;\ncolor: red !important;\n}\n\n@media screen and (max-width: 767px) {\n.customily-error-handler {margin-bottom: 0 !important;}\n}\n\n.customily-personalize-button {\n  width: 100% !important;\n}\n\n.customily-close-button {\n  background: #e50914 !important;\n}",
+    "debugMode": false,
+    "hoverZoom": false,
+    "touchZoom": false,
+    "tooltipType": "value",
+    "zoomBtnText": "",
+    "addOrderNotes": true,
+    "buttonsStyles": {
+      "share": {
+        "styles": {
+          "fontSize": "16",
+          "fontColor": "rgba(0,0,0,1)",
+          "borderColor": "rgba(72,172,231,1)",
+          "borderWidth": "5",
+          "borderRadius": "8",
+          "backgroundColor": "rgba(255,255,255,1)"
+        },
+        "customize": false
+      },
+      "upload": {
+        "styles": {
+          "fontSize": "16",
+          "fontColor": "rgba(0,0,0,1)",
+          "borderColor": "rgba(72,172,231,1)",
+          "borderWidth": "5",
+          "borderRadius": "8",
+          "backgroundColor": "rgba(255,255,255,1)"
+        },
+        "customize": false,
+        "showThumbnails": true
+      },
+      "preview": {
+        "styles": {
+          "fontSize": "16",
+          "fontColor": "rgba(0,0,0,1)",
+          "borderColor": "rgba(72,172,231,1)",
+          "borderWidth": "5",
+          "borderRadius": "8",
+          "backgroundColor": "rgba(255,255,255,1)"
+        },
+        "customize": false
+      },
+      "addToCart": {
+        "styles": {
+          "fontSize": "16",
+          "fontColor": "rgba(0,0,0,1)",
+          "borderColor": "rgba(72,172,231,1)",
+          "borderWidth": "5",
+          "borderRadius": "8",
+          "backgroundColor": "rgba(255,255,255,1)"
+        },
+        "customize": false
+      },
+      "personalize": {
+        "styles": {
+          "fontSize": "16",
+          "fontColor": "rgba(0,0,0,1)",
+          "borderColor": "rgba(72,172,231,1)",
+          "borderWidth": "5",
+          "borderRadius": "8",
+          "backgroundColor": "rgba(255,255,255,1)"
+        },
+        "customize": false
+      },
+      "replace": {
+        "replaceBtnText": ""
+      }
+    },
+    "sideHoverZoom": false,
+    "stickyPreview": false,
+    "builtInGallery": {
+      "mobile": {
+        "enabled": false,
+        "thumbnailsLayout": "bottom",
+        "allowSwiping": false
+      },
+      "desktop": {
+        "enabled": false,
+        "thumbnailsLayout": "bottom",
+        "allowSwiping": false
+      }
+    },
+    "dropdownSwatch": {
+      "size": "medium",
+      "color": "rgba(114,88,224,1)",
+      "sizePx": 32,
+      "squared": true
+    },
+    "mobileControls": true,
+    "modalScrollbar": false,
+    "realtimeRender": true,
+    "useLivePreview": false,
+    "shareButtonText": "Share Customization",
+    "useThemeScripts": false,
+    "accordionOptions": false,
+    "previewButtonText": "Preview",
+    "enableEngraverLogs": false,
+    "priceQuerySelector": "",
+    "preventEdgeResizing": false,
+    "requiredMessageText": "Required",
+    "shareButtonCssClass": "",
+    "showPreviewVariants": true,
+    "stickyPreviewMobile": false,
+    "uploadedImageCovers": false,
+    "exportProductionFile": true,
+    "generatePreviewImage": true,
+    "removeSwatchesBorder": true,
+    "showPreviewByDefault": false,
+    "dontCreateNewSessions": false,
+    "personalizeButtonText": "Personalize",
+    "renameProdFilePattern": "",
+    "allowMobileTouchEvents": false,
+    "optionsBackgroundColor": null,
+    "salePriceQuerySelector": "",
+    "enablePersonalizeButton": false,
+    "optionalPersonalization": {
+      "enable": false,
+      "dividerColor": "#cccccc",
+      "backgroundColor": "#edefee"
+    },
+    "previewButtonMobileText": "Show Preview",
+    "showPreviewButtonMobile": false,
+    "keepEngraverControlsSize": false,
+    "requiredMessageTextColor": "rgba(255,0,0,1)",
+    "enableEditPersonalization": false,
+    "enableSavePersonalization": false,
+    "stickyPreviewButtonMobile": false,
+    "uploadUserImagesToShopify": false,
+    "enableSharePersonalization": false,
+    "previewButtonNeedsRequired": false,
+    "enableStoredPersonalization": false,
+    "removeEventsFromProductForm": false,
+    "showLivePreviewPreviewButton": false,
+    "addRenamedProdFileAdditionalNotes": false,
+    "mobileUseModal": true,
+    "mobileUseLivePreview": false,
+    "optionsPosition": {
+      "positioning": 0,
+      "selector": ""
+    },
+    "querySelectors": {
+      "price": {
+        "regular": "",
+        "sale": ""
+      },
+      "cart": {
+        "popup": {
+          "element": "",
+          "properties": ""
+        },
+        "page": {
+          "element": "",
+          "properties": ""
+        }
+      }
+    },
+    "cartItems": {
+      "personalizationLink": false,
+      "previewModal": false,
+      "personalizedThumbnail": true,
+      "showSuggestions": false,
+      "groupAddOns": false,
+      "hideDeleteButtonOnAddOns": true,
+      "hideQuantityButtonsOnAddOns": true,
+      "hideLineItemProperties": false,
+      "texts": {
+        "editLink": "",
+        "previewLink": ""
+      }
+    },
+    "addToCartIntoPreviewModal": false,
+    "customCurrency": "",
+    "showMobileControls": false,
+    "buttonsLayout": {
+      "desktop": {
+        "custom": false,
+        "layout": "q_p_c"
+      },
+      "mobile": {
+        "custom": false,
+        "layout": "q_p_c"
+      }
+    },
+    "upSellStyles": {
+      "title": {
+        "fontColor": "rgba(0,0,0,1)",
+        "fontSize": "16"
+      },
+      "product": {
+        "fontColor": "rgba(0,0,0,1)",
+        "fontSize": "16"
+      }
+    },
+    "useShadowRoot": false,
+    "reflectShadowRootOnVariant": false,
+    "addToCart": {
+      "useAjax": false,
+      "triggerStoreButtonClick": true,
+      "reloadPageAfterAtc": false,
+      "openCartDrawerAfterAtc": false,
+      "cartDrawerQuerySelector": "",
+      "urlToRedirectAfterAtc": "",
+      "eventsToDispatchBeforeAtc": "",
+      "eventsToDispatchAfterAtc": ""
+    },
+    "upsell": {
+      "enabled": false
+    },
+    "uploadImage": {
+      "zoomSelection": false,
+      "disableZoomOnImageUpload": false,
+      "imageOverlaySelection": false,
+      "canvasImageLoading": false,
+      "cropBtnText": "Crop",
+      "doneCropeBtnText": "Done",
+      "crop": {
+        "customize": false,
+        "styles": {}
+      },
+      "done": {
+        "customize": false,
+        "styles": {}
+      }
+    },
+    "promptStoredPersonalization": false,
+    "zoomBtnType": "textButton",
+    "useFutureExport": true,
+    "renameProdFile": false,
+    "enableCollapsibleOptionsMenu": false,
+    "showAddToCartButtonAlwaysPresent": true
+  },
+  "headers": {
+    "access-control-allow-credentials": "true",
+    "access-control-allow-origin": "https://www.netflix.shop",
+    "cache-control": "must-revalidate, no-store, no-cache",
+    "content-encoding": "gzip",
+    "content-type": "application/json; charset=utf-8",
+    "date": "Mon, 05 Jan 2026 23:56:45 GMT",
+    "expires": "-1",
+    "vary": "Origin, Accept-Encoding"
+  }
+}

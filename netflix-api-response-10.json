@@ -1,0 +1,200 @@
+{
+  "url": "https://fast.a.klaviyo.com/custom-fonts/api/v1/company-fonts/onsite?company_id=S2UC25",
+  "status": 200,
+  "data": {
+    "google": [
+      {
+        "id": 228219,
+        "family": "Poppins",
+        "fallback": "\"Helvetica Neue\", Helvetica, Arial, sans-serif",
+        "font_type": "google",
+        "variants": [
+          {
+            "id": 208,
+            "family": "Poppins",
+            "variant_value": "600"
+          },
+          {
+            "id": 359,
+            "family": "Poppins",
+            "variant_value": "700"
+          },
+          {
+            "id": 807,
+            "family": "Poppins",
+            "variant_value": "800"
+          },
+          {
+            "id": 1587,
+            "family": "Poppins",
+            "variant_value": "200"
+          },
+          {
+            "id": 1629,
+            "family": "Poppins",
+            "variant_value": "500"
+          },
+          {
+            "id": 1713,
+            "family": "Poppins",
+            "variant_value": "300"
+          },
+          {
+            "id": 1716,
+            "family": "Poppins",
+            "variant_value": "100"
+          },
+          {
+            "id": 2405,
+            "family": "Poppins",
+            "variant_value": "900"
+          },
+          {
+            "id": 2861,
+            "family": "Poppins",
+            "variant_value": "regular"
+          }
+        ]
+      }
+    ],
+    "typekit": [],
+    "custom": [
+      {
+        "id": 25359,
+        "family": "NetflixSans",
+        "fallback": "Arial, \"Helvetica Neue\", Helvetica, sans-serif",
+        "font_type": "custom",
+        "variants": [
+          {
+            "id": 6420,
+            "variant_value": "n5",
+            "url": "https://cdn.shopify.com/s/files/1/0522/8222/8911/files/NetflixSans_W_Md.woff2"
+          },
+          {
+            "id": 11294,
+            "variant_value": "n7",
+            "url": "https://cdn.shopify.com/s/files/1/0522/8222/8911/t/2/assets/NetflixSans_W_Bd.woff2?v=12590800222405645062"
+          },
+          {
+            "id": 11295,
+            "variant_value": "n9",
+            "url": "https://cdn.shopify.com/s/files/1/0522/8222/8911/t/2/assets/NetflixSans_W_Blk.woff2?v=8964007320308920110"
+          },
+          {
+            "id": 11293,
+            "variant_value": "n4",
+            "url": "https://cdn.shopify.com/s/files/1/0522/8222/8911/t/2/assets/NetflixSans_W_Rg.woff2?v=13103250410028582570"
+          }
+        ]
+      },
+      {
+        "id": 1432797,
+        "family": "Peacock Sans",
+        "fallback": "Helvetica, Arial, sans-serif",
+        "font_type": "custom",
+        "variants": [
+          {
+            "id": 1340174,
+            "variant_value": "n9",
+            "url": "https://cdn.shopify.com/s/files/1/0250/1217/4900/files/Peacock_Sans-Black.woff?v=1688753030"
+          },
+          {
+            "id": 1340175,
+            "variant_value": "n7",
+            "url": "https://cdn.shopify.com/s/files/1/0250/1217/4900/files/Peacock_Sans-Bold.woff?v=1688753031"
+          },
+          {
+            "id": 1340176,
+            "variant_value": "n4",
+            "url": "https://cdn.shopify.com/s/files/1/0250/1217/4900/files/Peacock_Sans-Book.woff?v=1688753031"
+          },
+          {
+            "id": 1340177,
+            "variant_value": "n3",
+            "url": "https://cdn.shopify.com/s/files/1/0250/1217/4900/files/Peacock_Sans-Light.woff?v=1688753031"
+          },
+          {
+            "id": 1340178,
+            "variant_value": "n5",
+            "url": "https://cdn.shopify.com/s/files/1/0250/1217/4900/files/Peacock_Sans-Medium.woff?v=1688753030"
+          }
+        ]
+      },
+      {
+        "id": 1592016,
+        "family": "Peak Sans",
+        "fallback": "Verdana, Geneva, sans-serif",
+        "font_type": "custom",
+        "variants": [
+          {
+            "id": 1360335,
+            "variant_value": "n9",
+            "url": "https://cdn.shopify.com/s/files/1/0569/1562/3983/files/Peak-Sans_Black.woff?v=1679586852"
+          },
+          {
+            "id": 1360336,
+            "variant_value": "n7",
+            "url": "https://cdn.shopify.com/s/files/1/0569/1562/3983/files/Peak-Sans_Bold.woff?v=1659445970"
+          },
+          {
+            "id": 1360337,
+            "variant_value": "n4",
+            "url": "https://cdn.shopify.com/s/files/1/0569/1562/3983/files/Peak-Sans_Regular.woff?v=1659445969"
+          }
+        ]
+      },
+      {
+        "id": 977278,
+        "family": "Poppins-Klaviyo-Hosted",
+        "fallback": "Arial, \"Helvetica Neue\", Helvetica, sans-serif",
+        "font_type": "custom",
+        "variants": [
+          {
+            "id": 917273,
+            "variant_value": "i4",
+            "url": "https://static.klaviyo.com/onsite/hosted-fonts/Poppins/latin/poppins_latin_italic_400.woff2"
+          },
+          {
+            "id": 917274,
+            "variant_value": "i7",
+            "url": "https://static.klaviyo.com/onsite/hosted-fonts/Poppins/latin/poppins_latin_italic_700.woff2"
+          },
+          {
+            "id": 917275,
+            "variant_value": "n4",
+            "url": "https://static.klaviyo.com/onsite/hosted-fonts/Poppins/latin/poppins_latin_regular_400_2.woff2"
+          },
+          {
+            "id": 917276,
+            "variant_value": "n7",
+            "url": "https://static.klaviyo.com/onsite/hosted-fonts/Poppins/latin/poppins_latin_regular_700.woff2"
+          }
+        ]
+      }
+    ]
+  },
+  "headers": {
+    "accept-ranges": "bytes",
+    "access-control-allow-credentials": "true",
+    "access-control-allow-headers": "",
+    "access-control-allow-methods": "GET",
+    "access-control-allow-origin": "*",
+    "access-control-max-age": "86400",
+    "age": "1187141",
+    "allow": "GET, HEAD, OPTIONS",
+    "cache-control": "max-age=10",
+    "content-encoding": "gzip",
+    "content-language": "en-us",
+    "content-length": "743",
+    "content-security-policy": "base-uri 'none'; script-src 'report-sample' 'strict-dynamic' 'unsafe-eval'; frame-ancestors 'self' login.bigcommerce.com *.mybigcommerce.com admin.shopify.com klaviyo.file.force.com klaviyo.lightning.force.com klaviyo.my.salesforce.com; object-src 'none'; report-uri /csp/",
+    "content-type": "application/json; charset=utf-8",
+    "date": "Mon, 05 Jan 2026 23:56:43 GMT",
+    "server": "nginx",
+    "strict-transport-security": "max-age=900",
+    "vary": "Accept-Encoding, Accept-Language, Cookie",
+    "via": "1.1 varnish, 1.1 varnish",
+    "x-cache": "MISS, HIT",
+    "x-cache-hits": "0, 0",
+    "x-served-by": "cache-bos4678-BOS, cache-gru-sbgr1930040-GRU"
+  }
+}

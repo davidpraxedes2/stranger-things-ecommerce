@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Stranger Things Store - Loja Oficial</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Teko:wght@300;400;500;600;700&family=Merriweather:wght@300;400&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Grid Background -->
+    <div class="grid-background"></div>
+
+    <!-- Top Announcement Bar -->
+    <div class="announcement-bar">
+        <div class="container">
+            <p>✨ <strong>OFERTA ESPECIAL:</strong> 20% OFF em todo o site com código <strong>STRANGER20</strong> - Válido até 31/01</p>
+            <button class="announcement-close" aria-label="Fechar anúncio">&times;</button>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-top">
+                <div class="logo">
+                    <a href="index.html">
+                        <img src="logo.png" alt="Stranger Things Store" class="logo-img">
+                    </a>
+                </div>
+                <div class="header-actions">
+                    <!-- Search -->
+                    <button class="search-toggle" id="searchToggle" aria-label="Buscar">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/>
+                            <path d="m20 20-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                    <!-- Account -->
+                    <button class="account-toggle" id="accountToggle" aria-label="Minha conta">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </button>
+                    <!-- Cart/Bag -->
+                    <div class="cart-icon-wrapper">
+                        <button class="cart-icon" id="cartBtn" aria-label="Abrir sacola">
+                            <span class="cart-count" id="cartCount">0</span>
+                            <svg class="bag-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M6 2L3 6V20C3 20.5304 3.21071 21.0391 3.58579 21.4142C3.96086 21.7893 4.46957 22 5 22H19C19.5304 22 20.0391 21.7893 20.4142 21.4142C20.7893 21.0391 21 20.5304 21 20V6L18 2H6Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M3 6H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M16 10C16 11.0609 15.5786 12.0783 14.8284 12.8284C14.0783 13.5786 13.0609 14 12 14C10.9391 14 9.92172 13.5786 9.17157 12.8284C8.42143 12.0783 8 11.0609 8 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <!-- Mobile Menu Toggle -->
+                    <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Menu">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="search-bar" id="searchBar">
+                <div class="search-container">
+                    <input type="text" id="searchInput" placeholder="Buscar produtos..." class="search-input">
+                    <button class="search-submit" aria-label="Buscar">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/>
+                            <path d="m20 20-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Navigation -->
+            <nav class="main-nav" id="mainNav">
+                <div class="mobile-nav-header">
+                    <div class="mobile-nav-logo">
+                        <div class="netflix-logo">NETFLIX</div>
+                        <div class="stranger-logo">STRANGER THINGS</div>
+                        <div class="series-text">THE ORIGINAL SERIES</div>
+                    </div>
+                    <button class="mobile-nav-close" id="mobileNavClose">&times;</button>
+                </div>
+                
+                <ul class="nav-list">
+                    <li class="nav-item has-dropdown">
+                        <a href="#" class="nav-link">TÍTULOS</a>
+                        <div class="dropdown-menu">
+                            <div class="dropdown-section">
+                                <h4>Stranger Things</h4>
+                                <ul>
+                                    <li><a href="#produtos">Todas as Coleções</a></li>
+                                    <li><a href="#produtos">Season 5</a></li>
+                                    <li><a href="#produtos">Hawkins High</a></li>
+                                    <li><a href="#produtos">Hellfire Club</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="nav-item has-dropdown">
+                        <a href="#" class="nav-link">PRODUTOS</a>
+                        <div class="dropdown-menu">
+                            <div class="dropdown-section">
+                                <h4>Roupas</h4>
+                                <ul>
+                                    <li><a href="#produtos">Camisetas</a></li>
+                                    <li><a href="#produtos">Moletons</a></li>
+                                    <li><a href="#produtos">Casacos</a></li>
+                                    <li><a href="#produtos">Roupas Infantis</a></li>
+                                </ul>
+                            </div>
+                            <div class="dropdown-section">
+                                <h4>Acessórios</h4>
+                                <ul>
+                                    <li><a href="#produtos">Mochilas</a></li>
+                                    <li><a href="#produtos">Bonés</a></li>
+                                    <li><a href="#produtos">Joias</a></li>
+                                    <li><a href="#produtos">Cases</a></li>
+                                </ul>
+                            </div>
+                            <div class="dropdown-section">
+                                <h4>Casa & Escritório</h4>
+                                <ul>
+                                    <li><a href="#produtos">Canecas</a></li>
+                                    <li><a href="#produtos">Posters</a></li>
+                                    <li><a href="#produtos">Almofadas</a></li>
+                                    <li><a href="#produtos">Mantas</a></li>
+                                </ul>
+                            </div>
+                            <div class="dropdown-section">
+                                <h4>Colecionáveis</h4>
+                                <ul>
+                                    <li><a href="#produtos">Funko Pop!</a></li>
+                                    <li><a href="#produtos">Action Figures</a></li>
+                                    <li><a href="#produtos">Pelúcias</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="nav-item has-dropdown">
+                        <a href="#" class="nav-link">COLEÇÕES</a>
+                        <div class="dropdown-menu">
+                            <div class="dropdown-section">
+                                <h4>Mais Populares</h4>
+                                <ul>
+                                    <li><a href="#produtos">Fan Favorites</a></li>
+                                    <li><a href="#produtos">Lançamentos</a></li>
+                                    <li><a href="#produtos">Cosplay</a></li>
+                                </ul>
+                            </div>
+                            <div class="dropdown-section">
+                                <h4>Colaborações</h4>
+                                <ul>
+                                    <li><a href="#produtos">Stranger Things x Nike</a></li>
+                                    <li><a href="#produtos">Stranger Things x Butcher Billy</a></li>
+                                    <li><a href="#produtos">Stranger Things x Kyle Lambert</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Mobile Nav Overlay -->
+            <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
+        </div>
+    </header>
+
+    <!-- Hero Banner -->
+    <section class="hero-banner">
+        <div class="hero-content">
+            <h1 class="hero-title">BEM-VINDO AO MUNDO INVERTIDO</h1>
+            <p class="hero-subtitle">Descubra produtos exclusivos de Stranger Things</p>
+            <a href="#produtos" class="btn btn-primary btn-large">EXPLORAR PRODUTOS</a>
+        </div>
+    </section>
+
+    <!-- Featured Products Section -->
+    <section class="featured-section">
+        <div class="container">
+            <h2 class="section-title">DESTAQUES</h2>
+            <div class="products-grid" id="featuredProducts">
+                <!-- Featured products will be loaded here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section class="products-section" id="produtos">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">TODOS OS PRODUTOS</h2>
+                <div class="filter-toggle" id="filterToggle">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 6h18M7 12h10M11 18h2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    FILTROS
+                </div>
+            </div>
+            
+            <div class="products-layout">
+                <!-- Filters Sidebar -->
+                <aside class="filters-sidebar" id="filtersSidebar">
+                    <div class="filters-header">
+                        <h3>FILTROS</h3>
+                        <button class="filters-close" id="filtersClose">&times;</button>
+                    </div>
+                    <div class="filter-group">
+                        <h4>Categoria</h4>
+                        <label><input type="checkbox"> Camisetas</label>
+                        <label><input type="checkbox"> Moletons</label>
+                        <label><input type="checkbox"> Acessórios</label>
+                        <label><input type="checkbox"> Colecionáveis</label>
+                    </div>
+                    <div class="filter-group">
+                        <h4>Preço</h4>
+                        <label><input type="checkbox"> Até R$ 50</label>
+                        <label><input type="checkbox"> R$ 50 - R$ 100</label>
+                        <label><input type="checkbox"> R$ 100 - R$ 200</label>
+                        <label><input type="checkbox"> Acima de R$ 200</label>
+                    </div>
+                </aside>
+
+                <!-- Products Grid -->
+                <div class="products-container">
+                    <div class="products-grid" id="productsGrid">
+                        <!-- Products will be dynamically loaded -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <!-- Customer Service -->
+                <div class="footer-section">
+                    <h3>Atendimento</h3>
+                    <ul>
+                        <li><a href="#">Central de Ajuda</a></li>
+                        <li><a href="#">Pedidos e Devoluções</a></li>
+                        <li><a href="#">Política de Privacidade</a></li>
+                        <li><a href="#">Termos de Uso</a></li>
+                        <li><a href="#">Declaração de Acessibilidade</a></li>
+                        <li><a href="#">Política de Devolução</a></li>
+                    </ul>
+                </div>
+
+                <!-- Account & Ordering -->
+                <div class="footer-section">
+                    <h3>Conta e Pedidos</h3>
+                    <ul>
+                        <li><a href="#">Minha Conta</a></li>
+                        <li><a href="#">Política de Envio</a></li>
+                        <li><a href="#">Política de Pedidos</a></li>
+                        <li><a href="#">Descontos por Volume</a></li>
+                    </ul>
+                </div>
+
+                <!-- Netflix -->
+                <div class="footer-section">
+                    <h3>Netflix</h3>
+                    <ul>
+                        <li><a href="#">Sobre a Netflix Shop</a></li>
+                        <li><a href="#">Netflix Streaming</a></li>
+                        <li><a href="#">Netflix House</a></li>
+                        <li><a href="#">Stranger Things Pop-up</a></li>
+                    </ul>
+                </div>
+
+                <!-- Newsletter -->
+                <div class="footer-section">
+                    <h3>Newsletter</h3>
+                    <p>Economize 15% na sua primeira compra! Receba as últimas novidades sobre lançamentos e mais!</p>
+                    <form class="newsletter-form">
+                        <input type="email" placeholder="Seu email" required>
+                        <button type="submit" class="btn btn-primary">INSCREVER-SE</button>
+                    </form>
+                    <div class="social-icons">
+                        <a href="#" class="social-icon" aria-label="Instagram">📷</a>
+                        <a href="#" class="social-icon" aria-label="Facebook">👥</a>
+                        <a href="#" class="social-icon" aria-label="TikTok">🎵</a>
+                        <a href="#" class="social-icon" aria-label="YouTube">📺</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2024 Stranger Things Store. Todos os direitos reservados.</p>
+                <p class="disclaimer">STRANGER THINGS ™/ © Netflix 2024</p>
+                <div class="footer-links">
+                    <a href="#">Cookies</a>
+                    <span>|</span>
+                    <a href="#">Não Vender Minhas Informações</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Cart Drawer Overlay -->
+    <div class="cart-drawer-overlay" id="cartOverlay"></div>
+
+    <!-- Cart Drawer -->
+    <div class="cart-drawer" id="cartDrawer">
+        <div class="cart-drawer-header">
+            <h2>SACOLA</h2>
+            <button class="cart-drawer-close" id="closeCart" aria-label="Fechar sacola">&times;</button>
+        </div>
+        <div class="cart-drawer-body">
+            <div id="cartItems"></div>
+        </div>
+        <div class="cart-drawer-footer">
+            <div class="cart-total">
+                <span class="cart-total-label">Total:</span>
+                <span class="cart-total-value">R$ <span id="cartTotal">0.00</span></span>
+            </div>
+            <div class="cart-drawer-actions">
+                <a href="#produtos" class="btn btn-secondary btn-block" id="continueShopping">CONTINUAR COMPRANDO</a>
+                <button class="btn btn-primary btn-block" id="checkoutBtn">FINALIZAR COMPRA</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

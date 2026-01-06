@@ -1,0 +1,1322 @@
+{
+  "url": "https://api.gocase.com.br/api/v2/shelf/7252?locale=pt-BR&currency=BRL&store=br&jd=42",
+  "status": 200,
+  "data": {
+    "label": "Copo Térmico Life + Base de Mimo!",
+    "type": "taxon",
+    "see_more": "https://www.gocase.com.br/copo-life//?taxon=collections%2Fnetflix%2Fstranger-things&product_filter=copo-life&page=1&sorting=favorites&new=1",
+    "products": [
+      {
+        "id": 82033,
+        "sku": "nfx-ctl-28",
+        "name": "Copo Térmico Life + Ebook -  Stranger Things - Inverso",
+        "seo_optimized_name": "Copo Térmico Life + Ebook -  Stranger Things - Inverso",
+        "slug": "copo-termico-life-ebook-stranger-things-inverso",
+        "price": "249.9",
+        "old_price": "349.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-28/360lifebranco-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-41-termicos/105147/360lifeamarelo-copolife1180/1749730813533419405516626164178947.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-ctl-28",
+          "customizations": [
+            {
+              "id": 98541,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-41-termicos/105147/360lifeamarelo-copolife1180/1749730813533987303111092595574575.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-41-termicos/105147/360lifeamarelo-copolife1180/1749730813533419405516626164178947.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-41-termicos/105147/360lifeamarelo-copolife1180/1749730813533987303111092595574575.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-41-termicos/105147/360lifeamarelo-copolife1180/1749730813533419405516626164178947.png"
+              },
+              "engine_identifier": "nfx-st-41-termicos"
+            }
+          ],
+          "material": "360lifebranco-copolife880ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "copoebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-28/360lifebranco-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-41-termicos/105148/360hangerbranco-hangerlife880ebook/1749730750232267602605959313685643.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360lifebranco-copolife880ebook",
+            "case_type_id": 2423,
+            "case_device_id": 8747,
+            "is_showcase_default": false,
+            "price": 249.9,
+            "old_price": 349.9
+          }
+        ],
+        "gif_image": "",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 84316,
+        "promotion": [],
+        "badge": {
+          "label": "GANHE UMA BASE",
+          "hex_color": "#de7993",
+          "image": null
+        },
+        "tag": [],
+        "customization_ids": [
+          98541
+        ]
+      },
+      {
+        "id": 79595,
+        "sku": "nfx-ctl-15",
+        "name": "Copo Térmico Life + Ebook -  Stranger Things - Hellfire Club Pattern",
+        "seo_optimized_name": "Copo Térmico Life + Ebook -  Stranger Things - Hellfire Club Pattern",
+        "slug": "copo-termico-life-ebook-stranger-things-hellfire-club-pattern",
+        "price": "249.9",
+        "old_price": "349.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-15/360lifebranco-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-36-termicos/103979/360lifeamarelo-copolife1180/1747830474807126807443424517295463.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-ctl-15",
+          "customizations": [
+            {
+              "id": 95881,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.280.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-36-termicos/103979/360lifeamarelo-copolife1180/174783047480752520952643959276743.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-36-termicos/103979/360lifeamarelo-copolife1180/1747830474807126807443424517295463.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-36-termicos/103979/360lifeamarelo-copolife1180/174783047480752520952643959276743.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-36-termicos/103979/360lifeamarelo-copolife1180/1747830474807126807443424517295463.png"
+              },
+              "engine_identifier": "nfx-st-36-termicos"
+            }
+          ],
+          "material": "360lifebranco-copolife880ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "copoebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-15/360lifebranco-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-36-termicos/103980/360hangerbranco-hangerlife880ebook/1747830467138187207189886971624299.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360lifebranco-copolife880ebook",
+            "case_type_id": 2423,
+            "case_device_id": 8747,
+            "is_showcase_default": false,
+            "price": 249.9,
+            "old_price": 349.9
+          },
+          {
+            "color": "FCEBF8",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-15/360liferosaclaro-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-36-termicos/103980/360hangerbranco-hangerlife880ebook/1747830467138187207189886971624299.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360liferosaclaro-copolife880ebook",
+            "case_type_id": 2415,
+            "case_device_id": 8753,
+            "is_showcase_default": false,
+            "price": 249.9,
+            "old_price": 349.9
+          },
+          {
+            "color": "BFBEE7",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-15/360lifelilas-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-36-termicos/103980/360hangerbranco-hangerlife880ebook/1747830467138187207189886971624299.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360lifelilas-copolife880ebook",
+            "case_type_id": 2419,
+            "case_device_id": 8748,
+            "is_showcase_default": false,
+            "price": 249.9,
+            "old_price": 349.9
+          },
+          {
+            "color": "C8D8EE",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-15/360lifeazulclaro-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-36-termicos/103980/360hangerbranco-hangerlife880ebook/1747830467138187207189886971624299.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360lifeazulclaro-copolife880ebook",
+            "case_type_id": 2425,
+            "case_device_id": 8750,
+            "is_showcase_default": false,
+            "price": 249.9,
+            "old_price": 349.9
+          },
+          {
+            "color": "EA9C67",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-15/360lifelaranja-copolife1180ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-36-termicos/103979/360lifeamarelo-copolife1180/1747830474807126807443424517295463.png&expires=yes",
+            "default": true,
+            "in_stock": false,
+            "material": "360lifelaranja-copolife1180ebook",
+            "case_type_id": 2421,
+            "case_device_id": 8296,
+            "is_showcase_default": false,
+            "price": 269.9,
+            "old_price": 369.9
+          }
+        ],
+        "gif_image": "",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 81878,
+        "promotion": [],
+        "badge": {
+          "label": "GANHE UMA BASE",
+          "hex_color": "#de7993",
+          "image": null
+        },
+        "tag": [],
+        "customization_ids": [
+          95881
+        ]
+      },
+      {
+        "id": 79613,
+        "sku": "nfx-ctl-24",
+        "name": "Copo Térmico Life + Ebook -  Stranger Things - Noite em Hawkins",
+        "seo_optimized_name": "Copo Térmico Life + Ebook -  Stranger Things - Noite em Hawkins",
+        "slug": "copo-termico-life-ebook-stranger-things-noite-em-hawkins",
+        "price": "209.9",
+        "old_price": "369.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-24/360lifepreto-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-45-termicos/104208/360lifebranco-copolife600/174837325922925160646370633051615.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-ctl-24",
+          "customizations": [
+            {
+              "id": 95899,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-45-termicos/104208/360lifebranco-copolife600/17483732592298005021487726081567793.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-45-termicos/104208/360lifebranco-copolife600/174837325922925160646370633051615.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-45-termicos/104208/360lifebranco-copolife600/17483732592298005021487726081567793.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-45-termicos/104208/360lifebranco-copolife600/174837325922925160646370633051615.png"
+              },
+              "engine_identifier": "nfx-st-45-termicos"
+            }
+          ],
+          "material": "360lifepreto-copolife880ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "copoebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "000000",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-24/360lifepreto-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-45-termicos/104211/360hangerpreto-hangerlife880ebook/1748373061838573208053634867527322.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360lifepreto-copolife880ebook",
+            "case_type_id": 2416,
+            "case_device_id": 8755,
+            "is_showcase_default": false,
+            "price": 209.9,
+            "old_price": 369.9
+          },
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-24/360lifebranco-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-45-termicos/104210/360hangerbranco-hangerlife880ebook/174837308576990906791777900947409.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360lifebranco-copolife880ebook",
+            "case_type_id": 2423,
+            "case_device_id": 8747,
+            "is_showcase_default": false,
+            "price": 229.9,
+            "old_price": 389.9
+          },
+          {
+            "color": "FCEBF8",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-24/360liferosaclaro-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-45-termicos/104210/360hangerbranco-hangerlife880ebook/174837308576990906791777900947409.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360liferosaclaro-copolife880ebook",
+            "case_type_id": 2415,
+            "case_device_id": 8753,
+            "is_showcase_default": false,
+            "price": 229.9,
+            "old_price": 389.9
+          },
+          {
+            "color": "FF5DF5",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-24/360lifepink-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-45-termicos/104211/360hangerpreto-hangerlife880ebook/1748373061838573208053634867527322.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360lifepink-copolife880ebook",
+            "case_type_id": 3474,
+            "case_device_id": 8751,
+            "is_showcase_default": false,
+            "price": 229.9,
+            "old_price": 389.9
+          },
+          {
+            "color": "BFBEE7",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-24/360lifelilas-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-45-termicos/104210/360hangerbranco-hangerlife880ebook/174837308576990906791777900947409.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360lifelilas-copolife880ebook",
+            "case_type_id": 2419,
+            "case_device_id": 8748,
+            "is_showcase_default": false,
+            "price": 229.9,
+            "old_price": 389.9
+          },
+          {
+            "color": "C8D8EE",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-24/360lifeazulclaro-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-45-termicos/104210/360hangerbranco-hangerlife880ebook/174837308576990906791777900947409.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360lifeazulclaro-copolife880ebook",
+            "case_type_id": 2425,
+            "case_device_id": 8750,
+            "is_showcase_default": false,
+            "price": 229.9,
+            "old_price": 389.9
+          },
+          {
+            "color": "274A96",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-24/360lifeazulmarinho-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-45-termicos/104211/360hangerpreto-hangerlife880ebook/1748373061838573208053634867527322.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360lifeazulmarinho-copolife880ebook",
+            "case_type_id": 2418,
+            "case_device_id": 8752,
+            "is_showcase_default": false,
+            "price": 229.9,
+            "old_price": 389.9
+          },
+          {
+            "color": "E8B6FF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-24/360lifedegradelilaserosa-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-45-termicos/104210/360hangerbranco-hangerlife880ebook/174837308576990906791777900947409.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360lifedegradelilaserosa-copolife880ebook",
+            "case_type_id": 3933,
+            "case_device_id": 8749,
+            "is_showcase_default": false,
+            "price": 229.9,
+            "old_price": 389.9
+          },
+          {
+            "color": "EA9C67",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-24/360lifelaranja-copolife1180ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-45-termicos/104212/360lifeamarelo-copolife1180/17483730438383293016278593642333372.png&expires=yes",
+            "default": true,
+            "in_stock": false,
+            "material": "360lifelaranja-copolife1180ebook",
+            "case_type_id": 2421,
+            "case_device_id": 8296,
+            "is_showcase_default": false,
+            "price": 249.9,
+            "old_price": 409.9
+          }
+        ],
+        "gif_image": "",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 81896,
+        "promotion": [],
+        "badge": {
+          "label": "GANHE UMA BASE",
+          "hex_color": "#de7993",
+          "image": null
+        },
+        "tag": [],
+        "customization_ids": [
+          95899
+        ]
+      },
+      {
+        "id": 79591,
+        "sku": "nfx-ctl-13",
+        "name": "Copo Térmico Life + Ebook -  Stranger Things - Pisca Pisca",
+        "seo_optimized_name": "Copo Térmico Life + Ebook -  Stranger Things - Pisca Pisca",
+        "slug": "copo-termico-life-ebook-stranger-things-pisca-pisca",
+        "price": "229.9",
+        "old_price": "389.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-13/360lifebranco-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-03-termicos/103969/360lifebranco-copolife600/1748271322416692505520312336328428.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-ctl-13",
+          "customizations": [
+            {
+              "id": 95877,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-03-termicos/103969/360lifebranco-copolife600/174827132241710705755030211866901.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-03-termicos/103969/360lifebranco-copolife600/1748271322416692505520312336328428.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-03-termicos/103969/360lifebranco-copolife600/174827132241710705755030211866901.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-03-termicos/103969/360lifebranco-copolife600/1748271322416692505520312336328428.png"
+              },
+              "engine_identifier": "nfx-st-03-termicos"
+            }
+          ],
+          "material": "360lifebranco-copolife880ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "copoebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-13/360lifebranco-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-03-termicos/103968/360hangerbranco-hangerlife880ebook/1748270134469544014879692773822695.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360lifebranco-copolife880ebook",
+            "case_type_id": 2423,
+            "case_device_id": 8747,
+            "is_showcase_default": false,
+            "price": 229.9,
+            "old_price": 389.9
+          },
+          {
+            "color": "FCEBF8",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-13/360liferosaclaro-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-03-termicos/103968/360hangerbranco-hangerlife880ebook/1748270134469544014879692773822695.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360liferosaclaro-copolife880ebook",
+            "case_type_id": 2415,
+            "case_device_id": 8753,
+            "is_showcase_default": false,
+            "price": 229.9,
+            "old_price": 389.9
+          },
+          {
+            "color": "BFBEE7",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-13/360lifelilas-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-03-termicos/103968/360hangerbranco-hangerlife880ebook/1748270134469544014879692773822695.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360lifelilas-copolife880ebook",
+            "case_type_id": 2419,
+            "case_device_id": 8748,
+            "is_showcase_default": false,
+            "price": 229.9,
+            "old_price": 389.9
+          },
+          {
+            "color": "C8D8EE",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-13/360lifeazulclaro-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-03-termicos/103968/360hangerbranco-hangerlife880ebook/1748270134469544014879692773822695.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360lifeazulclaro-copolife880ebook",
+            "case_type_id": 2425,
+            "case_device_id": 8750,
+            "is_showcase_default": false,
+            "price": 229.9,
+            "old_price": 389.9
+          },
+          {
+            "color": "E8B6FF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-13/360lifedegradelilaserosa-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-03-termicos/103968/360hangerbranco-hangerlife880ebook/1748270134469544014879692773822695.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360lifedegradelilaserosa-copolife880ebook",
+            "case_type_id": 3933,
+            "case_device_id": 8749,
+            "is_showcase_default": false,
+            "price": 229.9,
+            "old_price": 389.9
+          },
+          {
+            "color": "EA9C67",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-13/360lifelaranja-copolife1180ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-03-termicos/103967/360lifeamarelo-copolife1180/17482701157988784018041363426492818.png&expires=yes",
+            "default": true,
+            "in_stock": false,
+            "material": "360lifelaranja-copolife1180ebook",
+            "case_type_id": 2421,
+            "case_device_id": 8296,
+            "is_showcase_default": false,
+            "price": 249.9,
+            "old_price": 409.9
+          }
+        ],
+        "gif_image": "",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 81874,
+        "promotion": [],
+        "badge": {
+          "label": "GANHE UMA BASE",
+          "hex_color": "#de7993",
+          "image": null
+        },
+        "tag": [],
+        "customization_ids": [
+          95877
+        ]
+      },
+      {
+        "id": 91150,
+        "sku": "nfx-ctl-29",
+        "name": "Copo Térmico Life + Ebook -  Stranger Things - Squawk Van Poster",
+        "seo_optimized_name": "Copo Térmico Life + Ebook -  Stranger Things - Squawk Van Poster",
+        "slug": "copo-termico-life-ebook-stranger-things-squawk-van-poster",
+        "price": "209.9",
+        "old_price": "369.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-29/360lifepreto-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-squawk-van-poster-termicos/125452/360lifeamarelo-copolife1180/17604484530082166003041550975415175.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-ctl-29",
+          "customizations": [
+            {
+              "id": 108543,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/st5-squawk-van-poster-termicos/125452/360lifeamarelo-copolife1180/176044845300866910029014309502297997.png",
+                "pt_br": "prisma-render/prod-v2/previews/st5-squawk-van-poster-termicos/125452/360lifeamarelo-copolife1180/17604484530082166003041550975415175.png",
+                "en_dark": "prisma-render/prod-v2/previews/st5-squawk-van-poster-termicos/125452/360lifeamarelo-copolife1180/176044845300866910029014309502297997.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/st5-squawk-van-poster-termicos/125452/360lifeamarelo-copolife1180/17604484530082166003041550975415175.png"
+              },
+              "engine_identifier": "st5-squawk-van-poster-termicos"
+            }
+          ],
+          "material": "360lifepreto-copolife880ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "copoebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "000000",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-29/360lifepreto-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-squawk-van-poster-termicos/125451/360hangerpreto-hangerlife880ebook/1760448455302127403836060996905378.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360lifepreto-copolife880ebook",
+            "case_type_id": 2416,
+            "case_device_id": 8755,
+            "is_showcase_default": false,
+            "price": 209.9,
+            "old_price": 369.9
+          },
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-29/360lifebranco-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-squawk-van-poster-termicos/125450/360hangerbranco-hangerlife880ebook/17604484527179327014532042368999942.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360lifebranco-copolife880ebook",
+            "case_type_id": 2423,
+            "case_device_id": 8747,
+            "is_showcase_default": false,
+            "price": 229.9,
+            "old_price": 389.9
+          },
+          {
+            "color": "FCEBF8",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-29/360liferosaclaro-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-squawk-van-poster-termicos/125450/360hangerbranco-hangerlife880ebook/17604484527179327014532042368999942.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360liferosaclaro-copolife880ebook",
+            "case_type_id": 2415,
+            "case_device_id": 8753,
+            "is_showcase_default": false,
+            "price": 229.9,
+            "old_price": 389.9
+          },
+          {
+            "color": "BFBEE7",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-29/360lifelilas-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-squawk-van-poster-termicos/125450/360hangerbranco-hangerlife880ebook/17604484527179327014532042368999942.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360lifelilas-copolife880ebook",
+            "case_type_id": 2419,
+            "case_device_id": 8748,
+            "is_showcase_default": false,
+            "price": 229.9,
+            "old_price": 389.9
+          },
+          {
+            "color": "C8D8EE",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-29/360lifeazulclaro-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-squawk-van-poster-termicos/125450/360hangerbranco-hangerlife880ebook/17604484527179327014532042368999942.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360lifeazulclaro-copolife880ebook",
+            "case_type_id": 2425,
+            "case_device_id": 8750,
+            "is_showcase_default": false,
+            "price": 229.9,
+            "old_price": 389.9
+          },
+          {
+            "color": "274A96",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-29/360lifeazulmarinho-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-squawk-van-poster-termicos/125451/360hangerpreto-hangerlife880ebook/1760448455302127403836060996905378.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360lifeazulmarinho-copolife880ebook",
+            "case_type_id": 2418,
+            "case_device_id": 8752,
+            "is_showcase_default": false,
+            "price": 229.9,
+            "old_price": 389.9
+          }
+        ],
+        "gif_image": "",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 93433,
+        "promotion": [],
+        "badge": {
+          "label": "GANHE UMA BASE",
+          "hex_color": "#de7993",
+          "image": null
+        },
+        "tag": [],
+        "customization_ids": [
+          108543
+        ]
+      },
+      {
+        "id": 91152,
+        "sku": "nfx-ctl-31",
+        "name": "Copo Térmico Life + Ebook -  Stranger Things - Hawkins 1987",
+        "seo_optimized_name": "Copo Térmico Life + Ebook -  Stranger Things - Hawkins 1987",
+        "slug": "copo-termico-life-ebook-stranger-things-hawkins-1987",
+        "price": "209.9",
+        "old_price": "369.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-31/360lifepreto-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-1987-termicos/125077/360lifeamarelo-copolife1180/1762887205701921706776886210839145.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-ctl-31",
+          "customizations": [
+            {
+              "id": 108545,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/st5-1987-termicos/125077/360lifeamarelo-copolife1180/1762887205702332306668353431837507.png",
+                "pt_br": "prisma-render/prod-v2/previews/st5-1987-termicos/125077/360lifeamarelo-copolife1180/1762887205701921706776886210839145.png",
+                "en_dark": "prisma-render/prod-v2/previews/st5-1987-termicos/125077/360lifeamarelo-copolife1180/1762887205702332306668353431837507.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/st5-1987-termicos/125077/360lifeamarelo-copolife1180/1762887205701921706776886210839145.png"
+              },
+              "engine_identifier": "st5-1987-termicos"
+            }
+          ],
+          "material": "360lifepreto-copolife880ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "copoebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "000000",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-31/360lifepreto-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-1987-termicos/125078/360hangerpreto-hangerlife880ebook/176288717419560308919320701870342.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360lifepreto-copolife880ebook",
+            "case_type_id": 2416,
+            "case_device_id": 8755,
+            "is_showcase_default": false,
+            "price": 209.9,
+            "old_price": 369.9
+          },
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-31/360lifebranco-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-1987-termicos/125079/360hangerbranco-hangerlife880ebook/1762887155586489407035033521175885.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360lifebranco-copolife880ebook",
+            "case_type_id": 2423,
+            "case_device_id": 8747,
+            "is_showcase_default": false,
+            "price": 229.9,
+            "old_price": 389.9
+          },
+          {
+            "color": "FCEBF8",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-31/360liferosaclaro-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-1987-termicos/125079/360hangerbranco-hangerlife880ebook/1762887155586489407035033521175885.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360liferosaclaro-copolife880ebook",
+            "case_type_id": 2415,
+            "case_device_id": 8753,
+            "is_showcase_default": false,
+            "price": 229.9,
+            "old_price": 389.9
+          },
+          {
+            "color": "BFBEE7",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-31/360lifelilas-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-1987-termicos/125079/360hangerbranco-hangerlife880ebook/1762887155586489407035033521175885.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360lifelilas-copolife880ebook",
+            "case_type_id": 2419,
+            "case_device_id": 8748,
+            "is_showcase_default": false,
+            "price": 229.9,
+            "old_price": 389.9
+          },
+          {
+            "color": "C8D8EE",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-31/360lifeazulclaro-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-1987-termicos/125079/360hangerbranco-hangerlife880ebook/1762887155586489407035033521175885.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360lifeazulclaro-copolife880ebook",
+            "case_type_id": 2425,
+            "case_device_id": 8750,
+            "is_showcase_default": false,
+            "price": 229.9,
+            "old_price": 389.9
+          },
+          {
+            "color": "274A96",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-31/360lifeazulmarinho-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-1987-termicos/125078/360hangerpreto-hangerlife880ebook/176288717419560308919320701870342.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360lifeazulmarinho-copolife880ebook",
+            "case_type_id": 2418,
+            "case_device_id": 8752,
+            "is_showcase_default": false,
+            "price": 229.9,
+            "old_price": 389.9
+          }
+        ],
+        "gif_image": "",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 93435,
+        "promotion": [],
+        "badge": {
+          "label": "GANHE UMA BASE",
+          "hex_color": "#de7993",
+          "image": null
+        },
+        "tag": [],
+        "customization_ids": [
+          108545
+        ]
+      },
+      {
+        "id": 79615,
+        "sku": "nfx-ctl-25",
+        "name": "Copo Térmico Life + Ebook -  Stranger Things - Stranger Squad",
+        "seo_optimized_name": "Copo Térmico Life + Ebook -  Stranger Things - Stranger Squad",
+        "slug": "copo-termico-life-ebook-stranger-things-stranger-squad",
+        "price": "209.9",
+        "old_price": "369.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-25/360lifepreto-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-46-termicos/104193/360lifeamarelo-copolife1180/1747850982636099004061188561798079.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-ctl-25",
+          "customizations": [
+            {
+              "id": 95901,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-46-termicos/104193/360lifeamarelo-copolife1180/174785098263669905570565058179721.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-46-termicos/104193/360lifeamarelo-copolife1180/1747850982636099004061188561798079.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-46-termicos/104193/360lifeamarelo-copolife1180/174785098263669905570565058179721.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-46-termicos/104193/360lifeamarelo-copolife1180/1747850982636099004061188561798079.png"
+              },
+              "engine_identifier": "nfx-st-46-termicos"
+            }
+          ],
+          "material": "360lifepreto-copolife880ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "copoebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "000000",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-25/360lifepreto-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-46-termicos/104181/360hangerpreto-hangerlife880ebook/1747850139554993408490333977963865.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360lifepreto-copolife880ebook",
+            "case_type_id": 2416,
+            "case_device_id": 8755,
+            "is_showcase_default": false,
+            "price": 209.9,
+            "old_price": 369.9
+          }
+        ],
+        "gif_image": "",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 81898,
+        "promotion": [],
+        "badge": {
+          "label": "GANHE UMA BASE",
+          "hex_color": "#de7993",
+          "image": null
+        },
+        "tag": [],
+        "customization_ids": [
+          95901
+        ]
+      },
+      {
+        "id": 79607,
+        "sku": "nfx-ctl-21",
+        "name": "Copo Térmico Life + Ebook -  Stranger Things - Demogorgon Fan Club",
+        "seo_optimized_name": "Copo Térmico Life + Ebook -  Stranger Things - Demogorgon Fan Club",
+        "slug": "copo-termico-life-ebook-stranger-things-demogorgon-fan-club",
+        "price": "209.9",
+        "old_price": "369.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-21/360lifepreto-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-42-termicos/104098/360hangerpreto-hangerlife880ebook/1748267206849702042441900552398626.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-ctl-21",
+          "customizations": [
+            {
+              "id": 95893,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-42-termicos/104098/360hangerpreto-hangerlife880ebook/174826720685012150827950491156457.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-42-termicos/104098/360hangerpreto-hangerlife880ebook/1748267206849702042441900552398626.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-42-termicos/104098/360hangerpreto-hangerlife880ebook/174826720685012150827950491156457.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-42-termicos/104098/360hangerpreto-hangerlife880ebook/1748267206849702042441900552398626.png"
+              },
+              "engine_identifier": "nfx-st-42-termicos"
+            }
+          ],
+          "material": "360lifepreto-copolife880ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "copoebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "000000",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-21/360lifepreto-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-42-termicos/104098/360hangerpreto-hangerlife880ebook/1748267206849702042441900552398626.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360lifepreto-copolife880ebook",
+            "case_type_id": 2416,
+            "case_device_id": 8755,
+            "is_showcase_default": false,
+            "price": 209.9,
+            "old_price": 369.9
+          },
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-21/360lifebranco-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-42-termicos/104092/360hangerbranco-hangerlife880ebook/1748267054808741601314295757276287.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360lifebranco-copolife880ebook",
+            "case_type_id": 2423,
+            "case_device_id": 8747,
+            "is_showcase_default": false,
+            "price": 229.9,
+            "old_price": 389.9
+          },
+          {
+            "color": "FCEBF8",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-21/360liferosaclaro-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-42-termicos/104092/360hangerbranco-hangerlife880ebook/1748267054808741601314295757276287.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360liferosaclaro-copolife880ebook",
+            "case_type_id": 2415,
+            "case_device_id": 8753,
+            "is_showcase_default": false,
+            "price": 229.9,
+            "old_price": 389.9
+          },
+          {
+            "color": "FF5DF5",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-21/360lifepink-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-42-termicos/104098/360hangerpreto-hangerlife880ebook/1748267206849702042441900552398626.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360lifepink-copolife880ebook",
+            "case_type_id": 3474,
+            "case_device_id": 8751,
+            "is_showcase_default": false,
+            "price": 229.9,
+            "old_price": 389.9
+          },
+          {
+            "color": "C8D8EE",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-21/360lifeazulclaro-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-42-termicos/104092/360hangerbranco-hangerlife880ebook/1748267054808741601314295757276287.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360lifeazulclaro-copolife880ebook",
+            "case_type_id": 2425,
+            "case_device_id": 8750,
+            "is_showcase_default": false,
+            "price": 229.9,
+            "old_price": 389.9
+          },
+          {
+            "color": "274A96",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-21/360lifeazulmarinho-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-42-termicos/104098/360hangerpreto-hangerlife880ebook/1748267206849702042441900552398626.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360lifeazulmarinho-copolife880ebook",
+            "case_type_id": 2418,
+            "case_device_id": 8752,
+            "is_showcase_default": false,
+            "price": 229.9,
+            "old_price": 389.9
+          },
+          {
+            "color": "EA9C67",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-21/360lifelaranja-copolife1180ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-42-termicos/104097/360lifeamarelo-copolife1180/1748267184303179707229938303544029.png&expires=yes",
+            "default": true,
+            "in_stock": false,
+            "material": "360lifelaranja-copolife1180ebook",
+            "case_type_id": 2421,
+            "case_device_id": 8296,
+            "is_showcase_default": false,
+            "price": 249.9,
+            "old_price": 409.9
+          }
+        ],
+        "gif_image": "",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 81890,
+        "promotion": [],
+        "badge": {
+          "label": "GANHE UMA BASE",
+          "hex_color": "#de7993",
+          "image": null
+        },
+        "tag": [],
+        "customization_ids": [
+          95893
+        ]
+      },
+      {
+        "id": 79599,
+        "sku": "nfx-ctl-17",
+        "name": "Copo Térmico Life + Ebook -  Stranger Things - Minimalist Icon",
+        "seo_optimized_name": "Copo Térmico Life + Ebook -  Stranger Things - Minimalist Icon",
+        "slug": "copo-termico-life-ebook-stranger-things-minimalist-icon",
+        "price": "209.9",
+        "old_price": "369.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-17/360lifepreto-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-37-termicos/104166/360lifeamarelo-copolife1180/174784207257442402543228104351487.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-ctl-17",
+          "customizations": [
+            {
+              "id": 95885,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-37-termicos/104166/360lifeamarelo-copolife1180/1747842072574860304615092088378431.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-37-termicos/104166/360lifeamarelo-copolife1180/174784207257442402543228104351487.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-37-termicos/104166/360lifeamarelo-copolife1180/1747842072574860304615092088378431.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-37-termicos/104166/360lifeamarelo-copolife1180/174784207257442402543228104351487.png"
+              },
+              "engine_identifier": "nfx-st-37-termicos"
+            }
+          ],
+          "material": "360lifepreto-copolife880ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "copoebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "000000",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-17/360lifepreto-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-37-termicos/104306/360hangerpreto-hangerlife880ebook/1747912353010042014877781753484676.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360lifepreto-copolife880ebook",
+            "case_type_id": 2416,
+            "case_device_id": 8755,
+            "is_showcase_default": false,
+            "price": 209.9,
+            "old_price": 369.9
+          },
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-17/360lifebranco-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-37-termicos/104307/360hangerbranco-hangerlife880ebook/17479125855943322002040736129218579.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360lifebranco-copolife880ebook",
+            "case_type_id": 2423,
+            "case_device_id": 8747,
+            "is_showcase_default": false,
+            "price": 229.9,
+            "old_price": 389.9
+          }
+        ],
+        "gif_image": "",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 81882,
+        "promotion": [],
+        "badge": {
+          "label": "GANHE UMA BASE",
+          "hex_color": "#de7993",
+          "image": null
+        },
+        "tag": [],
+        "customization_ids": [
+          95885
+        ]
+      },
+      {
+        "id": 79609,
+        "sku": "nfx-ctl-22",
+        "name": "Copo Térmico Life + Ebook -  Stranger Things - Hellfire Club",
+        "seo_optimized_name": "Copo Térmico Life + Ebook -  Stranger Things - Hellfire Club",
+        "slug": "copo-termico-life-ebook-stranger-things-hellfire-club",
+        "price": "209.9",
+        "old_price": "369.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-22/360lifepreto-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-43-termicos/104160/360lifebranco-copolife600/1748341424677733208337793429118407.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-ctl-22",
+          "customizations": [
+            {
+              "id": 95895,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.280.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-43-termicos/104160/360lifebranco-copolife600/1748341424678141606620613424554714.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-43-termicos/104160/360lifebranco-copolife600/1748341424677733208337793429118407.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-43-termicos/104160/360lifebranco-copolife600/1748341424678141606620613424554714.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-43-termicos/104160/360lifebranco-copolife600/1748341424677733208337793429118407.png"
+              },
+              "engine_identifier": "nfx-st-43-termicos"
+            }
+          ],
+          "material": "360lifepreto-copolife880ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "copoebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "000000",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-22/360lifepreto-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-43-termicos/104147/360hangerpreto-hangerlife880ebook/1748340815421981018522093431956932.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360lifepreto-copolife880ebook",
+            "case_type_id": 2416,
+            "case_device_id": 8755,
+            "is_showcase_default": false,
+            "price": 209.9,
+            "old_price": 369.9
+          },
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-22/360lifebranco-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-43-termicos/104150/360hangerbranco-hangerlife880ebook/1748340881869650606043256451362868.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360lifebranco-copolife880ebook",
+            "case_type_id": 2423,
+            "case_device_id": 8747,
+            "is_showcase_default": false,
+            "price": 229.9,
+            "old_price": 389.9
+          }
+        ],
+        "gif_image": "",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 81892,
+        "promotion": [],
+        "badge": {
+          "label": "GANHE UMA BASE",
+          "hex_color": "#de7993",
+          "image": null
+        },
+        "tag": [],
+        "customization_ids": [
+          95895
+        ]
+      },
+      {
+        "id": 79603,
+        "sku": "nfx-ctl-19",
+        "name": "Copo Térmico Life + Ebook -  Stranger Things - Scoops Ahoy",
+        "seo_optimized_name": "Copo Térmico Life + Ebook -  Stranger Things - Scoops Ahoy",
+        "slug": "copo-termico-life-ebook-stranger-things-scoops-ahoy",
+        "price": "249.9",
+        "old_price": "349.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-19/360liferosaclaro-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-39-termicos/104272/360lifepreto-copolife600/1748289499452002507832781931546554.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-ctl-19",
+          "customizations": [
+            {
+              "id": 95889,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-39-termicos/104272/360lifepreto-copolife600/174828949945265750591431786812272.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-39-termicos/104272/360lifepreto-copolife600/1748289499452002507832781931546554.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-39-termicos/104272/360lifepreto-copolife600/174828949945265750591431786812272.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-39-termicos/104272/360lifepreto-copolife600/1748289499452002507832781931546554.png"
+              },
+              "engine_identifier": "nfx-st-39-termicos"
+            }
+          ],
+          "material": "360liferosaclaro-copolife880ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "copoebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "FCEBF8",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-19/360liferosaclaro-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-39-termicos/104296/360hangerbranco-hangerlife880ebook/1748289586062081808740243663253283.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360liferosaclaro-copolife880ebook",
+            "case_type_id": 2415,
+            "case_device_id": 8753,
+            "is_showcase_default": false,
+            "price": 249.9,
+            "old_price": 349.9
+          },
+          {
+            "color": "FF5DF5",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-19/360lifepink-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-39-termicos/104297/360hangerpreto-hangerlife880ebook/17482895799298440767756710712648.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360lifepink-copolife880ebook",
+            "case_type_id": 3474,
+            "case_device_id": 8751,
+            "is_showcase_default": false,
+            "price": 249.9,
+            "old_price": 349.9
+          },
+          {
+            "color": "BFBEE7",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-19/360lifelilas-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-39-termicos/104296/360hangerbranco-hangerlife880ebook/1748289586062081808740243663253283.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360lifelilas-copolife880ebook",
+            "case_type_id": 2419,
+            "case_device_id": 8748,
+            "is_showcase_default": false,
+            "price": 249.9,
+            "old_price": 349.9
+          },
+          {
+            "color": "C8D8EE",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-19/360lifeazulclaro-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-39-termicos/104296/360hangerbranco-hangerlife880ebook/1748289586062081808740243663253283.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360lifeazulclaro-copolife880ebook",
+            "case_type_id": 2425,
+            "case_device_id": 8750,
+            "is_showcase_default": false,
+            "price": 249.9,
+            "old_price": 349.9
+          },
+          {
+            "color": "274A96",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-19/360lifeazulmarinho-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-39-termicos/104297/360hangerpreto-hangerlife880ebook/17482895799298440767756710712648.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360lifeazulmarinho-copolife880ebook",
+            "case_type_id": 2418,
+            "case_device_id": 8752,
+            "is_showcase_default": false,
+            "price": 249.9,
+            "old_price": 349.9
+          },
+          {
+            "color": "E8B6FF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-19/360lifedegradelilaserosa-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-39-termicos/104296/360hangerbranco-hangerlife880ebook/1748289586062081808740243663253283.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360lifedegradelilaserosa-copolife880ebook",
+            "case_type_id": 3933,
+            "case_device_id": 8749,
+            "is_showcase_default": false,
+            "price": 249.9,
+            "old_price": 349.9
+          },
+          {
+            "color": "EA9C67",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-19/360lifelaranja-copolife1180ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-39-termicos/104298/360lifeamarelo-copolife1180/174828957613113503192543513458338.png&expires=yes",
+            "default": true,
+            "in_stock": false,
+            "material": "360lifelaranja-copolife1180ebook",
+            "case_type_id": 2421,
+            "case_device_id": 8296,
+            "is_showcase_default": false,
+            "price": 269.9,
+            "old_price": 369.9
+          }
+        ],
+        "gif_image": "",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 81886,
+        "promotion": [],
+        "badge": {
+          "label": "GANHE UMA BASE",
+          "hex_color": "#de7993",
+          "image": null
+        },
+        "tag": [],
+        "customization_ids": [
+          95889
+        ]
+      },
+      {
+        "id": 79593,
+        "sku": "nfx-ctl-14",
+        "name": "Copo Térmico Life + Ebook -  Stranger Things - Logo",
+        "seo_optimized_name": "Copo Térmico Life + Ebook -  Stranger Things - Logo",
+        "slug": "copo-termico-life-ebook-stranger-things-logo",
+        "price": "209.9",
+        "old_price": "369.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-14/360lifepreto-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-05-termicos/103925/360lifeamarelo-copolife1180/1747683692678052704555317846631989.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-ctl-14",
+          "customizations": [
+            {
+              "id": 95879,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-05-termicos/103925/360lifeamarelo-copolife1180/1747683692678375706538863293206832.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-05-termicos/103925/360lifeamarelo-copolife1180/1747683692678052704555317846631989.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-05-termicos/103925/360lifeamarelo-copolife1180/1747683692678375706538863293206832.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-05-termicos/103925/360lifeamarelo-copolife1180/1747683692678052704555317846631989.png"
+              },
+              "engine_identifier": "nfx-st-05-termicos"
+            }
+          ],
+          "material": "360lifepreto-copolife880ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "copoebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "000000",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-14/360lifepreto-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-05-termicos/103924/360hangerpreto-hangerlife880ebook/1747684490046837605645588339612485.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360lifepreto-copolife880ebook",
+            "case_type_id": 2416,
+            "case_device_id": 8755,
+            "is_showcase_default": false,
+            "price": 209.9,
+            "old_price": 369.9
+          },
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-ctl-14/360lifebranco-copolife880ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-05-termicos/103923/360hangerbranco-hangerlife880ebook/1747684488660355806027041964414012.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360lifebranco-copolife880ebook",
+            "case_type_id": 2423,
+            "case_device_id": 8747,
+            "is_showcase_default": false,
+            "price": 229.9,
+            "old_price": 389.9
+          }
+        ],
+        "gif_image": "",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 81876,
+        "promotion": [],
+        "badge": {
+          "label": "GANHE UMA BASE",
+          "hex_color": "#de7993",
+          "image": null
+        },
+        "tag": [],
+        "customization_ids": [
+          95879
+        ]
+      }
+    ],
+    "case_device_id": null
+  },
+  "headers": {
+    "access-control-allow-credentials": "true",
+    "access-control-allow-methods": "GET, POST, PATCH, PUT, DELETE, OPTIONS",
+    "access-control-allow-origin": "https://www.gocase.com.br",
+    "access-control-expose-headers": "Cache-Control, Content-Language, Content-Length, Content-Type, Expires, Last-Modified, Pragma",
+    "access-control-max-age": "86400",
+    "age": "88",
+    "cache-control": "max-age=0, public, s-maxage=120, stale-while-revalidate=30, stale-if-error=30",
+    "cf-cache-status": "HIT",
+    "cf-ray": "9b96765f9d35b871-GRU",
+    "content-encoding": "br",
+    "content-type": "application/json; charset=utf-8",
+    "date": "Mon, 05 Jan 2026 22:37:49 GMT",
+    "etag": "W/\"039cd35f1265e838519e69eab90859ad\"",
+    "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+    "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=XqzMJ7Xe4TQae8vO7Z3mRZSReNGA5rdZonNmeA7G%2BPnUtoGKbh5P4QAJbvgXf0hzfBnzie36gVlRmDhKkOtOh8rslIPMFwIqgvg5ZSOLWlw%3D\"}]}",
+    "server": "cloudflare",
+    "strict-transport-security": "max-age=0; includeSubDomains",
+    "vary": "Origin, accept-encoding",
+    "x-content-type-options": "nosniff",
+    "x-envoy-upstream-service-time": "225",
+    "x-frame-options": "SAMEORIGIN",
+    "x-request-id": "3211004a-3714-4b76-89f7-7f3f90fd08ba",
+    "x-runtime": "0.222198",
+    "x-xss-protection": "1; mode=block"
+  }
+}

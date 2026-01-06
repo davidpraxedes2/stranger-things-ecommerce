@@ -1,0 +1,113 @@
+{
+  "url": "https://ekr.zdassets.com/compose/c3e9ea3e-2673-479e-becb-5a879f006927",
+  "status": 200,
+  "data": {
+    "products": [
+      {
+        "name": "web_widget",
+        "id": "netflixshop.zendesk.com",
+        "bootstrap": {
+          "config": {
+            "features": {
+              "multiConvoEnabled": true,
+              "messagingPrivacyNoticeEvents": true,
+              "conversationTicketMetadata": true,
+              "displayAcWaitTimeCapsule": true
+            },
+            "messenger": {
+              "reopenConversationDisabled": false,
+              "canUserCreateMoreConversations": true,
+              "color": {
+                "message": "#221f1f",
+                "action": "#e40914",
+                "primary": "#221f1f"
+              },
+              "description": "",
+              "title": "Netflix Shop",
+              "conversationTranscriptEnabled": false,
+              "canUserSeeConversationList": true,
+              "conversationHistory": "forget",
+              "appId": "627be94669ab8b00f6c2195a",
+              "soundNotificationEnabled": false,
+              "endSessionEnabled": false,
+              "integrationId": "6618e9ac842f6db20a531595",
+              "attachmentsEnabled": true,
+              "privacyNoticeEnabled": false,
+              "avatar": "https://netflixshop.zendesk.com/embeddable/avatars/25561283516180",
+              "positionOffset": {
+                "mobile": {
+                  "horizontal": "16",
+                  "vertical": "16"
+                },
+                "web": {
+                  "horizontal": "16",
+                  "vertical": "16"
+                }
+              },
+              "showZendeskLogo": false,
+              "baseUrl": "https://netflixshop.zendesk.com/sc/sdk",
+              "waitConfig": {
+                "queuePollingInterval": 60,
+                "queuePositionEnabled": false,
+                "onlyDecreasingQueue": false,
+                "waitTimeEnabled": false
+              },
+              "channelLinkingEnabled": false,
+              "frameBorderRadius": "20",
+              "privacyNoticeUrl": null,
+              "position": "right",
+              "proactiveMessagingEnabled": false,
+              "launcher": {
+                "shapeSettings": null,
+                "showTextInMobile": false,
+                "text": "Hi. Need any help?",
+                "shape": "circle"
+              }
+            }
+          }
+        },
+        "features": [],
+        "url": "https://ekr.zendesk.com/compose_product/web_widget/f2a00dbea58ce054c88173684d24640c3c0ebbd9?features%5B%5D=",
+        "assets": {
+          "scripts": [
+            {
+              "src": "https://static.zdassets.com/web_widget/messenger/latest/web-widget-main-f2a00db.js"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "headers": {
+    "access-control-allow-methods": "GET, POST, OPTIONS",
+    "access-control-allow-origin": "*",
+    "access-control-expose-headers": "",
+    "access-control-max-age": "7200",
+    "age": "23",
+    "cache-control": "max-age=300, public, stale-while-revalidate=300, stale-if-error=21600",
+    "cdn-cache-control": "max-age=60",
+    "cf-cache-status": "HIT",
+    "cf-ray": "9b96e9e80a8752ee-GRU",
+    "content-encoding": "br",
+    "content-type": "application/json; charset=utf-8",
+    "date": "Mon, 05 Jan 2026 23:56:41 GMT",
+    "etag": "W/\"aa67e6259f0c614680f1d04eb095b0ac\"",
+    "nel": "{\"success_fraction\":0,\"report_to\":\"cf-nel\",\"max_age\":604800}",
+    "referrer-policy": "strict-origin-when-cross-origin",
+    "report-to": "{\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report\\/v4?s=obIPux1uGIQvgnDGicFmgmcv29enbJctbTEsfNRLtAY8XommmVb5oX5IyB0WlLhbQQMUWN5nt3k3cTqFv22YgJSKrefyHlvLfH3jQt%2BMA9S8Sa5iA4h2k9DWDBcw71pQUCg%3D\"}],\"group\":\"cf-nel\",\"max_age\":604800}",
+    "server": "cloudflare",
+    "strict-transport-security": "max-age=0",
+    "vary": "Accept,Origin, Accept-Encoding",
+    "via": "zorg",
+    "x-content-type-options": "nosniff",
+    "x-download-options": "noopen",
+    "x-envoy-upstream-service-time": "12",
+    "x-frame-options": "SAMEORIGIN",
+    "x-permitted-cross-domain-policies": "none",
+    "x-request-id": "9ac5d2b07f3c5b3c-SEA",
+    "x-runtime": "0.010433",
+    "x-xss-protection": "1; mode=block",
+    "x-zendesk-zorg": "yes",
+    "zendesk-service": "embed-key-registry"
+  }
+}

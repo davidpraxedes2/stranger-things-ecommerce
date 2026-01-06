@@ -1,0 +1,674 @@
+{
+  "url": "https://api.gocase.com.br/api/v2/shelf/7250?locale=pt-BR&currency=BRL&store=br&jd=42",
+  "status": 200,
+  "data": {
+    "label": "⭐️ Cases Stranger Things - Pague 1 e Leve 2 cases! 🔥",
+    "type": "taxon",
+    "see_more": "https://www.gocase.com.br/capinha-para-celular//?sorting=favorites&product_filter=capinha-para-celular&page=1&new=1&taxon=collections%2Fnetflix%2Fstranger-things",
+    "products": [
+      {
+        "id": 94164,
+        "sku": "nfx-st-84",
+        "name": " Stranger Things - Inverso",
+        "seo_optimized_name": "Capinha para celular  Stranger Things - Inverso",
+        "slug": "capinha-para-celular-stranger-things-inverso",
+        "price": "79.9",
+        "old_price": "89.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-st-84/infiniteair-iphone13/mockup?stamp=prisma-render%2Fprod-v2%2Fpreviews%2Fst5-inverso-case%2F129983%2Fstandard-iphone11%2F176357543960955380284653450056478.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-st-84",
+          "customizations": [
+            {
+              "id": 111656,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/st5-inverso-case/129983/standard-iphone11/1763575439610010409865346192494703.png",
+                "pt_br": "prisma-render/prod-v2/previews/st5-inverso-case/129983/standard-iphone11/176357543960955380284653450056478.png",
+                "en_dark": "prisma-render/prod-v2/previews/st5-inverso-case/129983/standard-iphone11/1763575439610010409865346192494703.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/st5-inverso-case/129983/standard-iphone11/176357543960955380284653450056478.png"
+              },
+              "engine_identifier": "st5-inverso-case"
+            }
+          ],
+          "material": "infiniteair-iphone13",
+          "url": "https://ik.imagekit.io/gocase/govinci/nfx-st-84/infiniteair-iphone13/mockup?stamp=prisma-render%2Fprod-v2%2Fpreviews%2Fst5-inverso-case%2F129983%2Fstandard-iphone11%2F176357543960955380284653450056478.png&expires=yes",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "case",
+        "has_color_and_size_variants": false,
+        "in_stock": true,
+        "color_options": [],
+        "gif_image": "",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 96447,
+        "promotion": [],
+        "badge": {
+          "label": "LEVE 2, PAGUE 1",
+          "hex_color": "#ff0000",
+          "image": null
+        },
+        "tag": [],
+        "customization_ids": [
+          111656
+        ]
+      },
+      {
+        "id": 91089,
+        "sku": "nfx-st-54",
+        "name": " Stranger Things - Anatomia do Demogorgon",
+        "seo_optimized_name": "Capinha para celular  Stranger Things - Anatomia do Demogorgon",
+        "slug": "capinha-para-celular-stranger-things-anatomia-do-demogorgon",
+        "price": "79.9",
+        "old_price": "89.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-st-54/infiniteair-iphone13/mockup?stamp=prisma-render%2Fprod-v2%2Fpreviews%2Fst5-anatomia-demogorgon%2F121317%2Fantiimpactoslimair-iphone14%2F1761937773329347408476895006336835.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-st-54",
+          "customizations": [
+            {
+              "id": 108482,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/st5-anatomia-demogorgon/121317/antiimpactoslimair-iphone14/17619377733297284029869328758828495.png",
+                "pt_br": "prisma-render/prod-v2/previews/st5-anatomia-demogorgon/121317/antiimpactoslimair-iphone14/1761937773329347408476895006336835.png",
+                "en_dark": "prisma-render/prod-v2/previews/st5-anatomia-demogorgon/121317/antiimpactoslimair-iphone14/17619377733297284029869328758828495.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/st5-anatomia-demogorgon/121317/antiimpactoslimair-iphone14/1761937773329347408476895006336835.png"
+              },
+              "engine_identifier": "st5-anatomia-demogorgon"
+            }
+          ],
+          "material": "infiniteair-iphone13",
+          "url": "https://ik.imagekit.io/gocase/govinci/nfx-st-54/infiniteair-iphone13/mockup?stamp=prisma-render%2Fprod-v2%2Fpreviews%2Fst5-anatomia-demogorgon%2F121317%2Fantiimpactoslimair-iphone14%2F1761937773329347408476895006336835.png&expires=yes",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "case",
+        "has_color_and_size_variants": false,
+        "in_stock": true,
+        "color_options": [],
+        "gif_image": "",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 93372,
+        "promotion": [],
+        "badge": {
+          "label": "LEVE 2, PAGUE 1",
+          "hex_color": "#ff0000",
+          "image": null
+        },
+        "tag": [],
+        "customization_ids": [
+          108482
+        ]
+      },
+      {
+        "id": 91081,
+        "sku": "nfx-st-50",
+        "name": " Stranger Things - Pixel Art Game",
+        "seo_optimized_name": "Capinha para celular  Stranger Things - Pixel Art Game",
+        "slug": "capinha-para-celular-stranger-things-pixel-art-game",
+        "price": "79.9",
+        "old_price": "89.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-st-50/infiniteair-iphone13/mockup?stamp=prisma-render%2Fprod-v2%2Fpreviews%2Fst5-pixel-art-game%2F125061%2Fantiimpactoslimair-iphone14%2F1760104109258312707235325077454576.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-st-50",
+          "customizations": [
+            {
+              "id": 108474,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/st5-pixel-art-game/125061/antiimpactoslimair-iphone14/17601041092588165023082970188233176.png",
+                "pt_br": "prisma-render/prod-v2/previews/st5-pixel-art-game/125061/antiimpactoslimair-iphone14/1760104109258312707235325077454576.png",
+                "en_dark": "prisma-render/prod-v2/previews/st5-pixel-art-game/125061/antiimpactoslimair-iphone14/17601041092588165023082970188233176.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/st5-pixel-art-game/125061/antiimpactoslimair-iphone14/1760104109258312707235325077454576.png"
+              },
+              "engine_identifier": "st5-pixel-art-game"
+            }
+          ],
+          "material": "infiniteair-iphone13",
+          "url": "https://ik.imagekit.io/gocase/govinci/nfx-st-50/infiniteair-iphone13/mockup?stamp=prisma-render%2Fprod-v2%2Fpreviews%2Fst5-pixel-art-game%2F125061%2Fantiimpactoslimair-iphone14%2F1760104109258312707235325077454576.png&expires=yes",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "case",
+        "has_color_and_size_variants": false,
+        "in_stock": true,
+        "color_options": [],
+        "gif_image": "",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 93364,
+        "promotion": [],
+        "badge": {
+          "label": "LEVE 2, PAGUE 1",
+          "hex_color": "#ff0000",
+          "image": null
+        },
+        "tag": [],
+        "customization_ids": [
+          108474
+        ]
+      },
+      {
+        "id": 92574,
+        "sku": "nfx-st-79",
+        "name": " Stranger Things - Steve Scoops Ahoy",
+        "seo_optimized_name": "Capinha para celular  Stranger Things - Steve Scoops Ahoy",
+        "slug": "capinha-para-celular-stranger-things-steve-scoops-ahoy",
+        "price": "79.9",
+        "old_price": "89.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-st-79/infiniteair-iphone13/mockup?stamp=prisma-render%2Fprod-v2%2Fpreviews%2Fst5-steve-scoops-ahoy%2F126762%2Fstandard-iphone11%2F1761306590814816502039174389094921.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-st-79",
+          "customizations": [
+            {
+              "id": 110016,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/st5-steve-scoops-ahoy/126762/standard-iphone11/1761306590815173905708580198039722.png",
+                "pt_br": "prisma-render/prod-v2/previews/st5-steve-scoops-ahoy/126762/standard-iphone11/1761306590814816502039174389094921.png",
+                "en_dark": "prisma-render/prod-v2/previews/st5-steve-scoops-ahoy/126762/standard-iphone11/1761306590815173905708580198039722.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/st5-steve-scoops-ahoy/126762/standard-iphone11/1761306590814816502039174389094921.png"
+              },
+              "engine_identifier": "st5-steve-scoops-ahoy"
+            }
+          ],
+          "material": "infiniteair-iphone13",
+          "url": "https://ik.imagekit.io/gocase/govinci/nfx-st-79/infiniteair-iphone13/mockup?stamp=prisma-render%2Fprod-v2%2Fpreviews%2Fst5-steve-scoops-ahoy%2F126762%2Fstandard-iphone11%2F1761306590814816502039174389094921.png&expires=yes",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "case",
+        "has_color_and_size_variants": false,
+        "in_stock": true,
+        "color_options": [],
+        "gif_image": "",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 94857,
+        "promotion": [],
+        "badge": {
+          "label": "LEVE 2, PAGUE 1",
+          "hex_color": "#ff0000",
+          "image": null
+        },
+        "tag": [],
+        "customization_ids": [
+          110016
+        ]
+      },
+      {
+        "id": 94166,
+        "sku": "nfx-st-86",
+        "name": " Stranger Things - Monster Hunters",
+        "seo_optimized_name": "Capinha para celular  Stranger Things - Monster Hunters",
+        "slug": "capinha-para-celular-stranger-things-monster-hunters",
+        "price": "79.9",
+        "old_price": "89.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-st-86/infiniteair-iphone13/mockup?stamp=prisma-render%2Fprod-v2%2Fpreviews%2Fst5-monster-hunters%2F129947%2Fstandard-iphone11%2F17635696736943247007101686725747569.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-st-86",
+          "customizations": [
+            {
+              "id": 111658,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/st5-monster-hunters/129947/standard-iphone11/1763569673694887032640124833684914.png",
+                "pt_br": "prisma-render/prod-v2/previews/st5-monster-hunters/129947/standard-iphone11/17635696736943247007101686725747569.png",
+                "en_dark": "prisma-render/prod-v2/previews/st5-monster-hunters/129947/standard-iphone11/1763569673694887032640124833684914.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/st5-monster-hunters/129947/standard-iphone11/17635696736943247007101686725747569.png"
+              },
+              "engine_identifier": "st5-monster-hunters"
+            }
+          ],
+          "material": "infiniteair-iphone13",
+          "url": "https://ik.imagekit.io/gocase/govinci/nfx-st-86/infiniteair-iphone13/mockup?stamp=prisma-render%2Fprod-v2%2Fpreviews%2Fst5-monster-hunters%2F129947%2Fstandard-iphone11%2F17635696736943247007101686725747569.png&expires=yes",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "case",
+        "has_color_and_size_variants": false,
+        "in_stock": true,
+        "color_options": [],
+        "gif_image": "",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 96449,
+        "promotion": [],
+        "badge": {
+          "label": "LEVE 2, PAGUE 1",
+          "hex_color": "#ff0000",
+          "image": null
+        },
+        "tag": [],
+        "customization_ids": [
+          111658
+        ]
+      },
+      {
+        "id": 19376,
+        "sku": "nfx-st-01",
+        "name": "Stranger Things - Fita",
+        "seo_optimized_name": "Capinha para celular Stranger Things - Fita",
+        "slug": "capinha-para-celular-nfx-st-01",
+        "price": "79.9",
+        "old_price": "89.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-st-01/infiniteair-iphone13/mockup?stamp=prisma-render%2Fprod-v2%2Fpreviews%2Fnfx-st-01%2F9768%2Fstandard-iphone11%2F174160911984804530010510865344595222.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-st-01",
+          "customizations": [
+            {
+              "id": 32807,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@latest/dist/app.js",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-01/9768/standard-iphone11/17416091198486936047131435839899904.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-01/9768/standard-iphone11/174160911984804530010510865344595222.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-01/9768/standard-iphone11/17416091198486936047131435839899904.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-01/9768/standard-iphone11/174160911984804530010510865344595222.png"
+              },
+              "engine_identifier": "nfx-st-01"
+            }
+          ],
+          "material": "infiniteair-iphone13",
+          "url": "https://ik.imagekit.io/gocase/govinci/nfx-st-01/infiniteair-iphone13/mockup?stamp=prisma-render%2Fprod-v2%2Fpreviews%2Fnfx-st-01%2F9768%2Fstandard-iphone11%2F174160911984804530010510865344595222.png&expires=yes",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "case",
+        "has_color_and_size_variants": false,
+        "in_stock": true,
+        "color_options": [],
+        "gif_image": "",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 23265,
+        "promotion": [],
+        "badge": {
+          "label": "LEVE 2, PAGUE 1",
+          "hex_color": "#ff0000",
+          "image": null
+        },
+        "tag": [],
+        "customization_ids": [
+          32807
+        ]
+      },
+      {
+        "id": 22784,
+        "sku": "nfx-st-42",
+        "name": "Stranger Things - Eddie",
+        "seo_optimized_name": "Capinha para celular Stranger Things - Eddie",
+        "slug": "capinha-para-celular-stranger-things-eddie",
+        "price": "79.9",
+        "old_price": "89.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-st-42/infiniteair-iphone13/mockup?stamp=prisma-render%2Fprod-v2%2Fpreviews%2Fnfx-st-37%2F14875%2Fstandard-iphone11%2F17622573938896887049065457470278095.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-st-42",
+          "customizations": [
+            {
+              "id": 36178,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-37/14875/standard-iphone11/17622573938900906519837147350743.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-37/14875/standard-iphone11/17622573938896887049065457470278095.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-37/14875/standard-iphone11/17622573938900906519837147350743.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-37/14875/standard-iphone11/17622573938896887049065457470278095.png"
+              },
+              "engine_identifier": "nfx-st-37"
+            }
+          ],
+          "material": "infiniteair-iphone13",
+          "url": "https://ik.imagekit.io/gocase/govinci/nfx-st-42/infiniteair-iphone13/mockup?stamp=prisma-render%2Fprod-v2%2Fpreviews%2Fnfx-st-37%2F14875%2Fstandard-iphone11%2F17622573938896887049065457470278095.png&expires=yes",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "case",
+        "has_color_and_size_variants": false,
+        "in_stock": true,
+        "color_options": [],
+        "gif_image": "",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 26642,
+        "promotion": [],
+        "badge": {
+          "label": "LEVE 2, PAGUE 1",
+          "hex_color": "#ff0000",
+          "image": null
+        },
+        "tag": [],
+        "customization_ids": [
+          36178
+        ]
+      },
+      {
+        "id": 21310,
+        "sku": "nfx-st-14",
+        "name": "Stranger Things - Devil",
+        "seo_optimized_name": "Capinha para celular Stranger Things - Devil",
+        "slug": "capinha-para-celular-nfx-st-14",
+        "price": "79.9",
+        "old_price": "89.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-st-14/infiniteair-iphone13/mockup?stamp=prisma-render%2Fprod-v2%2Fpreviews%2Fnfx-st-14%2F12356%2Fstandard-iphone11%2F17416121316516457012306804105089697.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-st-14",
+          "customizations": [
+            {
+              "id": 34747,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@latest/dist/app.js",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-14/12356/standard-iphone11/1741612131652155405011132366192897.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-14/12356/standard-iphone11/17416121316516457012306804105089697.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-14/12356/standard-iphone11/1741612131652155405011132366192897.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-14/12356/standard-iphone11/17416121316516457012306804105089697.png"
+              },
+              "engine_identifier": "nfx-st-14"
+            }
+          ],
+          "material": "infiniteair-iphone13",
+          "url": "https://ik.imagekit.io/gocase/govinci/nfx-st-14/infiniteair-iphone13/mockup?stamp=prisma-render%2Fprod-v2%2Fpreviews%2Fnfx-st-14%2F12356%2Fstandard-iphone11%2F17416121316516457012306804105089697.png&expires=yes",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "case",
+        "has_color_and_size_variants": false,
+        "in_stock": true,
+        "color_options": [],
+        "gif_image": "",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 25206,
+        "promotion": [],
+        "badge": {
+          "label": "LEVE 2, PAGUE 1",
+          "hex_color": "#ff0000",
+          "image": null
+        },
+        "tag": [],
+        "customization_ids": [
+          34747
+        ]
+      },
+      {
+        "id": 19378,
+        "sku": "nfx-st-03",
+        "name": "Stranger Things - Pisca Pisca",
+        "seo_optimized_name": "Capinha para celular Stranger Things - Pisca Pisca",
+        "slug": "capinha-para-celular-nfx-st-03",
+        "price": "79.9",
+        "old_price": "89.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-st-03/infiniteair-iphone13/mockup?stamp=prisma-render%2Fprod-v2%2Fpreviews%2Fnfx-st-03%2F9769%2Fstandard-iphone11%2F174160922597570820576144384044182.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-st-03",
+          "customizations": [
+            {
+              "id": 32808,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@latest/dist/app.js",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-03/9769/standard-iphone11/174160922597604580951365387619898.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-03/9769/standard-iphone11/174160922597570820576144384044182.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-03/9769/standard-iphone11/174160922597604580951365387619898.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-03/9769/standard-iphone11/174160922597570820576144384044182.png"
+              },
+              "engine_identifier": "nfx-st-03"
+            }
+          ],
+          "material": "infiniteair-iphone13",
+          "url": "https://ik.imagekit.io/gocase/govinci/nfx-st-03/infiniteair-iphone13/mockup?stamp=prisma-render%2Fprod-v2%2Fpreviews%2Fnfx-st-03%2F9769%2Fstandard-iphone11%2F174160922597570820576144384044182.png&expires=yes",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "case",
+        "has_color_and_size_variants": false,
+        "in_stock": true,
+        "color_options": [],
+        "gif_image": "",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 23267,
+        "promotion": [],
+        "badge": {
+          "label": "LEVE 2, PAGUE 1",
+          "hex_color": "#ff0000",
+          "image": null
+        },
+        "tag": [],
+        "customization_ids": [
+          32808
+        ]
+      },
+      {
+        "id": 91091,
+        "sku": "nfx-st-55",
+        "name": " Stranger Things - Hawkins 1987",
+        "seo_optimized_name": "Capinha para celular  Stranger Things - Hawkins 1987",
+        "slug": "capinha-para-celular-stranger-things-hawkins-1987",
+        "price": "79.9",
+        "old_price": "89.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-st-55/infiniteair-iphone13/mockup?stamp=prisma-render%2Fprod-v2%2Fpreviews%2Fst5-1987%2F121232%2Fstandard-iphone11%2F17600404182239742021116496070114432.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-st-55",
+          "customizations": [
+            {
+              "id": 108484,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/st5-1987/121232/standard-iphone11/1760040418224366204639304902378839.png",
+                "pt_br": "prisma-render/prod-v2/previews/st5-1987/121232/standard-iphone11/17600404182239742021116496070114432.png",
+                "en_dark": "prisma-render/prod-v2/previews/st5-1987/121232/standard-iphone11/1760040418224366204639304902378839.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/st5-1987/121232/standard-iphone11/17600404182239742021116496070114432.png"
+              },
+              "engine_identifier": "st5-1987"
+            }
+          ],
+          "material": "infiniteair-iphone13",
+          "url": "https://ik.imagekit.io/gocase/govinci/nfx-st-55/infiniteair-iphone13/mockup?stamp=prisma-render%2Fprod-v2%2Fpreviews%2Fst5-1987%2F121232%2Fstandard-iphone11%2F17600404182239742021116496070114432.png&expires=yes",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "case",
+        "has_color_and_size_variants": false,
+        "in_stock": true,
+        "color_options": [],
+        "gif_image": "",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 93374,
+        "promotion": [],
+        "badge": {
+          "label": "LEVE 2, PAGUE 1",
+          "hex_color": "#ff0000",
+          "image": null
+        },
+        "tag": [],
+        "customization_ids": [
+          108484
+        ]
+      },
+      {
+        "id": 22770,
+        "sku": "nfx-st-45",
+        "name": "Stranger Things - Hellfire Club",
+        "seo_optimized_name": "Capinha para celular Stranger Things - Hellfire Club",
+        "slug": "capinha-para-celular-stranger-things-hellfire-club",
+        "price": "79.9",
+        "old_price": "89.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-st-45/infiniteair-iphone13/mockup?stamp=prisma-render%2Fprod-v2%2Fpreviews%2Fnfx-st-36%2F14874%2Fstandard-iphone11%2F1743512461171500402011916322481072.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-st-45",
+          "customizations": [
+            {
+              "id": 36164,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@latest/dist/app.js",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-36/14874/standard-iphone11/17435124611720138017361131251248563.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-36/14874/standard-iphone11/1743512461171500402011916322481072.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-36/14874/standard-iphone11/17435124611720138017361131251248563.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-36/14874/standard-iphone11/1743512461171500402011916322481072.png"
+              },
+              "engine_identifier": "nfx-st-36"
+            }
+          ],
+          "material": "infiniteair-iphone13",
+          "url": "https://ik.imagekit.io/gocase/govinci/nfx-st-45/infiniteair-iphone13/mockup?stamp=prisma-render%2Fprod-v2%2Fpreviews%2Fnfx-st-36%2F14874%2Fstandard-iphone11%2F1743512461171500402011916322481072.png&expires=yes",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "case",
+        "has_color_and_size_variants": false,
+        "in_stock": true,
+        "color_options": [],
+        "gif_image": "",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 26628,
+        "promotion": [],
+        "badge": {
+          "label": "LEVE 2, PAGUE 1",
+          "hex_color": "#ff0000",
+          "image": null
+        },
+        "tag": [],
+        "customization_ids": [
+          36164
+        ]
+      },
+      {
+        "id": 91075,
+        "sku": "nfx-st-47",
+        "name": " Stranger Things - Paper Logo",
+        "seo_optimized_name": "Capinha para celular  Stranger Things - Paper Logo",
+        "slug": "capinha-para-celular-stranger-things-paper-logo",
+        "price": "79.9",
+        "old_price": "89.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-st-47/infiniteair-iphone13/mockup?stamp=prisma-render%2Fprod-v2%2Fpreviews%2Fst5-paper-logo%2F121195%2Fstandard-iphone11%2F1757974630696925406827942788730481.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-st-47",
+          "customizations": [
+            {
+              "id": 108468,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/st5-paper-logo/121195/standard-iphone11/1757974630697381306879643818164207.png",
+                "pt_br": "prisma-render/prod-v2/previews/st5-paper-logo/121195/standard-iphone11/1757974630696925406827942788730481.png",
+                "en_dark": "prisma-render/prod-v2/previews/st5-paper-logo/121195/standard-iphone11/1757974630697381306879643818164207.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/st5-paper-logo/121195/standard-iphone11/1757974630696925406827942788730481.png"
+              },
+              "engine_identifier": "st5-paper-logo"
+            }
+          ],
+          "material": "infiniteair-iphone13",
+          "url": "https://ik.imagekit.io/gocase/govinci/nfx-st-47/infiniteair-iphone13/mockup?stamp=prisma-render%2Fprod-v2%2Fpreviews%2Fst5-paper-logo%2F121195%2Fstandard-iphone11%2F1757974630696925406827942788730481.png&expires=yes",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "case",
+        "has_color_and_size_variants": false,
+        "in_stock": true,
+        "color_options": [],
+        "gif_image": "",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 93358,
+        "promotion": [],
+        "badge": {
+          "label": "LEVE 2, PAGUE 1",
+          "hex_color": "#ff0000",
+          "image": null
+        },
+        "tag": [],
+        "customization_ids": [
+          108468
+        ]
+      }
+    ],
+    "case_device_id": 9667
+  },
+  "headers": {
+    "access-control-allow-credentials": "true",
+    "access-control-allow-methods": "GET, POST, PATCH, PUT, DELETE, OPTIONS",
+    "access-control-allow-origin": "https://www.gocase.com.br",
+    "access-control-expose-headers": "Cache-Control, Content-Language, Content-Length, Content-Type, Expires, Last-Modified, Pragma",
+    "access-control-max-age": "86400",
+    "age": "94",
+    "cache-control": "max-age=0, public, s-maxage=120, stale-while-revalidate=30, stale-if-error=30",
+    "cf-cache-status": "HIT",
+    "cf-ray": "9b9676244ed1b871-GRU",
+    "content-encoding": "br",
+    "content-type": "application/json; charset=utf-8",
+    "date": "Mon, 05 Jan 2026 22:37:39 GMT",
+    "etag": "W/\"53025e752ff2a9745cb3d22a2ab24dbc\"",
+    "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+    "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=uWi7vSxbKlKu6Zonx5sWrmuhWhPc2poe%2BWYVrLxkooZRmb608HXQHYhM28YC6vGlRQxprmst%2FWNgJy8V%2BzluqmUp83OYkslGzSb7H5kBMRg%3D\"}]}",
+    "server": "cloudflare",
+    "strict-transport-security": "max-age=0; includeSubDomains",
+    "vary": "Origin, accept-encoding",
+    "x-content-type-options": "nosniff",
+    "x-envoy-upstream-service-time": "219",
+    "x-frame-options": "SAMEORIGIN",
+    "x-request-id": "e76ea39f-a3dc-4226-b905-9fc34dc38992",
+    "x-runtime": "0.215534",
+    "x-xss-protection": "1; mode=block"
+  }
+}

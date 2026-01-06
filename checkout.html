@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Stranger Things Store</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Teko:wght@300;400;500;600;700&family=Merriweather:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        .checkout-page {
+            padding-top: calc(var(--header-height-mobile) + var(--spacing-lg));
+            min-height: 100vh;
+            padding-bottom: var(--spacing-2xl);
+        }
+
+        .checkout-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--spacing-lg) var(--spacing-md);
+        }
+
+        .checkout-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--spacing-xl);
+        }
+
+        .checkout-section {
+            background: var(--dark-gray);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: var(--spacing-xl);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .checkout-section h2 {
+            font-family: var(--font-teko);
+            font-size: var(--fs-2xl);
+            color: var(--netflix-red);
+            margin-bottom: var(--spacing-lg);
+            text-transform: uppercase;
+        }
+
+        .checkout-summary {
+            position: sticky;
+            top: 100px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: var(--spacing-md) 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+            font-weight: 700;
+            font-size: var(--fs-lg);
+            color: var(--netflix-red);
+        }
+
+        .form-group {
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: var(--spacing-sm);
+            color: var(--text-white);
+            font-family: var(--font-teko);
+            text-transform: uppercase;
+            font-size: var(--fs-sm);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: var(--spacing-md);
+            background: var(--medium-gray);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-white);
+            font-size: var(--fs-base);
+            font-family: var(--font-merriweather);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--netflix-red);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--spacing-md);
+        }
+
+        @media (min-width: 768px) {
+            .checkout-layout {
+                grid-template-columns: 2fr 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .order-items {
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .order-item {
+            display: flex;
+            gap: var(--spacing-md);
+            padding: var(--spacing-md);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .order-item:last-child {
+            border-bottom: none;
+        }
+
+        .order-item-image {
+            width: 80px;
+            height: 80px;
+            background: var(--medium-gray);
+            border-radius: 6px;
+            flex-shrink: 0;
+        }
+
+        .order-item-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        .order-item-info {
+            flex: 1;
+        }
+
+        .order-item-name {
+            font-weight: 600;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .order-item-details {
+            font-size: var(--fs-sm);
+            color: var(--text-gray);
+        }
+
+        .order-item-price {
+            font-weight: 700;
+            color: var(--netflix-red);
+            margin-top: var(--spacing-xs);
+        }
+    </style>
+</head>
+<body>
+    <!-- Grid Background -->
+    <div class="grid-background"></div>
+
+    <!-- Header (simplified) -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <a href="index.html">
+                    <img src="logo.png" alt="Stranger Things Store" class="logo-img">
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Checkout Page -->
+    <main class="checkout-page">
+        <div class="checkout-container">
+            <h1 class="section-title" style="text-align: left; margin-bottom: var(--spacing-2xl);">FINALIZAR COMPRA</h1>
+            
+            <div class="checkout-layout">
+                <!-- Checkout Form -->
+                <div class="checkout-main">
+                    <!-- Customer Data -->
+                    <div class="checkout-section">
+                        <h2>Dados de Entrega</h2>
+                        <form id="checkoutForm">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Nome Completo *</label>
+                                    <input type="text" id="customerName" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Email *</label>
+                                    <input type="email" id="customerEmail" required>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Telefone *</label>
+                                    <input type="tel" id="customerPhone" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>CPF</label>
+                                    <input type="text" id="customerCpf">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Endereço *</label>
+                                <input type="text" id="customerAddress" required>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Cidade *</label>
+                                    <input type="text" id="customerCity" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Estado *</label>
+                                    <input type="text" id="customerState" maxlength="2" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>CEP *</label>
+                                    <input type="text" id="customerZipCode" required>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Método de Pagamento *</label>
+                                <select id="paymentMethod" required>
+                                    <option value="">Selecione...</option>
+                                    <option value="credit_card">Cartão de Crédito</option>
+                                    <option value="debit_card">Cartão de Débito</option>
+                                    <option value="pix">PIX</option>
+                                    <option value="boleto">Boleto</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Observações (opcional)</label>
+                                <textarea id="orderNotes" rows="3"></textarea>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Order Summary -->
+                <div class="checkout-summary">
+                    <div class="checkout-section">
+                        <h2>Resumo do Pedido</h2>
+                        <div class="order-items" id="orderItems">
+                            <!-- Items will be loaded here -->
+                        </div>
+                        <div class="summary-item">
+                            <span>Subtotal</span>
+                            <span id="subtotal">R$ 0,00</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Frete</span>
+                            <span>R$ 0,00</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Total</span>
+                            <span id="total">R$ 0,00</span>
+                        </div>
+                        <button class="btn btn-primary btn-block" id="submitOrder" style="margin-top: var(--spacing-xl);">
+                            FINALIZAR PEDIDO
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="checkout.js"></script>
+</body>
+</html>
+

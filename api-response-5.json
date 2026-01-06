@@ -1,0 +1,43 @@
+{
+  "url": "https://api.gocase.com.br/api/v2/users/login?locale=pt-BR&currency=BRL&store=br&jd=42",
+  "status": 200,
+  "data": {
+    "rich_relevance_session_id": "12b4769f6243b1bafb5b97fa3f5f3889",
+    "internal_id": "D0B7WwrVVrsi1AjGXonBQg1767652660197",
+    "country_id": "BR",
+    "country_name": "Brazil",
+    "user_ip": "177.125.185.152",
+    "logged_in": false,
+    "order": null,
+    "email": null,
+    "first_name": null,
+    "last_name": null,
+    "phone_number": null
+  },
+  "headers": {
+    "access-control-allow-credentials": "true",
+    "access-control-allow-methods": "GET, POST, PATCH, PUT, DELETE, OPTIONS",
+    "access-control-allow-origin": "https://www.gocase.com.br",
+    "access-control-expose-headers": "Cache-Control, Content-Language, Content-Length, Content-Type, Expires, Last-Modified, Pragma",
+    "access-control-max-age": "86400",
+    "cache-control": "max-age=0, private, must-revalidate",
+    "cf-cache-status": "DYNAMIC",
+    "cf-ray": "9b967625993fb871-GRU",
+    "content-encoding": "br",
+    "content-type": "application/json; charset=utf-8",
+    "date": "Mon, 05 Jan 2026 22:37:40 GMT",
+    "etag": "W/\"52626f4882cd3089c0ce6e09d4f4dddd\"",
+    "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+    "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=1hFlhUUAc7PrWg1I55S1QgRCnxnQkPtF0WkfZJWooqex5SCJV1p6tsUiDSs%2BnAiWG725X6Hi8GXL6yCdS%2BBXCXs%2BAielQUN4gwoyZ%2BQVqBE%3D\"}]}",
+    "server": "cloudflare",
+    "set-cookie": "rich_relevance_session_id=12b4769f6243b1bafb5b97fa3f5f3889; path=/; expires=Mon, 12 Jan 2026 22:37:40 -0000; Secure; SameSite=None\nguest_token=IkQwQjdXd3JWVnJzaTFBakdYb25CUWcxNzY3NjUyNjYwMTk3Ig%3D%3D--e0c177be287eedfbacf653f15a0df3dd93567fe4; domain=.gocase.com.br; path=/; expires=Fri, 05 Jan 2046 22:37:40 -0000; Secure; SameSite=None",
+    "strict-transport-security": "max-age=0; includeSubDomains",
+    "vary": "Origin",
+    "x-content-type-options": "nosniff",
+    "x-envoy-upstream-service-time": "110",
+    "x-frame-options": "SAMEORIGIN",
+    "x-request-id": "f15d24a0-a9f9-4589-b1a2-e2f5c9530397",
+    "x-runtime": "0.102728",
+    "x-xss-protection": "1; mode=block"
+  }
+}

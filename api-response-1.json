@@ -1,0 +1,263 @@
+{
+  "url": "https://cdn.growthbook.io/api/features/sdk-wW6EqXlo115rdhd",
+  "status": 200,
+  "data": {
+    "status": 200,
+    "features": {
+      "mincartWithApiV3": {
+        "defaultValue": true
+      },
+      "minicartShippingCalculator": {
+        "defaultValue": false
+      },
+      "checkoutButtonOnPaymentMethod": {
+        "defaultValue": false,
+        "rules": [
+          {
+            "coverage": 1,
+            "hashAttribute": "id",
+            "bucketVersion": 1,
+            "seed": "d00aafe7-2df8-4dbc-b168-9b7f9594199f",
+            "hashVersion": 2,
+            "force": false
+          }
+        ]
+      },
+      "pdpStickyBuyButton": {
+        "defaultValue": false,
+        "rules": [
+          {
+            "coverage": 1,
+            "hashAttribute": "id",
+            "namespace": [
+              "ns-19g622md7defzc",
+              0,
+              0.5
+            ],
+            "seed": "3c80f72f-975d-4ea0-a9fc-ed01ef9cca9b",
+            "hashVersion": 2,
+            "force": false
+          }
+        ]
+      },
+      "newShelfPositionMobile": {
+        "defaultValue": false,
+        "rules": [
+          {
+            "coverage": 1,
+            "hashAttribute": "id",
+            "bucketVersion": 1,
+            "seed": "dd45ed16-a67e-4f14-a62f-a833050e3181",
+            "hashVersion": 2,
+            "force": false
+          }
+        ]
+      },
+      "isBlackFriday": {
+        "defaultValue": false
+      },
+      "minicartFreeShippingProgress": {
+        "defaultValue": false
+      },
+      "productCardWithQuickview": {
+        "defaultValue": false
+      },
+      "displayOutOfStockProductsInCaseType": {
+        "defaultValue": true,
+        "rules": [
+          {
+            "coverage": 1,
+            "hashAttribute": "id",
+            "disableStickyBucketing": true,
+            "seed": "95a9ea71-d382-4f1f-bf29-b1fe36fee3e3",
+            "hashVersion": 2,
+            "force": true
+          }
+        ]
+      },
+      "minicartItemsPlaceholderImage": {
+        "defaultValue": false
+      },
+      "minicartFirstSyncMsDelay": {
+        "defaultValue": 1000,
+        "rules": [
+          {
+            "coverage": 1,
+            "hashAttribute": "id",
+            "disableStickyBucketing": true,
+            "seed": "85564fb1-d570-45c4-a34d-9358739f1188",
+            "hashVersion": 2,
+            "force": 1000
+          }
+        ]
+      },
+      "minicartRecommendationsShelf": {
+        "defaultValue": false,
+        "rules": [
+          {
+            "coverage": 1,
+            "hashAttribute": "id",
+            "disableStickyBucketing": true,
+            "seed": "5a441cf9-da5c-4269-bad4-2a9206ea3cbf",
+            "hashVersion": 2,
+            "variations": [
+              false,
+              true
+            ],
+            "weights": [
+              0.5,
+              0.5
+            ],
+            "key": "ab-recomendacoes-minicart-2",
+            "meta": [
+              {
+                "key": "0",
+                "name": "Control"
+              },
+              {
+                "key": "1",
+                "name": "Variation 1"
+              }
+            ],
+            "phase": "0",
+            "name": "A/B - Recomendacoes no Minicart [2]"
+          }
+        ]
+      },
+      "mockupLocalSnapshots": {
+        "defaultValue": false
+      },
+      "persistentSelectedDevice": {
+        "defaultValue": true,
+        "rules": [
+          {
+            "coverage": 1,
+            "hashAttribute": "id",
+            "seed": "fcdf06e8-c472-4b33-8193-a35a88f56543",
+            "hashVersion": 2,
+            "force": true
+          }
+        ]
+      },
+      "quantityOutOfStockDisplay": {
+        "defaultValue": 0
+      },
+      "homeRichRelevanceShelves": {
+        "defaultValue": false,
+        "rules": [
+          {
+            "coverage": 1,
+            "hashAttribute": "id",
+            "bucketVersion": 2,
+            "seed": "6509e4a5-dc08-4135-9c55-937cc9c3fa2f",
+            "hashVersion": 2,
+            "force": false
+          }
+        ]
+      },
+      "passwordlessLogin": {
+        "defaultValue": true
+      },
+      "productGallery3dView": {
+        "defaultValue": true
+      },
+      "autoSelectSingleDevice": {
+        "defaultValue": false
+      },
+      "new-catalog-page": {
+        "defaultValue": false
+      },
+      "GoCheckoutTraffic": {
+        "defaultValue": false
+      },
+      "productKits": {
+        "defaultValue": false,
+        "rules": [
+          {
+            "coverage": 1,
+            "hashAttribute": "id",
+            "disableStickyBucketing": true,
+            "seed": "5a441cf9-da5c-4269-bad4-2a9206ea3cbf",
+            "hashVersion": 2,
+            "variations": [
+              false,
+              true
+            ],
+            "weights": [
+              0.5,
+              0.5
+            ],
+            "key": "ab-kits-de-produtos-em-pdp-stitch-e-angel",
+            "meta": [
+              {
+                "key": "0",
+                "name": "Control"
+              },
+              {
+                "key": "1",
+                "name": "Variation 1"
+              }
+            ],
+            "phase": "0",
+            "name": "A/B - Kits de produtos em PdP [Stitch e Angel]"
+          }
+        ]
+      },
+      "minicartZoomFallbackImages": {
+        "defaultValue": true,
+        "rules": [
+          {
+            "coverage": 1,
+            "hashAttribute": "id",
+            "disableStickyBucketing": true,
+            "seed": "5a441cf9-da5c-4269-bad4-2a9206ea3cbf",
+            "hashVersion": 2,
+            "variations": [
+              true,
+              false
+            ],
+            "weights": [
+              0.5,
+              0.5
+            ],
+            "key": "ab-desabilitar-zoom-de-imagens-default-em-fila-minicart",
+            "meta": [
+              {
+                "key": "0",
+                "name": "Control"
+              },
+              {
+                "key": "1",
+                "name": "Variation 1"
+              }
+            ],
+            "phase": "0",
+            "name": "A/B - Desabilitar zoom de imagens default (em fila) no Minicart"
+          }
+        ]
+      }
+    },
+    "experiments": [],
+    "dateUpdated": "2026-01-05T15:27:54.803Z"
+  },
+  "headers": {
+    "accept-ranges": "bytes",
+    "access-control-allow-origin": "*",
+    "access-control-expose-headers": "x-sse-support",
+    "age": "265",
+    "cache-control": "public, max-age=300, stale-while-revalidate=3600, stale-if-error=36000",
+    "content-encoding": "gzip",
+    "content-length": "1084",
+    "content-type": "application/json; charset=utf-8",
+    "date": "Mon, 05 Jan 2026 22:37:39 GMT",
+    "etag": "W/\"cf4-INCBRISKDY4OS1SCQyFIVDzl6PQ\"",
+    "vary": "Accept-Encoding",
+    "via": "1.1 varnish, 1.1 varnish",
+    "x-cache": "HIT, HIT",
+    "x-cache-hits": "3766, 58",
+    "x-powered-by": "Express",
+    "x-served-by": "cache-iad-kcgs7200115-IAD, cache-gru-sbgr1930043-GRU",
+    "x-sse-support": "enabled",
+    "x-timer": "S1767652660.629681,VS0,VE0"
+  }
+}

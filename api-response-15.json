@@ -1,0 +1,1002 @@
+{
+  "url": "https://api.gocase.com.br/api/v2/shelf/7254?locale=pt-BR&currency=BRL&store=br&jd=42",
+  "status": 200,
+  "data": {
+    "label": "Garrafa Térmica Mini + MIMO!",
+    "type": "taxon",
+    "see_more": "https://www.gocase.com.br/garrafa-mini//?taxon=collections%2Fnetflix%2Fstranger-things&product_filter=garrafa-mini&page=1&sorting=favorites&new=1",
+    "products": [
+      {
+        "id": 79620,
+        "sku": "nfx-gtm-01",
+        "name": "Garrafa Térmica Mini + Ebook -  Stranger Things - Pisca Pisca",
+        "seo_optimized_name": "Garrafa Térmica Mini + Ebook -  Stranger Things - Pisca Pisca",
+        "slug": "garrafa-termica-mini-ebook-stranger-things-pisca-pisca",
+        "price": "149.9",
+        "old_price": "239.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-01/360minibranca-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-03-termicos/103974/360freshminiazul-garrafafresh350/17482702388277588020097522976589566.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-gtm-01",
+          "customizations": [
+            {
+              "id": 95906,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-03-termicos/103974/360freshminiazul-garrafafresh350/174827023882818502067319633294621.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-03-termicos/103974/360freshminiazul-garrafafresh350/17482702388277588020097522976589566.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-03-termicos/103974/360freshminiazul-garrafafresh350/174827023882818502067319633294621.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-03-termicos/103974/360freshminiazul-garrafafresh350/17482702388277588020097522976589566.png"
+              },
+              "engine_identifier": "nfx-st-03-termicos"
+            }
+          ],
+          "material": "360minibranca-garrafamini350ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "garrafaebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-01/360minibranca-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-03-termicos/103974/360freshminiazul-garrafafresh350/17482702388277588020097522976589566.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360minibranca-garrafamini350ebook",
+            "case_type_id": 1466,
+            "case_device_id": 5596,
+            "is_showcase_default": false,
+            "price": 149.9,
+            "old_price": 239.9
+          },
+          {
+            "color": "EBE6D8",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-01/360minioffwhite-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-03-termicos/103974/360freshminiazul-garrafafresh350/17482702388277588020097522976589566.png&expires=yes",
+            "default": true,
+            "in_stock": false,
+            "material": "360minioffwhite-garrafamini350ebook",
+            "case_type_id": 3523,
+            "case_device_id": 8348,
+            "is_showcase_default": false,
+            "price": 149.9,
+            "old_price": 239.9
+          },
+          {
+            "color": "EFC8FC",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-01/360minililas-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-03-termicos/103974/360freshminiazul-garrafafresh350/17482702388277588020097522976589566.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360minililas-garrafamini350ebook",
+            "case_type_id": 3519,
+            "case_device_id": 8345,
+            "is_showcase_default": false,
+            "price": 179.9,
+            "old_price": 269.9
+          },
+          {
+            "color": "F0AC85",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-01/360minilaranja-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-03-termicos/103974/360freshminiazul-garrafafresh350/17482702388277588020097522976589566.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360minilaranja-garrafamini350ebook",
+            "case_type_id": 3518,
+            "case_device_id": 8344,
+            "is_showcase_default": false,
+            "price": 159.9,
+            "old_price": 249.9
+          },
+          {
+            "color": "FE6E8F",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-01/360minimelancia-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-03-termicos/103974/360freshminiazul-garrafafresh350/17482702388277588020097522976589566.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360minimelancia-garrafamini350ebook",
+            "case_type_id": 1469,
+            "case_device_id": 5597,
+            "is_showcase_default": false,
+            "price": 159.9,
+            "old_price": 249.9
+          },
+          {
+            "color": "A1B4D6",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-01/360miniazul-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-03-termicos/103974/360freshminiazul-garrafafresh350/17482702388277588020097522976589566.png&expires=yes",
+            "default": true,
+            "in_stock": false,
+            "material": "360miniazul-garrafamini350ebook",
+            "case_type_id": 1467,
+            "case_device_id": 5599,
+            "is_showcase_default": false,
+            "price": 149.9,
+            "old_price": 239.9
+          },
+          {
+            "color": "FFBFBF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-01/360minirosa-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-03-termicos/103974/360freshminiazul-garrafafresh350/17482702388277588020097522976589566.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360minirosa-garrafamini350ebook",
+            "case_type_id": 3522,
+            "case_device_id": 8349,
+            "is_showcase_default": false,
+            "price": 149.9,
+            "old_price": 239.9
+          }
+        ],
+        "gif_image": "",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 81903,
+        "promotion": [],
+        "badge": {
+          "label": "GANHE UM MIMO",
+          "hex_color": "#de7993",
+          "image": null
+        },
+        "tag": {
+          "location": "listing",
+          "image": "https://ik.imagekit.io/gocase/v3/spree/product_tags/images/000/000/232/original/TAG-OUTLET_%281%29.png?1725647492"
+        },
+        "customization_ids": [
+          95906
+        ]
+      },
+      {
+        "id": 79626,
+        "sku": "nfx-gtm-04",
+        "name": "Garrafa Térmica Mini + Ebook -  Stranger Things - Demogorgon Fan Club",
+        "seo_optimized_name": "Garrafa Térmica Mini + Ebook -  Stranger Things - Demogorgon Fan Club",
+        "slug": "garrafa-termica-mini-ebook-stranger-things-demogorgon-fan-club",
+        "price": "149.9",
+        "old_price": "239.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-04/360minibranca-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-42-termicos/105425/360freshminipreta-garrafafresh350/174846203941127406964123716364807.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-gtm-04",
+          "customizations": [
+            {
+              "id": 95912,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-42-termicos/105425/360freshminipreta-garrafafresh350/1748462039411705503983412734033023.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-42-termicos/105425/360freshminipreta-garrafafresh350/174846203941127406964123716364807.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-42-termicos/105425/360freshminipreta-garrafafresh350/1748462039411705503983412734033023.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-42-termicos/105425/360freshminipreta-garrafafresh350/174846203941127406964123716364807.png"
+              },
+              "engine_identifier": "nfx-st-42-termicos"
+            }
+          ],
+          "material": "360minibranca-garrafamini350ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "garrafaebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-04/360minibranca-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-42-termicos/105424/360freshminiazul-garrafafresh350/1748461788937518408224128826761387.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360minibranca-garrafamini350ebook",
+            "case_type_id": 1466,
+            "case_device_id": 5596,
+            "is_showcase_default": false,
+            "price": 149.9,
+            "old_price": 239.9
+          },
+          {
+            "color": "000000",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-04/360minipreta-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-42-termicos/105425/360freshminipreta-garrafafresh350/174846203941127406964123716364807.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360minipreta-garrafamini350ebook",
+            "case_type_id": 1468,
+            "case_device_id": 5598,
+            "is_showcase_default": false,
+            "price": 169.9,
+            "old_price": 259.9
+          },
+          {
+            "color": "EBE6D8",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-04/360minioffwhite-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-42-termicos/105424/360freshminiazul-garrafafresh350/1748461788937518408224128826761387.png&expires=yes",
+            "default": true,
+            "in_stock": false,
+            "material": "360minioffwhite-garrafamini350ebook",
+            "case_type_id": 3523,
+            "case_device_id": 8348,
+            "is_showcase_default": false,
+            "price": 149.9,
+            "old_price": 239.9
+          },
+          {
+            "color": "004A86",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-04/360miniazulmarinho-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-42-termicos/105425/360freshminipreta-garrafafresh350/174846203941127406964123716364807.png&expires=yes",
+            "default": true,
+            "in_stock": false,
+            "material": "360miniazulmarinho-garrafamini350ebook",
+            "case_type_id": 3520,
+            "case_device_id": 8347,
+            "is_showcase_default": false,
+            "price": 179.9,
+            "old_price": 269.9
+          },
+          {
+            "color": "F0AC85",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-04/360minilaranja-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-42-termicos/105424/360freshminiazul-garrafafresh350/1748461788937518408224128826761387.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360minilaranja-garrafamini350ebook",
+            "case_type_id": 3518,
+            "case_device_id": 8344,
+            "is_showcase_default": false,
+            "price": 159.9,
+            "old_price": 249.9
+          },
+          {
+            "color": "A1B4D6",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-04/360miniazul-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-42-termicos/105424/360freshminiazul-garrafafresh350/1748461788937518408224128826761387.png&expires=yes",
+            "default": true,
+            "in_stock": false,
+            "material": "360miniazul-garrafamini350ebook",
+            "case_type_id": 1467,
+            "case_device_id": 5599,
+            "is_showcase_default": false,
+            "price": 149.9,
+            "old_price": 239.9
+          },
+          {
+            "color": "D42A32",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-04/360minivermelha-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-42-termicos/105425/360freshminipreta-garrafafresh350/174846203941127406964123716364807.png&expires=yes",
+            "default": true,
+            "in_stock": false,
+            "material": "360minivermelha-garrafamini350ebook",
+            "case_type_id": 3521,
+            "case_device_id": 8346,
+            "is_showcase_default": false,
+            "price": 179.9,
+            "old_price": 269.9
+          },
+          {
+            "color": "FFBFBF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-04/360minirosa-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-42-termicos/105424/360freshminiazul-garrafafresh350/1748461788937518408224128826761387.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360minirosa-garrafamini350ebook",
+            "case_type_id": 3522,
+            "case_device_id": 8349,
+            "is_showcase_default": false,
+            "price": 149.9,
+            "old_price": 239.9
+          }
+        ],
+        "gif_image": "",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 81909,
+        "promotion": [],
+        "badge": {
+          "label": "GANHE UM MIMO",
+          "hex_color": "#de7993",
+          "image": null
+        },
+        "tag": {
+          "location": "listing",
+          "image": "https://ik.imagekit.io/gocase/v3/spree/product_tags/images/000/000/232/original/TAG-OUTLET_%281%29.png?1725647492"
+        },
+        "customization_ids": [
+          95912
+        ]
+      },
+      {
+        "id": 80012,
+        "sku": "nfx-gtm-03",
+        "name": "Garrafa Térmica Mini + Ebook - Stranger Things - Submundo",
+        "seo_optimized_name": "Garrafa Térmica Mini + Ebook - Stranger Things - Submundo",
+        "slug": "garrafa-termica-mini-ebook-stranger-things-submundo",
+        "price": "149.9",
+        "old_price": "239.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-03/360minibranca-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-40-termicos/104997/360freshminiazul-garrafafresh350/174828667991297530060657017219835074.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-gtm-03",
+          "customizations": [
+            {
+              "id": 96337,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-40-termicos/104997/360freshminiazul-garrafafresh350/17482866799133976011837368038219165.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-40-termicos/104997/360freshminiazul-garrafafresh350/174828667991297530060657017219835074.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-40-termicos/104997/360freshminiazul-garrafafresh350/17482866799133976011837368038219165.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-40-termicos/104997/360freshminiazul-garrafafresh350/174828667991297530060657017219835074.png"
+              },
+              "engine_identifier": "nfx-st-40-termicos"
+            }
+          ],
+          "material": "360minibranca-garrafamini350ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "garrafaebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-03/360minibranca-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-40-termicos/104997/360freshminiazul-garrafafresh350/174828667991297530060657017219835074.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360minibranca-garrafamini350ebook",
+            "case_type_id": 1466,
+            "case_device_id": 5596,
+            "is_showcase_default": false,
+            "price": 149.9,
+            "old_price": 239.9
+          },
+          {
+            "color": "000000",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-03/360minipreta-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-40-termicos/104996/360freshminipreta-garrafafresh350/1748286658173360802532894599363882.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360minipreta-garrafamini350ebook",
+            "case_type_id": 1468,
+            "case_device_id": 5598,
+            "is_showcase_default": false,
+            "price": 169.9,
+            "old_price": 259.9
+          },
+          {
+            "color": "EBE6D8",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-03/360minioffwhite-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-40-termicos/104997/360freshminiazul-garrafafresh350/174828667991297530060657017219835074.png&expires=yes",
+            "default": true,
+            "in_stock": false,
+            "material": "360minioffwhite-garrafamini350ebook",
+            "case_type_id": 3523,
+            "case_device_id": 8348,
+            "is_showcase_default": false,
+            "price": 149.9,
+            "old_price": 239.9
+          },
+          {
+            "color": "004A86",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-03/360miniazulmarinho-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-40-termicos/104996/360freshminipreta-garrafafresh350/1748286658173360802532894599363882.png&expires=yes",
+            "default": true,
+            "in_stock": false,
+            "material": "360miniazulmarinho-garrafamini350ebook",
+            "case_type_id": 3520,
+            "case_device_id": 8347,
+            "is_showcase_default": false,
+            "price": 179.9,
+            "old_price": 269.9
+          },
+          {
+            "color": "EFC8FC",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-03/360minililas-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-40-termicos/104997/360freshminiazul-garrafafresh350/174828667991297530060657017219835074.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360minililas-garrafamini350ebook",
+            "case_type_id": 3519,
+            "case_device_id": 8345,
+            "is_showcase_default": false,
+            "price": 179.9,
+            "old_price": 269.9
+          },
+          {
+            "color": "F0AC85",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-03/360minilaranja-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-40-termicos/104997/360freshminiazul-garrafafresh350/174828667991297530060657017219835074.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360minilaranja-garrafamini350ebook",
+            "case_type_id": 3518,
+            "case_device_id": 8344,
+            "is_showcase_default": false,
+            "price": 159.9,
+            "old_price": 249.9
+          },
+          {
+            "color": "A1B4D6",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-03/360miniazul-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-40-termicos/104997/360freshminiazul-garrafafresh350/174828667991297530060657017219835074.png&expires=yes",
+            "default": true,
+            "in_stock": false,
+            "material": "360miniazul-garrafamini350ebook",
+            "case_type_id": 1467,
+            "case_device_id": 5599,
+            "is_showcase_default": false,
+            "price": 149.9,
+            "old_price": 239.9
+          },
+          {
+            "color": "D42A32",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-03/360minivermelha-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-40-termicos/104996/360freshminipreta-garrafafresh350/1748286658173360802532894599363882.png&expires=yes",
+            "default": true,
+            "in_stock": false,
+            "material": "360minivermelha-garrafamini350ebook",
+            "case_type_id": 3521,
+            "case_device_id": 8346,
+            "is_showcase_default": false,
+            "price": 179.9,
+            "old_price": 269.9
+          },
+          {
+            "color": "FFBFBF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-03/360minirosa-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-40-termicos/104997/360freshminiazul-garrafafresh350/174828667991297530060657017219835074.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360minirosa-garrafamini350ebook",
+            "case_type_id": 3522,
+            "case_device_id": 8349,
+            "is_showcase_default": false,
+            "price": 149.9,
+            "old_price": 239.9
+          }
+        ],
+        "gif_image": "",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 82295,
+        "promotion": [],
+        "badge": {
+          "label": "GANHE UM MIMO",
+          "hex_color": "#de7993",
+          "image": null
+        },
+        "tag": {
+          "location": "listing",
+          "image": "https://ik.imagekit.io/gocase/v3/spree/product_tags/images/000/000/232/original/TAG-OUTLET_%281%29.png?1725647492"
+        },
+        "customization_ids": [
+          96337
+        ]
+      },
+      {
+        "id": 79624,
+        "sku": "nfx-gtm-02",
+        "name": "Garrafa Térmica Mini + Ebook -  Stranger Things - Minimalist Icon",
+        "seo_optimized_name": "Garrafa Térmica Mini + Ebook -  Stranger Things - Minimalist Icon",
+        "slug": "garrafa-termica-mini-ebook-stranger-things-minimalist-icon",
+        "price": "149.9",
+        "old_price": "239.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-02/360minibranca-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-37-termicos/104331/360freshminiazul-garrafafresh350/174791443705785806806045010839419.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-gtm-02",
+          "customizations": [
+            {
+              "id": 95910,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-37-termicos/104331/360freshminiazul-garrafafresh350/1747914437058180309378999786077051.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-37-termicos/104331/360freshminiazul-garrafafresh350/174791443705785806806045010839419.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-37-termicos/104331/360freshminiazul-garrafafresh350/1747914437058180309378999786077051.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-37-termicos/104331/360freshminiazul-garrafafresh350/174791443705785806806045010839419.png"
+              },
+              "engine_identifier": "nfx-st-37-termicos"
+            }
+          ],
+          "material": "360minibranca-garrafamini350ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "garrafaebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-02/360minibranca-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-37-termicos/104331/360freshminiazul-garrafafresh350/174791443705785806806045010839419.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360minibranca-garrafamini350ebook",
+            "case_type_id": 1466,
+            "case_device_id": 5596,
+            "is_showcase_default": false,
+            "price": 149.9,
+            "old_price": 239.9
+          },
+          {
+            "color": "000000",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-02/360minipreta-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-37-termicos/104330/360freshminipreta-garrafafresh350/174791443959251505535542391832544.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360minipreta-garrafamini350ebook",
+            "case_type_id": 1468,
+            "case_device_id": 5598,
+            "is_showcase_default": false,
+            "price": 169.9,
+            "old_price": 259.9
+          },
+          {
+            "color": "EBE6D8",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-02/360minioffwhite-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-37-termicos/104331/360freshminiazul-garrafafresh350/174791443705785806806045010839419.png&expires=yes",
+            "default": true,
+            "in_stock": false,
+            "material": "360minioffwhite-garrafamini350ebook",
+            "case_type_id": 3523,
+            "case_device_id": 8348,
+            "is_showcase_default": false,
+            "price": 149.9,
+            "old_price": 239.9
+          }
+        ],
+        "gif_image": "",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 81907,
+        "promotion": [],
+        "badge": {
+          "label": "GANHE UM MIMO",
+          "hex_color": "#de7993",
+          "image": null
+        },
+        "tag": {
+          "location": "listing",
+          "image": "https://ik.imagekit.io/gocase/v3/spree/product_tags/images/000/000/232/original/TAG-OUTLET_%281%29.png?1725647492"
+        },
+        "customization_ids": [
+          95910
+        ]
+      },
+      {
+        "id": 79632,
+        "sku": "nfx-gtm-07",
+        "name": "Garrafa Térmica Mini + Ebook -  Stranger Things - Stranger Squad",
+        "seo_optimized_name": "Garrafa Térmica Mini + Ebook -  Stranger Things - Stranger Squad",
+        "slug": "garrafa-termica-mini-ebook-stranger-things-stranger-squad",
+        "price": "169.9",
+        "old_price": "259.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-07/360minipreta-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-46-termicos/105444/360freshminipreta-garrafafresh350/1748462915565027203609643643681403.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-gtm-07",
+          "customizations": [
+            {
+              "id": 95918,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-46-termicos/105444/360freshminipreta-garrafafresh350/1748462915565434208814766437716092.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-46-termicos/105444/360freshminipreta-garrafafresh350/1748462915565027203609643643681403.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-46-termicos/105444/360freshminipreta-garrafafresh350/1748462915565434208814766437716092.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-46-termicos/105444/360freshminipreta-garrafafresh350/1748462915565027203609643643681403.png"
+              },
+              "engine_identifier": "nfx-st-46-termicos"
+            }
+          ],
+          "material": "360minipreta-garrafamini350ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "garrafaebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "000000",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-07/360minipreta-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-46-termicos/105444/360freshminipreta-garrafafresh350/1748462915565027203609643643681403.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360minipreta-garrafamini350ebook",
+            "case_type_id": 1468,
+            "case_device_id": 5598,
+            "is_showcase_default": false,
+            "price": 169.9,
+            "old_price": 259.9
+          }
+        ],
+        "gif_image": "",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 81915,
+        "promotion": [],
+        "badge": {
+          "label": "GANHE UM MIMO",
+          "hex_color": "#de7993",
+          "image": null
+        },
+        "tag": {
+          "location": "listing",
+          "image": "https://ik.imagekit.io/gocase/v3/spree/product_tags/images/000/000/232/original/TAG-OUTLET_%281%29.png?1725647492"
+        },
+        "customization_ids": [
+          95918
+        ]
+      },
+      {
+        "id": 79628,
+        "sku": "nfx-gtm-05",
+        "name": "Garrafa Térmica Mini + Ebook -  Stranger Things - Hellfire Club",
+        "seo_optimized_name": "Garrafa Térmica Mini + Ebook -  Stranger Things - Hellfire Club",
+        "slug": "garrafa-termica-mini-ebook-stranger-things-hellfire-club",
+        "price": "149.9",
+        "old_price": "239.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-05/360minibranca-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-43-termicos/105439/360freshminiazul-garrafafresh350/17484625886215546007875869797672708.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-gtm-05",
+          "customizations": [
+            {
+              "id": 95914,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-43-termicos/105439/360freshminiazul-garrafafresh350/174846258862201808517965023484186.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-43-termicos/105439/360freshminiazul-garrafafresh350/17484625886215546007875869797672708.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-43-termicos/105439/360freshminiazul-garrafafresh350/174846258862201808517965023484186.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-43-termicos/105439/360freshminiazul-garrafafresh350/17484625886215546007875869797672708.png"
+              },
+              "engine_identifier": "nfx-st-43-termicos"
+            }
+          ],
+          "material": "360minibranca-garrafamini350ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "garrafaebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-05/360minibranca-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-43-termicos/105439/360freshminiazul-garrafafresh350/17484625886215546007875869797672708.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360minibranca-garrafamini350ebook",
+            "case_type_id": 1466,
+            "case_device_id": 5596,
+            "is_showcase_default": false,
+            "price": 149.9,
+            "old_price": 239.9
+          },
+          {
+            "color": "000000",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-05/360minipreta-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-43-termicos/105440/360freshminipreta-garrafafresh350/17484625529081829030158033740215895.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360minipreta-garrafamini350ebook",
+            "case_type_id": 1468,
+            "case_device_id": 5598,
+            "is_showcase_default": false,
+            "price": 169.9,
+            "old_price": 259.9
+          },
+          {
+            "color": "EBE6D8",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-05/360minioffwhite-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-43-termicos/105439/360freshminiazul-garrafafresh350/17484625886215546007875869797672708.png&expires=yes",
+            "default": true,
+            "in_stock": false,
+            "material": "360minioffwhite-garrafamini350ebook",
+            "case_type_id": 3523,
+            "case_device_id": 8348,
+            "is_showcase_default": false,
+            "price": 149.9,
+            "old_price": 239.9
+          }
+        ],
+        "gif_image": "",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 81911,
+        "promotion": [],
+        "badge": {
+          "label": "GANHE UM MIMO",
+          "hex_color": "#de7993",
+          "image": null
+        },
+        "tag": {
+          "location": "listing",
+          "image": "https://ik.imagekit.io/gocase/v3/spree/product_tags/images/000/000/232/original/TAG-OUTLET_%281%29.png?1725647492"
+        },
+        "customization_ids": [
+          95914
+        ]
+      },
+      {
+        "id": 80014,
+        "sku": "nfx-gtm-08",
+        "name": "Garrafa Térmica Mini + Ebook - Stranger Things - Hawkins High School",
+        "seo_optimized_name": "Garrafa Térmica Mini + Ebook - Stranger Things - Hawkins High School",
+        "slug": "garrafa-termica-mini-ebook-stranger-things-hawkins-high-school",
+        "price": "149.9",
+        "old_price": "239.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-08/360minibranca-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-48-termicos/105158/360freshminiazul-garrafafresh350/174835250336296705835661787775654.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-gtm-08",
+          "customizations": [
+            {
+              "id": 96339,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-48-termicos/105158/360freshminiazul-garrafafresh350/17483525033636672024041079029488133.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-48-termicos/105158/360freshminiazul-garrafafresh350/174835250336296705835661787775654.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-48-termicos/105158/360freshminiazul-garrafafresh350/17483525033636672024041079029488133.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-48-termicos/105158/360freshminiazul-garrafafresh350/174835250336296705835661787775654.png"
+              },
+              "engine_identifier": "nfx-st-48-termicos"
+            }
+          ],
+          "material": "360minibranca-garrafamini350ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "garrafaebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-08/360minibranca-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-48-termicos/105158/360freshminiazul-garrafafresh350/174835250336296705835661787775654.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360minibranca-garrafamini350ebook",
+            "case_type_id": 1466,
+            "case_device_id": 5596,
+            "is_showcase_default": false,
+            "price": 149.9,
+            "old_price": 239.9
+          },
+          {
+            "color": "000000",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-08/360minipreta-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-48-termicos/105159/360freshminipreta-garrafafresh350/1748352529275039207343136250177568.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360minipreta-garrafamini350ebook",
+            "case_type_id": 1468,
+            "case_device_id": 5598,
+            "is_showcase_default": false,
+            "price": 169.9,
+            "old_price": 259.9
+          },
+          {
+            "color": "EBE6D8",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-08/360minioffwhite-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-48-termicos/105158/360freshminiazul-garrafafresh350/174835250336296705835661787775654.png&expires=yes",
+            "default": true,
+            "in_stock": false,
+            "material": "360minioffwhite-garrafamini350ebook",
+            "case_type_id": 3523,
+            "case_device_id": 8348,
+            "is_showcase_default": false,
+            "price": 149.9,
+            "old_price": 239.9
+          },
+          {
+            "color": "F0AC85",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-08/360minilaranja-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-48-termicos/105158/360freshminiazul-garrafafresh350/174835250336296705835661787775654.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360minilaranja-garrafamini350ebook",
+            "case_type_id": 3518,
+            "case_device_id": 8344,
+            "is_showcase_default": false,
+            "price": 159.9,
+            "old_price": 249.9
+          }
+        ],
+        "gif_image": "",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 82297,
+        "promotion": [],
+        "badge": {
+          "label": "GANHE UM MIMO",
+          "hex_color": "#de7993",
+          "image": null
+        },
+        "tag": {
+          "location": "listing",
+          "image": "https://ik.imagekit.io/gocase/v3/spree/product_tags/images/000/000/232/original/TAG-OUTLET_%281%29.png?1725647492"
+        },
+        "customization_ids": [
+          96339
+        ]
+      },
+      {
+        "id": 79630,
+        "sku": "nfx-gtm-06",
+        "name": "Garrafa Térmica Mini + Ebook -  Stranger Things - Fireball Him",
+        "seo_optimized_name": "Garrafa Térmica Mini + Ebook -  Stranger Things - Fireball Him",
+        "slug": "garrafa-termica-mini-ebook-stranger-things-fireball-him",
+        "price": "149.9",
+        "old_price": "239.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-06/360minibranca-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-44-termicos/105291/360freshminipreta-garrafafresh350/17483777146425703010184500939258068.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-gtm-06",
+          "customizations": [
+            {
+              "id": 95916,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-44-termicos/105291/360freshminipreta-garrafafresh350/1748377714643067406466009040675481.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-44-termicos/105291/360freshminipreta-garrafafresh350/17483777146425703010184500939258068.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-44-termicos/105291/360freshminipreta-garrafafresh350/1748377714643067406466009040675481.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-44-termicos/105291/360freshminipreta-garrafafresh350/17483777146425703010184500939258068.png"
+              },
+              "engine_identifier": "nfx-st-44-termicos"
+            }
+          ],
+          "material": "360minibranca-garrafamini350ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "garrafaebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-06/360minibranca-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-44-termicos/105290/360freshminiazul-garrafafresh350/1748377639578601017859292711412778.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360minibranca-garrafamini350ebook",
+            "case_type_id": 1466,
+            "case_device_id": 5596,
+            "is_showcase_default": false,
+            "price": 149.9,
+            "old_price": 239.9
+          },
+          {
+            "color": "000000",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-06/360minipreta-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-44-termicos/105291/360freshminipreta-garrafafresh350/17483777146425703010184500939258068.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360minipreta-garrafamini350ebook",
+            "case_type_id": 1468,
+            "case_device_id": 5598,
+            "is_showcase_default": false,
+            "price": 169.9,
+            "old_price": 259.9
+          },
+          {
+            "color": "EBE6D8",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-06/360minioffwhite-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-44-termicos/105290/360freshminiazul-garrafafresh350/1748377639578601017859292711412778.png&expires=yes",
+            "default": true,
+            "in_stock": false,
+            "material": "360minioffwhite-garrafamini350ebook",
+            "case_type_id": 3523,
+            "case_device_id": 8348,
+            "is_showcase_default": false,
+            "price": 149.9,
+            "old_price": 239.9
+          },
+          {
+            "color": "004A86",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-06/360miniazulmarinho-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-44-termicos/105291/360freshminipreta-garrafafresh350/17483777146425703010184500939258068.png&expires=yes",
+            "default": true,
+            "in_stock": false,
+            "material": "360miniazulmarinho-garrafamini350ebook",
+            "case_type_id": 3520,
+            "case_device_id": 8347,
+            "is_showcase_default": false,
+            "price": 179.9,
+            "old_price": 269.9
+          },
+          {
+            "color": "F0AC85",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-06/360minilaranja-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-44-termicos/105290/360freshminiazul-garrafafresh350/1748377639578601017859292711412778.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360minilaranja-garrafamini350ebook",
+            "case_type_id": 3518,
+            "case_device_id": 8344,
+            "is_showcase_default": false,
+            "price": 159.9,
+            "old_price": 249.9
+          },
+          {
+            "color": "A1B4D6",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-06/360miniazul-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-44-termicos/105290/360freshminiazul-garrafafresh350/1748377639578601017859292711412778.png&expires=yes",
+            "default": true,
+            "in_stock": false,
+            "material": "360miniazul-garrafamini350ebook",
+            "case_type_id": 1467,
+            "case_device_id": 5599,
+            "is_showcase_default": false,
+            "price": 149.9,
+            "old_price": 239.9
+          },
+          {
+            "color": "D42A32",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-06/360minivermelha-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-44-termicos/105291/360freshminipreta-garrafafresh350/17483777146425703010184500939258068.png&expires=yes",
+            "default": true,
+            "in_stock": false,
+            "material": "360minivermelha-garrafamini350ebook",
+            "case_type_id": 3521,
+            "case_device_id": 8346,
+            "is_showcase_default": false,
+            "price": 179.9,
+            "old_price": 269.9
+          },
+          {
+            "color": "FFBFBF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gtm-06/360minirosa-garrafamini350ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-44-termicos/105290/360freshminiazul-garrafafresh350/1748377639578601017859292711412778.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360minirosa-garrafamini350ebook",
+            "case_type_id": 3522,
+            "case_device_id": 8349,
+            "is_showcase_default": false,
+            "price": 149.9,
+            "old_price": 239.9
+          }
+        ],
+        "gif_image": "",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 81913,
+        "promotion": [],
+        "badge": {
+          "label": "GANHE UM MIMO",
+          "hex_color": "#de7993",
+          "image": null
+        },
+        "tag": {
+          "location": "listing",
+          "image": "https://ik.imagekit.io/gocase/v3/spree/product_tags/images/000/000/232/original/TAG-OUTLET_%281%29.png?1725647492"
+        },
+        "customization_ids": [
+          95916
+        ]
+      }
+    ],
+    "case_device_id": null
+  },
+  "headers": {
+    "access-control-allow-credentials": "true",
+    "access-control-allow-methods": "GET, POST, PATCH, PUT, DELETE, OPTIONS",
+    "access-control-allow-origin": "https://www.gocase.com.br",
+    "access-control-expose-headers": "Cache-Control, Content-Language, Content-Length, Content-Type, Expires, Last-Modified, Pragma",
+    "access-control-max-age": "86400",
+    "age": "63",
+    "cache-control": "max-age=0, public, s-maxage=120, stale-while-revalidate=30, stale-if-error=30",
+    "cf-cache-status": "HIT",
+    "cf-ray": "9b9676670aa5b871-GRU",
+    "content-encoding": "br",
+    "content-type": "application/json; charset=utf-8",
+    "date": "Mon, 05 Jan 2026 22:37:50 GMT",
+    "etag": "W/\"194e06ac35ca7a7cd3185ed8ca006fa9\"",
+    "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+    "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=zuxwQt75S27jcIqQhBSEqvBxDr4EKPbs%2FvzRyRZdTFIdI4dA7xQ8kp5uxkhxfz8Kke4StOIHa6rKMGsUe2ydx%2BDVwmpJac0b74IUnNITvFo%3D\"}]}",
+    "server": "cloudflare",
+    "strict-transport-security": "max-age=0; includeSubDomains",
+    "vary": "Origin, accept-encoding",
+    "x-content-type-options": "nosniff",
+    "x-envoy-upstream-service-time": "176",
+    "x-frame-options": "SAMEORIGIN",
+    "x-request-id": "d355bdda-3a72-4d66-80ab-3024da272d84",
+    "x-runtime": "0.172762",
+    "x-xss-protection": "1; mode=block"
+  }
+}

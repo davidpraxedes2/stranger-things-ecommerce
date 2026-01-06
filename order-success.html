@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedido Confirmado - Stranger Things Store</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Teko:wght@300;400;500;600;700&family=Merriweather:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        .success-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-2xl) var(--spacing-md);
+        }
+
+        .success-container {
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            background: var(--dark-gray);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: var(--spacing-3xl);
+        }
+
+        .success-icon {
+            font-size: 5rem;
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .success-title {
+            font-family: var(--font-teko);
+            font-size: var(--fs-3xl);
+            color: var(--netflix-red);
+            margin-bottom: var(--spacing-lg);
+            text-transform: uppercase;
+        }
+
+        .success-message {
+            color: var(--text-gray);
+            margin-bottom: var(--spacing-xl);
+            line-height: 1.8;
+        }
+
+        .order-id {
+            background: var(--medium-gray);
+            padding: var(--spacing-md);
+            border-radius: 6px;
+            margin-bottom: var(--spacing-xl);
+            font-family: var(--font-teko);
+            font-size: var(--fs-lg);
+        }
+    </style>
+</head>
+<body>
+    <!-- Grid Background -->
+    <div class="grid-background"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <a href="index.html">
+                    <img src="logo.png" alt="Stranger Things Store" class="logo-img">
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Success Page -->
+    <main class="success-page">
+        <div class="success-container">
+            <div class="success-icon">✅</div>
+            <h1 class="success-title">Pedido Confirmado!</h1>
+            <p class="success-message">
+                Seu pedido foi realizado com sucesso!<br>
+                Você receberá um email de confirmação em breve.
+            </p>
+            <div class="order-id" id="orderId">
+                Pedido #<span id="orderIdValue">-</span>
+            </div>
+            <div style="display: flex; gap: var(--spacing-md); flex-direction: column;">
+                <a href="index.html" class="btn btn-primary btn-block">CONTINUAR COMPRANDO</a>
+                <a href="index.html#produtos" class="btn btn-secondary btn-block">VER MAIS PRODUTOS</a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Get order ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderId = urlParams.get('order_id');
+        if (orderId && document.getElementById('orderIdValue')) {
+            document.getElementById('orderIdValue').textContent = orderId;
+        } else {
+            document.getElementById('orderId').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
+

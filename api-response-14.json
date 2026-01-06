@@ -1,0 +1,1536 @@
+{
+  "url": "https://api.gocase.com.br/api/v2/shelf/7253?locale=pt-BR&currency=BRL&store=br&jd=42",
+  "status": 200,
+  "data": {
+    "label": "Garrafa Térmica Urban a partir de 89,90!",
+    "type": "taxon",
+    "see_more": "https://www.gocase.com.br/garrafas-urban-ebook//?product_filter=garrafas-urban-ebook&page=1&sorting=favorites&new=1&taxon=collections%2Fnetflix%2Fstranger-things",
+    "products": [
+      {
+        "id": 82035,
+        "sku": "nfx-gurb-23",
+        "name": "Garrafa Térmica Urban + Ebook - Stranger Things - Inverso",
+        "seo_optimized_name": "Garrafa Térmica Urban + Ebook - Stranger Things - Inverso",
+        "slug": "garrafa-termica-urban-ebook-stranger-things-inverso",
+        "price": "99.9",
+        "old_price": "139.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-23/360urbanbranca-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-41-termicos/105149/360urbanbranca-garrafaurban500/1749730724967946011126405139111217.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-gurb-23",
+          "customizations": [
+            {
+              "id": 98543,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-41-termicos/105149/360urbanbranca-garrafaurban500/17497307249683077012126159943697035.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-41-termicos/105149/360urbanbranca-garrafaurban500/1749730724967946011126405139111217.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-41-termicos/105149/360urbanbranca-garrafaurban500/17497307249683077012126159943697035.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-41-termicos/105149/360urbanbranca-garrafaurban500/1749730724967946011126405139111217.png"
+              },
+              "engine_identifier": "nfx-st-41-termicos"
+            }
+          ],
+          "material": "360urbanbranca-garrafaurban500ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "garrafaebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-23/360urbanbranca-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-41-termicos/105149/360urbanbranca-garrafaurban500/1749730724967946011126405139111217.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanbranca-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/130885/original/temp_image20251202-7-4zryho.png",
+            "case_type_id": 1392,
+            "case_device_id": 5520,
+            "is_showcase_default": false,
+            "price": 99.9,
+            "old_price": 139.9
+          }
+        ],
+        "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/130885/original/temp_image20251202-7-4zryho.png",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 84318,
+        "promotion": [],
+        "badge": [],
+        "tag": [],
+        "customization_ids": [
+          98543
+        ]
+      },
+      {
+        "id": 79646,
+        "sku": "nfx-gurb-20",
+        "name": "Garrafa Térmica Urban + Ebook - Stranger Things - Noite em Hawkins",
+        "seo_optimized_name": "Garrafa Térmica Urban + Ebook - Stranger Things - Noite em Hawkins",
+        "slug": "garrafa-termica-urban-ebook-stranger-things-noite-em-hawkins",
+        "price": "99.9",
+        "old_price": "139.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-20/360urbanbranca-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-45-termicos/104206/360urbanbranca-garrafaurban500/1748373338561112407318240600738265.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-gurb-20",
+          "customizations": [
+            {
+              "id": 95932,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-45-termicos/104206/360urbanbranca-garrafaurban500/17483733385616214018160454794914926.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-45-termicos/104206/360urbanbranca-garrafaurban500/1748373338561112407318240600738265.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-45-termicos/104206/360urbanbranca-garrafaurban500/17483733385616214018160454794914926.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-45-termicos/104206/360urbanbranca-garrafaurban500/1748373338561112407318240600738265.png"
+              },
+              "engine_identifier": "nfx-st-45-termicos"
+            }
+          ],
+          "material": "360urbanbranca-garrafaurban500ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "garrafaebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-20/360urbanbranca-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-45-termicos/104206/360urbanbranca-garrafaurban500/1748373338561112407318240600738265.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanbranca-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123558/original/temp_image20251102-7-7454uo.png",
+            "case_type_id": 1392,
+            "case_device_id": 5520,
+            "is_showcase_default": false,
+            "price": 99.9,
+            "old_price": 139.9
+          },
+          {
+            "color": "E9BDB7",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-20/360urbanrosa-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-45-termicos/104206/360urbanbranca-garrafaurban500/1748373338561112407318240600738265.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanrosa-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123561/original/temp_image20251102-7-10ua6wi.png",
+            "case_type_id": 1389,
+            "case_device_id": 5521,
+            "is_showcase_default": false,
+            "price": 99.9,
+            "old_price": 139.9
+          },
+          {
+            "color": "000000",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-20/360urbanpreta-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-45-termicos/104207/360urbanazul-garrafaurban500/1748373284588078707290365741532667.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanpreta-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123563/original/temp_image20251102-7-2ufc7c.png",
+            "case_type_id": 1390,
+            "case_device_id": 5523,
+            "is_showcase_default": false,
+            "price": 99.9,
+            "old_price": 139.9
+          },
+          {
+            "color": "0052AB",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-20/360urbanazul-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-45-termicos/104207/360urbanazul-garrafaurban500/1748373284588078707290365741532667.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanazul-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123559/original/temp_image20251102-7-h0udpk.png",
+            "case_type_id": 1391,
+            "case_device_id": 5522,
+            "is_showcase_default": false,
+            "price": 109.9,
+            "old_price": 149.9
+          },
+          {
+            "color": "E05E66",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-20/360urbanmelancia-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-45-termicos/104207/360urbanazul-garrafaurban500/1748373284588078707290365741532667.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanmelancia-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123562/original/temp_image20251102-7-1ab05s9.png",
+            "case_type_id": 2945,
+            "case_device_id": 7599,
+            "is_showcase_default": false,
+            "price": 119.9,
+            "old_price": 159.9
+          },
+          {
+            "color": "B8FFBF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-20/360urbanturquesa-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-45-termicos/104206/360urbanbranca-garrafaurban500/1748373338561112407318240600738265.png&expires=yes",
+            "default": true,
+            "in_stock": false,
+            "material": "360urbanturquesa-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123560/original/temp_image20251102-7-2ii3yi.png",
+            "case_type_id": 2943,
+            "case_device_id": 7598,
+            "is_showcase_default": false,
+            "price": 109.9,
+            "old_price": 149.9
+          },
+          {
+            "color": "CDAFE2",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-20/360urbanlilas-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-45-termicos/104206/360urbanbranca-garrafaurban500/1748373338561112407318240600738265.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanlilas-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123557/original/temp_image20251102-7-1k5rlel.png",
+            "case_type_id": 2944,
+            "case_device_id": 7600,
+            "is_showcase_default": false,
+            "price": 109.9,
+            "old_price": 149.9
+          },
+          {
+            "color": "86898C",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-20/360urbancinza-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-45-termicos/104207/360urbanazul-garrafaurban500/1748373284588078707290365741532667.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbancinza-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/163162/original/temp_image20251102-7-1h579mn.png",
+            "case_type_id": 4100,
+            "case_device_id": 9675,
+            "is_showcase_default": false,
+            "price": 109.9,
+            "old_price": 149.9
+          },
+          {
+            "color": "893B72",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-20/360urbanacai-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-45-termicos/104207/360urbanazul-garrafaurban500/1748373284588078707290365741532667.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanacai-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/165668/original/temp_image20251102-7-7ng1es.png",
+            "case_type_id": 4633,
+            "case_device_id": 9672,
+            "is_showcase_default": false,
+            "price": 119.9,
+            "old_price": 159.9
+          },
+          {
+            "color": "E73EAF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-20/360urbanpink-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-45-termicos/104207/360urbanazul-garrafaurban500/1748373284588078707290365741532667.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanpink-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/164415/original/temp_image20251102-7-vjkmyi.png",
+            "case_type_id": 4102,
+            "case_device_id": 9673,
+            "is_showcase_default": false,
+            "price": 119.9,
+            "old_price": 159.9
+          },
+          {
+            "color": "003151",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-20/360urbanazulescuro-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-45-termicos/104207/360urbanazul-garrafaurban500/1748373284588078707290365741532667.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanazulescuro-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/161912/original/temp_image20251102-7-13gh3e4.png",
+            "case_type_id": 4097,
+            "case_device_id": 9674,
+            "is_showcase_default": false,
+            "price": 139.9,
+            "old_price": 179.9
+          }
+        ],
+        "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123558/original/temp_image20251102-7-7454uo.png",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 81929,
+        "promotion": [],
+        "badge": [],
+        "tag": [],
+        "customization_ids": [
+          95932
+        ]
+      },
+      {
+        "id": 79648,
+        "sku": "nfx-gurb-21",
+        "name": "Garrafa Térmica Urban + Ebook - Stranger Things - Stranger Squad",
+        "seo_optimized_name": "Garrafa Térmica Urban + Ebook - Stranger Things - Stranger Squad",
+        "slug": "garrafa-termica-urban-ebook-stranger-things-stranger-squad",
+        "price": "99.9",
+        "old_price": "139.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-21/360urbanpreta-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-46-termicos/104188/360urbanbranca-garrafaurban500/17478503410665103956524760824828.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-gurb-21",
+          "customizations": [
+            {
+              "id": 95934,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-46-termicos/104188/360urbanbranca-garrafaurban500/1747850341066888308939679060531165.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-46-termicos/104188/360urbanbranca-garrafaurban500/17478503410665103956524760824828.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-46-termicos/104188/360urbanbranca-garrafaurban500/1747850341066888308939679060531165.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-46-termicos/104188/360urbanbranca-garrafaurban500/17478503410665103956524760824828.png"
+              },
+              "engine_identifier": "nfx-st-46-termicos"
+            }
+          ],
+          "material": "360urbanpreta-garrafaurban500ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "garrafaebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "000000",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-21/360urbanpreta-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-46-termicos/104183/360urbanazul-garrafaurban500/1747850342221006406258965641737926.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanpreta-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123579/original/temp_image20251103-8-1nehp95.png",
+            "case_type_id": 1390,
+            "case_device_id": 5523,
+            "is_showcase_default": false,
+            "price": 99.9,
+            "old_price": 139.9
+          },
+          {
+            "color": "86898C",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-21/360urbancinza-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-46-termicos/104183/360urbanazul-garrafaurban500/1747850342221006406258965641737926.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbancinza-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/163163/original/temp_image20251103-7-1jk4oo8.png",
+            "case_type_id": 4100,
+            "case_device_id": 9675,
+            "is_showcase_default": false,
+            "price": 109.9,
+            "old_price": 149.9
+          },
+          {
+            "color": "893B72",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-21/360urbanacai-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-46-termicos/104183/360urbanazul-garrafaurban500/1747850342221006406258965641737926.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanacai-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/165669/original/temp_image20251103-7-ll4h37.png",
+            "case_type_id": 4633,
+            "case_device_id": 9672,
+            "is_showcase_default": false,
+            "price": 119.9,
+            "old_price": 159.9
+          },
+          {
+            "color": "E73EAF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-21/360urbanpink-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-46-termicos/104183/360urbanazul-garrafaurban500/1747850342221006406258965641737926.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanpink-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/164416/original/temp_image20251103-8-1lxalq2.png",
+            "case_type_id": 4102,
+            "case_device_id": 9673,
+            "is_showcase_default": false,
+            "price": 119.9,
+            "old_price": 159.9
+          },
+          {
+            "color": "003151",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-21/360urbanazulescuro-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-46-termicos/104183/360urbanazul-garrafaurban500/1747850342221006406258965641737926.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanazulescuro-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/161913/original/temp_image20251103-6-nruwtw.png",
+            "case_type_id": 4097,
+            "case_device_id": 9674,
+            "is_showcase_default": false,
+            "price": 139.9,
+            "old_price": 179.9
+          }
+        ],
+        "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123579/original/temp_image20251103-8-1nehp95.png",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 81931,
+        "promotion": [],
+        "badge": [],
+        "tag": [],
+        "customization_ids": [
+          95934
+        ]
+      },
+      {
+        "id": 79634,
+        "sku": "nfx-gurb-13",
+        "name": "Garrafa Térmica Urban + Ebook - Stranger Things - Pisca Pisca",
+        "seo_optimized_name": "Garrafa Térmica Urban + Ebook - Stranger Things - Pisca Pisca",
+        "slug": "garrafa-termica-urban-ebook-stranger-things-pisca-pisca",
+        "price": "99.9",
+        "old_price": "139.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-13/360urbanbranca-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-03-termicos/121470/360urbanacai-garrafaurban500ebook/1758381962668172603361437120812666.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-gurb-13",
+          "customizations": [
+            {
+              "id": 95920,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-03-termicos/121470/360urbanacai-garrafaurban500ebook/1758381962668578908054598917290403.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-03-termicos/121470/360urbanacai-garrafaurban500ebook/1758381962668172603361437120812666.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-03-termicos/121470/360urbanacai-garrafaurban500ebook/1758381962668578908054598917290403.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-03-termicos/121470/360urbanacai-garrafaurban500ebook/1758381962668172603361437120812666.png"
+              },
+              "engine_identifier": "nfx-st-03-termicos"
+            }
+          ],
+          "material": "360urbanbranca-garrafaurban500ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "garrafaebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-13/360urbanbranca-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-03-termicos/103971/360urbanbranca-garrafaurban500/17482702081217458003288938323104518.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanbranca-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123483/original/temp_image20251102-7-1hry52c.png",
+            "case_type_id": 1392,
+            "case_device_id": 5520,
+            "is_showcase_default": false,
+            "price": 99.9,
+            "old_price": 139.9
+          },
+          {
+            "color": "E9BDB7",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-13/360urbanrosa-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-03-termicos/103971/360urbanbranca-garrafaurban500/17482702081217458003288938323104518.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanrosa-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123485/original/temp_image20251102-7-7l931y.png",
+            "case_type_id": 1389,
+            "case_device_id": 5521,
+            "is_showcase_default": false,
+            "price": 99.9,
+            "old_price": 139.9
+          },
+          {
+            "color": "E05E66",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-13/360urbanmelancia-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-03-termicos/121470/360urbanacai-garrafaurban500ebook/1758381962668172603361437120812666.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanmelancia-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123487/original/temp_image20251102-7-h8qcyl.png",
+            "case_type_id": 2945,
+            "case_device_id": 7599,
+            "is_showcase_default": false,
+            "price": 119.9,
+            "old_price": 159.9
+          },
+          {
+            "color": "B8FFBF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-13/360urbanturquesa-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-03-termicos/103971/360urbanbranca-garrafaurban500/17482702081217458003288938323104518.png&expires=yes",
+            "default": true,
+            "in_stock": false,
+            "material": "360urbanturquesa-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123486/original/temp_image20251102-7-1eow66k.png",
+            "case_type_id": 2943,
+            "case_device_id": 7598,
+            "is_showcase_default": false,
+            "price": 109.9,
+            "old_price": 149.9
+          },
+          {
+            "color": "CDAFE2",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-13/360urbanlilas-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-03-termicos/103971/360urbanbranca-garrafaurban500/17482702081217458003288938323104518.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanlilas-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123484/original/temp_image20251102-7-jfkyha.png",
+            "case_type_id": 2944,
+            "case_device_id": 7600,
+            "is_showcase_default": false,
+            "price": 109.9,
+            "old_price": 149.9
+          }
+        ],
+        "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123483/original/temp_image20251102-7-1hry52c.png",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 81917,
+        "promotion": [],
+        "badge": [],
+        "tag": [],
+        "customization_ids": [
+          95920
+        ]
+      },
+      {
+        "id": 91148,
+        "sku": "nfx-gurb-24",
+        "name": "Garrafa Térmica Urban + Ebook - Stranger Things - Hawkins 1987",
+        "seo_optimized_name": "Garrafa Térmica Urban + Ebook - Stranger Things - Hawkins 1987",
+        "slug": "garrafa-termica-urban-ebook-stranger-things-hawkins-1987",
+        "price": "99.9",
+        "old_price": "139.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-24/360urbanbranca-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-1987-termicos/125075/360urbanbranca-garrafaurban500/1760448553568137009046003660426494.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-gurb-24",
+          "customizations": [
+            {
+              "id": 108541,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/st5-1987-termicos/125075/360urbanbranca-garrafaurban500/176044855356855309399189392421178.png",
+                "pt_br": "prisma-render/prod-v2/previews/st5-1987-termicos/125075/360urbanbranca-garrafaurban500/1760448553568137009046003660426494.png",
+                "en_dark": "prisma-render/prod-v2/previews/st5-1987-termicos/125075/360urbanbranca-garrafaurban500/176044855356855309399189392421178.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/st5-1987-termicos/125075/360urbanbranca-garrafaurban500/1760448553568137009046003660426494.png"
+              },
+              "engine_identifier": "st5-1987-termicos"
+            }
+          ],
+          "material": "360urbanbranca-garrafaurban500ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "garrafaebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-24/360urbanbranca-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-1987-termicos/125075/360urbanbranca-garrafaurban500/1760448553568137009046003660426494.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanbranca-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/174230/original/temp_image20251014-7-1yosjbu.png",
+            "case_type_id": 1392,
+            "case_device_id": 5520,
+            "is_showcase_default": false,
+            "price": 99.9,
+            "old_price": 139.9
+          },
+          {
+            "color": "E9BDB7",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-24/360urbanrosa-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-1987-termicos/125075/360urbanbranca-garrafaurban500/1760448553568137009046003660426494.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanrosa-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/174232/original/temp_image20251014-7-1a0krh1.png",
+            "case_type_id": 1389,
+            "case_device_id": 5521,
+            "is_showcase_default": false,
+            "price": 99.9,
+            "old_price": 139.9
+          },
+          {
+            "color": "000000",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-24/360urbanpreta-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-1987-termicos/125074/360urbanacai-garrafaurban500/176044855415142204505697111622471.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanpreta-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/174236/original/temp_image20251014-8-10frgwn.png",
+            "case_type_id": 1390,
+            "case_device_id": 5523,
+            "is_showcase_default": false,
+            "price": 99.9,
+            "old_price": 139.9
+          },
+          {
+            "color": "0052AB",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-24/360urbanazul-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-1987-termicos/125074/360urbanacai-garrafaurban500/176044855415142204505697111622471.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanazul-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/174231/original/temp_image20251014-7-1l0xdj.png",
+            "case_type_id": 1391,
+            "case_device_id": 5522,
+            "is_showcase_default": false,
+            "price": 109.9,
+            "old_price": 149.9
+          },
+          {
+            "color": "E05E66",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-24/360urbanmelancia-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-1987-termicos/125074/360urbanacai-garrafaurban500/176044855415142204505697111622471.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanmelancia-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/174233/original/temp_image20251014-8-dgxku3.png",
+            "case_type_id": 2945,
+            "case_device_id": 7599,
+            "is_showcase_default": false,
+            "price": 119.9,
+            "old_price": 159.9
+          },
+          {
+            "color": "B8FFBF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-24/360urbanturquesa-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-1987-termicos/125075/360urbanbranca-garrafaurban500/1760448553568137009046003660426494.png&expires=yes",
+            "default": true,
+            "in_stock": false,
+            "material": "360urbanturquesa-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/174234/original/temp_image20251014-7-xxts32.png",
+            "case_type_id": 2943,
+            "case_device_id": 7598,
+            "is_showcase_default": false,
+            "price": 109.9,
+            "old_price": 149.9
+          },
+          {
+            "color": "CDAFE2",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-24/360urbanlilas-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-1987-termicos/125075/360urbanbranca-garrafaurban500/1760448553568137009046003660426494.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanlilas-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/174235/original/temp_image20251014-8-1551lc.png",
+            "case_type_id": 2944,
+            "case_device_id": 7600,
+            "is_showcase_default": false,
+            "price": 109.9,
+            "old_price": 149.9
+          }
+        ],
+        "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/174230/original/temp_image20251014-7-1yosjbu.png",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 93431,
+        "promotion": [],
+        "badge": [],
+        "tag": [],
+        "customization_ids": [
+          108541
+        ]
+      },
+      {
+        "id": 91217,
+        "sku": "nfx-gurb-25",
+        "name": "Garrafa Térmica Urban + Ebook - Stranger Things - One Last Adventure",
+        "seo_optimized_name": "Garrafa Térmica Urban + Ebook - Stranger Things - One Last Adventure",
+        "slug": "garrafa-termica-urban-ebook-stranger-things-one-last-adventure",
+        "price": "99.9",
+        "old_price": "139.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-25/360urbanpreta-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-one-last-adventure-termicos/125235/360freshpretav3-garrafafresh950ebook/1760448493408872606846416295133712.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-gurb-25",
+          "customizations": [
+            {
+              "id": 108615,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/st5-one-last-adventure-termicos/125235/360freshpretav3-garrafafresh950ebook/1760448493409371405644011243884645.png",
+                "pt_br": "prisma-render/prod-v2/previews/st5-one-last-adventure-termicos/125235/360freshpretav3-garrafafresh950ebook/1760448493408872606846416295133712.png",
+                "en_dark": "prisma-render/prod-v2/previews/st5-one-last-adventure-termicos/125235/360freshpretav3-garrafafresh950ebook/1760448493409371405644011243884645.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/st5-one-last-adventure-termicos/125235/360freshpretav3-garrafafresh950ebook/1760448493408872606846416295133712.png"
+              },
+              "engine_identifier": "st5-one-last-adventure-termicos"
+            }
+          ],
+          "material": "360urbanpreta-garrafaurban500ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "garrafaebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "000000",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-25/360urbanpreta-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/st5-one-last-adventure-termicos/125458/360urbanacai-garrafaurban500/1760448501861481207090779772817132.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanpreta-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/174457/original/temp_image20251014-7-120mf9l.png",
+            "case_type_id": 1390,
+            "case_device_id": 5523,
+            "is_showcase_default": false,
+            "price": 99.9,
+            "old_price": 139.9
+          }
+        ],
+        "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/174457/original/temp_image20251014-7-120mf9l.png",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 93500,
+        "promotion": [],
+        "badge": [],
+        "tag": [],
+        "customization_ids": [
+          108615
+        ]
+      },
+      {
+        "id": 79642,
+        "sku": "nfx-gurb-17",
+        "name": "Garrafa Térmica Urban + Ebook - Stranger Things - Demogorgon Fan Club",
+        "seo_optimized_name": "Garrafa Térmica Urban + Ebook - Stranger Things - Demogorgon Fan Club",
+        "slug": "garrafa-termica-urban-ebook-stranger-things-demogorgon-fan-club",
+        "price": "99.9",
+        "old_price": "139.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-17/360urbanbranca-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-42-termicos/104100/360urbanazul-garrafaurban500/1748267233031752607178856308925287.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-gurb-17",
+          "customizations": [
+            {
+              "id": 95928,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-42-termicos/104100/360urbanazul-garrafaurban500/1748267233032542208614085798392042.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-42-termicos/104100/360urbanazul-garrafaurban500/1748267233031752607178856308925287.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-42-termicos/104100/360urbanazul-garrafaurban500/1748267233032542208614085798392042.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-42-termicos/104100/360urbanazul-garrafaurban500/1748267233031752607178856308925287.png"
+              },
+              "engine_identifier": "nfx-st-42-termicos"
+            }
+          ],
+          "material": "360urbanbranca-garrafaurban500ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "garrafaebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-17/360urbanbranca-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-42-termicos/104099/360urbanbranca-garrafaurban500/1748267219085552505659603339286591.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanbranca-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123523/original/temp_image20251102-7-1yisyab.png",
+            "case_type_id": 1392,
+            "case_device_id": 5520,
+            "is_showcase_default": false,
+            "price": 99.9,
+            "old_price": 139.9
+          },
+          {
+            "color": "E9BDB7",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-17/360urbanrosa-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-42-termicos/104099/360urbanbranca-garrafaurban500/1748267219085552505659603339286591.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanrosa-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123526/original/temp_image20251102-8-8n9wmy.png",
+            "case_type_id": 1389,
+            "case_device_id": 5521,
+            "is_showcase_default": false,
+            "price": 99.9,
+            "old_price": 139.9
+          },
+          {
+            "color": "000000",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-17/360urbanpreta-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-42-termicos/104100/360urbanazul-garrafaurban500/1748267233031752607178856308925287.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanpreta-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123528/original/temp_image20251102-7-apxxrv.png",
+            "case_type_id": 1390,
+            "case_device_id": 5523,
+            "is_showcase_default": false,
+            "price": 99.9,
+            "old_price": 139.9
+          },
+          {
+            "color": "0052AB",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-17/360urbanazul-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-42-termicos/104100/360urbanazul-garrafaurban500/1748267233031752607178856308925287.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanazul-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123525/original/temp_image20251102-7-1c2sj2q.png",
+            "case_type_id": 1391,
+            "case_device_id": 5522,
+            "is_showcase_default": false,
+            "price": 109.9,
+            "old_price": 149.9
+          },
+          {
+            "color": "86898C",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-17/360urbancinza-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-42-termicos/104100/360urbanazul-garrafaurban500/1748267233031752607178856308925287.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbancinza-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/163160/original/temp_image20251102-7-ucvpnr.png",
+            "case_type_id": 4100,
+            "case_device_id": 9675,
+            "is_showcase_default": false,
+            "price": 109.9,
+            "old_price": 149.9
+          },
+          {
+            "color": "893B72",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-17/360urbanacai-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-42-termicos/104100/360urbanazul-garrafaurban500/1748267233031752607178856308925287.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanacai-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/165666/original/temp_image20251102-7-dgktnu.png",
+            "case_type_id": 4633,
+            "case_device_id": 9672,
+            "is_showcase_default": false,
+            "price": 119.9,
+            "old_price": 159.9
+          },
+          {
+            "color": "E73EAF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-17/360urbanpink-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-42-termicos/104100/360urbanazul-garrafaurban500/1748267233031752607178856308925287.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanpink-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/164413/original/temp_image20251102-7-1aww5gt.png",
+            "case_type_id": 4102,
+            "case_device_id": 9673,
+            "is_showcase_default": false,
+            "price": 119.9,
+            "old_price": 159.9
+          },
+          {
+            "color": "003151",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-17/360urbanazulescuro-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-42-termicos/104100/360urbanazul-garrafaurban500/1748267233031752607178856308925287.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanazulescuro-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/161910/original/temp_image20251102-7-1puvr40.png",
+            "case_type_id": 4097,
+            "case_device_id": 9674,
+            "is_showcase_default": false,
+            "price": 139.9,
+            "old_price": 179.9
+          }
+        ],
+        "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123523/original/temp_image20251102-7-1yisyab.png",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 81925,
+        "promotion": [],
+        "badge": [],
+        "tag": [],
+        "customization_ids": [
+          95928
+        ]
+      },
+      {
+        "id": 79636,
+        "sku": "nfx-gurb-14",
+        "name": "Garrafa Térmica Urban + Ebook - Stranger Things - Logo",
+        "seo_optimized_name": "Garrafa Térmica Urban + Ebook - Stranger Things - Logo",
+        "slug": "garrafa-termica-urban-ebook-stranger-things-logo",
+        "price": "99.9",
+        "old_price": "139.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-14/360urbanbranca-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-05-termicos/103904/360urbanbranca-garrafaurban500/1747683637458440509188017091183264.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-gurb-14",
+          "customizations": [
+            {
+              "id": 95922,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-05-termicos/103904/360urbanbranca-garrafaurban500/1747683637458867504231140010130501.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-05-termicos/103904/360urbanbranca-garrafaurban500/1747683637458440509188017091183264.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-05-termicos/103904/360urbanbranca-garrafaurban500/1747683637458867504231140010130501.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-05-termicos/103904/360urbanbranca-garrafaurban500/1747683637458440509188017091183264.png"
+              },
+              "engine_identifier": "nfx-st-05-termicos"
+            }
+          ],
+          "material": "360urbanbranca-garrafaurban500ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "garrafaebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-14/360urbanbranca-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-05-termicos/103904/360urbanbranca-garrafaurban500/1747683637458440509188017091183264.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanbranca-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123494/original/temp_image20251102-7-17nsgl.png",
+            "case_type_id": 1392,
+            "case_device_id": 5520,
+            "is_showcase_default": false,
+            "price": 99.9,
+            "old_price": 139.9
+          },
+          {
+            "color": "000000",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-14/360urbanpreta-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-05-termicos/103905/360urbanazul-garrafaurban500/174768364967387103730606508354838.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanpreta-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123493/original/temp_image20251102-7-13csk4c.png",
+            "case_type_id": 1390,
+            "case_device_id": 5523,
+            "is_showcase_default": false,
+            "price": 99.9,
+            "old_price": 139.9
+          },
+          {
+            "color": "86898C",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-14/360urbancinza-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-05-termicos/103905/360urbanazul-garrafaurban500/174768364967387103730606508354838.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbancinza-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/163157/original/temp_image20251102-7-1e7i6l3.png",
+            "case_type_id": 4100,
+            "case_device_id": 9675,
+            "is_showcase_default": false,
+            "price": 109.9,
+            "old_price": 149.9
+          },
+          {
+            "color": "893B72",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-14/360urbanacai-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-05-termicos/103905/360urbanazul-garrafaurban500/174768364967387103730606508354838.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanacai-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/165663/original/temp_image20251102-7-3mev0z.png",
+            "case_type_id": 4633,
+            "case_device_id": 9672,
+            "is_showcase_default": false,
+            "price": 119.9,
+            "old_price": 159.9
+          },
+          {
+            "color": "E73EAF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-14/360urbanpink-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-05-termicos/103905/360urbanazul-garrafaurban500/174768364967387103730606508354838.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanpink-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/164410/original/temp_image20251102-7-lj8aef.png",
+            "case_type_id": 4102,
+            "case_device_id": 9673,
+            "is_showcase_default": false,
+            "price": 119.9,
+            "old_price": 159.9
+          },
+          {
+            "color": "003151",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-14/360urbanazulescuro-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-05-termicos/103905/360urbanazul-garrafaurban500/174768364967387103730606508354838.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanazulescuro-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/161907/original/temp_image20251102-7-g9dlc3.png",
+            "case_type_id": 4097,
+            "case_device_id": 9674,
+            "is_showcase_default": false,
+            "price": 139.9,
+            "old_price": 179.9
+          }
+        ],
+        "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123494/original/temp_image20251102-7-17nsgl.png",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 81919,
+        "promotion": [],
+        "badge": [],
+        "tag": [],
+        "customization_ids": [
+          95922
+        ]
+      },
+      {
+        "id": 80004,
+        "sku": "nfx-gurb-18",
+        "name": "Garrafa Térmica Urban + Ebook - Stranger Things - Hellfire Club",
+        "seo_optimized_name": "Garrafa Térmica Urban + Ebook - Stranger Things - Hellfire Club",
+        "slug": "garrafa-termica-urban-ebook-stranger-things-hellfire-club",
+        "price": "99.9",
+        "old_price": "139.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-18/360urbanbranca-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-43-termicos/104153/360urbanbranca-garrafaurban500/17483413360129483013707254041070782.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-gurb-18",
+          "customizations": [
+            {
+              "id": 96329,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.280.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-43-termicos/104153/360urbanbranca-garrafaurban500/17483413360133324044857787099988133.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-43-termicos/104153/360urbanbranca-garrafaurban500/17483413360129483013707254041070782.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-43-termicos/104153/360urbanbranca-garrafaurban500/17483413360133324044857787099988133.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-43-termicos/104153/360urbanbranca-garrafaurban500/17483413360129483013707254041070782.png"
+              },
+              "engine_identifier": "nfx-st-43-termicos"
+            }
+          ],
+          "material": "360urbanbranca-garrafaurban500ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "garrafaebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-18/360urbanbranca-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-43-termicos/104153/360urbanbranca-garrafaurban500/17483413360129483013707254041070782.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanbranca-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/125029/original/temp_image20250527-7-173pagr.png",
+            "case_type_id": 1392,
+            "case_device_id": 5520,
+            "is_showcase_default": false,
+            "price": 99.9,
+            "old_price": 139.9
+          },
+          {
+            "color": "000000",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-18/360urbanpreta-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-43-termicos/104154/360urbanazul-garrafaurban500/17483412679816272015774492139481056.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanpreta-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/125033/original/temp_image20250527-7-z3nzu9.png",
+            "case_type_id": 1390,
+            "case_device_id": 5523,
+            "is_showcase_default": false,
+            "price": 99.9,
+            "old_price": 139.9
+          },
+          {
+            "color": "86898C",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-18/360urbancinza-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-43-termicos/104154/360urbanazul-garrafaurban500/17483412679816272015774492139481056.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbancinza-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/163169/original/temp_image20250925-7-1kbrb1r.png",
+            "case_type_id": 4100,
+            "case_device_id": 9675,
+            "is_showcase_default": false,
+            "price": 109.9,
+            "old_price": 149.9
+          },
+          {
+            "color": "893B72",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-18/360urbanacai-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-43-termicos/104154/360urbanazul-garrafaurban500/17483412679816272015774492139481056.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanacai-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/165675/original/temp_image20250926-7-dq470l.png",
+            "case_type_id": 4633,
+            "case_device_id": 9672,
+            "is_showcase_default": false,
+            "price": 119.9,
+            "old_price": 159.9
+          },
+          {
+            "color": "E73EAF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-18/360urbanpink-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-43-termicos/104154/360urbanazul-garrafaurban500/17483412679816272015774492139481056.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanpink-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/164422/original/temp_image20250925-7-1fki8dm.png",
+            "case_type_id": 4102,
+            "case_device_id": 9673,
+            "is_showcase_default": false,
+            "price": 119.9,
+            "old_price": 159.9
+          },
+          {
+            "color": "003151",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-18/360urbanazulescuro-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-43-termicos/104154/360urbanazul-garrafaurban500/17483412679816272015774492139481056.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanazulescuro-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/161919/original/temp_image20250925-7-18x8qr7.png",
+            "case_type_id": 4097,
+            "case_device_id": 9674,
+            "is_showcase_default": false,
+            "price": 139.9,
+            "old_price": 179.9
+          }
+        ],
+        "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/125029/original/temp_image20250527-7-173pagr.png",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 82287,
+        "promotion": [],
+        "badge": [],
+        "tag": [],
+        "customization_ids": [
+          96329
+        ]
+      },
+      {
+        "id": 79640,
+        "sku": "nfx-gurb-16",
+        "name": "Garrafa Térmica Urban + Ebook - Stranger Things - Minimalist Icon",
+        "seo_optimized_name": "Garrafa Térmica Urban + Ebook - Stranger Things - Minimalist Icon",
+        "slug": "garrafa-termica-urban-ebook-stranger-things-minimalist-icon",
+        "price": "99.9",
+        "old_price": "139.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-16/360urbanbranca-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-37-termicos/104327/360urbanbranca-garrafaurban500/1747913904559519308788364413878048.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-gurb-16",
+          "customizations": [
+            {
+              "id": 95926,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-37-termicos/104327/360urbanbranca-garrafaurban500/17479139045598323046934450436529196.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-37-termicos/104327/360urbanbranca-garrafaurban500/1747913904559519308788364413878048.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-37-termicos/104327/360urbanbranca-garrafaurban500/17479139045598323046934450436529196.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-37-termicos/104327/360urbanbranca-garrafaurban500/1747913904559519308788364413878048.png"
+              },
+              "engine_identifier": "nfx-st-37-termicos"
+            }
+          ],
+          "material": "360urbanbranca-garrafaurban500ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "garrafaebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-16/360urbanbranca-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-37-termicos/104327/360urbanbranca-garrafaurban500/1747913904559519308788364413878048.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanbranca-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123507/original/temp_image20251103-7-1pu13rv.png",
+            "case_type_id": 1392,
+            "case_device_id": 5520,
+            "is_showcase_default": false,
+            "price": 99.9,
+            "old_price": 139.9
+          },
+          {
+            "color": "000000",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-16/360urbanpreta-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-37-termicos/104326/360urbanazul-garrafaurban500/1747913886840168208050052237853426.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanpreta-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123511/original/temp_image20251103-7-1leyq6z.png",
+            "case_type_id": 1390,
+            "case_device_id": 5523,
+            "is_showcase_default": false,
+            "price": 99.9,
+            "old_price": 139.9
+          },
+          {
+            "color": "86898C",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-16/360urbancinza-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-37-termicos/104326/360urbanazul-garrafaurban500/1747913886840168208050052237853426.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbancinza-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/163159/original/temp_image20251103-7-c3u9o1.png",
+            "case_type_id": 4100,
+            "case_device_id": 9675,
+            "is_showcase_default": false,
+            "price": 109.9,
+            "old_price": 149.9
+          },
+          {
+            "color": "893B72",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-16/360urbanacai-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-37-termicos/104326/360urbanazul-garrafaurban500/1747913886840168208050052237853426.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanacai-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/165665/original/temp_image20251103-7-6w7cza.png",
+            "case_type_id": 4633,
+            "case_device_id": 9672,
+            "is_showcase_default": false,
+            "price": 119.9,
+            "old_price": 159.9
+          },
+          {
+            "color": "E73EAF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-16/360urbanpink-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-37-termicos/104326/360urbanazul-garrafaurban500/1747913886840168208050052237853426.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanpink-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/164412/original/temp_image20251103-7-i45285.png",
+            "case_type_id": 4102,
+            "case_device_id": 9673,
+            "is_showcase_default": false,
+            "price": 119.9,
+            "old_price": 159.9
+          },
+          {
+            "color": "003151",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-16/360urbanazulescuro-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-37-termicos/104326/360urbanazul-garrafaurban500/1747913886840168208050052237853426.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanazulescuro-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/161909/original/temp_image20251103-7-1w1e6gp.png",
+            "case_type_id": 4097,
+            "case_device_id": 9674,
+            "is_showcase_default": false,
+            "price": 139.9,
+            "old_price": 179.9
+          }
+        ],
+        "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123507/original/temp_image20251103-7-1pu13rv.png",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 81923,
+        "promotion": [],
+        "badge": [],
+        "tag": [],
+        "customization_ids": [
+          95926
+        ]
+      },
+      {
+        "id": 79638,
+        "sku": "nfx-gurb-15",
+        "name": "Garrafa Térmica Urban + Ebook - Stranger Things - Criatura",
+        "seo_optimized_name": "Garrafa Térmica Urban + Ebook - Stranger Things - Criatura",
+        "slug": "garrafa-termica-urban-ebook-stranger-things-criatura",
+        "price": "99.9",
+        "old_price": "139.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-15/360urbanbranca-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/stranger1-termicos/103950/360urbanbranca-garrafaurban500/1747686689095962508691318342484955.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-gurb-15",
+          "customizations": [
+            {
+              "id": 95924,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/stranger1-termicos/103950/360urbanbranca-garrafaurban500/1747686689096283409007089225128536.png",
+                "pt_br": "prisma-render/prod-v2/previews/stranger1-termicos/103950/360urbanbranca-garrafaurban500/1747686689095962508691318342484955.png",
+                "en_dark": "prisma-render/prod-v2/previews/stranger1-termicos/103950/360urbanbranca-garrafaurban500/1747686689096283409007089225128536.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/stranger1-termicos/103950/360urbanbranca-garrafaurban500/1747686689095962508691318342484955.png"
+              },
+              "engine_identifier": "stranger1-termicos"
+            }
+          ],
+          "material": "360urbanbranca-garrafaurban500ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "garrafaebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-15/360urbanbranca-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/stranger1-termicos/103950/360urbanbranca-garrafaurban500/1747686689095962508691318342484955.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanbranca-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123496/original/temp_image20251102-7-1x5gw4z.png",
+            "case_type_id": 1392,
+            "case_device_id": 5520,
+            "is_showcase_default": false,
+            "price": 99.9,
+            "old_price": 139.9
+          },
+          {
+            "color": "000000",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-15/360urbanpreta-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/stranger1-termicos/103951/360urbanazul-garrafaurban500/17476866899586322012497721752083712.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanpreta-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123500/original/temp_image20251102-7-23b80x.png",
+            "case_type_id": 1390,
+            "case_device_id": 5523,
+            "is_showcase_default": false,
+            "price": 99.9,
+            "old_price": 139.9
+          },
+          {
+            "color": "86898C",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-15/360urbancinza-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/stranger1-termicos/103951/360urbanazul-garrafaurban500/17476866899586322012497721752083712.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbancinza-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/163158/original/temp_image20251102-7-sce832.png",
+            "case_type_id": 4100,
+            "case_device_id": 9675,
+            "is_showcase_default": false,
+            "price": 109.9,
+            "old_price": 149.9
+          },
+          {
+            "color": "893B72",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-15/360urbanacai-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/stranger1-termicos/103951/360urbanazul-garrafaurban500/17476866899586322012497721752083712.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanacai-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/165664/original/temp_image20251102-7-sjyxwu.png",
+            "case_type_id": 4633,
+            "case_device_id": 9672,
+            "is_showcase_default": false,
+            "price": 119.9,
+            "old_price": 159.9
+          },
+          {
+            "color": "E73EAF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-15/360urbanpink-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/stranger1-termicos/103951/360urbanazul-garrafaurban500/17476866899586322012497721752083712.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanpink-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/164411/original/temp_image20251102-7-8xe5b9.png",
+            "case_type_id": 4102,
+            "case_device_id": 9673,
+            "is_showcase_default": false,
+            "price": 119.9,
+            "old_price": 159.9
+          },
+          {
+            "color": "003151",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-15/360urbanazulescuro-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/stranger1-termicos/103951/360urbanazul-garrafaurban500/17476866899586322012497721752083712.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanazulescuro-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/161908/original/temp_image20251102-7-wr7pq8.png",
+            "case_type_id": 4097,
+            "case_device_id": 9674,
+            "is_showcase_default": false,
+            "price": 139.9,
+            "old_price": 179.9
+          }
+        ],
+        "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123496/original/temp_image20251102-7-1x5gw4z.png",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 81921,
+        "promotion": [],
+        "badge": [],
+        "tag": [],
+        "customization_ids": [
+          95924
+        ]
+      },
+      {
+        "id": 79644,
+        "sku": "nfx-gurb-19",
+        "name": "Garrafa Térmica Urban + Ebook - Stranger Things - Fireball Him",
+        "seo_optimized_name": "Garrafa Térmica Urban + Ebook - Stranger Things - Fireball Him",
+        "slug": "garrafa-termica-urban-ebook-stranger-things-fireball-him",
+        "price": "99.9",
+        "old_price": "139.9",
+        "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-19/360urbanbranca-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-44-termicos/104125/360urbanbranca-garrafaurban500/17478339650650907004458781000890133.png&expires=yes",
+        "image_info": {
+          "sku": "nfx-gurb-19",
+          "customizations": [
+            {
+              "id": 95930,
+              "code": "stamp",
+              "name": "Prisma",
+              "type": "engine",
+              "engine": "https://unpkg.com/@gocasebr/prisma@0.286.0",
+              "required": true,
+              "max_length": null,
+              "default_values": {
+                "en": "prisma-render/prod-v2/previews/nfx-st-44-termicos/104125/360urbanbranca-garrafaurban500/17478339650655162002045579362971428.png",
+                "pt_br": "prisma-render/prod-v2/previews/nfx-st-44-termicos/104125/360urbanbranca-garrafaurban500/17478339650650907004458781000890133.png",
+                "en_dark": "prisma-render/prod-v2/previews/nfx-st-44-termicos/104125/360urbanbranca-garrafaurban500/17478339650655162002045579362971428.png",
+                "pt_br_dark": "prisma-render/prod-v2/previews/nfx-st-44-termicos/104125/360urbanbranca-garrafaurban500/17478339650650907004458781000890133.png"
+              },
+              "engine_identifier": "nfx-st-44-termicos"
+            }
+          ],
+          "material": "360urbanbranca-garrafaurban500ebook",
+          "dark_material": false
+        },
+        "animation_images": [],
+        "product_type_code": "garrafaebook",
+        "has_color_and_size_variants": true,
+        "in_stock": true,
+        "color_options": [
+          {
+            "color": "FFFFFF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-19/360urbanbranca-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-44-termicos/104125/360urbanbranca-garrafaurban500/17478339650650907004458781000890133.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanbranca-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123541/original/temp_image20251103-7-cmdvz4.png",
+            "case_type_id": 1392,
+            "case_device_id": 5520,
+            "is_showcase_default": false,
+            "price": 99.9,
+            "old_price": 139.9
+          },
+          {
+            "color": "E9BDB7",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-19/360urbanrosa-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-44-termicos/104125/360urbanbranca-garrafaurban500/17478339650650907004458781000890133.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanrosa-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123543/original/temp_image20251103-8-1vgmrmi.png",
+            "case_type_id": 1389,
+            "case_device_id": 5521,
+            "is_showcase_default": false,
+            "price": 99.9,
+            "old_price": 139.9
+          },
+          {
+            "color": "000000",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-19/360urbanpreta-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-44-termicos/104137/360urbanazul-garrafaurban500/1747833982247762706518517299802185.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanpreta-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123545/original/temp_image20251103-8-1kwn352.png",
+            "case_type_id": 1390,
+            "case_device_id": 5523,
+            "is_showcase_default": false,
+            "price": 99.9,
+            "old_price": 139.9
+          },
+          {
+            "color": "0052AB",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-19/360urbanazul-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-44-termicos/104137/360urbanazul-garrafaurban500/1747833982247762706518517299802185.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanazul-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123542/original/temp_image20251103-7-15uw9us.png",
+            "case_type_id": 1391,
+            "case_device_id": 5522,
+            "is_showcase_default": false,
+            "price": 109.9,
+            "old_price": 149.9
+          },
+          {
+            "color": "86898C",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-19/360urbancinza-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-44-termicos/104137/360urbanazul-garrafaurban500/1747833982247762706518517299802185.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbancinza-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/163161/original/temp_image20251103-7-coilhy.png",
+            "case_type_id": 4100,
+            "case_device_id": 9675,
+            "is_showcase_default": false,
+            "price": 109.9,
+            "old_price": 149.9
+          },
+          {
+            "color": "893B72",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-19/360urbanacai-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-44-termicos/104137/360urbanazul-garrafaurban500/1747833982247762706518517299802185.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanacai-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/165667/original/temp_image20251103-7-ofua9k.png",
+            "case_type_id": 4633,
+            "case_device_id": 9672,
+            "is_showcase_default": false,
+            "price": 119.9,
+            "old_price": 159.9
+          },
+          {
+            "color": "E73EAF",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-19/360urbanpink-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-44-termicos/104137/360urbanazul-garrafaurban500/1747833982247762706518517299802185.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanpink-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/164414/original/temp_image20251103-6-12zd51e.png",
+            "case_type_id": 4102,
+            "case_device_id": 9673,
+            "is_showcase_default": false,
+            "price": 119.9,
+            "old_price": 159.9
+          },
+          {
+            "color": "003151",
+            "image": "https://ik.imagekit.io/gocase/govinci/nfx-gurb-19/360urbanazulescuro-garrafaurban500ebook/mockup?stamp=prisma-render/prod-v2/previews/nfx-st-44-termicos/104137/360urbanazul-garrafaurban500/1747833982247762706518517299802185.png&expires=yes",
+            "default": true,
+            "in_stock": true,
+            "material": "360urbanazulescuro-garrafaurban500ebook",
+            "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/161911/original/temp_image20251103-7-1lq95nb.png",
+            "case_type_id": 4097,
+            "case_device_id": 9674,
+            "is_showcase_default": false,
+            "price": 139.9,
+            "old_price": 179.9
+          }
+        ],
+        "gif_image": "https://ik.imagekit.io/gocase/v3/gif_images/123541/original/temp_image20251103-7-cmdvz4.png",
+        "is_kit": false,
+        "pre_sale_enabled": false,
+        "variant_id": 81927,
+        "promotion": [],
+        "badge": [],
+        "tag": [],
+        "customization_ids": [
+          95930
+        ]
+      }
+    ],
+    "case_device_id": null
+  },
+  "headers": {
+    "access-control-allow-credentials": "true",
+    "access-control-allow-methods": "GET, POST, PATCH, PUT, DELETE, OPTIONS",
+    "access-control-allow-origin": "https://www.gocase.com.br",
+    "access-control-expose-headers": "Cache-Control, Content-Language, Content-Length, Content-Type, Expires, Last-Modified, Pragma",
+    "access-control-max-age": "86400",
+    "age": "75",
+    "cache-control": "max-age=0, public, s-maxage=120, stale-while-revalidate=30, stale-if-error=30",
+    "cf-cache-status": "HIT",
+    "cf-ray": "9b9676635bcdb871-GRU",
+    "content-encoding": "br",
+    "content-type": "application/json; charset=utf-8",
+    "date": "Mon, 05 Jan 2026 22:37:49 GMT",
+    "etag": "W/\"a301416f5984d56ec561ffcd4fa97afb\"",
+    "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+    "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=A78G3DNA%2FwbI888EVb1QfOiBLtxsKs0FNF0LEAtkyDfo%2Fs%2BMiZcQ20QpW7dJwT%2FK0Qlu1I35wEUiXmuWcVkf%2BSj5e8TL0ieJEt9tAmqzoYs%3D\"}]}",
+    "server": "cloudflare",
+    "strict-transport-security": "max-age=0; includeSubDomains",
+    "vary": "Origin, accept-encoding",
+    "x-content-type-options": "nosniff",
+    "x-envoy-upstream-service-time": "276",
+    "x-frame-options": "SAMEORIGIN",
+    "x-request-id": "7de0434f-0091-497a-975c-6535793f37b3",
+    "x-runtime": "0.272043",
+    "x-xss-protection": "1; mode=block"
+  }
+}
