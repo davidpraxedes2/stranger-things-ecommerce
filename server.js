@@ -541,7 +541,7 @@ async function handlePopulate(req, res) {
     }
 });
 
-// Listar produtos (público) - VERSÃO SIMPLIFICADA
+// Listar produtos (público) - VERSÃO ULTRA SIMPLIFICADA
 app.get('/api/products', async (req, res) => {
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -549,52 +549,27 @@ app.get('/api/products', async (req, res) => {
     let client = null;
     
     try {
-        // Verificar todas as variáveis possíveis do Vercel
-        let connectionString = process.env.POSTGRES_URL || 
-                              process.env.POSTGRES_PRISMA_URL || 
-                              process.env.DATABASE_URL ||
-                              process.env.POSTGRES_URL_NON_POOLING ||
-                              process.env.POSTGRES_URL_NONPOOLING;
-        
-        // PRISMA_DATABASE_URL pode começar com "prisma+" - não funciona com pg.Client
-        // Usar POSTGRES_URL ao invés
-        if (!connectionString && process.env.PRISMA_DATABASE_URL) {
-            // Se só tiver PRISMA_DATABASE_URL, tentar extrair a URL real
-            const prismaUrl = process.env.PRISMA_DATABASE_URL;
-            if (prismaUrl.startsWith('prisma+')) {
-                // Não podemos usar prisma+ URLs diretamente
-                console.log('⚠️ PRISMA_DATABASE_URL com prisma+ não suportado, use POSTGRES_URL');
-            } else {
-                connectionString = prismaUrl;
-            }
-        }
+        // Pegar a primeira variável PostgreSQL que encontrar (Vercel cria automaticamente)
+        const connectionString = process.env.POSTGRES_URL || 
+                                process.env.POSTGRES_PRISMA_URL || 
+                                process.env.DATABASE_URL ||
+                                process.env.POSTGRES_URL_NON_POOLING ||
+                                process.env.POSTGRES_URL_NONPOOLING;
         
         if (!connectionString) {
-            console.log('⚠️ PostgreSQL não configurado, usando SQLite');
             // SQLite fallback
             db.all('SELECT * FROM products WHERE active = 1 ORDER BY created_at DESC', [], (err, rows) => {
-                if (err) {
-                    console.error('❌ Erro SQLite:', err);
-                    return res.json([]); // Retornar vazio ao invés de erro
-                }
                 res.json(rows || []);
             });
             return;
         }
         
-        console.log('🔌 Conectando ao PostgreSQL...');
-        // PostgreSQL
+        // PostgreSQL - tudo automático
         const { Client } = require('pg');
-        client = new Client({ 
-            connectionString: connectionString,
-            connectionTimeoutMillis: 10000
-        });
-        
+        client = new Client({ connectionString });
         await client.connect();
-        console.log('✅ Conectado ao PostgreSQL');
         
-        // Criar tabela se não existir
-        console.log('📋 Criando/verificando tabela products...');
+        // Criar tabela automaticamente
         await client.query(`
             CREATE TABLE IF NOT EXISTS products (
                 id SERIAL PRIMARY KEY,
@@ -612,29 +587,33 @@ app.get('/api/products', async (req, res) => {
                 sku TEXT
             )
         `);
-        console.log('✅ Tabela verificada');
+        
+        // Verificar se tem produtos, se não tiver, criar alguns
+        const countResult = await client.query('SELECT COUNT(*) as count FROM products');
+        const count = parseInt(countResult.rows[0].count);
+        
+        if (count === 0) {
+            // Criar produtos automaticamente
+            await client.query(`
+                INSERT INTO products (name, description, price, category, image_url, stock, active) VALUES
+                ('Stranger Things T-Shirt', 'Camiseta oficial Stranger Things', 79.90, 'stranger-things', 'https://via.placeholder.com/300', 10, 1),
+                ('Stranger Things Poster', 'Pôster oficial da série', 29.90, 'stranger-things', 'https://via.placeholder.com/300', 20, 1),
+                ('Stranger Things Mug', 'Caneca temática Stranger Things', 39.90, 'stranger-things', 'https://via.placeholder.com/300', 15, 1)
+            `);
+        }
         
         // Buscar produtos
-        console.log('🔍 Buscando produtos...');
         const result = await client.query('SELECT * FROM products WHERE active = 1 ORDER BY created_at DESC');
-        console.log(`✅ ${result.rows.length} produtos encontrados`);
-        
-        // SEMPRE retornar array, mesmo vazio
         res.json(result.rows || []);
         
     } catch (error) {
-        console.error('❌ ERRO /api/products:', error.message);
-        console.error('❌ Stack:', error.stack);
-        // Retornar array vazio em caso de erro, não quebrar o frontend
-        res.json([]);
+        console.error('ERRO:', error.message);
+        res.json([]); // Sempre retornar array
     } finally {
         if (client) {
             try {
                 await client.end();
-                console.log('🔌 Conexão fechada');
-            } catch (closeError) {
-                console.error('⚠️ Erro ao fechar conexão:', closeError.message);
-            }
+            } catch (e) {}
         }
     }
 });
