@@ -256,8 +256,16 @@ db.initialize = async function() {
 
 async function initializePostgres() {
     try {
-        // Create tables using template literals (safer for @vercel/postgres)
-        await pgClient`
+        const { Client } = require('pg');
+        const client = new Client({
+            connectionString: process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL
+        });
+        
+        await client.connect();
+        console.log('✅ Conectado ao PostgreSQL');
+        
+        // Create tables
+        await client.query(`
             CREATE TABLE IF NOT EXISTS products (
                 id SERIAL PRIMARY KEY,
                 name TEXT NOT NULL,
@@ -273,9 +281,9 @@ async function initializePostgres() {
                 original_price REAL,
                 sku TEXT
             )
-        `;
+        `);
         
-        await pgClient`
+        await client.query(`
             CREATE TABLE IF NOT EXISTS users (
                 id SERIAL PRIMARY KEY,
                 username TEXT UNIQUE NOT NULL,
@@ -284,9 +292,9 @@ async function initializePostgres() {
                 role TEXT DEFAULT 'admin',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
-        `;
+        `);
         
-        await pgClient`
+        await client.query(`
             CREATE TABLE IF NOT EXISTS orders (
                 id SERIAL PRIMARY KEY,
                 customer_name TEXT,
@@ -299,9 +307,9 @@ async function initializePostgres() {
                 shipping_address TEXT,
                 payment_method TEXT
             )
-        `;
+        `);
         
-        await pgClient`
+        await client.query(`
             CREATE TABLE IF NOT EXISTS order_items (
                 id SERIAL PRIMARY KEY,
                 order_id INTEGER NOT NULL,
@@ -309,9 +317,9 @@ async function initializePostgres() {
                 quantity INTEGER NOT NULL,
                 price REAL NOT NULL
             )
-        `;
+        `);
         
-        await pgClient`
+        await client.query(`
             CREATE TABLE IF NOT EXISTS customers (
                 id SERIAL PRIMARY KEY,
                 name TEXT NOT NULL,
@@ -325,9 +333,9 @@ async function initializePostgres() {
                 zip_code TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
-        `;
+        `);
         
-        await pgClient`
+        await client.query(`
             CREATE TABLE IF NOT EXISTS cart_items (
                 id SERIAL PRIMARY KEY,
                 session_id TEXT NOT NULL,
@@ -337,11 +345,22 @@ async function initializePostgres() {
                 selected_variant TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
-        `;
+        `);
         
-        console.log('✅ Tabelas PostgreSQL criadas');
+        // Create admin user if doesn't exist
+        const bcrypt = require('bcryptjs');
+        const defaultPassword = bcrypt.hashSync('admin123', 10);
+        await client.query(`
+            INSERT INTO users (username, email, password, role)
+            SELECT 'admin', 'admin@strangerthings.com', $1, 'admin'
+            WHERE NOT EXISTS (SELECT 1 FROM users WHERE username = 'admin')
+        `, [defaultPassword]);
+        
+        await client.end();
+        console.log('✅ Tabelas PostgreSQL criadas com sucesso');
     } catch (error) {
         console.error('❌ Erro ao criar tabelas PostgreSQL:', error);
+        throw error;
     }
 }
 
