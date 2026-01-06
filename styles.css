@@ -97,21 +97,32 @@ body.fade-out {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
     background: var(--dark-bg);
-    z-index: 99999;
-    display: none; /* Começar escondido */
+    z-index: 999999;
+    display: none;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     opacity: 0;
-    transition: opacity 0.2s ease;
+    pointer-events: none;
 }
 
 .page-loader.active {
-    display: flex !important; /* Forçar display quando ativo */
+    display: flex !important;
     opacity: 1 !important;
+    pointer-events: all;
+    animation: showLoader 0.1s ease forwards;
+}
+
+@keyframes showLoader {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 .page-loader-spinner {

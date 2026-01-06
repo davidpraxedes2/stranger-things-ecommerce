@@ -3,7 +3,6 @@
     'use strict';
 
     let pageLoader = null;
-    let isNavigating = false;
     
     // Obter referência do loader
     function getLoader() {
@@ -13,28 +12,28 @@
         return pageLoader;
     }
     
-    // Mostrar spinner
+    // Mostrar spinner INSTANTANEAMENTE
     function showLoader() {
         const loader = getLoader();
         if (loader) {
-            isNavigating = true;
+            // Remover qualquer classe/esconder
+            loader.classList.remove('active');
             loader.style.display = 'flex';
-            loader.style.opacity = '0';
-            // Forçar reflow
-            requestAnimationFrame(() => {
-                loader.classList.add('active');
-                loader.style.opacity = '1';
-            });
+            loader.style.opacity = '1';
+            loader.style.visibility = 'visible';
+            // Forçar display e aparecer IMEDIATAMENTE
+            loader.offsetWidth; // Force reflow
+            loader.classList.add('active');
         }
     }
 
     // Esconder spinner
     function hideLoader() {
         const loader = getLoader();
-        if (loader && !isNavigating) {
+        if (loader) {
             loader.classList.remove('active');
             setTimeout(() => {
-                if (loader) {
+                if (loader && !loader.classList.contains('active')) {
                     loader.style.display = 'none';
                     loader.style.opacity = '0';
                 }
@@ -42,9 +41,9 @@
         }
     }
 
-    // Interceptar cliques em links
+    // Interceptar cliques em links - ANTES de tudo
     function initPageLoader() {
-        // Interceptar TODOS os cliques primeiro (capture phase)
+        // Usar capture phase para executar ANTES de qualquer outro handler
         document.addEventListener('click', function(e) {
             const link = e.target.closest('a[href]');
             if (!link) return;
@@ -64,59 +63,52 @@
                 !e.metaKey &&
                 !e.shiftKey) {
                 
-                // Prevenir navegação imediata
+                // PARAR TUDO - prevenir qualquer outra ação
                 e.preventDefault();
+                e.stopPropagation();
                 e.stopImmediatePropagation();
                 
-                // Mostrar spinner
+                // MOSTRAR SPINNER IMEDIATAMENTE (sem delays)
                 showLoader();
                 
-                // Navegar após garantir que spinner apareceu
+                // Navegar após garantir que spinner foi renderizado
                 setTimeout(() => {
                     window.location.href = href;
-                }, 200);
+                }, 300); // Delay maior para garantir visibilidade
                 
                 return false;
             }
-        }, true); // CAPTURE PHASE - executa ANTES de qualquer outro handler
+        }, true); // CAPTURE PHASE
 
-        // Esconder loader quando página nova carregar
+        // Esconder loader quando página carregar
         if (document.readyState === 'complete') {
-            isNavigating = false;
-            setTimeout(hideLoader, 1000);
+            setTimeout(hideLoader, 500);
         } else {
             window.addEventListener('load', function() {
-                isNavigating = false;
-                setTimeout(hideLoader, 800);
+                setTimeout(hideLoader, 500);
             });
             
-            // Fallback
             document.addEventListener('DOMContentLoaded', function() {
-                setTimeout(() => {
-                    if (!isNavigating) {
-                        hideLoader();
-                    }
-                }, 1000);
+                setTimeout(hideLoader, 800);
             });
         }
     }
 
-    // Inicializar imediatamente
-    if (document.readyState === 'loading') {
-        // Se ainda está carregando, esperar DOM
-        document.addEventListener('DOMContentLoaded', initPageLoader);
-        // Mas mostrar loader se já estiver carregando
-        setTimeout(() => {
-            if (document.readyState !== 'complete') {
-                isNavigating = false;
-                hideLoader();
-            }
-        }, 500);
-    } else {
-        // DOM já carregou, inicializar e esconder loader
+    // Inicializar IMEDIATAMENTE quando script carregar
+    // Não esperar DOM se já estiver pronto
+    if (document.body) {
         initPageLoader();
-        isNavigating = false;
         setTimeout(hideLoader, 500);
+    } else {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                initPageLoader();
+                setTimeout(hideLoader, 500);
+            });
+        } else {
+            initPageLoader();
+            setTimeout(hideLoader, 500);
+        }
     }
 
     // Expor funções globalmente

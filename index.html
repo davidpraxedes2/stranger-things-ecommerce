@@ -337,6 +337,48 @@
         </div>
     </div>
 
+    <script>
+        // Page Loader - INLINE para garantir que executa ANTES de tudo
+        (function() {
+            let pageLoader = null;
+            
+            function getLoader() {
+                if (!pageLoader) pageLoader = document.getElementById('pageLoader');
+                return pageLoader;
+            }
+            
+            function showLoader() {
+                const loader = getLoader();
+                if (loader) {
+                    loader.style.cssText = 'display: flex !important; opacity: 1 !important; visibility: visible !important; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 999999; background: #000;';
+                    loader.classList.add('active');
+                }
+            }
+            
+            document.addEventListener('click', function(e) {
+                const link = e.target.closest('a[href]');
+                if (!link) return;
+                
+                const href = link.getAttribute('href');
+                if (href && 
+                    !href.startsWith('http') && 
+                    !href.startsWith('//') && 
+                    !href.startsWith('#') && 
+                    !href.startsWith('javascript:') &&
+                    link.target !== '_blank' &&
+                    !e.ctrlKey && !e.metaKey) {
+                    
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    showLoader();
+                    setTimeout(() => window.location.href = href, 400);
+                    return false;
+                }
+            }, true);
+            
+            window.showPageLoader = showLoader;
+        })();
+    </script>
     <script src="page-loader.js"></script>
     <script src="script.js?v=2"></script>
 </body>
