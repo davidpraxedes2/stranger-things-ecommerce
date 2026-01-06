@@ -1,3 +1,18 @@
+/* ===== Page Transitions ===== */
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    opacity: 1;
+    transition: opacity 0.3s ease-in-out;
+}
+
+body.fade-out {
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+}
+
 /* ===== CSS Variables - Mobile First Design System ===== */
 :root {
     /* Colors */

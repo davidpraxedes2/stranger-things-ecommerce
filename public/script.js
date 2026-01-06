@@ -113,8 +113,52 @@ const mobileMenuToggle = document.getElementById('mobileMenuToggle');
 const mainNav = document.getElementById('mainNav');
 const navLinks = document.querySelectorAll('.nav-link');
 
+// Page Transition Effect
+function initPageTransitions() {
+    // Interceptar todos os links internos
+    document.querySelectorAll('a[href]').forEach(link => {
+        const href = link.getAttribute('href');
+        
+        // Apenas links internos (não externos, não âncoras, não javascript:)
+        if (href && 
+            !href.startsWith('http') && 
+            !href.startsWith('//') && 
+            !href.startsWith('#') && 
+            !href.startsWith('javascript:') &&
+            !href.startsWith('mailto:') &&
+            !href.startsWith('tel:')) {
+            
+            link.addEventListener('click', function(e) {
+                // Não aplicar transição para links que abrem em nova aba
+                if (link.target === '_blank' || e.ctrlKey || e.metaKey) {
+                    return;
+                }
+                
+                e.preventDefault();
+                
+                // Aplicar fade-out
+                document.body.classList.add('fade-out');
+                
+                // Navegar após a transição
+                setTimeout(() => {
+                    window.location.href = href;
+                }, 200);
+            });
+        }
+    });
+    
+    // Fade-in quando a página carrega
+    document.body.style.opacity = '0';
+    setTimeout(() => {
+        document.body.style.transition = 'opacity 0.3s ease-in-out';
+        document.body.style.opacity = '1';
+    }, 10);
+}
+
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+    // Inicializar transições de página
+    initPageTransitions();
     // NÃO renderizar produtos aqui - esperar loadProductsFromAPI() carregar primeiro
     // Os produtos serão renderizados automaticamente quando loadProductsFromAPI() terminar
 

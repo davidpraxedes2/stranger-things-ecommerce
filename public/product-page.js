@@ -33,6 +33,50 @@ window.reloadCart = function() {
     }
 };
 
+// Page Transition Effect
+function initPageTransitions() {
+    // Interceptar todos os links internos
+    document.querySelectorAll('a[href]').forEach(link => {
+        const href = link.getAttribute('href');
+        
+        // Apenas links internos
+        if (href && 
+            !href.startsWith('http') && 
+            !href.startsWith('//') && 
+            !href.startsWith('#') && 
+            !href.startsWith('javascript:') &&
+            !href.startsWith('mailto:') &&
+            !href.startsWith('tel:')) {
+            
+            link.addEventListener('click', function(e) {
+                if (link.target === '_blank' || e.ctrlKey || e.metaKey) {
+                    return;
+                }
+                
+                e.preventDefault();
+                document.body.classList.add('fade-out');
+                setTimeout(() => {
+                    window.location.href = href;
+                }, 200);
+            });
+        }
+    });
+    
+    // Fade-in quando a página carrega
+    document.body.style.opacity = '0';
+    setTimeout(() => {
+        document.body.style.transition = 'opacity 0.3s ease-in-out';
+        document.body.style.opacity = '1';
+    }, 10);
+}
+
+// Inicializar transições quando o DOM estiver pronto
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPageTransitions);
+} else {
+    initPageTransitions();
+}
+
 // Load product data
 async function loadProduct() {
     if (!productId) {
