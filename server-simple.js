@@ -105,6 +105,15 @@ app.get('/checkout.js', (req, res) => {
     }
 });
 
+app.get('/page-loader.js', (req, res) => {
+    try {
+        res.setHeader('Content-Type', 'application/javascript');
+        res.sendFile(path.join(__dirname, 'page-loader.js'));
+    } catch (error) {
+        res.status(404).send('JS not found');
+    }
+});
+
 app.get('/product.html', (req, res) => {
     try {
         res.sendFile(path.join(__dirname, 'product.html'));

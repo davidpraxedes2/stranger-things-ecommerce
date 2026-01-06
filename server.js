@@ -87,6 +87,12 @@ app.get('/product-cart.js', (req, res) => {
     });
 });
 
+app.get('/page-loader.js', (req, res) => {
+    res.sendFile(path.join(__dirname, 'page-loader.js'), {
+        headers: { 'Content-Type': 'application/javascript' }
+    });
+});
+
 app.get('/checkout.js', (req, res) => {
     res.sendFile(path.join(__dirname, 'checkout.js'), {
         headers: { 'Content-Type': 'application/javascript' }
