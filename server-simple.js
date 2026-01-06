@@ -181,32 +181,56 @@ app.get('/api/products', async (req, res) => {
         const countResult = await client.query('SELECT COUNT(*) as count FROM products');
         const count = parseInt(countResult.rows[0]?.count || 0);
         
-        if (count === 0) {
+        // Sempre tentar importar produtos reais se tiver menos de 10 produtos (para evitar reimportar sempre)
+        if (count < 10) {
+            // Limpar produtos mock primeiro
+            await client.query('DELETE FROM products WHERE name LIKE \'Stranger Things T-Shirt\' OR name LIKE \'Stranger Things Poster\' OR name LIKE \'Stranger Things Mug\'');
+            
             // Importar produtos reais dos arquivos JSON
             try {
                 const fs = require('fs');
                 const allProducts = [];
                 
-                // Importar da Netflix Shop
-                const netflixPath = path.join(__dirname, 'netflix-shop-products.json');
-                if (fs.existsSync(netflixPath)) {
-                    const netflixData = JSON.parse(fs.readFileSync(netflixPath, 'utf8'));
-                    if (netflixData.products && Array.isArray(netflixData.products)) {
-                        allProducts.push(...netflixData.products);
+                // Tentar múltiplos caminhos para o arquivo JSON
+                const netflixPaths = [
+                    path.join(__dirname, 'netflix-shop-products.json'),
+                    path.join(process.cwd(), 'netflix-shop-products.json'),
+                    '/var/task/netflix-shop-products.json'
+                ];
+                
+                for (const netflixPath of netflixPaths) {
+                    if (fs.existsSync(netflixPath)) {
+                        console.log(`📂 Encontrado arquivo em: ${netflixPath}`);
+                        const netflixData = JSON.parse(fs.readFileSync(netflixPath, 'utf8'));
+                        if (netflixData.products && Array.isArray(netflixData.products)) {
+                            allProducts.push(...netflixData.products);
+                            console.log(`✅ ${netflixData.products.length} produtos da Netflix Shop carregados`);
+                            break;
+                        }
                     }
                 }
                 
                 // Importar da GoCase
-                const gocasePath = path.join(__dirname, 'gocase-products-api.json');
-                if (fs.existsSync(gocasePath)) {
-                    const gocaseData = JSON.parse(fs.readFileSync(gocasePath, 'utf8'));
-                    if (gocaseData.products && Array.isArray(gocaseData.products)) {
-                        allProducts.push(...gocaseData.products);
+                const gocasePaths = [
+                    path.join(__dirname, 'gocase-products-api.json'),
+                    path.join(process.cwd(), 'gocase-products-api.json'),
+                    '/var/task/gocase-products-api.json'
+                ];
+                
+                for (const gocasePath of gocasePaths) {
+                    if (fs.existsSync(gocasePath)) {
+                        const gocaseData = JSON.parse(fs.readFileSync(gocasePath, 'utf8'));
+                        if (gocaseData.products && Array.isArray(gocaseData.products) && gocaseData.products.length > 0) {
+                            allProducts.push(...gocaseData.products);
+                            console.log(`✅ ${gocaseData.products.length} produtos da GoCase carregados`);
+                            break;
+                        }
                     }
                 }
                 
                 if (allProducts.length > 0) {
                     console.log(`📥 Importando ${allProducts.length} produtos reais...`);
+                    let imported = 0;
                     
                     for (const product of allProducts) {
                         try {
@@ -224,6 +248,7 @@ app.get('/api/products', async (req, res) => {
                                 INSERT INTO products (name, description, price, category, image_url, stock, active, images_json, original_price, sku)
                                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
                             `, [name, description, price, category, imageUrl, stock, 1, imagesJson, originalPrice, sku]);
+                            imported++;
                         } catch (err) {
                             // Ignorar erros de duplicação
                             if (!err.message.includes('duplicate') && !err.message.includes('unique')) {
@@ -232,25 +257,13 @@ app.get('/api/products', async (req, res) => {
                         }
                     }
                     
-                    console.log(`✅ ${allProducts.length} produtos importados!`);
+                    console.log(`✅ ${imported} produtos importados com sucesso!`);
                 } else {
-                    // Fallback: criar produtos de exemplo se não tiver arquivos JSON
-                    await client.query(`
-                        INSERT INTO products (name, description, price, category, image_url, stock, active) VALUES
-                        ('Stranger Things T-Shirt', 'Camiseta oficial', 79.90, 'stranger-things', 'https://via.placeholder.com/300', 10, 1),
-                        ('Stranger Things Poster', 'Pôster oficial', 29.90, 'stranger-things', 'https://via.placeholder.com/300', 20, 1),
-                        ('Stranger Things Mug', 'Caneca temática', 39.90, 'stranger-things', 'https://via.placeholder.com/300', 15, 1)
-                    `);
+                    console.log('⚠️ Nenhum arquivo JSON encontrado, mantendo produtos existentes');
                 }
             } catch (error) {
                 console.error('Erro ao importar produtos:', error.message);
-                // Criar produtos de exemplo como fallback
-                await client.query(`
-                    INSERT INTO products (name, description, price, category, image_url, stock, active) VALUES
-                    ('Stranger Things T-Shirt', 'Camiseta oficial', 79.90, 'stranger-things', 'https://via.placeholder.com/300', 10, 1),
-                    ('Stranger Things Poster', 'Pôster oficial', 29.90, 'stranger-things', 'https://via.placeholder.com/300', 20, 1),
-                    ('Stranger Things Mug', 'Caneca temática', 39.90, 'stranger-things', 'https://via.placeholder.com/300', 15, 1)
-                `);
+                console.error('Stack:', error.stack);
             }
         }
         
