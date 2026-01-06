@@ -12,28 +12,58 @@ app.use(express.json());
 // ROTAS DE ARQUIVOS ESTÁTICOS PRIMEIRO (ANTES DE TUDO)
 app.get('/styles.css', (req, res) => {
     try {
-        res.setHeader('Content-Type', 'text/css');
-        res.sendFile(path.join(__dirname, 'styles.css'));
+        const fs = require('fs');
+        const cssPath = path.join(__dirname, 'styles.css');
+        console.log('📄 Tentando servir styles.css de:', cssPath);
+        
+        if (fs.existsSync(cssPath)) {
+            res.setHeader('Content-Type', 'text/css');
+            res.sendFile(cssPath);
+        } else {
+            console.error('❌ styles.css não encontrado em:', cssPath);
+            res.status(404).send('/* CSS not found */');
+        }
     } catch (error) {
-        res.status(404).send('CSS not found');
+        console.error('❌ Erro ao servir CSS:', error.message);
+        res.status(404).send('/* CSS error */');
     }
 });
 
 app.get('/script.js', (req, res) => {
     try {
-        res.setHeader('Content-Type', 'application/javascript');
-        res.sendFile(path.join(__dirname, 'script.js'));
+        const fs = require('fs');
+        const jsPath = path.join(__dirname, 'script.js');
+        console.log('📄 Tentando servir script.js de:', jsPath);
+        
+        if (fs.existsSync(jsPath)) {
+            res.setHeader('Content-Type', 'application/javascript');
+            res.sendFile(jsPath);
+        } else {
+            console.error('❌ script.js não encontrado em:', jsPath);
+            res.status(404).send('// JS not found');
+        }
     } catch (error) {
-        res.status(404).send('JS not found');
+        console.error('❌ Erro ao servir JS:', error.message);
+        res.status(404).send('// JS error');
     }
 });
 
 app.get('/logo.png', (req, res) => {
     try {
-        res.setHeader('Content-Type', 'image/png');
-        res.sendFile(path.join(__dirname, 'logo.png'));
+        const fs = require('fs');
+        const imgPath = path.join(__dirname, 'logo.png');
+        console.log('📄 Tentando servir logo.png de:', imgPath);
+        
+        if (fs.existsSync(imgPath)) {
+            res.setHeader('Content-Type', 'image/png');
+            res.sendFile(imgPath);
+        } else {
+            console.error('❌ logo.png não encontrado em:', imgPath);
+            res.status(404).send('Image not found');
+        }
     } catch (error) {
-        res.status(404).send('Image not found');
+        console.error('❌ Erro ao servir imagem:', error.message);
+        res.status(404).send('Image error');
     }
 });
 
