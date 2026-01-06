@@ -1,15 +1,13 @@
 // Product Page Script
-// Expor API_BASE e API_URL no window para uso em outros scripts
+// Expose API_BASE and API_URL on window for use in other scripts
 window.API_BASE = window.location.origin;
 window.API_URL = `${window.API_BASE}/api`;
+const API_BASE = window.API_BASE;
+const API_URL = window.API_URL;
 
 // Get product ID from URL
 const urlParams = new URLSearchParams(window.location.search);
-let productId = parseInt(urlParams.get('id')) || null;
-
-// Log para debug
-console.log('🔍 URL atual:', window.location.href);
-console.log('🔍 productId extraído:', productId);
+const productId = parseInt(urlParams.get('id')) || null;
 
 let currentProduct = null;
 let currentQuantity = 1;
@@ -38,132 +36,46 @@ window.reloadCart = function() {
     }
 };
 
-// Page Transition Effect
-function initPageTransitions() {
-    // Interceptar todos os links internos
-    document.querySelectorAll('a[href]').forEach(link => {
-        const href = link.getAttribute('href');
-        
-        // Apenas links internos
-        if (href && 
-            !href.startsWith('http') && 
-            !href.startsWith('//') && 
-            !href.startsWith('#') && 
-            !href.startsWith('javascript:') &&
-            !href.startsWith('mailto:') &&
-            !href.startsWith('tel:')) {
-            
-            link.addEventListener('click', function(e) {
-                if (link.target === '_blank' || e.ctrlKey || e.metaKey) {
-                    return;
-                }
-                
-                e.preventDefault();
-                document.body.classList.add('fade-out');
-                setTimeout(() => {
-                    window.location.href = href;
-                }, 200);
-            });
-        }
-    });
-    
-    // Fade-in quando a página carrega
-    document.body.style.opacity = '0';
-    setTimeout(() => {
-        document.body.style.transition = 'opacity 0.3s ease-in-out';
-        document.body.style.opacity = '1';
-    }, 10);
-}
-
-// Carregar produto IMEDIATAMENTE ao invés de esperar o DOM
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        loadProduct();
-        initPageTransitions();
-    });
-} else {
-    loadProduct();
-    initPageTransitions();
-}
-
 // Load product data
 async function loadProduct() {
     if (!productId) {
-        document.getElementById('productTitle').textContent = 'Produto não encontrado';
+        const titleEl = document.getElementById('productTitle');
+        if (titleEl) titleEl.textContent = 'Produto não encontrado';
+        const loadingEl = document.getElementById('productLoading');
+        if (loadingEl) loadingEl.style.display = 'none';
+        const infoContainer = document.getElementById('productInfoContainer');
+        if (infoContainer) infoContainer.style.display = 'block';
         return;
     }
 
-    // Verificar se há produto pré-carregado
-    const preloadedProduct = sessionStorage.getItem('preloadedProduct');
-    if (preloadedProduct) {
-        try {
-            const product = JSON.parse(preloadedProduct);
-            // Verificar se é o produto correto
-            if (product.id === productId) {
-                currentProduct = product;
-                renderProduct(product);
-                // Limpar do sessionStorage após usar
-                sessionStorage.removeItem('preloadedProduct');
-                
-                // Carregar dados atualizados em background para garantir que está atualizado
-                fetch(`${window.API_URL}/products/${productId}`)
-                    .then(response => response.ok ? response.json() : null)
-                    .then(updatedProduct => {
-                        if (updatedProduct && updatedProduct.id === productId) {
-                            currentProduct = updatedProduct;
-                            renderProduct(updatedProduct);
-                        }
-                    })
-                        .catch(err => console.log('Erro ao atualizar produto:', err));
-
-                    if (productLoading) productLoading.style.display = 'none';
-                    if (productImagesContainer) productImagesContainer.style.display = 'flex';
-                    if (productInfoContainer) productInfoContainer.style.display = 'block';
-                    return;
-                }
-        } catch (e) {
-            console.log('Erro ao usar produto pré-carregado:', e);
-        }
-    }
-
-    // Se não tiver pré-carregado, carregar normalmente
-    console.log(`📡 Buscando produto ${productId} da API: ${window.API_URL}/products/${productId}`);
     try {
-        const response = await fetch(`${window.API_URL}/products/${productId}`);
-        console.log('📡 Resposta da API:', response.status, response.statusText);
-        
+        const response = await fetch(`${API_URL}/products/${productId}`);
         if (response.ok) {
             const product = await response.json();
-            console.log('✅ Produto carregado:', product.name);
             currentProduct = product;
             renderProduct(product);
         } else {
-            console.error('❌ Produto não encontrado na API');
             const titleEl = document.getElementById('productTitle');
             if (titleEl) titleEl.textContent = 'Produto não encontrado';
-            if (productInfoContainer) productInfoContainer.style.display = 'block';
+            const loadingEl = document.getElementById('productLoading');
+            if (loadingEl) loadingEl.style.display = 'none';
+            const infoContainer = document.getElementById('productInfoContainer');
+            if (infoContainer) infoContainer.style.display = 'block';
         }
     } catch (error) {
-        console.error('❌ Erro ao carregar produto:', error);
+        console.error('Erro ao carregar produto:', error);
         const titleEl = document.getElementById('productTitle');
         if (titleEl) titleEl.textContent = 'Erro ao carregar produto';
-        if (productInfoContainer) productInfoContainer.style.display = 'block';
-    } finally {
-        if (productLoading) productLoading.style.display = 'none';
-        if (productImagesContainer) productImagesContainer.style.display = 'flex';
-        if (productInfoContainer) productInfoContainer.style.display = 'block';
-    }
-        const titleEl = document.getElementById('productTitle');
+        const loadingEl = document.getElementById('productLoading');
+        if (loadingEl) loadingEl.style.display = 'none';
         const infoContainer = document.getElementById('productInfoContainer');
-        if (loadingEl) loadingEl.textContent = 'Erro ao carregar produto. Tente novamente.';
-        if (titleEl) titleEl.textContent = 'Erro ao carregar produto';
         if (infoContainer) infoContainer.style.display = 'block';
     }
 }
 
 // Render product
 function renderProduct(product) {
-    // Esconder loading e mostrar containers quando os dados carregarem
+    // Hide loading and show containers when data loads
     const loadingEl = document.getElementById('productLoading');
     if (loadingEl) {
         loadingEl.style.display = 'none';
@@ -171,6 +83,8 @@ function renderProduct(product) {
     
     const imagesContainer = document.getElementById('productImagesContainer');
     const infoContainer = document.getElementById('productInfoContainer');
+    if (imagesContainer) imagesContainer.style.display = 'flex';
+    if (infoContainer) infoContainer.style.display = 'block';
     
     // Set title
     const titleEl = document.getElementById('productTitle');
@@ -178,7 +92,7 @@ function renderProduct(product) {
         titleEl.textContent = product.name || 'Produto';
     }
 
-    // Set price - converter para número (PostgreSQL retorna DECIMAL como string)
+    // Set price - convert to number (PostgreSQL returns DECIMAL as string)
     const priceEl = document.getElementById('productPrice');
     if (priceEl) {
         const price = parseFloat(product.price) || 0;
@@ -199,7 +113,9 @@ function renderProduct(product) {
 
     // Set description
     const descEl = document.getElementById('productDescription');
-    descEl.innerHTML = `<p>${(product.description || 'Produto de alta qualidade.').replace(/\n/g, '</p><p>')}</p>`;
+    if (descEl) {
+        descEl.innerHTML = `<p>${(product.description || 'Produto de alta qualidade.').replace(/\n/g, '</p><p>')}</p>`;
+    }
 
     // Set images
     let images = [];
@@ -214,6 +130,11 @@ function renderProduct(product) {
     // Add main image if available
     if (product.image_url) {
         images.unshift(product.image_url);
+    }
+    
+    // Use images array if available (from API)
+    if (product.images && Array.isArray(product.images)) {
+        images = product.images;
     }
     
     // Remove duplicates
@@ -235,13 +156,15 @@ function renderProduct(product) {
 
 // Setup variants
 function setupVariants(product) {
+    // Convert price to number (PostgreSQL returns DECIMAL as string)
+    const productPrice = parseFloat(product.price) || 0;
     // Default variants (tamanhos)
     const defaultVariants = [
-        { id: 'P', name: 'P', price: product.price, available: true },
-        { id: 'M', name: 'M', price: product.price, available: true },
-        { id: 'G', name: 'G', price: product.price, available: true },
-        { id: 'GG', name: 'GG', price: product.price, available: true },
-        { id: 'XG', name: 'XG', price: product.price, available: true }
+        { id: 'P', name: 'P', price: productPrice, available: true },
+        { id: 'M', name: 'M', price: productPrice, available: true },
+        { id: 'G', name: 'G', price: productPrice, available: true },
+        { id: 'GG', name: 'GG', price: productPrice, available: true },
+        { id: 'XG', name: 'XG', price: productPrice, available: true }
     ];
 
     availableVariants = defaultVariants;
@@ -292,7 +215,7 @@ function renderImages(images) {
     const mainImageEl = document.getElementById('mainImage');
     const thumbnailsEl = document.getElementById('thumbnails');
 
-    if (images.length === 0) return;
+    if (!mainImageEl || images.length === 0) return;
 
     // Set main image
     if (typeof images[0] === 'string' && images[0].startsWith('http')) {
@@ -302,7 +225,7 @@ function renderImages(images) {
     }
 
     // Render thumbnails
-    if (images.length > 1) {
+    if (thumbnailsEl && images.length > 1) {
         thumbnailsEl.innerHTML = images.map((img, index) => {
             if (typeof img === 'string' && img.startsWith('http')) {
                 return `
@@ -326,7 +249,7 @@ function renderImages(images) {
                 changeImage(index);
             });
         });
-    } else {
+    } else if (thumbnailsEl) {
         thumbnailsEl.innerHTML = '';
     }
 }
@@ -337,6 +260,8 @@ function changeImage(index) {
 
     currentImageIndex = index;
     const mainImageEl = document.getElementById('mainImage');
+    if (!mainImageEl) return;
+    
     const img = selectedImages[index];
 
     if (typeof img === 'string' && img.startsWith('http')) {
@@ -351,7 +276,7 @@ function changeImage(index) {
     });
 }
 
-// Quantity controls
+// Quantity controls and page initialization
 document.addEventListener('DOMContentLoaded', () => {
     const increaseQty = document.getElementById('increaseQty');
     const decreaseQty = document.getElementById('decreaseQty');
@@ -386,9 +311,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 const variantInfo = selectedVariant ? `${selectedVariant.name}` : null;
-                const price = selectedVariant?.price || currentProduct.price;
+                const productPrice = parseFloat(currentProduct.price) || 0;
+                const price = selectedVariant?.price || productPrice;
 
-                const response = await fetch(`${window.API_URL}/cart/add`, {
+                const response = await fetch(`${API_URL}/cart/add`, {
                     method: 'POST',
                     headers: getCartHeaders(),
                     body: JSON.stringify({
@@ -431,7 +357,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // Load related products
 async function loadRelatedProducts() {
     try {
-        const response = await fetch(`${window.API_URL}/products?limit=4`);
+        const response = await fetch(`${API_URL}/products?limit=4`);
         if (response.ok) {
             const products = await response.json();
             const relatedContainer = document.getElementById('relatedProducts');
@@ -449,7 +375,7 @@ async function loadRelatedProducts() {
 // Render related products
 function renderRelatedProducts(products, container) {
     container.innerHTML = products.map(product => {
-        // Converter preços para números (PostgreSQL retorna DECIMAL como string)
+        // Convert prices to numbers (PostgreSQL returns DECIMAL as string)
         const price = parseFloat(product.price) || 0;
         const originalPrice = product.original_price ? parseFloat(product.original_price) : null;
         const hasDiscount = originalPrice && originalPrice > price;
@@ -471,7 +397,7 @@ function renderRelatedProducts(products, container) {
                 <p class="product-description">${(product.description || '').substring(0, 60)}...</p>
                 <div class="product-price">
                     ${hasDiscount && originalPrice ? `<span class="product-price-old">R$ ${originalPrice.toFixed(2).replace('.', ',')}</span>` : ''}
-                    <span>R$ ${(price || 0).toFixed(2).replace('.', ',')}</span>
+                    <span>R$ ${price.toFixed(2).replace('.', ',')}</span>
                 </div>
             </div>
         </a>
@@ -510,4 +436,3 @@ function showNotification(message, type = 'success') {
         setTimeout(() => notification.remove(), 300);
     }, 3000);
 }
-

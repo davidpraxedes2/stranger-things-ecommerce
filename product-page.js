@@ -132,6 +132,11 @@ function renderProduct(product) {
         images.unshift(product.image_url);
     }
     
+    // Use images array if available (from API)
+    if (product.images && Array.isArray(product.images)) {
+        images = product.images;
+    }
+    
     // Remove duplicates
     images = [...new Set(images)];
     
@@ -210,7 +215,7 @@ function renderImages(images) {
     const mainImageEl = document.getElementById('mainImage');
     const thumbnailsEl = document.getElementById('thumbnails');
 
-    if (images.length === 0) return;
+    if (!mainImageEl || images.length === 0) return;
 
     // Set main image
     if (typeof images[0] === 'string' && images[0].startsWith('http')) {
@@ -220,7 +225,7 @@ function renderImages(images) {
     }
 
     // Render thumbnails
-    if (images.length > 1) {
+    if (thumbnailsEl && images.length > 1) {
         thumbnailsEl.innerHTML = images.map((img, index) => {
             if (typeof img === 'string' && img.startsWith('http')) {
                 return `
@@ -244,7 +249,7 @@ function renderImages(images) {
                 changeImage(index);
             });
         });
-    } else {
+    } else if (thumbnailsEl) {
         thumbnailsEl.innerHTML = '';
     }
 }
@@ -255,6 +260,8 @@ function changeImage(index) {
 
     currentImageIndex = index;
     const mainImageEl = document.getElementById('mainImage');
+    if (!mainImageEl) return;
+    
     const img = selectedImages[index];
 
     if (typeof img === 'string' && img.startsWith('http')) {
@@ -269,7 +276,7 @@ function changeImage(index) {
     });
 }
 
-// Quantity controls
+// Quantity controls and page initialization
 document.addEventListener('DOMContentLoaded', () => {
     const increaseQty = document.getElementById('increaseQty');
     const decreaseQty = document.getElementById('decreaseQty');
@@ -343,7 +350,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Load product on page load (guaranteed DOM ready)
+    // Load product on page load
     loadProduct();
 });
 
@@ -429,4 +436,3 @@ function showNotification(message, type = 'success') {
         setTimeout(() => notification.remove(), 300);
     }, 3000);
 }
-
