@@ -1,10 +1,7 @@
 // Product Page Script
-const API_BASE = window.location.origin;
-const API_URL = `${API_BASE}/api`;
-
-// Exportar para uso em product-cart.js
-window.API_BASE = API_BASE;
-window.API_URL = API_URL;
+// Expor API_BASE e API_URL no window para uso em outros scripts
+window.API_BASE = window.location.origin;
+window.API_URL = `${window.API_BASE}/api`;
 
 // Get product ID from URL
 const urlParams = new URLSearchParams(window.location.search);
@@ -109,7 +106,7 @@ async function loadProduct() {
                 sessionStorage.removeItem('preloadedProduct');
                 
                 // Carregar dados atualizados em background para garantir que está atualizado
-                fetch(`${API_URL}/products/${productId}`)
+                fetch(`${window.API_URL}/products/${productId}`)
                     .then(response => response.ok ? response.json() : null)
                     .then(updatedProduct => {
                         if (updatedProduct && updatedProduct.id === productId) {
@@ -117,19 +114,22 @@ async function loadProduct() {
                             renderProduct(updatedProduct);
                         }
                     })
-                    .catch(err => console.log('Erro ao atualizar produto:', err));
-                
-                return;
-            }
+                        .catch(err => console.log('Erro ao atualizar produto:', err));
+
+                    if (productLoading) productLoading.style.display = 'none';
+                    if (productImagesContainer) productImagesContainer.style.display = 'flex';
+                    if (productInfoContainer) productInfoContainer.style.display = 'block';
+                    return;
+                }
         } catch (e) {
             console.log('Erro ao usar produto pré-carregado:', e);
         }
     }
 
     // Se não tiver pré-carregado, carregar normalmente
-    console.log(`📡 Buscando produto ${productId} da API: ${API_URL}/products/${productId}`);
+    console.log(`📡 Buscando produto ${productId} da API: ${window.API_URL}/products/${productId}`);
     try {
-        const response = await fetch(`${API_URL}/products/${productId}`);
+        const response = await fetch(`${window.API_URL}/products/${productId}`);
         console.log('📡 Resposta da API:', response.status, response.statusText);
         
         if (response.ok) {
@@ -139,16 +139,20 @@ async function loadProduct() {
             renderProduct(product);
         } else {
             console.error('❌ Produto não encontrado na API');
-            const loadingEl = document.getElementById('productLoading');
             const titleEl = document.getElementById('productTitle');
-            const infoContainer = document.getElementById('productInfoContainer');
-            if (loadingEl) loadingEl.textContent = 'Produto não encontrado';
             if (titleEl) titleEl.textContent = 'Produto não encontrado';
-            if (infoContainer) infoContainer.style.display = 'block';
+            if (productInfoContainer) productInfoContainer.style.display = 'block';
         }
     } catch (error) {
         console.error('❌ Erro ao carregar produto:', error);
-        const loadingEl = document.getElementById('productLoading');
+        const titleEl = document.getElementById('productTitle');
+        if (titleEl) titleEl.textContent = 'Erro ao carregar produto';
+        if (productInfoContainer) productInfoContainer.style.display = 'block';
+    } finally {
+        if (productLoading) productLoading.style.display = 'none';
+        if (productImagesContainer) productImagesContainer.style.display = 'flex';
+        if (productInfoContainer) productInfoContainer.style.display = 'block';
+    }
         const titleEl = document.getElementById('productTitle');
         const infoContainer = document.getElementById('productInfoContainer');
         if (loadingEl) loadingEl.textContent = 'Erro ao carregar produto. Tente novamente.';
@@ -384,7 +388,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const variantInfo = selectedVariant ? `${selectedVariant.name}` : null;
                 const price = selectedVariant?.price || currentProduct.price;
 
-                const response = await fetch(`${API_URL}/cart/add`, {
+                const response = await fetch(`${window.API_URL}/cart/add`, {
                     method: 'POST',
                     headers: getCartHeaders(),
                     body: JSON.stringify({
@@ -427,7 +431,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // Load related products
 async function loadRelatedProducts() {
     try {
-        const response = await fetch(`${API_URL}/products?limit=4`);
+        const response = await fetch(`${window.API_URL}/products?limit=4`);
         if (response.ok) {
             const products = await response.json();
             const relatedContainer = document.getElementById('relatedProducts');
@@ -466,8 +470,8 @@ function renderRelatedProducts(products, container) {
                 <h3 class="product-name">${product.name}</h3>
                 <p class="product-description">${(product.description || '').substring(0, 60)}...</p>
                 <div class="product-price">
-                    ${hasDiscount ? `<span class="product-price-old">R$ ${originalPrice.toFixed(2).replace('.', ',')}</span>` : ''}
-                    <span>R$ ${price.toFixed(2).replace('.', ',')}</span>
+                    ${hasDiscount && originalPrice ? `<span class="product-price-old">R$ ${originalPrice.toFixed(2).replace('.', ',')}</span>` : ''}
+                    <span>R$ ${(price || 0).toFixed(2).replace('.', ',')}</span>
                 </div>
             </div>
         </a>
