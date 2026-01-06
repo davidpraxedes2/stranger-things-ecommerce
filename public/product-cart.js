@@ -1,13 +1,14 @@
 // Cart functionality for product page
 // Usar API_BASE e API_URL já declarados em product-page.js, ou declarar se não existirem
-if (typeof API_BASE === 'undefined') {
+if (typeof window.API_BASE === 'undefined') {
     window.API_BASE = window.location.origin;
 }
-if (typeof API_URL === 'undefined') {
+if (typeof window.API_URL === 'undefined') {
     window.API_URL = `${window.API_BASE || window.location.origin}/api`;
 }
-const API_BASE = window.API_BASE || window.location.origin;
-const API_URL = window.API_URL || `${API_BASE}/api`;
+// Não redeclarar, apenas usar as variáveis globais
+const API_BASE = window.API_BASE;
+const API_URL = window.API_URL;
 
 let sessionId = localStorage.getItem('cart_session_id') || 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 if (!localStorage.getItem('cart_session_id')) {

@@ -4,7 +4,15 @@ const API_URL = `${API_BASE}/api`;
 
 // Get product ID from URL
 const urlParams = new URLSearchParams(window.location.search);
-const productId = parseInt(urlParams.get('id')) || null;
+let productId = parseInt(urlParams.get('id')) || null;
+
+// Se não tiver ID na URL, tentar pegar do hash ou outro lugar
+if (!productId) {
+    const hashMatch = window.location.hash.match(/id=(\d+)/);
+    if (hashMatch) {
+        productId = parseInt(hashMatch[1]);
+    }
+}
 
 let currentProduct = null;
 let currentQuantity = 1;
@@ -119,22 +127,31 @@ async function loadProduct() {
     }
 
     // Se não tiver pré-carregado, carregar normalmente
+    console.log(`📡 Buscando produto ${productId} da API: ${API_URL}/products/${productId}`);
     try {
         const response = await fetch(`${API_URL}/products/${productId}`);
+        console.log('📡 Resposta da API:', response.status, response.statusText);
+        
         if (response.ok) {
             const product = await response.json();
+            console.log('✅ Produto carregado:', product.name);
             currentProduct = product;
             renderProduct(product);
         } else {
+            console.error('❌ Produto não encontrado na API');
+            const loadingEl = document.getElementById('productLoading');
             const titleEl = document.getElementById('productTitle');
             const infoContainer = document.getElementById('productInfoContainer');
+            if (loadingEl) loadingEl.textContent = 'Produto não encontrado';
             if (titleEl) titleEl.textContent = 'Produto não encontrado';
             if (infoContainer) infoContainer.style.display = 'block';
         }
     } catch (error) {
-        console.error('Erro ao carregar produto:', error);
+        console.error('❌ Erro ao carregar produto:', error);
+        const loadingEl = document.getElementById('productLoading');
         const titleEl = document.getElementById('productTitle');
         const infoContainer = document.getElementById('productInfoContainer');
+        if (loadingEl) loadingEl.textContent = 'Erro ao carregar produto. Tente novamente.';
         if (titleEl) titleEl.textContent = 'Erro ao carregar produto';
         if (infoContainer) infoContainer.style.display = 'block';
     }
