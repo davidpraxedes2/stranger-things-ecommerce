@@ -375,60 +375,71 @@ app.get('/api/products', (req, res) => {
     console.log('⏰ Timestamp:', new Date().toISOString());
     console.log('🗄️  Banco inicializado:', dbInitialized);
     
-    const { category, search, minPrice, maxPrice } = req.query;
-    let query = 'SELECT * FROM products WHERE active = 1';
-    const params = [];
+    try {
+        const { category, search, minPrice, maxPrice } = req.query;
+        let query = 'SELECT * FROM products WHERE active = 1';
+        const params = [];
 
-    if (category) {
-        query += ' AND category = ?';
-        params.push(category);
-    }
-
-    if (search) {
-        query += ' AND (name LIKE ? OR description LIKE ?)';
-        const searchTerm = `%${search}%`;
-        params.push(searchTerm, searchTerm);
-    }
-
-    if (minPrice) {
-        query += ' AND price >= ?';
-        params.push(parseFloat(minPrice));
-    }
-
-    if (maxPrice) {
-        query += ' AND price <= ?';
-        params.push(parseFloat(maxPrice));
-    }
-
-    query += ' ORDER BY created_at DESC';
-
-    console.log('🔍 Executando query:', query);
-    console.log('📋 Parâmetros:', params);
-
-    // Usar callback (db.all já trata PostgreSQL e SQLite)
-    db.all(query, params, (err, rows) => {
-        const duration = Date.now() - startTime;
-        console.log(`⏱️ Query executada em ${duration}ms`);
-        
-        if (err) {
-            console.error('❌ Erro na query:', err);
-            console.error('❌ Stack:', err.stack);
-            res.status(500).json({ 
-                error: 'Erro ao buscar produtos',
-                message: err.message
-            });
-            return;
+        if (category) {
+            query += ' AND category = ?';
+            params.push(category);
         }
-        
-        // Garantir que sempre retorna um array
-        const safeRows = Array.isArray(rows) ? rows : [];
-        console.log(`✅ Retornando ${safeRows.length} produtos`);
-        console.log(`⏱️ Total: ${Date.now() - startTime}ms`);
-        
-        res.setHeader('Content-Type', 'application/json');
-        res.setHeader('Access-Control-Allow-Origin', '*');
-        res.json(safeRows);
-    });
+
+        if (search) {
+            query += ' AND (name LIKE ? OR description LIKE ?)';
+            const searchTerm = `%${search}%`;
+            params.push(searchTerm, searchTerm);
+        }
+
+        if (minPrice) {
+            query += ' AND price >= ?';
+            params.push(parseFloat(minPrice));
+        }
+
+        if (maxPrice) {
+            query += ' AND price <= ?';
+            params.push(parseFloat(maxPrice));
+        }
+
+        query += ' ORDER BY created_at DESC';
+
+        console.log('🔍 Executando query:', query);
+        console.log('📋 Parâmetros:', params);
+
+        // Usar callback (db.all já trata PostgreSQL e SQLite)
+        db.all(query, params, (err, rows) => {
+            const duration = Date.now() - startTime;
+            console.log(`⏱️ Query executada em ${duration}ms`);
+            
+            if (err) {
+                console.error('❌ Erro na query:', err);
+                console.error('❌ Mensagem:', err.message);
+                console.error('❌ Stack:', err.stack);
+                res.status(500).json({ 
+                    error: 'Erro ao buscar produtos',
+                    message: err.message,
+                    details: process.env.NODE_ENV === 'development' ? err.stack : undefined
+                });
+                return;
+            }
+            
+            // Garantir que sempre retorna um array
+            const safeRows = Array.isArray(rows) ? rows : [];
+            console.log(`✅ Retornando ${safeRows.length} produtos`);
+            console.log(`⏱️ Total: ${Date.now() - startTime}ms`);
+            
+            res.setHeader('Content-Type', 'application/json');
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.json(safeRows);
+        });
+    } catch (error) {
+        console.error('❌ Erro ao processar requisição:', error);
+        console.error('❌ Stack:', error.stack);
+        res.status(500).json({ 
+            error: 'Erro interno do servidor',
+            message: error.message
+        });
+    }
 });
 
 // Buscar produto por ID (público)

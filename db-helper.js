@@ -87,148 +87,146 @@ function allSQLite(query, params, callback) {
 }
 
 // PostgreSQL functions
-async function runPostgres(query, params, callback) {
-    try {
-        // Convert ? to $1, $2, etc
-        let paramIndex = 1;
-        let convertedQuery = query.replace(/\?/g, () => {
-            const idx = paramIndex++;
-            return `$${idx}`;
-        });
-        
-        // Fix syntax differences
-        convertedQuery = convertedQuery
-            .replace(/INTEGER PRIMARY KEY AUTOINCREMENT/g, 'SERIAL PRIMARY KEY')
-            .replace(/DATETIME DEFAULT CURRENT_TIMESTAMP/g, 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP');
-        
-        // Handle INSERT OR IGNORE
-        if (query.includes('INSERT OR IGNORE')) {
-            const match = query.match(/INSERT OR IGNORE INTO (\w+)/);
-            if (match) {
-                convertedQuery = convertedQuery.replace(/INSERT OR IGNORE/, 'INSERT') + 
-                    ` ON CONFLICT DO NOTHING`;
+function runPostgres(query, params, callback) {
+    (async () => {
+        try {
+            // Convert ? to $1, $2, etc
+            let paramIndex = 1;
+            let convertedQuery = query.replace(/\?/g, () => {
+                const idx = paramIndex++;
+                return `$${idx}`;
+            });
+            
+            // Fix syntax differences
+            convertedQuery = convertedQuery
+                .replace(/INTEGER PRIMARY KEY AUTOINCREMENT/g, 'SERIAL PRIMARY KEY')
+                .replace(/DATETIME DEFAULT CURRENT_TIMESTAMP/g, 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP');
+            
+            // Handle INSERT OR IGNORE
+            if (query.includes('INSERT OR IGNORE')) {
+                const match = query.match(/INSERT OR IGNORE INTO (\w+)/);
+                if (match) {
+                    convertedQuery = convertedQuery.replace(/INSERT OR IGNORE/, 'INSERT') + 
+                        ` ON CONFLICT DO NOTHING`;
+                }
+            }
+            
+            // Use pg directly for raw queries
+            const { Client } = require('pg');
+            const client = new Client({
+                connectionString: process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL
+            });
+            
+            await client.connect();
+            const result = await client.query(convertedQuery, params);
+            
+            // Get last inserted ID if it's an INSERT
+            let lastID = null;
+            if (convertedQuery.trim().toUpperCase().startsWith('INSERT')) {
+                const idResult = await client.query('SELECT LASTVAL() as id');
+                lastID = idResult.rows[0]?.id || null;
+            }
+            
+            await client.end();
+            
+            const mockResult = {
+                lastID: lastID,
+                changes: result.rowCount || 0
+            };
+            
+            if (callback) {
+                callback(null, mockResult);
+            }
+        } catch (error) {
+            if (callback) {
+                callback(error);
             }
         }
-        
-        // Use pg directly for raw queries (since @vercel/postgres sql template doesn't support raw strings well)
-        const { Client } = require('pg');
-        const client = new Client({
-            connectionString: process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL
-        });
-        
-        await client.connect();
-        const result = await client.query(convertedQuery, params);
-        
-        // Get last inserted ID if it's an INSERT
-        let lastID = null;
-        if (convertedQuery.trim().toUpperCase().startsWith('INSERT')) {
-            const idResult = await client.query('SELECT LASTVAL() as id');
-            lastID = idResult.rows[0]?.id || null;
-        }
-        
-        await client.end();
-        
-        const mockResult = {
-            lastID: lastID,
-            changes: result.rowCount || 0
-        };
-        
-        if (callback) {
-            callback(null, mockResult);
-        }
-    } catch (error) {
-        if (callback) {
-            callback(error);
-        } else {
-            throw error;
-        }
-    }
+    })();
 }
 
-async function getPostgres(query, params, callback) {
-    try {
-        let paramIndex = 1;
-        const convertedQuery = query.replace(/\?/g, () => {
-            const idx = paramIndex++;
-            return `$${idx}`;
-        }).replace(/INTEGER PRIMARY KEY AUTOINCREMENT/g, 'SERIAL PRIMARY KEY')
-          .replace(/DATETIME DEFAULT CURRENT_TIMESTAMP/g, 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP');
-        
-        const { Client } = require('pg');
-        const client = new Client({
-            connectionString: process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL
-        });
-        
-        await client.connect();
-        const result = await client.query(convertedQuery, params);
-        await client.end();
-        
-        const row = result.rows && result.rows[0] ? result.rows[0] : null;
-        
-        if (callback) {
-            callback(null, row);
-        } else {
-            return row;
+function getPostgres(query, params, callback) {
+    (async () => {
+        try {
+            let paramIndex = 1;
+            const convertedQuery = query.replace(/\?/g, () => {
+                const idx = paramIndex++;
+                return `$${idx}`;
+            }).replace(/INTEGER PRIMARY KEY AUTOINCREMENT/g, 'SERIAL PRIMARY KEY')
+              .replace(/DATETIME DEFAULT CURRENT_TIMESTAMP/g, 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP');
+            
+            const { Client } = require('pg');
+            const client = new Client({
+                connectionString: process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL
+            });
+            
+            await client.connect();
+            const result = await client.query(convertedQuery, params);
+            await client.end();
+            
+            const row = result.rows && result.rows[0] ? result.rows[0] : null;
+            
+            if (callback) {
+                callback(null, row);
+            }
+        } catch (error) {
+            if (callback) {
+                callback(error, null);
+            }
         }
-    } catch (error) {
-        if (callback) {
-            callback(error, null);
-        } else {
-            throw error;
-        }
-    }
+    })();
 }
 
-async function allPostgres(query, params, callback) {
-    try {
-        console.log('🔍 allPostgres chamado com query:', query.substring(0, 100));
-        let paramIndex = 1;
-        const convertedQuery = query.replace(/\?/g, () => {
-            const idx = paramIndex++;
-            return `$${idx}`;
-        }).replace(/INTEGER PRIMARY KEY AUTOINCREMENT/g, 'SERIAL PRIMARY KEY')
-          .replace(/DATETIME DEFAULT CURRENT_TIMESTAMP/g, 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP');
-        
-        console.log('🔍 Query convertida:', convertedQuery.substring(0, 100));
-        console.log('📋 Parâmetros:', params);
-        
-        const { Client } = require('pg');
-        const connectionString = process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL;
-        
-        if (!connectionString) {
-            throw new Error('POSTGRES_URL não configurada');
+function allPostgres(query, params, callback) {
+    // Wrapper para tornar async function compatível com callback
+    (async () => {
+        try {
+            console.log('🔍 allPostgres chamado com query:', query.substring(0, 100));
+            let paramIndex = 1;
+            const convertedQuery = query.replace(/\?/g, () => {
+                const idx = paramIndex++;
+                return `$${idx}`;
+            }).replace(/INTEGER PRIMARY KEY AUTOINCREMENT/g, 'SERIAL PRIMARY KEY')
+              .replace(/DATETIME DEFAULT CURRENT_TIMESTAMP/g, 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP');
+            
+            console.log('🔍 Query convertida:', convertedQuery.substring(0, 100));
+            console.log('📋 Parâmetros:', params);
+            
+            const { Client } = require('pg');
+            const connectionString = process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL;
+            
+            if (!connectionString) {
+                throw new Error('POSTGRES_URL não configurada');
+            }
+            
+            console.log('🔌 Conectando ao PostgreSQL...');
+            const client = new Client({
+                connectionString: connectionString
+            });
+            
+            await client.connect();
+            console.log('✅ Conectado ao PostgreSQL');
+            
+            console.log('📤 Executando query...');
+            const result = await client.query(convertedQuery, params);
+            console.log(`✅ Query executada, ${result.rows.length} linhas retornadas`);
+            
+            await client.end();
+            
+            const rows = result.rows || [];
+            
+            if (callback) {
+                callback(null, rows);
+            }
+        } catch (error) {
+            console.error('❌ Erro em allPostgres:', error);
+            console.error('❌ Mensagem:', error.message);
+            console.error('❌ Stack:', error.stack);
+            if (callback) {
+                callback(error, null);
+            }
         }
-        
-        console.log('🔌 Conectando ao PostgreSQL...');
-        const client = new Client({
-            connectionString: connectionString
-        });
-        
-        await client.connect();
-        console.log('✅ Conectado ao PostgreSQL');
-        
-        console.log('📤 Executando query...');
-        const result = await client.query(convertedQuery, params);
-        console.log(`✅ Query executada, ${result.rows.length} linhas retornadas`);
-        
-        await client.end();
-        
-        const rows = result.rows || [];
-        
-        if (callback) {
-            callback(null, rows);
-        } else {
-            return rows;
-        }
-    } catch (error) {
-        console.error('❌ Erro em allPostgres:', error);
-        console.error('❌ Stack:', error.stack);
-        if (callback) {
-            callback(error, null);
-        } else {
-            throw error;
-        }
-    }
+    })();
 }
 
 function preparePostgres(query) {
