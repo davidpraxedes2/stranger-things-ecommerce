@@ -243,9 +243,8 @@ app.get('/api/products', async (req, res) => {
                     console.error('Erro ao listar arquivos:', e.message);
                 }
                 
-                // Retornar erro mas não bloquear - retornar array vazio
-                console.error('⚠️ Continuando sem produtos - retornando array vazio');
-                return res.json([]);
+                // Não retornar aqui - deixar continuar para tentar buscar produtos existentes
+                console.error('⚠️ Arquivo não encontrado, mas continuando...');
             }
             
             // Importar da GoCase (opcional)
