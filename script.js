@@ -1,5 +1,6 @@
-// API Base URL
-const API_URL = 'http://localhost:3000/api';
+// API Base URL - usar caminho relativo para funcionar em qualquer domínio
+const API_BASE = window.location.origin;
+const API_URL = `${API_BASE}/api`;
 
 // Products Data (loaded from API)
 let products = [];

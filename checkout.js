@@ -1,5 +1,6 @@
 // Checkout Script
-const API_URL = 'http://localhost:3000/api';
+const API_BASE = window.location.origin;
+const API_URL = `${API_BASE}/api`;
 
 let sessionId = localStorage.getItem('cart_session_id') || 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 if (!localStorage.getItem('cart_session_id')) {

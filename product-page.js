@@ -1,5 +1,6 @@
 // Product Page Script
-const API_URL = 'http://localhost:3000/api';
+const API_BASE = window.location.origin;
+const API_URL = `${API_BASE}/api`;
 
 // Get product ID from URL
 const urlParams = new URLSearchParams(window.location.search);
