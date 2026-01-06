@@ -36,16 +36,6 @@ window.reloadCart = function() {
     }
 };
 
-// Load product immediately if DOM is ready, otherwise wait for DOMContentLoaded
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        loadProduct();
-    });
-} else {
-    // DOM already loaded, load product immediately
-    loadProduct();
-}
-
 // Load product data
 async function loadProduct() {
     if (!productId) {
@@ -353,7 +343,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Load product on page load
+    // Load product on page load (guaranteed DOM ready)
     loadProduct();
 });
 
