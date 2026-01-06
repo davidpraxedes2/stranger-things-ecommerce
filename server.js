@@ -302,8 +302,30 @@ function initializeDatabase() {
         stock INTEGER DEFAULT 0,
         active INTEGER DEFAULT 1,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )`);
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        images_json TEXT,
+        original_price REAL,
+        sku TEXT
+    )`, (err) => {
+        if (err) {
+            console.error('Erro ao criar tabela products:', err);
+        } else {
+            // Adicionar colunas que podem não existir
+            db.run(`ALTER TABLE products ADD COLUMN images_json TEXT`, () => {});
+            db.run(`ALTER TABLE products ADD COLUMN original_price REAL`, () => {});
+            db.run(`ALTER TABLE products ADD COLUMN sku TEXT`, () => {});
+            
+            // Verificar se há produtos, se não tiver, criar alguns
+            db.get('SELECT COUNT(*) as count FROM products', [], (err, row) => {
+                if (!err && row && row.count === 0) {
+                    console.log('📥 Criando produtos iniciais...');
+                    createSampleProducts();
+                    // Tentar importar produtos dos JSONs
+                    tryImportProductsFromJSON();
+                }
+            });
+        }
+    });
 
     // Tabela de usuários/admin
     db.run(`CREATE TABLE IF NOT EXISTS users (
@@ -556,8 +578,51 @@ app.get('/api/products', async (req, res) => {
                                 process.env.POSTGRES_URL_NONPOOLING;
         
         if (!connectionString) {
-            // Sem banco configurado - retornar array vazio
-            return res.json([]);
+            // Sem PostgreSQL - usar SQLite local
+            console.log('📦 Usando SQLite (desenvolvimento local)');
+            
+            return new Promise((resolve) => {
+                // Garantir que o banco está inicializado
+                if (!db) {
+                    console.error('❌ Banco SQLite não inicializado');
+                    return res.json([]);
+                }
+                
+                // Garantir que o banco está inicializado
+                initializeDatabase();
+                
+                // Buscar produtos do SQLite
+                db.all('SELECT * FROM products WHERE active = 1 ORDER BY created_at DESC', [], (err, rows) => {
+                    if (err) {
+                        console.error('❌ Erro ao buscar produtos:', err.message);
+                        return res.json([]);
+                    }
+                    
+                    // Se não houver produtos, tentar importar
+                    if (!rows || rows.length === 0) {
+                        console.log('📥 Nenhum produto encontrado, tentando importar...');
+                        createSampleProducts();
+                        tryImportProductsFromJSON();
+                        
+                        // Buscar novamente após importar (dar tempo para o banco processar)
+                        setTimeout(() => {
+                            db.all('SELECT * FROM products WHERE active = 1 ORDER BY created_at DESC', [], (err, rows) => {
+                                if (err) {
+                                    console.error('Erro ao buscar produtos após import:', err);
+                                    return res.json([]);
+                                }
+                                console.log(`✅ ${rows ? rows.length : 0} produtos encontrados`);
+                                res.json(rows || []);
+                                resolve();
+                            });
+                        }, 1500);
+                    } else {
+                        console.log(`✅ ${rows.length} produtos encontrados no SQLite`);
+                        res.json(rows || []);
+                        resolve();
+                    }
+                });
+            });
         }
         
         // PostgreSQL - tudo automático
