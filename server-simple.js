@@ -9,61 +9,72 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ROTAS DE ARQUIVOS ESTÁTICOS PRIMEIRO (ANTES DE TUDO)
+// ROTAS DE ARQUIVOS ESTÁTICOS - LER E SERVIR DIRETAMENTE
+const fs = require('fs');
+
 app.get('/styles.css', (req, res) => {
     try {
-        const fs = require('fs');
-        const cssPath = path.join(__dirname, 'styles.css');
-        console.log('📄 Tentando servir styles.css de:', cssPath);
+        const paths = [
+            path.join(__dirname, 'styles.css'),
+            path.join(__dirname, 'public', 'styles.css'),
+            path.join(process.cwd(), 'styles.css'),
+            path.join(process.cwd(), 'public', 'styles.css')
+        ];
         
-        if (fs.existsSync(cssPath)) {
-            res.setHeader('Content-Type', 'text/css');
-            res.sendFile(cssPath);
-        } else {
-            console.error('❌ styles.css não encontrado em:', cssPath);
-            res.status(404).send('/* CSS not found */');
+        for (const cssPath of paths) {
+            if (fs.existsSync(cssPath)) {
+                res.setHeader('Content-Type', 'text/css');
+                const content = fs.readFileSync(cssPath, 'utf8');
+                return res.send(content);
+            }
         }
+        res.status(404).send('/* CSS not found */');
     } catch (error) {
-        console.error('❌ Erro ao servir CSS:', error.message);
-        res.status(404).send('/* CSS error */');
+        res.status(404).send('/* CSS error: ' + error.message + ' */');
     }
 });
 
 app.get('/script.js', (req, res) => {
     try {
-        const fs = require('fs');
-        const jsPath = path.join(__dirname, 'script.js');
-        console.log('📄 Tentando servir script.js de:', jsPath);
+        const paths = [
+            path.join(__dirname, 'script.js'),
+            path.join(__dirname, 'public', 'script.js'),
+            path.join(process.cwd(), 'script.js'),
+            path.join(process.cwd(), 'public', 'script.js')
+        ];
         
-        if (fs.existsSync(jsPath)) {
-            res.setHeader('Content-Type', 'application/javascript');
-            res.sendFile(jsPath);
-        } else {
-            console.error('❌ script.js não encontrado em:', jsPath);
-            res.status(404).send('// JS not found');
+        for (const jsPath of paths) {
+            if (fs.existsSync(jsPath)) {
+                res.setHeader('Content-Type', 'application/javascript');
+                const content = fs.readFileSync(jsPath, 'utf8');
+                return res.send(content);
+            }
         }
+        res.status(404).send('// JS not found');
     } catch (error) {
-        console.error('❌ Erro ao servir JS:', error.message);
-        res.status(404).send('// JS error');
+        res.status(404).send('// JS error: ' + error.message);
     }
 });
 
 app.get('/logo.png', (req, res) => {
     try {
-        const fs = require('fs');
-        const imgPath = path.join(__dirname, 'logo.png');
-        console.log('📄 Tentando servir logo.png de:', imgPath);
+        const paths = [
+            path.join(__dirname, 'logo.png'),
+            path.join(__dirname, 'public', 'logo.png'),
+            path.join(process.cwd(), 'logo.png'),
+            path.join(process.cwd(), 'public', 'logo.png')
+        ];
         
-        if (fs.existsSync(imgPath)) {
-            res.setHeader('Content-Type', 'image/png');
-            res.sendFile(imgPath);
-        } else {
-            console.error('❌ logo.png não encontrado em:', imgPath);
-            res.status(404).send('Image not found');
+        for (const imgPath of paths) {
+            if (fs.existsSync(imgPath)) {
+                res.setHeader('Content-Type', 'image/png');
+                const content = fs.readFileSync(imgPath);
+                return res.send(content);
+            }
         }
+        res.status(404).send('Image not found');
     } catch (error) {
-        console.error('❌ Erro ao servir imagem:', error.message);
-        res.status(404).send('Image error');
+        res.status(404).send('Image error: ' + error.message);
     }
 });
 
