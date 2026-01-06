@@ -52,11 +52,21 @@ async function loadProductsFromAPI() {
             }
             
             // Update render if products grid exists
-            if (productsGrid) {
-                console.log('🎨 Renderizando produtos...');
-                renderProducts();
+            const grid = document.getElementById('productsGrid');
+            if (grid) {
+                console.log('🎨 Renderizando produtos no grid...');
+                renderProducts(grid);
+                console.log(`✅ ${products.length} produtos renderizados`);
             } else {
                 console.warn('⚠️ productsGrid não encontrado no DOM');
+                // Tentar novamente após um pequeno delay
+                setTimeout(() => {
+                    const retryGrid = document.getElementById('productsGrid');
+                    if (retryGrid) {
+                        console.log('🎨 Renderizando produtos (tentativa 2)...');
+                        renderProducts(retryGrid);
+                    }
+                }, 100);
             }
         } else {
             const errorText = await response.text();
@@ -411,9 +421,19 @@ function closeCartDrawer() {
 
 // Render Products
 function renderProducts(container = productsGrid, limit = null) {
-    if (!container) return;
+    if (!container) {
+        console.warn('⚠️ renderProducts: container não fornecido');
+        return;
+    }
+    
+    if (!products || products.length === 0) {
+        console.warn('⚠️ renderProducts: nenhum produto disponível');
+        container.innerHTML = '<p class="no-products">Nenhum produto disponível no momento.</p>';
+        return;
+    }
 
     const productsToRender = limit ? products.slice(0, limit) : products;
+    console.log(`🎨 Renderizando ${productsToRender.length} produtos no container:`, container.id || 'sem id');
     
     container.innerHTML = productsToRender.map(product => {
         const hasDiscount = product.original_price && product.original_price > product.price;
