@@ -180,8 +180,12 @@ function getPostgres(query, params, callback) {
 function allPostgres(query, params, callback) {
     // Wrapper para tornar async function compatível com callback
     (async () => {
+        let client = null;
         try {
-            console.log('🔍 allPostgres chamado com query:', query.substring(0, 100));
+            console.log('🔍 allPostgres chamado');
+            console.log('📝 Query original:', query.substring(0, 150));
+            console.log('📋 Parâmetros:', params);
+            
             let paramIndex = 1;
             const convertedQuery = query.replace(/\?/g, () => {
                 const idx = paramIndex++;
@@ -189,19 +193,19 @@ function allPostgres(query, params, callback) {
             }).replace(/INTEGER PRIMARY KEY AUTOINCREMENT/g, 'SERIAL PRIMARY KEY')
               .replace(/DATETIME DEFAULT CURRENT_TIMESTAMP/g, 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP');
             
-            console.log('🔍 Query convertida:', convertedQuery.substring(0, 100));
-            console.log('📋 Parâmetros:', params);
+            console.log('📝 Query convertida:', convertedQuery.substring(0, 150));
             
             const { Client } = require('pg');
             const connectionString = process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL;
             
             if (!connectionString) {
-                throw new Error('POSTGRES_URL não configurada');
+                throw new Error('POSTGRES_URL não configurada. Verifique as variáveis de ambiente.');
             }
             
             console.log('🔌 Conectando ao PostgreSQL...');
-            const client = new Client({
-                connectionString: connectionString
+            client = new Client({
+                connectionString: connectionString,
+                connectionTimeoutMillis: 10000
             });
             
             await client.connect();
@@ -209,9 +213,7 @@ function allPostgres(query, params, callback) {
             
             console.log('📤 Executando query...');
             const result = await client.query(convertedQuery, params);
-            console.log(`✅ Query executada, ${result.rows.length} linhas retornadas`);
-            
-            await client.end();
+            console.log(`✅ Query executada com sucesso, ${result.rows.length} linhas retornadas`);
             
             const rows = result.rows || [];
             
@@ -220,10 +222,21 @@ function allPostgres(query, params, callback) {
             }
         } catch (error) {
             console.error('❌ Erro em allPostgres:', error);
+            console.error('❌ Tipo:', error.constructor.name);
             console.error('❌ Mensagem:', error.message);
             console.error('❌ Stack:', error.stack);
+            
             if (callback) {
                 callback(error, null);
+            }
+        } finally {
+            if (client) {
+                try {
+                    await client.end();
+                    console.log('🔌 Conexão PostgreSQL fechada');
+                } catch (closeError) {
+                    console.error('⚠️ Erro ao fechar conexão:', closeError);
+                }
             }
         }
     })();

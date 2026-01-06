@@ -7,6 +7,9 @@ const jwt = require('jsonwebtoken');
 const db = require('./db-helper');
 require('dotenv').config();
 
+// Verificar se está usando PostgreSQL
+const USE_POSTGRES = process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL;
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'stranger-things-secret-key-change-in-production';
@@ -366,6 +369,16 @@ const authenticateToken = (req, res, next) => {
 };
 
 // ===== ROTAS PÚBLICAS =====
+
+// Health check
+app.get('/api/health', (req, res) => {
+    res.json({ 
+        status: 'ok', 
+        database: USE_POSTGRES ? 'PostgreSQL' : 'SQLite',
+        initialized: dbInitialized,
+        timestamp: new Date().toISOString()
+    });
+});
 
 // Listar produtos (público)
 app.get('/api/products', (req, res) => {
@@ -925,6 +938,19 @@ if (require.main === module) {
         console.log(`📦 Admin: http://localhost:${PORT}/admin.html`);
     });
 }
+
+// Error handler global (deve ser o último middleware)
+app.use((err, req, res, next) => {
+    console.error('❌ Erro não tratado:', err);
+    console.error('❌ Stack:', err.stack);
+    
+    // Sempre retornar JSON, nunca HTML
+    res.status(err.status || 500).json({
+        error: 'Erro interno do servidor',
+        message: err.message || 'Erro desconhecido',
+        details: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    });
+});
 
 // Exportar app para Vercel
 module.exports = app;
