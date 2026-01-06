@@ -70,10 +70,14 @@ function initPageTransitions() {
     }, 10);
 }
 
-// Inicializar transições quando o DOM estiver pronto
+// Carregar produto IMEDIATAMENTE ao invés de esperar o DOM
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initPageTransitions);
+    document.addEventListener('DOMContentLoaded', () => {
+        loadProduct();
+        initPageTransitions();
+    });
 } else {
+    loadProduct();
     initPageTransitions();
 }
 
@@ -84,6 +88,37 @@ async function loadProduct() {
         return;
     }
 
+    // Verificar se há produto pré-carregado
+    const preloadedProduct = sessionStorage.getItem('preloadedProduct');
+    if (preloadedProduct) {
+        try {
+            const product = JSON.parse(preloadedProduct);
+            // Verificar se é o produto correto
+            if (product.id === productId) {
+                currentProduct = product;
+                renderProduct(product);
+                // Limpar do sessionStorage após usar
+                sessionStorage.removeItem('preloadedProduct');
+                
+                // Carregar dados atualizados em background para garantir que está atualizado
+                fetch(`${API_URL}/products/${productId}`)
+                    .then(response => response.ok ? response.json() : null)
+                    .then(updatedProduct => {
+                        if (updatedProduct && updatedProduct.id === productId) {
+                            currentProduct = updatedProduct;
+                            renderProduct(updatedProduct);
+                        }
+                    })
+                    .catch(err => console.log('Erro ao atualizar produto:', err));
+                
+                return;
+            }
+        } catch (e) {
+            console.log('Erro ao usar produto pré-carregado:', e);
+        }
+    }
+
+    // Se não tiver pré-carregado, carregar normalmente
     try {
         const response = await fetch(`${API_URL}/products/${productId}`);
         if (response.ok) {

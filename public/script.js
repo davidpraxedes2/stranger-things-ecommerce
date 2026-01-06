@@ -481,7 +481,7 @@ function renderProducts(container = productsGrid, limit = null) {
         const discountPercent = hasDiscount ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0;
         
         return `
-        <a href="product.html?id=${product.id}" class="product-card">
+        <a href="product.html?id=${product.id}" class="product-card" data-product-id="${product.id}" data-preload="true">
             <div class="product-image-wrapper">
                 ${hasDiscount && discountPercent > 0 ? `<span class="product-badge discount">-${discountPercent}%</span>` : ''}
                 <div class="product-image">
