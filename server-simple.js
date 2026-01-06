@@ -275,22 +275,27 @@ app.get('/api/products', async (req, res) => {
                 let imported = 0;
                 let errors = 0;
                 
-                // Importar em lotes para não sobrecarregar
-                const batchSize = 50;
-                for (let i = 0; i < allProducts.length; i += batchSize) {
-                    const batch = allProducts.slice(i, i + batchSize);
-                    console.log(`📦 Importando lote ${Math.floor(i/batchSize) + 1}/${Math.ceil(allProducts.length/batchSize)} (${batch.length} produtos)...`);
-                    
-                    for (const product of batch) {
+                // Importar TODOS os produtos - usar INSERT em lote para ser mais rápido
+                // Limitar a 1000 produtos por vez para não exceder timeout do Vercel
+                const maxProducts = Math.min(allProducts.length, 1000);
+                const productsToImport = allProducts.slice(0, maxProducts);
+                
+                console.log(`📦 Importando ${productsToImport.length} produtos (de ${allProducts.length} total)...`);
+                
+                // Usar transação para ser mais rápido
+                await client.query('BEGIN');
+                
+                try {
+                    for (const product of productsToImport) {
                         try {
-                            const name = product.name || product.title || 'Produto sem nome';
-                            const description = product.description || '';
+                            const name = (product.name || product.title || 'Produto sem nome').substring(0, 500);
+                            const description = (product.description || '').substring(0, 2000);
                             const price = parseFloat(product.price) || 0;
                             const imageUrl = product.image || (product.images && product.images[0]) || null;
-                            const imagesJson = product.images ? JSON.stringify(product.images) : null;
+                            const imagesJson = product.images ? JSON.stringify(product.images).substring(0, 10000) : null;
                             const originalPrice = product.originalPrice ? parseFloat(product.originalPrice) : null;
-                            const sku = product.sku || null;
-                            const category = product.category || 'stranger-things';
+                            const sku = (product.sku || null) ? String(product.sku).substring(0, 100) : null;
+                            const category = (product.category || 'stranger-things').substring(0, 100);
                             const stock = product.inStock !== false ? 10 : 0;
                             
                             await client.query(`
@@ -301,13 +306,22 @@ app.get('/api/products', async (req, res) => {
                         } catch (err) {
                             errors++;
                             if (errors <= 5) {
-                                console.error(`Erro ao importar produto ${product.name || 'sem nome'}:`, err.message);
+                                console.error(`Erro ao importar produto:`, err.message);
                             }
                         }
                     }
+                    
+                    await client.query('COMMIT');
+                    console.log(`✅ ${imported} produtos importados com sucesso! (${errors} erros)`);
+                    
+                    // Se tiver mais produtos, logar
+                    if (allProducts.length > maxProducts) {
+                        console.log(`⚠️ Ainda há ${allProducts.length - maxProducts} produtos não importados. Use /api/reimport-products para importar o restante.`);
+                    }
+                } catch (err) {
+                    await client.query('ROLLBACK');
+                    throw err;
                 }
-                
-                console.log(`✅ ${imported} produtos importados com sucesso! (${errors} erros)`);
             } else {
                 console.error('❌ ERRO CRÍTICO: Nenhum produto real encontrado!');
                 return res.json([]);
