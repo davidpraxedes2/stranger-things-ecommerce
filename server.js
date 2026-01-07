@@ -6,10 +6,10 @@ try {
     console.error('Erro ao carregar db-helper:', error.message);
     // Criar um mock db para não crashar
     db = {
-        get: () => {},
-        all: () => {},
-        run: () => {},
-        prepare: () => {}
+        get: () => { },
+        all: () => { },
+        run: () => { },
+        prepare: () => { }
     };
 }
 
@@ -120,6 +120,11 @@ app.get('/admin.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
+// Redirect /admin directly to /admin.html
+app.get('/admin', (req, res) => {
+    res.redirect('/admin.html');
+});
+
 // Upload de imagens removido temporariamente para evitar crash
 
 // Inicializar banco de dados (não bloquear requisições)
@@ -146,10 +151,10 @@ async function populateDatabaseIfEmpty() {
     db.get('SELECT COUNT(*) as count FROM products', [], async (err, row) => {
         if (!err && row && row.count === 0) {
             console.log('📦 Banco vazio detectado. Tentando importar produtos dos arquivos JSON...');
-            
+
             // Tentar importar produtos reais primeiro
             const imported = await tryImportProductsFromJSON();
-            
+
             if (!imported) {
                 // Se não conseguiu importar, criar produtos de exemplo
                 console.log('📦 Criando produtos de exemplo...');
@@ -316,11 +321,12 @@ function initializeDatabase() {
         if (err) {
             console.error('Erro ao criar tabela products:', err);
         } else {
-            // Adicionar colunas que podem não existir
-            db.run(`ALTER TABLE products ADD COLUMN images_json TEXT`, () => {});
-            db.run(`ALTER TABLE products ADD COLUMN original_price REAL`, () => {});
-            db.run(`ALTER TABLE products ADD COLUMN sku TEXT`, () => {});
-            
+            // Adicionar colunas que podem não existir (Schema Migrations)
+            db.run(`ALTER TABLE products ADD COLUMN images_json TEXT`, () => { });
+            db.run(`ALTER TABLE products ADD COLUMN original_price REAL`, () => { });
+            db.run(`ALTER TABLE products ADD COLUMN sku TEXT`, () => { });
+            db.run(`ALTER TABLE products ADD COLUMN has_variants INTEGER DEFAULT 0`, () => { });
+
             // Verificar se há produtos, se não tiver, criar alguns
             db.get('SELECT COUNT(*) as count FROM products', [], (err, row) => {
                 if (!err && row && row.count === 0) {
@@ -365,6 +371,54 @@ function initializeDatabase() {
         FOREIGN KEY (product_id) REFERENCES products(id)
     )`);
 
+    // Tabela de coleções
+    db.run(`CREATE TABLE IF NOT EXISTS collections (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        slug TEXT NOT NULL,
+        description TEXT,
+        is_active INTEGER DEFAULT 1,
+        sort_order INTEGER DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`, (err) => {
+        if (!err) {
+            // Verificar se tabela está vazia e popular
+            db.get('SELECT COUNT(*) as count FROM collections', [], (err, row) => {
+                if (!err && row && row.count === 0) {
+                    const fs = require('fs');
+                    let collectionsData = [];
+
+                    if (fs.existsSync('collections.json')) {
+                        try {
+                            collectionsData = JSON.parse(fs.readFileSync('collections.json', 'utf8'));
+                            console.log('📦 Lendo coleções de collections.json');
+                        } catch (e) {
+                            console.error('Erro ao ler collections.json:', e);
+                        }
+                    }
+
+                    // Se não tiver dados (arquivo não existe ou vazio), usar defaults
+                    if (collectionsData.length === 0) {
+                        console.log('⚠️ collections.json não encontrado ou vazio. Usando coleções padrão.');
+                        collectionsData = [
+                            { name: 'Stranger Things', slug: 'stranger-things', description: 'Produtos oficiais da série', is_active: 1 },
+                            { name: 'Camisetas', slug: 'camisetas', description: 'Camisetas estampadas', is_active: 1 },
+                            { name: 'Acessórios', slug: 'acessorios', description: 'Acessórios diversos', is_active: 1 },
+                            { name: 'Lançamentos', slug: 'lancamentos', description: 'Novidades da loja', is_active: 1 }
+                        ];
+                    }
+
+                    const stmt = db.prepare('INSERT INTO collections (name, slug, description, is_active, sort_order) VALUES (?, ?, ?, ?, ?)');
+                    collectionsData.forEach((col, index) => {
+                        stmt.run([col.name, col.slug, col.description, col.is_active ? 1 : 0, index]);
+                    });
+                    stmt.finalize();
+                    console.log('✅ Coleções iniciais inseridas no banco de dados');
+                }
+            });
+        }
+    });
+
     // Criar usuário admin padrão (senha: admin123)
     const defaultPassword = bcrypt.hashSync('admin123', 10);
     db.run(`INSERT OR IGNORE INTO users (username, email, password, role) 
@@ -395,32 +449,53 @@ const authenticateToken = (req, res, next) => {
     });
 };
 
+// Rota para opções de frete
+app.get('/api/shipping-options', (req, res) => {
+    try {
+        const fs = require('fs');
+        const optionsPath = path.join(__dirname, 'shipping-options.json');
+        if (fs.existsSync(optionsPath)) {
+            const data = fs.readFileSync(optionsPath, 'utf8');
+            res.json(JSON.parse(data));
+        } else {
+            // Opções padrão caso arquivo não exista
+            res.json([
+                { id: 1, name: 'PAC', price: 25.0, delivery_time: '5-10 dias úteis', active: true },
+                { id: 2, name: 'SEDEX', price: 45.0, delivery_time: '2-4 dias úteis', active: true }
+            ]);
+        }
+    } catch (error) {
+        console.error('Erro ao buscar opções de frete:', error);
+        res.status(500).json({ error: 'Erro interno ao buscar frete' });
+    }
+});
+
 // ===== ROTAS PÚBLICAS =====
 
 // Health check
 app.get('/api/health', async (req, res) => {
     try {
         // Verificar todas as variáveis possíveis do Vercel
-        const postgresUrl = process.env.POSTGRES_URL || 
-                           process.env.POSTGRES_PRISMA_URL || 
-                           process.env.PRISMA_DATABASE_URL ||
-                           process.env.DATABASE_URL ||
-                           process.env.POSTGRES_URL_NON_POOLING ||
-                           process.env.POSTGRES_URL_NONPOOLING;
-        
-        const envVars = Object.keys(process.env).filter(k => 
+        const postgresUrl = process.env.POSTGRES_URL ||
+            process.env.POSTGRES_PRISMA_URL ||
+            process.env.PRISMA_DATABASE_URL ||
+            process.env.DATABASE_URL ||
+            process.env.POSTGRES_URL_NON_POOLING ||
+            process.env.POSTGRES_URL_NONPOOLING;
+
+        const envVars = Object.keys(process.env).filter(k =>
             k.includes('POSTGRES') || k.includes('DATABASE')
         );
-        
+
         if (postgresUrl) {
             try {
                 const { Client } = require('pg');
                 const client = new Client({
                     connectionString: postgresUrl
                 });
-                
+
                 await client.connect();
-                
+
                 // Verificar se tabela existe
                 const tableCheck = await client.query(`
                     SELECT EXISTS (
@@ -428,17 +503,17 @@ app.get('/api/health', async (req, res) => {
                         WHERE table_name = 'products'
                     );
                 `);
-                
+
                 let count = 0;
                 if (tableCheck.rows[0].exists) {
                     const countResult = await client.query('SELECT COUNT(*) as count FROM products');
                     count = parseInt(countResult.rows[0].count);
                 }
-                
+
                 await client.end();
-                
-                res.json({ 
-                    status: 'ok', 
+
+                res.json({
+                    status: 'ok',
                     database: 'PostgreSQL',
                     tableExists: tableCheck.rows[0].exists,
                     productCount: count,
@@ -455,8 +530,8 @@ app.get('/api/health', async (req, res) => {
                 });
             }
         } else {
-            res.json({ 
-                status: 'warning', 
+            res.json({
+                status: 'warning',
                 database: 'SQLite (PostgreSQL não configurado)',
                 hint: 'Configure POSTGRES_URL no Vercel',
                 envVarsFound: envVars,
@@ -464,7 +539,7 @@ app.get('/api/health', async (req, res) => {
             });
         }
     } catch (error) {
-        res.status(500).json({ 
+        res.status(500).json({
             status: 'error',
             message: error.message,
             timestamp: new Date().toISOString()
@@ -486,14 +561,14 @@ async function handlePopulate(req, res) {
         if (!process.env.POSTGRES_URL && !process.env.POSTGRES_PRISMA_URL && !process.env.DATABASE_URL) {
             return res.status(400).json({ error: 'PostgreSQL não configurado' });
         }
-        
+
         const { Client } = require('pg');
         const client = new Client({
             connectionString: process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL
         });
-        
+
         await client.connect();
-        
+
         // Criar tabela
         await client.query(`
             CREATE TABLE IF NOT EXISTS products (
@@ -512,11 +587,11 @@ async function handlePopulate(req, res) {
                 sku TEXT
             )
         `);
-        
+
         // Verificar se já tem produtos
         const countResult = await client.query('SELECT COUNT(*) as count FROM products');
         const count = parseInt(countResult.rows[0].count);
-        
+
         if (count === 0) {
             // Inserir produtos de exemplo
             const sampleProducts = [
@@ -548,14 +623,14 @@ async function handlePopulate(req, res) {
                     active: 1
                 }
             ];
-            
+
             for (const product of sampleProducts) {
                 await client.query(`
                     INSERT INTO products (name, description, price, category, image_url, stock, active)
                     VALUES ($1, $2, $3, $4, $5, $6, $7)
                 `, [product.name, product.description, product.price, product.category, product.image_url, product.stock, product.active]);
             }
-            
+
             await client.end();
             res.json({ success: true, message: `${sampleProducts.length} produtos inseridos` });
         } else {
@@ -572,44 +647,44 @@ async function handlePopulate(req, res) {
 app.get('/api/products', async (req, res) => {
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Access-Control-Allow-Origin', '*');
-    
+
     let client = null;
-    
+
     try {
         // Pegar a primeira variável PostgreSQL que encontrar (Vercel cria automaticamente)
-        const connectionString = process.env.POSTGRES_URL || 
-                                process.env.POSTGRES_PRISMA_URL || 
-                                process.env.DATABASE_URL ||
-                                process.env.POSTGRES_URL_NON_POOLING ||
-                                process.env.POSTGRES_URL_NONPOOLING;
-        
+        const connectionString = process.env.POSTGRES_URL ||
+            process.env.POSTGRES_PRISMA_URL ||
+            process.env.DATABASE_URL ||
+            process.env.POSTGRES_URL_NON_POOLING ||
+            process.env.POSTGRES_URL_NONPOOLING;
+
         if (!connectionString) {
             // Sem PostgreSQL - usar SQLite local
             console.log('📦 Usando SQLite (desenvolvimento local)');
-            
+
             return new Promise((resolve) => {
                 // Garantir que o banco está inicializado
                 if (!db) {
                     console.error('❌ Banco SQLite não inicializado');
                     return res.json([]);
                 }
-                
+
                 // Garantir que o banco está inicializado
                 initializeDatabase();
-                
+
                 // Buscar produtos do SQLite
                 db.all('SELECT * FROM products WHERE active = 1 ORDER BY created_at DESC', [], (err, rows) => {
                     if (err) {
                         console.error('❌ Erro ao buscar produtos:', err.message);
                         return res.json([]);
                     }
-                    
+
                     // Se não houver produtos, tentar importar
                     if (!rows || rows.length === 0) {
                         console.log('📥 Nenhum produto encontrado, tentando importar...');
                         createSampleProducts();
                         tryImportProductsFromJSON();
-                        
+
                         // Buscar novamente após importar (dar tempo para o banco processar)
                         setTimeout(() => {
                             db.all('SELECT * FROM products WHERE active = 1 ORDER BY created_at DESC', [], (err, rows) => {
@@ -630,16 +705,16 @@ app.get('/api/products', async (req, res) => {
                 });
             });
         }
-        
+
         // PostgreSQL - tudo automático
         const { Client } = require('pg');
-        client = new Client({ 
+        client = new Client({
             connectionString: connectionString,
             connectionTimeoutMillis: 5000
         });
-        
+
         await client.connect();
-        
+
         // Criar tabela automaticamente
         await client.query(`
             CREATE TABLE IF NOT EXISTS products (
@@ -658,11 +733,11 @@ app.get('/api/products', async (req, res) => {
                 sku TEXT
             )
         `);
-        
+
         // Verificar se tem produtos, se não tiver, criar alguns
         const countResult = await client.query('SELECT COUNT(*) as count FROM products');
         const count = parseInt(countResult.rows[0]?.count || 0);
-        
+
         if (count === 0) {
             // Criar produtos automaticamente
             await client.query(`
@@ -672,11 +747,13 @@ app.get('/api/products', async (req, res) => {
                 ('Stranger Things Mug', 'Caneca temática Stranger Things', 39.90, 'stranger-things', 'https://via.placeholder.com/300', 15, 1)
             `);
         }
-        
+
         // Buscar produtos
         const result = await client.query('SELECT * FROM products WHERE active = 1 ORDER BY created_at DESC');
+
+        // Enriquecer com coleções
         res.json(result.rows || []);
-        
+
     } catch (error) {
         console.error('ERRO /api/products:', error.message);
         console.error('Stack:', error.stack);
@@ -693,8 +770,245 @@ app.get('/api/products', async (req, res) => {
     }
 });
 
+
+
+// Função helper para buscar coleções com produtos
+function getCollectionsWithProducts(onlyActive = true) {
+    return new Promise((resolve, reject) => {
+        const query = `
+            SELECT c.*, 
+            (SELECT COUNT(*) FROM collection_products WHERE collection_id = c.id) as explicit_count
+            FROM collections c 
+            ${onlyActive ? 'WHERE c.is_active = 1' : ''}
+            ORDER BY c.sort_order ASC
+        `;
+
+        db.all(query, [], async (err, collections) => {
+            if (err) return reject(err);
+
+            // Para cada coleção, buscar os produtos ordenados
+            for (const col of collections) {
+                col.products = await new Promise((res) => {
+                    db.all(`
+                        SELECT p.*, cp.sort_order 
+                        FROM products p
+                        JOIN collection_products cp ON p.id = cp.product_id
+                        WHERE cp.collection_id = ? AND p.active = 1
+                        ORDER BY cp.sort_order ASC
+                    `, [col.id], (err, products) => {
+                        if (err) res([]);
+                        else {
+                            // Parse JSON fields if necessary
+                            products.forEach(p => {
+                                if (p.images_json) try { p.images = JSON.parse(p.images_json) } catch (e) { }
+                            });
+                            res(products);
+                        }
+                    });
+                });
+
+                // Compatibility: count is explicit count + fallback logic count (not implemented on backend to save time, relying on front for fuzzy)
+                col.product_count = col.products.length;
+            }
+            resolve(collections);
+        });
+    });
+}
+
+// Buscar coleções (público) - DB Backed
+app.get('/api/collections', async (req, res) => {
+    try {
+        const collections = await getCollectionsWithProducts(true);
+        res.json(collections);
+    } catch (err) {
+        console.error('Erro ao buscar coleções:', err);
+        res.status(500).json({ error: 'Erro ao carregar coleções' });
+    }
+});
+
+// Admin: Listar todas (incluindo inativas)
+app.get('/api/admin/collections', authenticateToken, async (req, res) => {
+    try {
+        const collections = await getCollectionsWithProducts(false);
+        res.json(collections);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Admin: Criar Coleção
+app.post('/api/admin/collections', authenticateToken, (req, res) => {
+    const { name, slug, description, is_active } = req.body;
+    db.run('INSERT INTO collections (name, slug, description, is_active, sort_order) VALUES (?, ?, ?, ?, (SELECT COALESCE(MAX(sort_order), -1) + 1 FROM collections))',
+        [name, slug, description, is_active ? 1 : 0],
+        function (err) {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ success: true, id: this.lastID, message: 'Coleção criada com sucesso' });
+        }
+    );
+});
+
+// Admin: Reordenar Coleções
+app.put('/api/admin/collections/reorder', authenticateToken, async (req, res) => {
+    const { order } = req.body; // Array of { id, sort_order }
+    if (!order || !Array.isArray(order)) return res.status(400).json({ error: 'Formato inválido' });
+
+    try {
+        // Sequencial é mais seguro para evitar locking no SQLite
+        for (const item of order) {
+            await new Promise((resolve, reject) => {
+                db.run('UPDATE collections SET sort_order = ? WHERE id = ?', [item.sort_order, item.id], (err) => {
+                    if (err) reject(err);
+                    else resolve();
+                });
+            });
+        }
+        res.json({ success: true, message: 'Ordem atualizada' });
+    } catch (err) {
+        console.error('Erro ao reordenar:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Admin: Atualizar Coleção
+app.put('/api/admin/collections/:id', authenticateToken, (req, res) => {
+    const { id } = req.params;
+    const { name, slug, description, is_active } = req.body;
+
+    // Se passar apenas is_active (toggle)
+    if (name === undefined && is_active !== undefined) {
+        db.run('UPDATE collections SET is_active = ? WHERE id = ?', [is_active ? 1 : 0, id], function (err) {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ success: true, message: 'Status atualizado' });
+        });
+        return;
+    }
+
+    db.run('UPDATE collections SET name = ?, slug = ?, description = ?, is_active = ? WHERE id = ?',
+        [name, slug, description, is_active ? 1 : 0, id],
+        function (err) {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ success: true, message: 'Coleção atualizada' });
+        }
+    );
+});
+
+// Admin: Reordenar Coleções
+// Admin: Reordenar Coleções (Mover para cima de :id)
+// MOVIDO PARA CIMA
+
+
+// Admin: Deletar Coleção
+app.delete('/api/admin/collections/:id', authenticateToken, (req, res) => {
+    const { id } = req.params;
+    db.run('DELETE FROM collections WHERE id = ?', [id], function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ success: true, message: 'Coleção removida' });
+    });
+});
+
+// Tabela de produtos em coleções (MxN)
+db.run(`CREATE TABLE IF NOT EXISTS collection_products (
+        collection_id INTEGER,
+        product_id INTEGER,
+        sort_order INTEGER DEFAULT 0,
+        PRIMARY KEY (collection_id, product_id),
+        FOREIGN KEY (collection_id) REFERENCES collections(id) ON DELETE CASCADE,
+        FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+    )`);
+
+// ... (existing code) ...
+
+// Admin: Adicionar produto à coleção
+app.post('/api/admin/collections/:id/products', authenticateToken, (req, res) => {
+    const { id } = req.params;
+    const { product_id } = req.body;
+
+    db.run('INSERT INTO collection_products (collection_id, product_id, sort_order) VALUES (?, ?, (SELECT COALESCE(MAX(sort_order), -1) + 1 FROM collection_products WHERE collection_id = ?))',
+        [id, product_id, id],
+        function (err) {
+            if (err) {
+                if (err.message.includes('UNIQUE constraint')) {
+                    return res.status(400).json({ error: 'Produto já está na coleção' });
+                }
+                return res.status(500).json({ error: err.message });
+            }
+            res.json({ success: true, message: 'Produto adicionado à coleção' });
+        }
+    );
+});
+
+// Admin: Remover produto da coleção
+app.delete('/api/admin/collections/:id/products/:productId', authenticateToken, (req, res) => {
+    const { id, productId } = req.params;
+    db.run('DELETE FROM collection_products WHERE collection_id = ? AND product_id = ?', [id, productId], function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ success: true, message: 'Produto removido da coleção' });
+    });
+});
+
+// Admin: Obter produtos da coleção (IDs)
+app.get('/api/admin/collections/:id/products', authenticateToken, (req, res) => {
+    const { id } = req.params;
+    db.all('SELECT product_id FROM collection_products WHERE collection_id = ?', [id], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(rows.map(r => r.product_id));
+    });
+});
+
+// Admin: Atualizar produtos da coleção (Bulk)
+app.put('/api/admin/collections/:id/products', authenticateToken, (req, res) => {
+    const { id } = req.params;
+    const { product_ids } = req.body; // Array of IDs
+
+    if (!Array.isArray(product_ids)) {
+        return res.status(400).json({ error: 'product_ids deve ser um array' });
+    }
+
+    const deleteStmt = db.prepare('DELETE FROM collection_products WHERE collection_id = ?');
+    const insertStmt = db.prepare('INSERT INTO collection_products (collection_id, product_id, sort_order) VALUES (?, ?, ?)');
+
+    const transaction = db.transaction((collectionId, productIds) => {
+        deleteStmt.run(collectionId);
+        let order = 0;
+        for (const prodId of productIds) {
+            insertStmt.run(collectionId, prodId, order++);
+        }
+    });
+
+    try {
+        transaction(id, product_ids);
+        res.json({ success: true, message: 'Produtos da coleção atualizados' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Admin: Reordenar produtos na coleção
+app.put('/api/admin/collections/:id/reorder-products', authenticateToken, (req, res) => {
+    const { id } = req.params;
+    const { order } = req.body; // Array of { product_id, sort_order }
+
+    if (!order || !Array.isArray(order)) return res.status(400).json({ error: 'Formato inválido' });
+
+    const stmt = db.prepare('UPDATE collection_products SET sort_order = ? WHERE collection_id = ? AND product_id = ?');
+    const transaction = db.transaction((items) => {
+        for (const item of items) {
+            stmt.run(item.sort_order, id, item.product_id);
+        }
+    });
+
+    try {
+        transaction(order);
+        res.json({ success: true, message: 'Ordem dos produtos atualizada' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // Buscar produto por ID (público)
 app.get('/api/products/:id', (req, res) => {
+    // ...
     const { id } = req.params;
     db.get('SELECT * FROM products WHERE id = ? AND active = 1', [id], (err, row) => {
         if (err) {
@@ -705,7 +1019,7 @@ app.get('/api/products/:id', (req, res) => {
             res.status(404).json({ error: 'Produto não encontrado' });
             return;
         }
-        
+
         // Parse images_json if exists
         if (row.images_json) {
             try {
@@ -716,7 +1030,7 @@ app.get('/api/products/:id', (req, res) => {
         } else {
             row.images = row.image_url ? [row.image_url] : [];
         }
-        
+
         res.json(row);
     });
 });
@@ -732,7 +1046,7 @@ app.post('/api/orders', (req, res) => {
     db.run(
         'INSERT INTO orders (customer_name, customer_email, customer_phone, shipping_address, payment_method, total) VALUES (?, ?, ?, ?, ?, ?)',
         [customer_name, customer_email, customer_phone, shipping_address || null, payment_method || null, total],
-        function(err) {
+        function (err) {
             if (err) {
                 res.status(500).json({ error: err.message });
                 return;
@@ -750,10 +1064,10 @@ app.post('/api/orders', (req, res) => {
                     res.status(500).json({ error: err.message });
                     return;
                 }
-                res.json({ 
-                    success: true, 
+                res.json({
+                    success: true,
                     message: 'Pedido criado com sucesso',
-                    order_id: orderId 
+                    order_id: orderId
                 });
             });
         }
@@ -770,7 +1084,7 @@ function getSessionId(req) {
 // Buscar carrinho
 app.get('/api/cart', (req, res) => {
     const sessionId = getSessionId(req);
-    
+
     db.all(`
         SELECT ci.*, p.name, p.image_url, p.sku 
         FROM cart_items ci
@@ -782,7 +1096,7 @@ app.get('/api/cart', (req, res) => {
             res.status(500).json({ error: err.message });
             return;
         }
-        
+
         const total = rows.reduce((sum, item) => sum + (item.price * item.quantity), 0);
         res.json({ items: rows, total: total });
     });
@@ -792,11 +1106,11 @@ app.get('/api/cart', (req, res) => {
 app.post('/api/cart/add', (req, res) => {
     const sessionId = getSessionId(req);
     const { product_id, quantity = 1, selected_variant, price } = req.body;
-    
+
     if (!product_id || !price) {
         return res.status(400).json({ error: 'Dados inválidos' });
     }
-    
+
     // Verificar se o produto já está no carrinho
     db.get(`
         SELECT * FROM cart_items 
@@ -806,7 +1120,7 @@ app.post('/api/cart/add', (req, res) => {
             res.status(500).json({ error: err.message });
             return;
         }
-        
+
         if (existing) {
             // Atualizar quantidade
             const newQuantity = existing.quantity + quantity;
@@ -814,7 +1128,7 @@ app.post('/api/cart/add', (req, res) => {
                 UPDATE cart_items 
                 SET quantity = ?, price = ?
                 WHERE id = ?
-            `, [newQuantity, price, existing.id], function(err) {
+            `, [newQuantity, price, existing.id], function (err) {
                 if (err) {
                     res.status(500).json({ error: err.message });
                     return;
@@ -826,7 +1140,7 @@ app.post('/api/cart/add', (req, res) => {
             db.run(`
                 INSERT INTO cart_items (session_id, product_id, quantity, selected_variant, price)
                 VALUES (?, ?, ?, ?, ?)
-            `, [sessionId, product_id, quantity, selected_variant || null, price], function(err) {
+            `, [sessionId, product_id, quantity, selected_variant || null, price], function (err) {
                 if (err) {
                     res.status(500).json({ error: err.message });
                     return;
@@ -842,16 +1156,16 @@ app.put('/api/cart/update/:id', (req, res) => {
     const { id } = req.params;
     const { quantity } = req.body;
     const sessionId = getSessionId(req);
-    
+
     if (!quantity || quantity < 1) {
         return res.status(400).json({ error: 'Quantidade inválida' });
     }
-    
+
     db.run(`
         UPDATE cart_items 
         SET quantity = ?
         WHERE id = ? AND session_id = ?
-    `, [quantity, id, sessionId], function(err) {
+    `, [quantity, id, sessionId], function (err) {
         if (err) {
             res.status(500).json({ error: err.message });
             return;
@@ -868,8 +1182,8 @@ app.put('/api/cart/update/:id', (req, res) => {
 app.delete('/api/cart/remove/:id', (req, res) => {
     const { id } = req.params;
     const sessionId = getSessionId(req);
-    
-    db.run('DELETE FROM cart_items WHERE id = ? AND session_id = ?', [id, sessionId], function(err) {
+
+    db.run('DELETE FROM cart_items WHERE id = ? AND session_id = ?', [id, sessionId], function (err) {
         if (err) {
             res.status(500).json({ error: err.message });
             return;
@@ -885,8 +1199,8 @@ app.delete('/api/cart/remove/:id', (req, res) => {
 // Limpar carrinho
 app.delete('/api/cart/clear', (req, res) => {
     const sessionId = getSessionId(req);
-    
-    db.run('DELETE FROM cart_items WHERE session_id = ?', [sessionId], function(err) {
+
+    db.run('DELETE FROM cart_items WHERE session_id = ?', [sessionId], function (err) {
         if (err) {
             res.status(500).json({ error: err.message });
             return;
@@ -936,22 +1250,70 @@ app.post('/api/auth/login', (req, res) => {
     });
 });
 
-// ===== ROTAS ADMIN (PROTEGIDAS) =====
+// Admin login (alias para /api/auth/login)
+app.post('/api/admin/login', (req, res) => {
+    const { username, password } = req.body;
 
-// Dashboard stats
-app.get('/api/admin/stats', authenticateToken, (req, res) => {
-    db.all(`
-        SELECT 
-            (SELECT COUNT(*) FROM products) as total_products,
-            (SELECT COUNT(*) FROM orders) as total_orders,
-            (SELECT SUM(total) FROM orders WHERE status = 'completed') as total_revenue
-    `, (err, rows) => {
+    console.log('🔐 Admin login attempt:', { username, password: password ? '***' : 'EMPTY' });
+
+    db.get('SELECT * FROM users WHERE username = ? OR email = ?', [username, username], (err, user) => {
         if (err) {
+            console.error('❌ DB error:', err);
             res.status(500).json({ error: err.message });
             return;
         }
-        res.json(rows[0] || { total_products: 0, total_orders: 0, total_revenue: 0 });
+
+        console.log('👤 User found:', user ? user.username : 'NOT FOUND');
+
+        if (!user) {
+            res.status(401).json({ error: 'Credenciais inválidas' });
+            return;
+        }
+
+        const validPassword = bcrypt.compareSync(password, user.password);
+        if (!validPassword) {
+            res.status(401).json({ error: 'Credenciais inválidas' });
+            return;
+        }
+
+        const token = jwt.sign(
+            { id: user.id, username: user.username, role: user.role },
+            JWT_SECRET,
+            { expiresIn: '24h' }
+        );
+
+        res.json({
+            token,
+            user: {
+                id: user.id,
+                username: user.username,
+                email: user.email,
+                role: user.role
+            }
+        });
     });
+});
+
+// ===== ROTAS ADMIN (PROTEGIDAS) =====
+
+// Dashboard stats - Version 3 (Paralelo)
+app.get('/api/admin/stats', authenticateToken, async (req, res) => {
+    try {
+        const [productCount, orderCount, revenue] = await Promise.all([
+            new Promise((resolve, reject) => db.get('SELECT COUNT(*) as count FROM products', [], (err, row) => err ? reject(err) : resolve(row.count))),
+            new Promise((resolve, reject) => db.get('SELECT COUNT(*) as count FROM orders', [], (err, row) => err ? reject(err) : resolve(row.count))),
+            new Promise((resolve, reject) => db.get("SELECT SUM(total) as total FROM orders WHERE status = 'completed'", [], (err, row) => err ? reject(err) : resolve(row.total || 0)))
+        ]);
+
+        res.json({
+            total_products: productCount,
+            total_orders: orderCount,
+            total_revenue: revenue
+        });
+    } catch (err) {
+        console.error('Erro em stats:', err);
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // Listar todos os produtos (admin)
@@ -967,21 +1329,21 @@ app.get('/api/admin/products', authenticateToken, (req, res) => {
 
 // Criar produto (admin)
 app.post('/api/admin/products', authenticateToken, (req, res) => {
-    const { name, description, price, category, stock } = req.body;
+    const { name, description, price, category, stock, has_variants, images_json } = req.body;
     const image_url = req.file ? `/uploads/products/${req.file.filename}` : null;
 
     db.run(
-        'INSERT INTO products (name, description, price, category, image_url, stock) VALUES (?, ?, ?, ?, ?, ?)',
-        [name, description, parseFloat(price), category, image_url, parseInt(stock) || 0],
-        function(err) {
+        'INSERT INTO products (name, description, price, category, image_url, stock, has_variants, images_json) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        [name, description, parseFloat(price), category, image_url, parseInt(stock) || 0, has_variants ? 1 : 0, images_json || '[]'],
+        function (err) {
             if (err) {
                 res.status(500).json({ error: err.message });
                 return;
             }
-            res.json({ 
-                success: true, 
+            res.json({
+                success: true,
                 message: 'Produto criado com sucesso',
-                id: this.lastID 
+                id: this.lastID
             });
         }
     );
@@ -990,10 +1352,10 @@ app.post('/api/admin/products', authenticateToken, (req, res) => {
 // Atualizar produto (admin)
 app.put('/api/admin/products/:id', authenticateToken, (req, res) => {
     const { id } = req.params;
-    const { name, description, price, category, stock, active } = req.body;
+    const { name, description, price, category, stock, active, has_variants, images_json } = req.body;
 
-    let query = 'UPDATE products SET name = ?, description = ?, price = ?, category = ?, stock = ?, active = ?, updated_at = CURRENT_TIMESTAMP';
-    const params = [name, description, parseFloat(price), category, parseInt(stock) || 0, active ? 1 : 0];
+    let query = 'UPDATE products SET name = ?, description = ?, price = ?, category = ?, stock = ?, active = ?, has_variants = ?, images_json = ?, updated_at = CURRENT_TIMESTAMP';
+    const params = [name, description, parseFloat(price), category, parseInt(stock) || 0, active ? 1 : 0, has_variants ? 1 : 0, images_json || '[]'];
 
     if (req.file) {
         query += ', image_url = ?';
@@ -1003,7 +1365,7 @@ app.put('/api/admin/products/:id', authenticateToken, (req, res) => {
     query += ' WHERE id = ?';
     params.push(id);
 
-    db.run(query, params, function(err) {
+    db.run(query, params, function (err) {
         if (err) {
             res.status(500).json({ error: err.message });
             return;
@@ -1019,7 +1381,7 @@ app.put('/api/admin/products/:id', authenticateToken, (req, res) => {
 // Deletar produto (admin)
 app.delete('/api/admin/products/:id', authenticateToken, (req, res) => {
     const { id } = req.params;
-    db.run('DELETE FROM products WHERE id = ?', [id], function(err) {
+    db.run('DELETE FROM products WHERE id = ?', [id], function (err) {
         if (err) {
             res.status(500).json({ error: err.message });
             return;
@@ -1048,7 +1410,7 @@ app.put('/api/admin/orders/:id', authenticateToken, (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    db.run('UPDATE orders SET status = ? WHERE id = ?', [status, id], function(err) {
+    db.run('UPDATE orders SET status = ? WHERE id = ?', [status, id], function (err) {
         if (err) {
             res.status(500).json({ error: err.message });
             return;
@@ -1060,7 +1422,7 @@ app.put('/api/admin/orders/:id', authenticateToken, (req, res) => {
 // Buscar pedido completo com itens (admin)
 app.get('/api/admin/orders/:id', authenticateToken, (req, res) => {
     const { id } = req.params;
-    
+
     db.get('SELECT * FROM orders WHERE id = ?', [id], (err, order) => {
         if (err) {
             res.status(500).json({ error: err.message });
@@ -1070,7 +1432,7 @@ app.get('/api/admin/orders/:id', authenticateToken, (req, res) => {
             res.status(404).json({ error: 'Pedido não encontrado' });
             return;
         }
-        
+
         db.all(`
             SELECT oi.*, p.name, p.image_url 
             FROM order_items oi
@@ -1118,11 +1480,11 @@ app.get('/api/admin/customers/:id', authenticateToken, (req, res) => {
 // Criar cliente (admin)
 app.post('/api/admin/customers', authenticateToken, (req, res) => {
     const { name, email, phone, cpf, address, city, state, zip_code } = req.body;
-    
+
     db.run(`
         INSERT INTO customers (name, email, phone, cpf, address, city, state, zip_code)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `, [name, email, phone, cpf, address, city, state, zip_code], function(err) {
+    `, [name, email, phone, cpf, address, city, state, zip_code], function (err) {
         if (err) {
             res.status(500).json({ error: err.message });
             return;
@@ -1135,12 +1497,12 @@ app.post('/api/admin/customers', authenticateToken, (req, res) => {
 app.put('/api/admin/customers/:id', authenticateToken, (req, res) => {
     const { id } = req.params;
     const { name, email, phone, cpf, address, city, state, zip_code } = req.body;
-    
+
     db.run(`
         UPDATE customers 
         SET name = ?, email = ?, phone = ?, cpf = ?, address = ?, city = ?, state = ?, zip_code = ?, updated_at = CURRENT_TIMESTAMP
         WHERE id = ?
-    `, [name, email, phone, cpf, address, city, state, zip_code, id], function(err) {
+    `, [name, email, phone, cpf, address, city, state, zip_code, id], function (err) {
         if (err) {
             res.status(500).json({ error: err.message });
             return;
@@ -1156,7 +1518,7 @@ app.put('/api/admin/customers/:id', authenticateToken, (req, res) => {
 // Deletar cliente (admin)
 app.delete('/api/admin/customers/:id', authenticateToken, (req, res) => {
     const { id } = req.params;
-    db.run('DELETE FROM customers WHERE id = ?', [id], function(err) {
+    db.run('DELETE FROM customers WHERE id = ?', [id], function (err) {
         if (err) {
             res.status(500).json({ error: err.message });
             return;
@@ -1176,6 +1538,8 @@ if (require.main === module) {
         console.log(`📦 Admin: http://localhost:${PORT}/admin.html`);
     });
 }
+
+
 
 // Error handler global (deve ser o último middleware)
 app.use((err, req, res, next) => {

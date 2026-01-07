@@ -1,0 +1,12 @@
+CORREÇÕES NECESSÁRIAS NO checkout.js:
+
+1. Remover toda a lógica de "Gerar código PIX" (linhas 383-411)
+2. Remover toda a seção pix-qrcode-state (linhas 215-274) 
+3. Simplificar seção PIX para mostrar apenas benefícios e nota informativa
+4. Manter apenas um botão: "FINALIZAR COMPRA"
+5. Ao finalizar com PIX selecionado, gerar o pedido E mostrar QR code
+6. Ao finalizar com cartão, processar normalmente
+
+ALTERAÇÕESSUG no botão finalizar:
+- Se PIX selecionado: criar pedido + gerar código PIX + redirecionar para página de confirmação
+- Se Cartão selecionado: criar pedido + processar pagamento + redirecionar para confirmação

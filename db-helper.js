@@ -1,5 +1,19 @@
 // Database helper - abstracts SQLite and PostgreSQL differences
-const sqlite3 = require('sqlite3').verbose();
+// VERSÃO CORRIGIDA - usando better-sqlite3 para evitar problemas de compilação
+
+let Database;
+try {
+    Database = require('better-sqlite3');
+} catch (e) {
+    console.error('⚠️  better-sqlite3 não disponível, tentando sqlite3...');
+    try {
+        Database = require('sqlite3').verbose().Database;
+    } catch (e2) {
+        console.error('❌ Nenhum driver SQLite disponível');
+        Database = null;
+    }
+}
+
 let pgClient = null;
 let USE_POSTGRES = false;
 
@@ -21,15 +35,19 @@ let sqliteDb = null;
 // Só inicializar SQLite se não estiver no Vercel (que tem sistema de arquivos read-only)
 if (!USE_POSTGRES && !process.env.VERCEL) {
     try {
-        // Use SQLite (local development)
-        console.log('📦 Usando SQLite (desenvolvimento local)');
-        sqliteDb = new sqlite3.Database('database.sqlite', (err) => {
-            if (err) {
-                console.error('Erro ao conectar ao SQLite:', err.message);
-            } else {
-                console.log('✅ Conectado ao SQLite');
-            }
-        });
+        if (Database === require('better-sqlite3')) {
+            // better-sqlite3 initialization
+            console.log('📦 Usando better-sqlite3 (desenvolvimento local)');
+            sqliteDb = new Database('database.sqlite');
+            console.log('✅ Conectado ao SQLite via better-sqlite3');
+        } else if (Database) {
+            // sqlite3 initialization (fallback)
+            console.log('📦 Usando SQLite clsssico (fallback)');
+            sqliteDb = new Database('database.sqlite', (err) => {
+                if (err) console.error('Erro ao conectar ao SQLite:', err.message);
+                else console.log('✅ Conectado ao SQLite');
+            });
+        }
     } catch (error) {
         console.error('Erro ao inicializar SQLite:', error.message);
         sqliteDb = null;
@@ -39,34 +57,34 @@ if (!USE_POSTGRES && !process.env.VERCEL) {
 // Helper functions
 const db = {
     // Run query (INSERT, UPDATE, DELETE)
-    run: function(query, params = [], callback) {
+    run: function (query, params = [], callback) {
         if (USE_POSTGRES) {
             return runPostgres(query, params, callback);
         } else {
             return runSQLite(query, params, callback);
         }
     },
-    
+
     // Get single row
-    get: function(query, params = [], callback) {
+    get: function (query, params = [], callback) {
         if (USE_POSTGRES) {
             return getPostgres(query, params, callback);
         } else {
             return getSQLite(query, params, callback);
         }
     },
-    
+
     // Get all rows
-    all: function(query, params = [], callback) {
+    all: function (query, params = [], callback) {
         if (USE_POSTGRES) {
             return allPostgres(query, params, callback);
         } else {
             return allSQLite(query, params, callback);
         }
     },
-    
+
     // Prepare statement
-    prepare: function(query) {
+    prepare: function (query) {
         if (USE_POSTGRES) {
             return preparePostgres(query);
         } else {
@@ -75,39 +93,85 @@ const db = {
     }
 };
 
-// SQLite functions
+// SQLite functions helpers
+function isBetterSqlite() {
+    return sqliteDb && sqliteDb.prepare && !sqliteDb.configure;
+}
+
 function runSQLite(query, params, callback) {
     if (!sqliteDb) {
-        if (callback) {
-            callback(new Error('SQLite não disponível no Vercel'), null);
-        }
+        if (callback) callback(new Error('SQLite não incializado'), null);
         return;
     }
-    sqliteDb.run(query, params, function(err) {
-        if (callback) {
-            callback(err, { lastID: this.lastID, changes: this.changes });
+
+    try {
+        if (isBetterSqlite()) {
+            // better-sqlite3 (sync)
+            const stmt = sqliteDb.prepare(query);
+            const info = stmt.run(...(params || []));
+            if (callback) {
+                // simulate async callback
+                setTimeout(() => {
+                    callback(null, { lastID: info.lastInsertRowid, changes: info.changes });
+                }, 0);
+            }
+        } else {
+            // sqlite3 (async)
+            sqliteDb.run(query, params, function (err) {
+                if (callback) {
+                    callback(err, { lastID: this ? this.lastID : 0, changes: this ? this.changes : 0 });
+                }
+            });
         }
-    });
+    } catch (err) {
+        if (callback) callback(err, null);
+    }
 }
 
 function getSQLite(query, params, callback) {
     if (!sqliteDb) {
-        if (callback) {
-            callback(new Error('SQLite não disponível no Vercel'), null);
-        }
+        if (callback) callback(new Error('SQLite não incializado'), null);
         return;
     }
-    sqliteDb.get(query, params, callback);
+
+    try {
+        if (isBetterSqlite()) {
+            // better-sqlite3 (sync)
+            const stmt = sqliteDb.prepare(query);
+            const row = stmt.get(...(params || []));
+            if (callback) {
+                setTimeout(() => callback(null, row), 0);
+            }
+        } else {
+            // sqlite3 (async)
+            sqliteDb.get(query, params, callback);
+        }
+    } catch (err) {
+        if (callback) callback(err, null);
+    }
 }
 
 function allSQLite(query, params, callback) {
     if (!sqliteDb) {
-        if (callback) {
-            callback(new Error('SQLite não disponível no Vercel'), []);
-        }
+        if (callback) callback(new Error('SQLite não incializado'), []);
         return;
     }
-    sqliteDb.all(query, params, callback);
+
+    try {
+        if (isBetterSqlite()) {
+            // better-sqlite3 (sync)
+            const stmt = sqliteDb.prepare(query);
+            const rows = stmt.all(...(params || []));
+            if (callback) {
+                setTimeout(() => callback(null, rows), 0);
+            }
+        } else {
+            // sqlite3 (async)
+            sqliteDb.all(query, params, callback);
+        }
+    } catch (err) {
+        if (callback) callback(err, null);
+    }
 }
 
 // PostgreSQL functions
@@ -120,44 +184,44 @@ function runPostgres(query, params, callback) {
                 const idx = paramIndex++;
                 return `$${idx}`;
             });
-            
+
             // Fix syntax differences
             convertedQuery = convertedQuery
                 .replace(/INTEGER PRIMARY KEY AUTOINCREMENT/g, 'SERIAL PRIMARY KEY')
                 .replace(/DATETIME DEFAULT CURRENT_TIMESTAMP/g, 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP');
-            
+
             // Handle INSERT OR IGNORE
             if (query.includes('INSERT OR IGNORE')) {
                 const match = query.match(/INSERT OR IGNORE INTO (\w+)/);
                 if (match) {
-                    convertedQuery = convertedQuery.replace(/INSERT OR IGNORE/, 'INSERT') + 
+                    convertedQuery = convertedQuery.replace(/INSERT OR IGNORE/, 'INSERT') +
                         ` ON CONFLICT DO NOTHING`;
                 }
             }
-            
+
             // Use pg directly for raw queries
             const { Client } = require('pg');
             const client = new Client({
                 connectionString: process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL
             });
-            
+
             await client.connect();
             const result = await client.query(convertedQuery, params);
-            
+
             // Get last inserted ID if it's an INSERT
             let lastID = null;
             if (convertedQuery.trim().toUpperCase().startsWith('INSERT')) {
                 const idResult = await client.query('SELECT LASTVAL() as id');
                 lastID = idResult.rows[0]?.id || null;
             }
-            
+
             await client.end();
-            
+
             const mockResult = {
                 lastID: lastID,
                 changes: result.rowCount || 0
             };
-            
+
             if (callback) {
                 callback(null, mockResult);
             }
@@ -177,19 +241,19 @@ function getPostgres(query, params, callback) {
                 const idx = paramIndex++;
                 return `$${idx}`;
             }).replace(/INTEGER PRIMARY KEY AUTOINCREMENT/g, 'SERIAL PRIMARY KEY')
-              .replace(/DATETIME DEFAULT CURRENT_TIMESTAMP/g, 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP');
-            
+                .replace(/DATETIME DEFAULT CURRENT_TIMESTAMP/g, 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP');
+
             const { Client } = require('pg');
             const client = new Client({
                 connectionString: process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL
             });
-            
+
             await client.connect();
             const result = await client.query(convertedQuery, params);
             await client.end();
-            
+
             const row = result.rows && result.rows[0] ? result.rows[0] : null;
-            
+
             if (callback) {
                 callback(null, row);
             }
@@ -209,38 +273,38 @@ function allPostgres(query, params, callback) {
             console.log('🔍 allPostgres chamado');
             console.log('📝 Query original:', query.substring(0, 150));
             console.log('📋 Parâmetros:', params);
-            
+
             let paramIndex = 1;
             const convertedQuery = query.replace(/\?/g, () => {
                 const idx = paramIndex++;
                 return `$${idx}`;
             }).replace(/INTEGER PRIMARY KEY AUTOINCREMENT/g, 'SERIAL PRIMARY KEY')
-              .replace(/DATETIME DEFAULT CURRENT_TIMESTAMP/g, 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP');
-            
+                .replace(/DATETIME DEFAULT CURRENT_TIMESTAMP/g, 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP');
+
             console.log('📝 Query convertida:', convertedQuery.substring(0, 150));
-            
+
             const { Client } = require('pg');
             const connectionString = process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL;
-            
+
             if (!connectionString) {
                 throw new Error('POSTGRES_URL não configurada. Verifique as variáveis de ambiente.');
             }
-            
+
             console.log('🔌 Conectando ao PostgreSQL...');
             client = new Client({
                 connectionString: connectionString,
                 connectionTimeoutMillis: 10000
             });
-            
+
             await client.connect();
             console.log('✅ Conectado ao PostgreSQL');
-            
+
             console.log('📤 Executando query...');
             const result = await client.query(convertedQuery, params);
             console.log(`✅ Query executada com sucesso, ${result.rows.length} linhas retornadas`);
-            
+
             const rows = result.rows || [];
-            
+
             if (callback) {
                 callback(null, rows);
             }
@@ -249,7 +313,7 @@ function allPostgres(query, params, callback) {
             console.error('❌ Tipo:', error.constructor.name);
             console.error('❌ Mensagem:', error.message);
             console.error('❌ Stack:', error.stack);
-            
+
             if (callback) {
                 callback(error, null);
             }
@@ -268,38 +332,38 @@ function allPostgres(query, params, callback) {
 
 function preparePostgres(query) {
     return {
-        run: async function(params = [], callback) {
+        run: async function (params = [], callback) {
             try {
                 let paramIndex = 1;
                 const convertedQuery = query.replace(/\?/g, () => {
                     const idx = paramIndex++;
                     return `$${idx}`;
                 }).replace(/INTEGER PRIMARY KEY AUTOINCREMENT/g, 'SERIAL PRIMARY KEY')
-                  .replace(/DATETIME DEFAULT CURRENT_TIMESTAMP/g, 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP');
-                
+                    .replace(/DATETIME DEFAULT CURRENT_TIMESTAMP/g, 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP');
+
                 const { Client } = require('pg');
                 const client = new Client({
                     connectionString: process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL
                 });
-                
+
                 await client.connect();
                 await client.query(convertedQuery, params);
                 await client.end();
-                
+
                 if (callback) callback(null);
             } catch (error) {
                 if (callback) callback(error);
                 else throw error;
             }
         },
-        finalize: function(callback) {
+        finalize: function (callback) {
             if (callback) callback();
         }
     };
 }
 
 // Initialize database
-db.initialize = async function() {
+db.initialize = async function () {
     if (USE_POSTGRES && pgClient) {
         await initializePostgres();
     } else {
@@ -313,10 +377,10 @@ async function initializePostgres() {
         const client = new Client({
             connectionString: process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL
         });
-        
+
         await client.connect();
         console.log('✅ Conectado ao PostgreSQL');
-        
+
         // Create tables
         await client.query(`
             CREATE TABLE IF NOT EXISTS products (
@@ -335,7 +399,7 @@ async function initializePostgres() {
                 sku TEXT
             )
         `);
-        
+
         await client.query(`
             CREATE TABLE IF NOT EXISTS users (
                 id SERIAL PRIMARY KEY,
@@ -346,7 +410,7 @@ async function initializePostgres() {
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `);
-        
+
         await client.query(`
             CREATE TABLE IF NOT EXISTS orders (
                 id SERIAL PRIMARY KEY,
@@ -361,7 +425,7 @@ async function initializePostgres() {
                 payment_method TEXT
             )
         `);
-        
+
         await client.query(`
             CREATE TABLE IF NOT EXISTS order_items (
                 id SERIAL PRIMARY KEY,
@@ -371,7 +435,7 @@ async function initializePostgres() {
                 price REAL NOT NULL
             )
         `);
-        
+
         await client.query(`
             CREATE TABLE IF NOT EXISTS customers (
                 id SERIAL PRIMARY KEY,
@@ -387,7 +451,7 @@ async function initializePostgres() {
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `);
-        
+
         await client.query(`
             CREATE TABLE IF NOT EXISTS cart_items (
                 id SERIAL PRIMARY KEY,
@@ -399,7 +463,7 @@ async function initializePostgres() {
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `);
-        
+
         // Create admin user if doesn't exist
         const bcrypt = require('bcryptjs');
         const defaultPassword = bcrypt.hashSync('admin123', 10);
@@ -408,7 +472,7 @@ async function initializePostgres() {
             SELECT 'admin', 'admin@strangerthings.com', $1, 'admin'
             WHERE NOT EXISTS (SELECT 1 FROM users WHERE username = 'admin')
         `, [defaultPassword]);
-        
+
         await client.end();
         console.log('✅ Tabelas PostgreSQL criadas com sucesso');
     } catch (error) {
@@ -423,4 +487,3 @@ function initializeSQLite() {
 }
 
 module.exports = db;
-

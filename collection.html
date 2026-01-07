@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title id="pageTitle">Coleção - Stranger Things Store</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Teko:wght@300;400;500;600;700&family=Merriweather:wght@300;400&display=swap"
+        rel="stylesheet">
+
+    <style>
+        /* CSS CRÍTICO INLINE - FORÇAR desde o início */
+        body:has(.announcement-bar:not(.hidden)),
+        body.has-announcement {
+            padding-top: 48px !important;
+        }
+
+        /* Header SEMPRE abaixo do announcement bar */
+        body:has(.announcement-bar:not(.hidden)) .header,
+        body.has-announcement .header,
+        .announcement-bar:not(.hidden)~.header {
+            top: 48px !important;
+            z-index: 1003 !important;
+        }
+
+        /* Announcement bar SEMPRE no topo */
+        .announcement-bar:not(.hidden) {
+            position: fixed !important;
+            top: 0 !important;
+            z-index: 1004 !important;
+            height: 48px !important;
+        }
+
+        /* Collection page specific styles */
+        .collection-header {
+            /* Espaçamento superior considerando header (60px) + espaço */
+            padding-top: 100px;
+            padding-bottom: var(--spacing-2xl);
+            padding-left: var(--spacing-md);
+            padding-right: var(--spacing-md);
+            background: linear-gradient(135deg, rgba(229, 9, 20, 0.1) 0%, rgba(0, 0, 0, 0.9) 100%);
+            border-bottom: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        /* Quando há announcement bar */
+        body.has-announcement .collection-header {
+            padding-top: 120px;
+        }
+
+        .collection-title {
+            font-family: var(--font-teko);
+            font-size: var(--fs-4xl);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-bottom: var(--spacing-md);
+            color: var(--netflix-red);
+            text-shadow: 0 0 20px rgba(229, 9, 20, 0.8);
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
+        .collection-description {
+            font-size: var(--fs-lg);
+            color: var(--text-gray);
+            max-width: 700px;
+            margin: 0 auto var(--spacing-md);
+            line-height: 1.6;
+        }
+
+        .collection-count {
+            font-family: var(--font-teko);
+            font-size: var(--fs-xl);
+            color: var(--text-white);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            font-family: var(--font-teko);
+            font-size: var(--fs-base);
+            color: var(--text-gray);
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: var(--spacing-lg);
+            transition: all var(--transition-base);
+        }
+
+        .back-link:hover {
+            color: var(--netflix-red);
+        }
+
+        .back-link svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .collection-products-section {
+            padding: var(--spacing-2xl) var(--spacing-md);
+        }
+
+        /* Mobile adjustments */
+        @media (max-width: 768px) {
+            .collection-header {
+                padding-top: 80px;
+            }
+
+            body.has-announcement .collection-header {
+                padding-top: 100px;
+            }
+
+            .collection-title {
+                font-size: var(--fs-3xl);
+                letter-spacing: 2px;
+            }
+
+            .collection-description {
+                font-size: var(--fs-base);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Page Loader Spinner -->
+    <div class="page-loader" id="pageLoader">
+        <div class="page-loader-spinner">
+            <div class="spinner-ring spinner-ring-outer"></div>
+            <div class="spinner-ring spinner-ring-inner"></div>
+        </div>
+        <div class="page-loader-text">STRANGER THINGS</div>
+        <div class="page-loader-logo">LOADING...</div>
+    </div>
+
+    <!-- Grid Background -->
+    <div class="grid-background"></div>
+
+    <!-- Top Announcement Bar -->
+    <div class="announcement-bar">
+        <div class="container">
+            <p>✨ <strong>OFERTA ESPECIAL:</strong> 20% OFF em todo o site com código <strong>STRANGER20</strong> -
+                Válido até 31/01</p>
+            <button class="announcement-close" aria-label="Fechar anúncio">&times;</button>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-top">
+                <div class="logo">
+                    <a href="index.html">
+                        <img src="logo.png" alt="Stranger Things Store" class="logo-img">
+                    </a>
+                </div>
+                <div class="header-actions">
+                    <!-- Search -->
+                    <button class="search-toggle" id="searchToggle" aria-label="Buscar">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2" />
+                            <path d="m20 20-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        </svg>
+                    </button>
+                    <!-- Account -->
+                    <button class="account-toggle" id="accountToggle" aria-label="Minha conta">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" />
+                            <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2" />
+                        </svg>
+                    </button>
+                    <!-- Cart/Bag -->
+                    <div class="cart-icon-wrapper">
+                        <button class="cart-icon" id="cartBtn" aria-label="Abrir sacola">
+                            <span class="cart-count" id="cartCount">0</span>
+                            <svg class="bag-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M6 2L3 6V20C3 20.5304 3.21071 21.0391 3.58579 21.4142C3.96086 21.7893 4.46957 22 5 22H19C19.5304 22 20.0391 21.7893 20.4142 21.4142C20.7893 21.0391 21 20.5304 21 20V6L18 2H6Z"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path d="M3 6H21" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path
+                                    d="M16 10C16 11.0609 15.5786 12.0783 14.8284 12.8284C14.0783 13.5786 13.0609 14 12 14C10.9391 14 9.92172 13.5786 9.17157 12.8284C8.42143 12.0783 8 11.0609 8 10"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
+                        </button>
+                    </div>
+                    <!-- Mobile Menu Toggle -->
+                    <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Menu">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="search-bar" id="searchBar">
+                <div class="search-container">
+                    <input type="text" id="searchInput" placeholder="Buscar produtos..." class="search-input">
+                    <button class="search-submit" aria-label="Buscar">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2" />
+                            <path d="m20 20-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Navigation -->
+            <nav class="main-nav" id="mainNav">
+                <div class="mobile-nav-header">
+                    <div class="mobile-nav-logo">
+                        <div class="netflix-logo">NETFLIX</div>
+                        <div class="stranger-logo">STRANGER THINGS</div>
+                        <div class="series-text">THE ORIGINAL SERIES</div>
+                    </div>
+                    <button class="mobile-nav-close" id="mobileNavClose">&times;</button>
+                </div>
+
+                <ul class="nav-list" id="navList">
+                    <!-- Menu dinâmico será renderizado aqui -->
+                </ul>
+            </nav>
+
+            <!-- Mobile Nav Overlay -->
+            <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
+        </div>
+    </header>
+
+    <!-- Collection Header -->
+    <section class="collection-header">
+        <div class="container">
+            <a href="index.html" class="back-link">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+                Voltar para Home
+            </a>
+            <h1 class="collection-title" id="collectionTitle">Carregando...</h1>
+            <p class="collection-description" id="collectionDescription"></p>
+            <div class="collection-count" id="collectionCount"></div>
+        </div>
+    </section>
+
+    <!-- Collection Products -->
+    <section class="collection-products-section">
+        <div class="container">
+            <div class="products-grid" id="collectionProducts">
+                <!-- Produtos serão carregados aqui -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <!-- Customer Service -->
+                <div class="footer-section">
+                    <h3>Atendimento</h3>
+                    <ul>
+                        <li><a href="#">Central de Ajuda</a></li>
+                        <li><a href="#">Pedidos e Devoluções</a></li>
+                        <li><a href="#">Política de Privacidade</a></li>
+                        <li><a href="#">Termos de Uso</a></li>
+                    </ul>
+                </div>
+
+                <!-- Account & Ordering -->
+                <div class="footer-section">
+                    <h3>Conta e Pedidos</h3>
+                    <ul>
+                        <li><a href="#">Minha Conta</a></li>
+                        <li><a href="#">Política de Envio</a></li>
+                        <li><a href="#">Política de Pedidos</a></li>
+                    </ul>
+                </div>
+
+                <!-- Netflix -->
+                <div class="footer-section">
+                    <h3>Netflix</h3>
+                    <ul>
+                        <li><a href="#">Sobre a Netflix Shop</a></li>
+                        <li><a href="#">Netflix Streaming</a></li>
+                    </ul>
+                </div>
+
+                <!-- Newsletter -->
+                <div class="footer-section">
+                    <h3>Newsletter</h3>
+                    <p>Economize 15% na sua primeira compra!</p>
+                    <form class="newsletter-form">
+                        <input type="email" placeholder="Seu email" required>
+                        <button type="submit" class="btn btn-primary">INSCREVER-SE</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2024 Stranger Things Store. Todos os direitos reservados.</p>
+                <p class="disclaimer">STRANGER THINGS ™/ © Netflix 2024</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Cart Drawer Overlay -->
+    <div class="cart-drawer-overlay" id="cartOverlay"></div>
+
+    <!-- Cart Drawer -->
+    <div class="cart-drawer" id="cartDrawer">
+        <div class="cart-drawer-header">
+            <h2>SACOLA</h2>
+            <button class="cart-drawer-close" id="closeCart" aria-label="Fechar sacola">&times;</button>
+        </div>
+        <div class="cart-drawer-body">
+            <div id="cartItems"></div>
+        </div>
+        <div class="cart-drawer-footer">
+            <div class="cart-total">
+                <span class="cart-total-label">Total:</span>
+                <span class="cart-total-value">R$ <span id="cartTotal">0.00</span></span>
+            </div>
+            <div class="cart-drawer-actions">
+                <a href="index.html" class="btn btn-secondary btn-block" id="continueShopping">CONTINUAR COMPRANDO</a>
+                <button class="btn btn-primary btn-block" id="checkoutBtn">FINALIZAR COMPRA</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // FORÇAR layout correto IMEDIATAMENTE
+        (function () {
+            function forceFixedLayout() {
+                if (!document.body) return;
+
+                const announcementBar = document.querySelector('.announcement-bar');
+                const header = document.querySelector('.header');
+
+                if (announcementBar && !announcementBar.classList.contains('hidden')) {
+                    document.body.style.setProperty('padding-top', '48px', 'important');
+                    document.body.classList.add('has-announcement');
+
+                    if (header) {
+                        header.style.setProperty('top', '48px', 'important');
+                        header.style.setProperty('z-index', '1003', 'important');
+                        header.classList.add('has-announcement');
+                    }
+
+                    if (announcementBar) {
+                        announcementBar.style.setProperty('z-index', '1004', 'important');
+                        announcementBar.style.setProperty('top', '0', 'important');
+                        announcementBar.style.setProperty('height', '48px', 'important');
+                    }
+                } else {
+                    document.body.style.setProperty('padding-top', '0', 'important');
+                    document.body.classList.remove('has-announcement');
+
+                    if (header) {
+                        header.style.setProperty('top', '0', 'important');
+                        header.style.setProperty('z-index', '1003', 'important');
+                        header.classList.remove('has-announcement');
+                    }
+                }
+            }
+
+            if (document.body) {
+                forceFixedLayout();
+            }
+
+            const checkBody = setInterval(function () {
+                if (document.body) {
+                    clearInterval(checkBody);
+                    forceFixedLayout();
+                }
+            }, 1);
+
+            ['DOMContentLoaded', 'load'].forEach(function (event) {
+                document.addEventListener(event, forceFixedLayout);
+            });
+
+            let count = 0;
+            const forceInterval = setInterval(function () {
+                forceFixedLayout();
+                count++;
+                if (count >= 10) clearInterval(forceInterval);
+            }, 100);
+        })();
+
+        // Announcement bar close
+        document.addEventListener('DOMContentLoaded', () => {
+            const announcementClose = document.querySelector('.announcement-close');
+            if (announcementClose) {
+                announcementClose.addEventListener('click', () => {
+                    document.querySelector('.announcement-bar').classList.add('hidden');
+                    document.body.classList.remove('has-announcement');
+                    document.querySelector('.header').style.top = '0';
+                });
+            }
+        });
+    </script>
+    <script src="collection-page.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>

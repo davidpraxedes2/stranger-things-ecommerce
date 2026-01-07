@@ -1,117 +1,47 @@
-// Page Loader - Spinner durante navegação entre páginas
-(function() {
+(function () {
     'use strict';
+    // Page Loader Logic
 
-    let pageLoader = null;
-    
-    // Obter referência do loader
-    function getLoader() {
-        if (!pageLoader) {
-            pageLoader = document.getElementById('pageLoader');
-        }
-        return pageLoader;
-    }
-    
-    // Mostrar spinner INSTANTANEAMENTE
-    function showLoader() {
-        const loader = getLoader();
-        if (loader) {
-            // Remover qualquer classe/esconder
-            loader.classList.remove('active');
-            loader.style.display = 'flex';
-            loader.style.opacity = '1';
-            loader.style.visibility = 'visible';
-            // Forçar display e aparecer IMEDIATAMENTE
-            loader.offsetWidth; // Force reflow
-            loader.classList.add('active');
-        }
-    }
+    const loader = document.getElementById('pageLoader');
+    const MIN_LOADING_TIME = 400; // Minimum time to show loader
+    const MAX_LOADING_TIME = 5000; // Safety timeout
+    const startTime = Date.now();
+    let hidden = false;
 
-    // Esconder spinner
     function hideLoader() {
-        const loader = getLoader();
-        if (loader) {
-            loader.classList.remove('active');
+        if (hidden || !loader) return;
+
+        const elapsed = Date.now() - startTime;
+        const remaining = Math.max(0, MIN_LOADING_TIME - elapsed);
+
+        setTimeout(() => {
+            if (hidden) return;
+            hidden = true;
+
+            loader.classList.add('hidden');
+            document.body.classList.remove('no-scroll'); // Ensure scroll is enabled
+
+            // Remove from DOM after transition
             setTimeout(() => {
-                if (loader && !loader.classList.contains('active')) {
-                    loader.style.display = 'none';
-                    loader.style.opacity = '0';
-                }
-            }, 300);
-        }
+                loader.style.display = 'none';
+            }, 500);
+        }, remaining);
     }
 
-    // Interceptar cliques em links - ANTES de tudo
-    function initPageLoader() {
-        // Usar capture phase para executar ANTES de qualquer outro handler
-        document.addEventListener('click', function(e) {
-            const link = e.target.closest('a[href]');
-            if (!link) return;
-
-            const href = link.getAttribute('href');
-            
-            // Verificar se é link interno válido
-            if (href && 
-                !href.startsWith('http') && 
-                !href.startsWith('//') && 
-                !href.startsWith('#') && 
-                !href.startsWith('javascript:') &&
-                !href.startsWith('mailto:') &&
-                !href.startsWith('tel:') &&
-                link.target !== '_blank' &&
-                !e.ctrlKey &&
-                !e.metaKey &&
-                !e.shiftKey) {
-                
-                // PARAR TUDO - prevenir qualquer outra ação
-                e.preventDefault();
-                e.stopPropagation();
-                e.stopImmediatePropagation();
-                
-                // MOSTRAR SPINNER IMEDIATAMENTE (sem delays)
-                showLoader();
-                
-                // Navegar após garantir que spinner foi renderizado
-                setTimeout(() => {
-                    window.location.href = href;
-                }, 300); // Delay maior para garantir visibilidade
-                
-                return false;
-            }
-        }, true); // CAPTURE PHASE
-
-        // Esconder loader quando página carregar
-        if (document.readyState === 'complete') {
-            setTimeout(hideLoader, 500);
-        } else {
-            window.addEventListener('load', function() {
-                setTimeout(hideLoader, 500);
-            });
-            
-            document.addEventListener('DOMContentLoaded', function() {
-                setTimeout(hideLoader, 800);
-            });
+    // Expose functions globally
+    window.showPageLoader = function () {
+        if (loader) {
+            loader.style.display = 'flex';
+            loader.classList.remove('hidden');
+            hidden = false;
         }
-    }
+    };
 
-    // Inicializar IMEDIATAMENTE quando script carregar
-    // Não esperar DOM se já estiver pronto
-    if (document.body) {
-        initPageLoader();
-        setTimeout(hideLoader, 500);
-    } else {
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', function() {
-                initPageLoader();
-                setTimeout(hideLoader, 500);
-            });
-        } else {
-            initPageLoader();
-            setTimeout(hideLoader, 500);
-        }
-    }
-
-    // Expor funções globalmente
-    window.showPageLoader = showLoader;
     window.hidePageLoader = hideLoader;
+
+    // Safety timeout
+    setTimeout(hideLoader, MAX_LOADING_TIME);
+
+    // If script runs late and everything is loaded, try to hide (but script.js should handle it for products)
+    // We will leave it active until script.js calls hidePageLoader() or timeout happens.
 })();

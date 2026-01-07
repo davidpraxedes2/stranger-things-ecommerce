@@ -8,24 +8,166 @@ const API_URL = window.API_URL;
 
 // Products Data (loaded from API)
 let products = [];
+let collections = [];
+
+// Debounce helper para otimizar eventos
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Load collections from API
+async function loadCollections() {
+    try {
+        const response = await fetch(`${API_URL}/collections`);
+        if (response.ok) {
+            collections = await response.json();
+            console.log(`✅ ${collections.length} coleções carregadas`);
+        }
+    } catch (error) {
+        console.error('Erro ao carregar coleções:', error);
+        collections = [];
+    }
+}
+
+// Render collections with products
+async function renderCollectionsSections() {
+    const container = document.getElementById('collectionsContainer');
+    
+    console.log('🎨 renderCollectionsSections chamada');
+    console.log('   Container:', container ? 'OK' : 'NÃO ENCONTRADO');
+    console.log('   Collections:', collections.length);
+    console.log('   Products:', products.length);
+    
+    if (!container) {
+        console.error('❌ Container #collectionsContainer não encontrado!');
+        return;
+    }
+    
+    if (collections.length === 0) {
+        console.warn('⚠️ Nenhuma coleção carregada');
+        return;
+    }
+    
+    if (products.length === 0) {
+        console.warn('⚠️ Nenhum produto carregado');
+        return;
+    }
+    
+    let html = '';
+    let sectionsCreated = 0;
+    
+    collections.forEach(collection => {
+        // Filtrar produtos desta coleção
+        const collectionProducts = products.filter(p => 
+            p.collections && p.collections.includes(collection.name)
+        );
+        
+        console.log(`   📦 ${collection.name}: ${collectionProducts.length} produtos`);
+        
+        if (collectionProducts.length === 0) return;
+        
+        // Limitar a 8 produtos por coleção na home
+        const displayProducts = collectionProducts.slice(0, 8);
+        sectionsCreated++;
+        
+        html += `
+            <section class="products-section collection-section" data-collection-id="${collection.id}">
+                <div class="container">
+                    <div class="section-header">
+                        <div>
+                            <h2 class="section-title">${collection.name.toUpperCase()}</h2>
+                            <p class="section-subtitle">${collection.description}</p>
+                        </div>
+                        ${collectionProducts.length > 8 ? `
+                            <a href="#" class="btn btn-secondary" onclick="event.preventDefault(); showAllProducts('${collection.slug}')">
+                                VER TODOS (${collectionProducts.length})
+                            </a>
+                        ` : ''}
+                    </div>
+                    <div class="products-grid">
+                        ${displayProducts.map(product => renderProductCard(product)).join('')}
+                    </div>
+                </div>
+            </section>
+        `;
+    });
+    
+    container.innerHTML = html;
+    console.log(`✅ ${sectionsCreated} seções de coleções renderizadas`);
+}
+
+// Render single product card
+function renderProductCard(product) {
+    const price = parseFloat(product.price) || 0;
+    const originalPrice = product.original_price ? parseFloat(product.original_price) : null;
+    const hasDiscount = originalPrice && originalPrice > price;
+    const discountPercent = hasDiscount ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0;
+    
+    return `
+        <a href="product.html?id=${product.id}" class="product-card" data-product-id="${product.id}">
+            <div class="product-image-wrapper">
+                ${hasDiscount && discountPercent > 0 ? `<span class="product-badge discount">-${discountPercent}%</span>` : ''}
+                <div class="product-image">
+                    ${product.image_url ? 
+                        `<img src="${product.image_url}" alt="${product.name}" loading="lazy">` : 
+                        '<div style="font-size: 3rem; display: flex; align-items: center; justify-content: center; height: 100%;">📦</div>'
+                    }
+                </div>
+            </div>
+            <div class="product-info">
+                <h3 class="product-name">${product.name}</h3>
+                <p class="product-description">${product.description || ''}</p>
+                <div class="product-price">
+                    ${hasDiscount ? `<span class="product-price-old">R$ ${originalPrice.toFixed(2).replace('.', ',')}</span>` : ''}
+                    <span>R$ ${price.toFixed(2).replace('.', ',')}</span>
+                </div>
+                <button class="add-to-cart" onclick="event.preventDefault(); addToCart(${product.id});">
+                    ADICIONAR AO CARRINHO
+                </button>
+            </div>
+        </a>
+    `;
+}
+
+// Show all products (opcional - pode abrir página filtrada)
+function showAllProducts(collectionSlug) {
+    // Por enquanto, scroll para seção de todos os produtos
+    const allProductsSection = document.getElementById('produtos');
+    if (allProductsSection) {
+        allProductsSection.style.display = 'block';
+        allProductsSection.scrollIntoView({ behavior: 'smooth' });
+        renderProducts(document.getElementById('productsGrid'));
+    }
+}
+
+// Debounce helper para otimizar eventos
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
 
 // Load products from API
 async function loadProductsFromAPI() {
     const fullUrl = `${API_URL}/products`;
-    console.log('🔄 Carregando produtos da API...');
-    console.log('🌐 URL completa:', fullUrl);
-    console.log('🌐 API_BASE:', API_BASE);
-    console.log('🌐 API_URL:', API_URL);
     
     try {
-        console.log('📤 Enviando requisição fetch...');
-        
-        // Adicionar timeout de 30 segundos (servidor pode estar inicializando banco)
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => {
-            console.warn('⏱️ Timeout após 30 segundos - servidor pode estar inicializando');
-            controller.abort();
-        }, 30000);
+        const timeoutId = setTimeout(() => controller.abort(), 30000);
         
         const response = await fetch(fullUrl, {
             method: 'GET',
@@ -38,51 +180,21 @@ async function loadProductsFromAPI() {
         });
         
         clearTimeout(timeoutId);
-        console.log('📡 Resposta recebida!');
-        console.log('📡 Status da resposta:', response.status, response.statusText);
-        
-        console.log('📡 Status da resposta:', response.status, response.statusText);
-        console.log('📡 Headers:', Object.fromEntries(response.headers.entries()));
         
         if (response.ok) {
             const data = await response.json();
             products = Array.isArray(data) ? data : [];
             console.log(`✅ ${products.length} produtos carregados`);
             
-            if (products.length > 0) {
-                console.log('📦 Primeiro produto:', products[0]);
-            } else {
-                console.warn('⚠️ Nenhum produto retornado da API');
-            }
+            // Carregar coleções e renderizar seções
+            await loadCollections();
+            renderCollectionsSections();
             
-            // Update render if products grid exists
-            const grid = document.getElementById('productsGrid');
-            if (grid) {
-                console.log('🎨 Renderizando produtos no grid...');
-                renderProducts(grid);
-                console.log(`✅ ${products.length} produtos renderizados`);
-            } else {
-                console.warn('⚠️ productsGrid não encontrado no DOM');
-                // Tentar novamente após um pequeno delay
-                setTimeout(() => {
-                    const retryGrid = document.getElementById('productsGrid');
-                    if (retryGrid) {
-                        console.log('🎨 Renderizando produtos (tentativa 2)...');
-                        renderProducts(retryGrid);
-                    }
-                }, 100);
-            }
         } else {
-            const errorText = await response.text();
-            console.error('❌ Erro ao carregar produtos da API:', response.status, errorText);
             products = [];
         }
     } catch (error) {
-        console.error('❌ Erro ao conectar com API:', error);
-        console.error('❌ Tipo do erro:', error.name);
-        console.error('❌ Mensagem:', error.message);
-        console.error('❌ Stack:', error.stack);
-        console.error('URL tentada:', `${API_URL}/products`);
+        console.error('Erro ao conectar com API:', error.message);
         products = [];
     }
 }
@@ -196,24 +308,26 @@ document.addEventListener('DOMContentLoaded', () => {
             body.classList.add('has-announcement');
             // Ajustar posição do header baseado na altura real
             header.style.top = `${announcementHeight}px`;
-            body.style.paddingTop = `${announcementHeight}px`;
+            // REMOVIDO: Não ajustar padding dinamicamente - CSS cuida disso
+            // body.style.paddingTop = `${announcementHeight}px`;
             
-            // Ajustar hero banner se existir
-            const heroBanner = document.querySelector('.hero-banner');
-            if (heroBanner) {
-                heroBanner.style.paddingTop = `calc(var(--header-height-mobile) + ${announcementHeight}px + var(--spacing-2xl))`;
-            }
+            // REMOVIDO: Não ajustar hero banner dinamicamente
+            // const heroBanner = document.querySelector('.hero-banner');
+            // if (heroBanner) {
+            //     heroBanner.style.paddingTop = `calc(var(--header-height-mobile) + ${announcementHeight}px + var(--spacing-2xl))`;
+            // }
         } else {
             header.classList.remove('has-announcement');
             body.classList.remove('has-announcement');
             header.style.top = '0';
-            body.style.paddingTop = '0';
+            // REMOVIDO: Não ajustar padding dinamicamente
+            // body.style.paddingTop = '0';
             
-            // Resetar hero banner
-            const heroBanner = document.querySelector('.hero-banner');
-            if (heroBanner) {
-                heroBanner.style.paddingTop = 'calc(var(--header-height-mobile) + var(--spacing-2xl))';
-            }
+            // REMOVIDO: Não resetar hero banner
+            // const heroBanner = document.querySelector('.hero-banner');
+            // if (heroBanner) {
+            //     heroBanner.style.paddingTop = 'calc(var(--header-height-mobile) + var(--spacing-2xl))';
+            // }
         }
     }
 
@@ -235,18 +349,8 @@ document.addEventListener('DOMContentLoaded', () => {
         resizeObserver.observe(announcementBar);
     }
 
-    // Search toggle
-    const searchToggle = document.getElementById('searchToggle');
-    const searchBar = document.getElementById('searchBar');
-
-    if (searchToggle && searchBar) {
-        searchToggle.addEventListener('click', () => {
-            searchBar.classList.toggle('active');
-            if (searchBar.classList.contains('active')) {
-                document.getElementById('searchInput')?.focus();
-            }
-        });
-    }
+    // Search toggle - funcionalidade movida para search.js
+    // Mantido apenas para compatibilidade, o search.js cuida de tudo
 
     // Account toggle (placeholder)
     const accountToggle = document.getElementById('accountToggle');

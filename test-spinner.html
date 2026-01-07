@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Test Spinner</title>
+    <style>
+        body { background: #000; color: #fff; font-family: Arial; padding: 20px; }
+        .test-btn { background: #E50914; color: #fff; padding: 15px 30px; border: none; cursor: pointer; margin: 10px; }
+        .page-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            z-index: 999999;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+        }
+        .page-loader.active {
+            display: flex !important;
+            opacity: 1 !important;
+        }
+        .page-loader-spinner {
+            width: 80px;
+            height: 80px;
+            border: 4px solid rgba(229, 9, 20, 0.3);
+            border-top-color: #E50914;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .page-loader-text {
+            margin-top: 20px;
+            font-size: 24px;
+            color: #E50914;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Teste do Spinner</h1>
+    <button class="test-btn" onclick="testSpinner()">Testar Spinner</button>
+    <a href="product.html?id=1" class="test-btn" style="text-decoration: none; display: inline-block;">Ir para Produto</a>
+    
+    <div class="page-loader" id="pageLoader">
+        <div class="page-loader-spinner"></div>
+        <div class="page-loader-text">STRANGER THINGS</div>
+    </div>
+    
+    <script>
+        function testSpinner() {
+            const loader = document.getElementById('pageLoader');
+            loader.style.display = 'flex';
+            loader.classList.add('active');
+            setTimeout(() => {
+                loader.classList.remove('active');
+                loader.style.display = 'none';
+            }, 2000);
+        }
+        
+        // Testar interceptação de links
+        document.addEventListener('click', function(e) {
+            const link = e.target.closest('a[href]');
+            if (link && link.href && !link.href.startsWith('http') && !link.href.includes('#')) {
+                e.preventDefault();
+                const loader = document.getElementById('pageLoader');
+                loader.style.display = 'flex';
+                loader.classList.add('active');
+                setTimeout(() => {
+                    window.location.href = link.href;
+                }, 300);
+            }
+        }, true);
+    </script>
+</body>
+</html>
+

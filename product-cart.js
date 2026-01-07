@@ -1,21 +1,23 @@
 // Cart functionality for product page
-// Use API_BASE and API_URL from product-page.js if available, otherwise declare them
+console.log('🛒 product-cart.js carregado!');
+
+// Fallback para API_BASE e API_URL caso product-page.js falhe ou não carregue
 if (typeof window.API_BASE === 'undefined') {
     window.API_BASE = window.location.origin;
     window.API_URL = `${window.API_BASE}/api`;
 }
-const API_BASE = window.API_BASE;
-const API_URL = window.API_URL;
-
-let sessionId = localStorage.getItem('cart_session_id') || 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+// Share the same sessionId from product-page.js
+const cartSessionId = localStorage.getItem('cart_session_id') || 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 if (!localStorage.getItem('cart_session_id')) {
-    localStorage.setItem('cart_session_id', sessionId);
+    localStorage.setItem('cart_session_id', cartSessionId);
 }
+
+console.log('🔑 Cart Session ID:', cartSessionId);
 
 function getCartHeaders() {
     return {
         'Content-Type': 'application/json',
-        'x-session-id': sessionId
+        'x-session-id': cartSessionId
     };
 }
 
@@ -23,29 +25,34 @@ let cart = [];
 
 // Load cart from API
 async function loadCartFromAPI() {
+    console.log('📥 Carregando carrinho da API...');
     try {
-        const response = await fetch(`${API_URL}/cart?session_id=${sessionId}`, {
+        const response = await fetch(`${window.API_URL}/cart?session_id=${cartSessionId}`, {
             headers: getCartHeaders()
         });
-        
+
         if (response.ok) {
             const data = await response.json();
             cart = data.items || [];
+            console.log('✅ Carrinho carregado:', cart);
             updateCartUI();
         }
     } catch (error) {
-        console.error('Erro ao carregar carrinho:', error);
+        console.error('❌ Erro ao carregar carrinho:', error);
     }
 }
 
 // Update cart UI
 function updateCartUI() {
+    console.log('🎨 Atualizando UI do carrinho...');
     const cartCount = document.getElementById('cartCount');
     const cartItems = document.getElementById('cartItems');
     const cartTotal = document.getElementById('cartTotal');
 
     // Update cart count
     const totalItems = cart.reduce((sum, item) => sum + (item.quantity || 0), 0);
+    console.log('📊 Total de itens:', totalItems);
+
     if (cartCount) {
         cartCount.textContent = totalItems;
         cartCount.style.display = totalItems > 0 ? 'flex' : 'none';
@@ -53,6 +60,8 @@ function updateCartUI() {
 
     // Update cart total
     const total = cart.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 0)), 0);
+    console.log('💰 Total R$:', total.toFixed(2));
+
     if (cartTotal) {
         cartTotal.textContent = total.toFixed(2).replace('.', ',');
     }
@@ -77,10 +86,10 @@ function updateCartUI() {
             cartItems.innerHTML = cart.map(item => `
                 <div class="cart-item">
                     <div class="cart-item-image">
-                        ${item.image_url ? 
-                            `<img src="${item.image_url}" alt="${item.name || 'Produto'}">` : 
-                            '<div style="font-size: 2rem;">👕</div>'
-                        }
+                        ${item.image_url ?
+                    `<img src="${item.image_url}" alt="${item.name || 'Produto'}">` :
+                    '<div style="font-size: 2rem;">👕</div>'
+                }
                     </div>
                     <div class="cart-item-info">
                         <div class="cart-item-name">${item.name || 'Produto'}</div>
@@ -128,10 +137,10 @@ async function updateCartQuantity(cartItemId, quantity) {
     }
 
     try {
-        const response = await fetch(`${API_URL}/cart/update/${cartItemId}`, {
+        const response = await fetch(`${window.API_URL}/cart/update/${cartItemId}`, {
             method: 'PUT',
             headers: getCartHeaders(),
-            body: JSON.stringify({ quantity: quantity, session_id: sessionId })
+            body: JSON.stringify({ quantity: quantity, session_id: cartSessionId })
         });
 
         if (response.ok) {
@@ -145,7 +154,7 @@ async function updateCartQuantity(cartItemId, quantity) {
 // Remove item
 async function removeCartItem(cartItemId) {
     try {
-        const response = await fetch(`${API_URL}/cart/remove/${cartItemId}`, {
+        const response = await fetch(`${window.API_URL}/cart/remove/${cartItemId}`, {
             method: 'DELETE',
             headers: getCartHeaders()
         });
