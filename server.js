@@ -468,6 +468,33 @@ function initializeDatabase() {
         }
     });
 
+    // Tabela de opções de frete
+    db.run(`CREATE TABLE IF NOT EXISTS shipping_options (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        price REAL NOT NULL,
+        delivery_time TEXT,
+        active INTEGER DEFAULT 1,
+        sort_order INTEGER DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`, (err) => {
+        if (err) {
+            console.error('Erro ao criar tabela shipping_options:', err);
+        } else {
+            // Verificar se há fretes, se não tiver, criar padrão
+            db.get('SELECT COUNT(*) as count FROM shipping_options', [], (err, row) => {
+                if (!err && row && row.count === 0) {
+                    console.log('📦 Criando opções de frete padrão...');
+                    const stmt = db.prepare('INSERT INTO shipping_options (name, price, delivery_time, active, sort_order) VALUES (?, ?, ?, ?, ?)');
+                    stmt.run('PAC', 15.00, '7-12 dias úteis', 1, 0);
+                    stmt.run('SEDEX', 25.00, '3-5 dias úteis', 1, 1);
+                    stmt.finalize();
+                    console.log('✅ Fretes padrão criados (PAC e SEDEX)');
+                }
+            });
+        }
+    });
+
     // Criar usuário admin padrão (senha: admin123)
     const defaultPassword = bcrypt.hashSync('admin123', 10);
     db.run(`INSERT OR IGNORE INTO users (username, email, password, role) 
@@ -497,27 +524,6 @@ const authenticateToken = (req, res, next) => {
         next();
     });
 };
-
-// Rota para opções de frete
-app.get('/api/shipping-options', (req, res) => {
-    try {
-        const fs = require('fs');
-        const optionsPath = path.join(__dirname, 'shipping-options.json');
-        if (fs.existsSync(optionsPath)) {
-            const data = fs.readFileSync(optionsPath, 'utf8');
-            res.json(JSON.parse(data));
-        } else {
-            // Opções padrão caso arquivo não exista
-            res.json([
-                { id: 1, name: 'PAC', price: 25.0, delivery_time: '5-10 dias úteis', active: true },
-                { id: 2, name: 'SEDEX', price: 45.0, delivery_time: '2-4 dias úteis', active: true }
-            ]);
-        }
-    } catch (error) {
-        console.error('Erro ao buscar opções de frete:', error);
-        res.status(500).json({ error: 'Erro interno ao buscar frete' });
-    }
-});
 
 // ===== ROTAS PÚBLICAS =====
 
@@ -1922,6 +1928,171 @@ app.post('/api/analytics/track-location', (req, res) => {
     }
     
     res.json({ success: true });
+});
+
+// ===== ROTAS DE FRETES (ADMIN) =====
+
+// Listar opções de frete (admin)
+app.get('/api/admin/shipping', authenticateToken, async (req, res) => {
+    try {
+        if (db.isPostgres) {
+            const result = await db.query('SELECT * FROM shipping_options ORDER BY sort_order ASC', []);
+            res.json(result.rows || []);
+        } else {
+            const options = db.prepare('SELECT * FROM shipping_options ORDER BY sort_order ASC').all();
+            res.json(options || []);
+        }
+    } catch (error) {
+        console.error('Erro ao buscar fretes:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Criar opção de frete (admin)
+app.post('/api/admin/shipping', authenticateToken, async (req, res) => {
+    const { name, price, delivery_time, active } = req.body;
+    
+    if (!name || price === undefined) {
+        return res.status(400).json({ error: 'Nome e preço são obrigatórios' });
+    }
+    
+    try {
+        if (db.isPostgres) {
+            // Obter próximo sort_order
+            const maxOrder = await db.get('SELECT COALESCE(MAX(sort_order), -1) + 1 as next_order FROM shipping_options', []);
+            const sortOrder = maxOrder?.next_order || 0;
+            
+            const result = await db.query(
+                'INSERT INTO shipping_options (name, price, delivery_time, active, sort_order) VALUES ($1, $2, $3, $4, $5) RETURNING id',
+                [name, price, delivery_time || null, active ? 1 : 0, sortOrder]
+            );
+            
+            res.json({ success: true, id: result.rows[0].id, message: 'Frete criado com sucesso' });
+        } else {
+            const stmt = db.prepare(`
+                INSERT INTO shipping_options (name, price, delivery_time, active, sort_order) 
+                VALUES (?, ?, ?, ?, (SELECT COALESCE(MAX(sort_order), -1) + 1 FROM shipping_options))
+            `);
+            const result = stmt.run(name, price, delivery_time || null, active ? 1 : 0);
+            
+            res.json({ success: true, id: result.lastInsertRowid, message: 'Frete criado com sucesso' });
+        }
+    } catch (error) {
+        console.error('Erro ao criar frete:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Atualizar opção de frete (admin)
+app.put('/api/admin/shipping/:id', authenticateToken, async (req, res) => {
+    const { id } = req.params;
+    const { name, price, delivery_time, active } = req.body;
+    
+    try {
+        if (db.isPostgres) {
+            const result = await db.query(
+                'UPDATE shipping_options SET name = $1, price = $2, delivery_time = $3, active = $4 WHERE id = $5',
+                [name, price, delivery_time || null, active ? 1 : 0, id]
+            );
+            
+            if (result.rowCount === 0) {
+                return res.status(404).json({ error: 'Frete não encontrado' });
+            }
+        } else {
+            const stmt = db.prepare('UPDATE shipping_options SET name = ?, price = ?, delivery_time = ?, active = ? WHERE id = ?');
+            const result = stmt.run(name, price, delivery_time || null, active ? 1 : 0, id);
+            
+            if (result.changes === 0) {
+                return res.status(404).json({ error: 'Frete não encontrado' });
+            }
+        }
+        
+        res.json({ success: true, message: 'Frete atualizado com sucesso' });
+    } catch (error) {
+        console.error('Erro ao atualizar frete:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Deletar opção de frete (admin)
+app.delete('/api/admin/shipping/:id', authenticateToken, async (req, res) => {
+    const { id } = req.params;
+    
+    try {
+        if (db.isPostgres) {
+            const result = await db.query('DELETE FROM shipping_options WHERE id = $1', [id]);
+            
+            if (result.rowCount === 0) {
+                return res.status(404).json({ error: 'Frete não encontrado' });
+            }
+        } else {
+            const stmt = db.prepare('DELETE FROM shipping_options WHERE id = ?');
+            const result = stmt.run(id);
+            
+            if (result.changes === 0) {
+                return res.status(404).json({ error: 'Frete não encontrado' });
+            }
+        }
+        
+        res.json({ success: true, message: 'Frete deletado com sucesso' });
+    } catch (error) {
+        console.error('Erro ao deletar frete:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Reordenar opções de frete (admin)
+app.put('/api/admin/shipping/reorder', authenticateToken, async (req, res) => {
+    const { order } = req.body; // Array of { id, sort_order }
+    
+    if (!order || !Array.isArray(order)) {
+        return res.status(400).json({ error: 'Formato inválido' });
+    }
+    
+    try {
+        if (db.isPostgres) {
+            // PostgreSQL - usar transação
+            for (const item of order) {
+                await db.query('UPDATE shipping_options SET sort_order = $1 WHERE id = $2', [item.sort_order, item.id]);
+            }
+        } else {
+            // SQLite - usar transação
+            const updateStmt = db.prepare('UPDATE shipping_options SET sort_order = ? WHERE id = ?');
+            const transaction = db.transaction((items) => {
+                for (const item of items) {
+                    updateStmt.run(item.sort_order, item.id);
+                }
+            });
+            transaction(order);
+        }
+        
+        res.json({ success: true, message: 'Ordem atualizada com sucesso' });
+    } catch (error) {
+        console.error('Erro ao reordenar fretes:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ===== ROTA PÚBLICA PARA CHECKOUT BUSCAR FRETES =====
+
+// Listar opções de frete ativas (público - para checkout)
+app.get('/api/shipping-options', async (req, res) => {
+    try {
+        if (db.isPostgres) {
+            const result = await db.query('SELECT * FROM shipping_options WHERE active = 1 ORDER BY sort_order ASC', []);
+            res.json(result.rows || []);
+        } else {
+            const options = db.prepare('SELECT * FROM shipping_options WHERE active = 1 ORDER BY sort_order ASC').all();
+            res.json(options || []);
+        }
+    } catch (error) {
+        console.error('Erro ao buscar opções de frete:', error);
+        // Retornar opções padrão se houver erro
+        res.json([
+            { id: 1, name: 'PAC', price: 15.00, delivery_time: '7-12 dias úteis', active: 1 },
+            { id: 2, name: 'SEDEX', price: 25.00, delivery_time: '3-5 dias úteis', active: 1 }
+        ]);
+    }
 });
 
 // Iniciar servidor (apenas em desenvolvimento local)

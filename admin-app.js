@@ -237,6 +237,11 @@ async function loadPage(pageName) {
                 subtitle: 'Controle de inventário e alertas',
                 render: renderInventory
             },
+            shipping: {
+                title: 'Fretes',
+                subtitle: 'Gerenciamento de opções de frete',
+                render: renderShipping
+            },
             settings: {
                 title: 'Configurações',
                 subtitle: 'Configurações gerais da loja',
@@ -2316,6 +2321,412 @@ function adjustInventory() {
 
 function adjustStockModal(sku) {
     showToast(`Ajustando estoque para ${sku}`, 'info');
+}
+
+// =====================================================
+// SHIPPING PAGE
+// =====================================================
+
+let shippingOptions = [];
+
+async function loadShippingOptions() {
+    try {
+        const response = await fetch(`${API_URL}/shipping`, {
+            headers: getAuthHeaders()
+        });
+        
+        if (response.ok) {
+            shippingOptions = await response.json();
+        } else {
+            showToast('Erro ao carregar opções de frete', 'error');
+            shippingOptions = [];
+        }
+    } catch (error) {
+        console.error('Erro ao carregar fretes:', error);
+        showToast('Erro ao conectar com servidor', 'error');
+        shippingOptions = [];
+    }
+}
+
+async function renderShipping(container) {
+    await loadShippingOptions();
+    
+    container.innerHTML = `
+        <div class="page-header">
+            <div>
+                <h1>Gerenciamento de Fretes</h1>
+                <p class="page-subtitle">Configure as opções de frete disponíveis na loja</p>
+            </div>
+            <button class="btn btn-primary" onclick="openAddShippingModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Adicionar Frete
+            </button>
+        </div>
+
+        <!-- Shipping Stats -->
+        <div class="stats-grid" style="margin-bottom: 32px;">
+            <div class="stat-card">
+                <div class="stat-label">Total de Opções</div>
+                <div class="stat-value">${shippingOptions.length}</div>
+                <div class="stat-change">Métodos cadastrados</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Ativos</div>
+                <div class="stat-value" style="color: var(--success);">${shippingOptions.filter(s => s.active).length}</div>
+                <div class="stat-change">Disponíveis na loja</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Frete Mais Barato</div>
+                <div class="stat-value">R$ ${shippingOptions.length > 0 ? Math.min(...shippingOptions.map(s => parseFloat(s.price))).toFixed(2).replace('.', ',') : '0,00'}</div>
+                <div class="stat-change">Valor mínimo</div>
+            </div>
+        </div>
+
+        <!-- Shipping Table -->
+        <div class="table-container">
+            <div class="table-header">
+                <h3 class="table-title">Opções de Frete</h3>
+            </div>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Preço</th>
+                        <th>Prazo de Entrega</th>
+                        <th>Status</th>
+                        <th>Ordem</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="shippingTableBody">
+                    ${renderShippingRows()}
+                </tbody>
+            </table>
+        </div>
+    `;
+}
+
+function renderShippingRows() {
+    if (shippingOptions.length === 0) {
+        return `
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 48px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 48px; height: 48px; margin: 0 auto 16px; opacity: 0.3;">
+                        <rect x="1" y="3" width="15" height="13"></rect>
+                        <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+                        <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                        <circle cx="18.5" cy="18.5" r="2.5"></circle>
+                    </svg>
+                    <p style="color: var(--text-secondary);">Nenhuma opção de frete cadastrada</p>
+                    <button class="btn btn-primary" onclick="openAddShippingModal()" style="margin-top: 16px;">Adicionar Primeira Opção</button>
+                </td>
+            </tr>
+        `;
+    }
+    
+    return shippingOptions
+        .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+        .map(option => `
+            <tr>
+                <td><strong>${option.name || 'Sem nome'}</strong></td>
+                <td>R$ ${parseFloat(option.price || 0).toFixed(2).replace('.', ',')}</td>
+                <td>${option.delivery_time || 'Não informado'}</td>
+                <td>
+                    <label class="toggle-switch">
+                        <input type="checkbox" ${option.active ? 'checked' : ''} onchange="toggleShippingStatus(${option.id})">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </td>
+                <td>
+                    <div style="display: flex; gap: 4px;">
+                        <button class="btn-icon" onclick="moveShippingUp(${option.id})" title="Mover para cima" ${option.sort_order === 0 ? 'disabled' : ''}>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="18 15 12 9 6 15"></polyline>
+                            </svg>
+                        </button>
+                        <button class="btn-icon" onclick="moveShippingDown(${option.id})" title="Mover para baixo">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+                </td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="btn-icon" onclick="editShipping(${option.id})" title="Editar">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg>
+                        </button>
+                        <button class="btn-icon btn-danger" onclick="deleteShipping(${option.id})" title="Deletar">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+}
+
+function openAddShippingModal() {
+    const modal = document.getElementById('modalContainer');
+    modal.innerHTML = `
+        <div class="modal-overlay" onclick="closeModal()"></div>
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Adicionar Opção de Frete</h2>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="addShippingForm" onsubmit="saveShipping(event)">
+                    <div class="form-group">
+                        <label>Nome do Frete *</label>
+                        <input type="text" name="name" class="search-input" placeholder="Ex: PAC, SEDEX" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Preço (R$) *</label>
+                        <input type="number" name="price" class="search-input" step="0.01" min="0" placeholder="0.00" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Prazo de Entrega</label>
+                        <input type="text" name="delivery_time" class="search-input" placeholder="Ex: 5-10 dias úteis">
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="active" checked>
+                            <span>Ativo (disponível na loja)</span>
+                        </label>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    `;
+}
+
+function editShipping(id) {
+    const shipping = shippingOptions.find(s => s.id === id);
+    if (!shipping) return;
+    
+    const modal = document.getElementById('modalContainer');
+    modal.innerHTML = `
+        <div class="modal-overlay" onclick="closeModal()"></div>
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Editar Opção de Frete</h2>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="editShippingForm" onsubmit="updateShipping(event, ${id})">
+                    <div class="form-group">
+                        <label>Nome do Frete *</label>
+                        <input type="text" name="name" class="search-input" value="${shipping.name || ''}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Preço (R$) *</label>
+                        <input type="number" name="price" class="search-input" step="0.01" min="0" value="${parseFloat(shipping.price || 0).toFixed(2)}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Prazo de Entrega</label>
+                        <input type="text" name="delivery_time" class="search-input" value="${shipping.delivery_time || ''}">
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="active" ${shipping.active ? 'checked' : ''}>
+                            <span>Ativo (disponível na loja)</span>
+                        </label>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    `;
+}
+
+async function saveShipping(event) {
+    event.preventDefault();
+    showLoading('Salvando...');
+    
+    const formData = new FormData(event.target);
+    const data = {
+        name: formData.get('name'),
+        price: parseFloat(formData.get('price')),
+        delivery_time: formData.get('delivery_time') || null,
+        active: formData.get('active') ? 1 : 0
+    };
+    
+    try {
+        const response = await fetch(`${API_URL}/shipping`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            showToast('Frete adicionado com sucesso!', 'success');
+            closeModal();
+            await loadPage('shipping');
+        } else {
+            showToast(result.error || 'Erro ao adicionar frete', 'error');
+        }
+    } catch (error) {
+        console.error('Erro:', error);
+        showToast('Erro ao conectar com servidor', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+async function updateShipping(event, id) {
+    event.preventDefault();
+    showLoading('Atualizando...');
+    
+    const formData = new FormData(event.target);
+    const data = {
+        name: formData.get('name'),
+        price: parseFloat(formData.get('price')),
+        delivery_time: formData.get('delivery_time') || null,
+        active: formData.get('active') ? 1 : 0
+    };
+    
+    try {
+        const response = await fetch(`${API_URL}/shipping/${id}`, {
+            method: 'PUT',
+            headers: getAuthHeaders(),
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            showToast('Frete atualizado com sucesso!', 'success');
+            closeModal();
+            await loadPage('shipping');
+        } else {
+            showToast(result.error || 'Erro ao atualizar frete', 'error');
+        }
+    } catch (error) {
+        console.error('Erro:', error);
+        showToast('Erro ao conectar com servidor', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+async function deleteShipping(id) {
+    if (!confirm('Tem certeza que deseja deletar esta opção de frete?')) return;
+    
+    showLoading('Deletando...');
+    
+    try {
+        const response = await fetch(`${API_URL}/shipping/${id}`, {
+            method: 'DELETE',
+            headers: getAuthHeaders()
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            showToast('Frete deletado com sucesso!', 'success');
+            await loadPage('shipping');
+        } else {
+            showToast(result.error || 'Erro ao deletar frete', 'error');
+        }
+    } catch (error) {
+        console.error('Erro:', error);
+        showToast('Erro ao conectar com servidor', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+async function toggleShippingStatus(id) {
+    const shipping = shippingOptions.find(s => s.id === id);
+    if (!shipping) return;
+    
+    const newStatus = shipping.active ? 0 : 1;
+    
+    try {
+        const response = await fetch(`${API_URL}/shipping/${id}`, {
+            method: 'PUT',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ active: newStatus })
+        });
+        
+        if (response.ok) {
+            shipping.active = newStatus;
+            showToast(`Frete ${newStatus ? 'ativado' : 'desativado'} com sucesso!`, 'success');
+        } else {
+            showToast('Erro ao alterar status', 'error');
+            // Recarregar para reverter UI
+            await loadPage('shipping');
+        }
+    } catch (error) {
+        console.error('Erro:', error);
+        showToast('Erro ao conectar com servidor', 'error');
+        await loadPage('shipping');
+    }
+}
+
+async function moveShippingUp(id) {
+    await reorderShipping(id, 'up');
+}
+
+async function moveShippingDown(id) {
+    await reorderShipping(id, 'down');
+}
+
+async function reorderShipping(id, direction) {
+    const currentIndex = shippingOptions.findIndex(s => s.id === id);
+    if (currentIndex === -1) return;
+    
+    const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    if (newIndex < 0 || newIndex >= shippingOptions.length) return;
+    
+    // Swap sort_order
+    const temp = shippingOptions[currentIndex].sort_order;
+    shippingOptions[currentIndex].sort_order = shippingOptions[newIndex].sort_order;
+    shippingOptions[newIndex].sort_order = temp;
+    
+    try {
+        const updates = [
+            { id: shippingOptions[currentIndex].id, sort_order: shippingOptions[currentIndex].sort_order },
+            { id: shippingOptions[newIndex].id, sort_order: shippingOptions[newIndex].sort_order }
+        ];
+        
+        const response = await fetch(`${API_URL}/shipping/reorder`, {
+            method: 'PUT',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ order: updates })
+        });
+        
+        if (response.ok) {
+            await loadPage('shipping');
+        } else {
+            showToast('Erro ao reordenar', 'error');
+        }
+    } catch (error) {
+        console.error('Erro:', error);
+        showToast('Erro ao conectar com servidor', 'error');
+    }
+}
+
+function closeModal() {
+    document.getElementById('modalContainer').innerHTML = '';
 }
 
 // =====================================================
