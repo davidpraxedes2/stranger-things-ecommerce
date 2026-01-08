@@ -34,6 +34,90 @@
             z-index: 1004 !important;
             height: 48px !important;
         }
+        
+        /* Loading Screen Inicial */
+        #checkoutPageLoader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #000000 0%, #0a0000 100%);
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 1;
+            transition: opacity 0.5s ease-out;
+        }
+        
+        #checkoutPageLoader.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .loader-content {
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .loader-spinner {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 2rem;
+        }
+        
+        .loader-spinner::before,
+        .loader-spinner::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+        }
+        
+        .loader-spinner::before {
+            width: 100%;
+            height: 100%;
+            border: 4px solid rgba(229, 9, 20, 0.1);
+        }
+        
+        .loader-spinner::after {
+            width: 100%;
+            height: 100%;
+            border: 4px solid transparent;
+            border-top-color: #E50914;
+            animation: loaderSpin 1s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+        }
+        
+        .loader-text {
+            font-family: 'Teko', sans-serif;
+            font-size: 2rem;
+            color: #E50914;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 0 0 20px rgba(229, 9, 20, 0.5);
+            animation: loaderGlow 2s ease-in-out infinite;
+        }
+        
+        .loader-subtext {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            letter-spacing: 1px;
+        }
+        
+        @keyframes loaderSpin {
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes loaderGlow {
+            0%, 100% { 
+                text-shadow: 0 0 20px rgba(229, 9, 20, 0.5), 0 0 40px rgba(229, 9, 20, 0.3);
+            }
+            50% { 
+                text-shadow: 0 0 30px rgba(229, 9, 20, 0.8), 0 0 60px rgba(229, 9, 20, 0.5);
+            }
+        }
     </style>
     <script>
         // FORÇAR layout correto IMEDIATAMENTE
@@ -92,6 +176,15 @@
 </head>
 
 <body class="checkout-page">
+    <!-- Page Loader -->
+    <div id="checkoutPageLoader">
+        <div class="loader-content">
+            <div class="loader-spinner"></div>
+            <div class="loader-text">CARREGANDO CHECKOUT</div>
+            <div class="loader-subtext">Preparando sua experiência...</div>
+        </div>
+    </div>
+
     <div class="grid-background"></div>
 
     <!-- Top Announcement Bar -->
@@ -143,6 +236,28 @@
                 document.querySelector('.announcement-bar').classList.add('hidden');
             });
         }
+        
+        // Hide page loader when page is ready
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                const loader = document.getElementById('checkoutPageLoader');
+                if (loader) {
+                    loader.classList.add('hidden');
+                    // Remove loader do DOM após animação
+                    setTimeout(function() {
+                        loader.remove();
+                    }, 500);
+                }
+            }, 400); // 400ms mínimo para garantir que veja o loader
+        });
+        
+        // Fallback: esconder loader após 3 segundos mesmo se algo der errado
+        setTimeout(function() {
+            const loader = document.getElementById('checkoutPageLoader');
+            if (loader && !loader.classList.contains('hidden')) {
+                loader.classList.add('hidden');
+            }
+        }, 3000);
     </script>
     <script src="checkout.js"></script>
 </body>
