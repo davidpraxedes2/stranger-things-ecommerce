@@ -48,7 +48,7 @@
             align-items: center;
             justify-content: center;
             opacity: 1;
-            transition: opacity 0.5s ease-out;
+            transition: opacity 0.4s ease-out;
         }
         
         #checkoutPageLoader.hidden {
@@ -59,6 +59,10 @@
         .loader-content {
             text-align: center;
             padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
         
         .loader-spinner {
@@ -72,6 +76,8 @@
         .loader-spinner::after {
             content: '';
             position: absolute;
+            top: 0;
+            left: 0;
             border-radius: 50%;
         }
         
@@ -97,6 +103,8 @@
             letter-spacing: 3px;
             text-shadow: 0 0 20px rgba(229, 9, 20, 0.5);
             animation: loaderGlow 2s ease-in-out infinite;
+            margin: 0;
+            text-align: center;
         }
         
         .loader-subtext {
@@ -104,6 +112,7 @@
             font-size: 0.9rem;
             margin-top: 0.5rem;
             letter-spacing: 1px;
+            text-align: center;
         }
         
         @keyframes loaderSpin {
@@ -117,6 +126,15 @@
             50% { 
                 text-shadow: 0 0 30px rgba(229, 9, 20, 0.8), 0 0 60px rgba(229, 9, 20, 0.5);
             }
+        }
+        
+        /* Esconder conteúdo da página enquanto carrega */
+        body.loading .checkout-container,
+        body.loading .header,
+        body.loading .announcement-bar,
+        body.loading footer {
+            opacity: 0;
+            visibility: hidden;
         }
     </style>
     <script>
@@ -175,7 +193,7 @@
     </script>
 </head>
 
-<body class="checkout-page">
+<body class="checkout-page loading">
     <!-- Page Loader -->
     <div id="checkoutPageLoader">
         <div class="loader-content">
@@ -237,8 +255,12 @@
             });
         }
         
-        // Hide page loader when page is ready
-        window.addEventListener('load', function() {
+        // Hide page loader quando DOMContentLoaded (não esperar imagens)
+        document.addEventListener('DOMContentLoaded', function() {
+            // Remover classe loading do body
+            document.body.classList.remove('loading');
+            
+            // Esconder loader após um delay mínimo
             setTimeout(function() {
                 const loader = document.getElementById('checkoutPageLoader');
                 if (loader) {
@@ -246,18 +268,19 @@
                     // Remove loader do DOM após animação
                     setTimeout(function() {
                         loader.remove();
-                    }, 500);
+                    }, 400);
                 }
-            }, 400); // 400ms mínimo para garantir que veja o loader
+            }, 200); // Delay mínimo de 200ms para garantir transição suave
         });
         
-        // Fallback: esconder loader após 3 segundos mesmo se algo der errado
+        // Fallback: esconder loader após 2 segundos se DOMContentLoaded não disparar
         setTimeout(function() {
+            document.body.classList.remove('loading');
             const loader = document.getElementById('checkoutPageLoader');
             if (loader && !loader.classList.contains('hidden')) {
                 loader.classList.add('hidden');
             }
-        }, 3000);
+        }, 2000);
     </script>
     <script src="checkout.js"></script>
 </body>
