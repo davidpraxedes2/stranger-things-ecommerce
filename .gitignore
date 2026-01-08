@@ -37,6 +37,7 @@ logs/
 # Temporary files
 *.tmp
 *.temp
+*.tmp2
 tmp/
 temp/
 
@@ -48,3 +49,21 @@ build/
 *.key
 *.pem
 secrets/
+
+# Backups
+*.backup
+*.bak
+
+# Documentation (local)
+ADMIN_DOCUMENTATION.md
+ADMIN_FEATURES.txt
+ANALYTICS_SYSTEM.md
+FRONTEND_ISSUES_REPORT.md
+
+# SVG files (temporary)
+brazil-map.svg
+brazil.svg
+
+# Git helper scripts
+.git-push.sh
+.git-credentials
