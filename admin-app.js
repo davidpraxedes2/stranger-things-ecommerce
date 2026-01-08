@@ -143,6 +143,14 @@ function handleLogout() {
     }
 }
 
+// Helper para headers de autenticação
+function getAuthHeaders() {
+    return {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+    };
+}
+
 // =====================================================
 // EVENT LISTENERS
 // =====================================================
