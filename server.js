@@ -698,6 +698,23 @@ async function handlePopulate(req, res) {
     }
 }
 
+// Endpoint para executar migrações manualmente
+app.get('/api/migrate', async (req, res) => {
+    try {
+        const { migratePostgres } = require('./db-migrate');
+        const result = await migratePostgres(db);
+        
+        if (result) {
+            res.json({ success: true, message: 'Migrações executadas com sucesso!' });
+        } else {
+            res.status(500).json({ success: false, message: 'Erro ao executar migrações' });
+        }
+    } catch (error) {
+        console.error('Erro ao executar migrações:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Listar produtos (público) - VERSÃO ULTRA SIMPLIFICADA COM TRATAMENTO DE ERRO
 app.get('/api/products', async (req, res) => {
     res.setHeader('Content-Type', 'application/json');
