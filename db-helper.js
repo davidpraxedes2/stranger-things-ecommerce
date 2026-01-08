@@ -20,14 +20,7 @@ let USE_POSTGRES = false;
 // Check if we're using PostgreSQL (Vercel)
 if (process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL) {
     USE_POSTGRES = true;
-    try {
-        const { sql } = require('@vercel/postgres');
-        pgClient = sql;
-        console.log('📦 Usando PostgreSQL (Vercel Postgres)');
-    } catch (error) {
-        console.log('⚠️  @vercel/postgres não disponível, usando SQLite');
-        USE_POSTGRES = false;
-    }
+    console.log('📦 Detectado PostgreSQL - modo produção (Vercel)');
 }
 
 let sqliteDb = null;
