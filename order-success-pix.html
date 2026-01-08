@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagamento PIX - Stranger Things Store</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Teko:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <style>
+        body {
+            padding-top: 70px !important;
+        }
+
+        .pix-page {
+            min-height: calc(100vh - 70px);
+            padding: var(--spacing-3xl) var(--spacing-md);
+        }
+
+        .pix-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, var(--dark-gray) 0%, #1a0a0a 100%);
+            border: 2px solid var(--netflix-red);
+            border-radius: 16px;
+            padding: var(--spacing-2xl);
+            box-shadow: 0 0 40px rgba(229, 9, 20, 0.3);
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .pix-header {
+            text-align: center;
+            margin-bottom: var(--spacing-2xl);
+            padding-bottom: var(--spacing-xl);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .pix-icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto var(--spacing-lg);
+            background: linear-gradient(135deg, #00D1C1, #00B8AB);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 40px rgba(0, 209, 193, 0.6), 0 10px 30px rgba(0, 0, 0, 0.3);
+            animation: pulse 2s ease-in-out infinite;
+            position: relative;
+        }
+
+        .pix-icon svg {
+            width: 60px;
+            height: 60px;
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 0 40px rgba(0, 209, 193, 0.6), 0 10px 30px rgba(0, 0, 0, 0.3);
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 0 0 60px rgba(0, 209, 193, 0.9), 0 15px 40px rgba(0, 0, 0, 0.4);
+                transform: scale(1.05);
+            }
+        }
+
+        .pix-title {
+            font-family: var(--font-teko);
+            font-size: clamp(2rem, 5vw, 2.5rem);
+            color: #00D1C1;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: var(--spacing-sm);
+            text-shadow: 0 0 20px rgba(0, 209, 193, 0.6);
+        }
+
+        .pix-subtitle {
+            font-size: var(--fs-base);
+            color: var(--text-gray);
+        }
+
+        .timer-section {
+            background: rgba(229, 9, 20, 0.1);
+            border: 1px solid rgba(229, 9, 20, 0.3);
+            border-radius: 12px;
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-2xl);
+            text-align: center;
+        }
+
+        .timer-label {
+            font-size: var(--fs-sm);
+            color: var(--text-gray);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .timer-display {
+            font-family: var(--font-teko);
+            font-size: clamp(2rem, 6vw, 3rem);
+            color: var(--netflix-red);
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-shadow: 0 0 15px rgba(229, 9, 20, 0.5);
+        }
+
+        .timer-warning {
+            font-size: var(--fs-xs);
+            color: var(--text-gray);
+            margin-top: var(--spacing-sm);
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--spacing-2xl);
+            margin-bottom: var(--spacing-2xl);
+        }
+
+        @media (min-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .qr-section {
+            text-align: center;
+        }
+
+        .qr-wrapper {
+            background: white;
+            padding: var(--spacing-lg);
+            border-radius: 12px;
+            display: inline-block;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        #qrcode {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #qrcode img {
+            border-radius: 8px;
+        }
+
+        .qr-label {
+            font-size: var(--fs-sm);
+            color: var(--text-gray);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .pix-code-section {
+            margin-top: var(--spacing-lg);
+        }
+
+        .pix-code-label {
+            font-size: var(--fs-sm);
+            color: var(--text-gray);
+            text-transform: uppercase;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .pix-code-box {
+            background: var(--medium-gray);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: var(--spacing-md);
+            word-break: break-all;
+            font-family: monospace;
+            font-size: var(--fs-xs);
+            color: var(--text-white);
+            max-height: 100px;
+            overflow-y: auto;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .copy-btn {
+            width: 100%;
+            padding: var(--spacing-md);
+            background: linear-gradient(135deg, #00D1C1, #00B8AB);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-family: var(--font-teko);
+            font-size: var(--fs-lg);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-sm);
+            box-shadow: 0 4px 15px rgba(0, 209, 193, 0.3);
+        }
+
+        .copy-btn:hover {
+            background: linear-gradient(135deg, #00B8AB, #009A8A);
+            box-shadow: 0 6px 25px rgba(0, 209, 193, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .copy-btn.copied {
+            background: #10B981;
+        }
+
+        .instructions-section {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+        }
+
+        .instruction-title {
+            font-family: var(--font-teko);
+            font-size: var(--fs-xl);
+            color: var(--text-white);
+            text-transform: uppercase;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .step {
+            display: flex;
+            gap: var(--spacing-md);
+            padding: var(--spacing-md);
+            background: var(--medium-gray);
+            border-radius: 8px;
+            border-left: 3px solid #00D1C1;
+        }
+
+        .step-number {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #00D1C1, #00B8AB);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-teko);
+            font-weight: 700;
+            font-size: var(--fs-lg);
+            flex-shrink: 0;
+            color: white;
+            box-shadow: 0 2px 10px rgba(0, 209, 193, 0.4);
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-text {
+            font-size: var(--fs-sm);
+            color: var(--text-gray);
+            line-height: 1.6;
+        }
+
+        .order-summary {
+            background: var(--medium-gray);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: var(--spacing-xl);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .summary-title {
+            font-family: var(--font-teko);
+            font-size: var(--fs-xl);
+            color: var(--text-white);
+            text-transform: uppercase;
+            margin-bottom: var(--spacing-lg);
+            text-align: center;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: var(--spacing-sm) 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .summary-row:last-child {
+            border-bottom: none;
+            padding-top: var(--spacing-md);
+            margin-top: var(--spacing-sm);
+        }
+
+        .summary-label {
+            font-size: var(--fs-sm);
+            color: var(--text-gray);
+        }
+
+        .summary-value {
+            font-family: var(--font-teko);
+            font-size: var(--fs-lg);
+            color: var(--text-white);
+            font-weight: 600;
+        }
+
+        .summary-value.total {
+            font-size: var(--fs-2xl);
+            color: #00D1C1;
+            text-shadow: 0 0 15px rgba(0, 209, 193, 0.4);
+        }
+
+        .discount-badge {
+            background: #10B981;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: var(--fs-xs);
+            margin-left: var(--spacing-sm);
+        }
+
+        .info-box {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 8px;
+            padding: var(--spacing-lg);
+            display: flex;
+            gap: var(--spacing-md);
+        }
+
+        .info-icon {
+            width: 24px;
+            height: 24px;
+            color: #3B82F6;
+            flex-shrink: 0;
+        }
+
+        .info-text {
+            font-size: var(--fs-sm);
+            color: var(--text-gray);
+            line-height: 1.6;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-sm);
+            width: 100%;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .checking {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+<body>
+    <!-- Grid Background -->
+    <div class="grid-background"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-top">
+                <div class="logo">
+                    <a href="index.html">
+                        <img src="logo.png" alt="Stranger Things Store" class="logo-img">
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- PIX Page -->
+    <main class="pix-page">
+        <div class="pix-container">
+            <div class="pix-header">
+                <div class="pix-icon">
+                    <!-- Logo PIX Oficial -->
+                    <svg viewBox="0 0 512 512" fill="white" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M242.4 292.5C247.8 287.1 257.1 287.1 262.5 292.5L339.5 369.5C353.7 383.7 372.6 391.5 392.6 391.5H407.7L310.6 488.6C280.3 518.1 231.1 518.1 200.8 488.6L103.3 391.5H112.6C132.6 391.5 151.5 383.7 165.7 369.5L242.4 292.5zM262.5 218.9C257.1 224.3 247.8 224.3 242.4 218.9L165.7 142.1C151.5 127.9 132.6 120.1 112.6 120.1H103.3L200.7 22.76C231.1-7.586 280.3-7.586 310.6 22.76L407.8 120.1H392.6C372.6 120.1 353.7 127.9 339.5 142.1L262.5 218.9zM112.6 142.1C126.4 142.1 139.1 148.3 149.7 158.1L226.4 236.1C239.1 248.8 251.5 255.1 252.5 255.1C253.4 255.1 265.8 248.8 278.5 236.1L355.5 158.1C365.3 148.3 378.8 142.1 392.6 142.1H430.3L488.6 200.7C518.9 231 518.9 280.3 488.6 310.6L430.3 368.9H392.6C378.8 368.9 365.3 362.7 355.5 352.9L278.5 275.9C265.8 263.2 253.5 256.9 252.5 256.9C251.5 256.9 239.1 263.2 226.4 275.9L149.7 352.9C139.1 362.7 126.4 368.9 112.6 368.9H80.78L22.76 310.6C-7.586 280.3-7.586 231 22.76 200.7L80.78 142.1H112.6z"/>
+                    </svg>
+                </div>
+                <h1 class="pix-title">Pagamento via PIX</h1>
+                <p class="pix-subtitle">Escaneie o QR Code ou copie o código para finalizar sua compra</p>
+            </div>
+
+            <!-- Timer -->
+            <div class="timer-section">
+                <div class="timer-label">Tempo restante para pagamento</div>
+                <div class="timer-display" id="timerDisplay">15:00</div>
+                <div class="timer-warning">O código PIX expira em 15 minutos</div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="order-summary">
+                <h2 class="summary-title">Resumo do Pedido</h2>
+                <div class="summary-row">
+                    <span class="summary-label">Pedido</span>
+                    <span class="summary-value" id="orderNumber">#000000</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Subtotal</span>
+                    <span class="summary-value" id="subtotal">R$ 0,00</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Desconto PIX <span class="discount-badge">-5%</span></span>
+                    <span class="summary-value" style="color: #10B981;" id="discount">- R$ 0,00</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label"><strong>Total a Pagar</strong></span>
+                    <span class="summary-value total" id="totalAmount">R$ 0,00</span>
+                </div>
+            </div>
+
+            <!-- Content Grid -->
+            <div class="content-grid">
+                <!-- QR Code Section -->
+                <div class="qr-section">
+                    <div class="qr-label">Escaneie o QR Code com seu app de banco</div>
+                    <div class="qr-wrapper">
+                        <div id="qrcode"></div>
+                    </div>
+                    <div class="pix-code-section">
+                        <div class="pix-code-label">Ou copie o código PIX</div>
+                        <div class="pix-code-box" id="pixCode">00020126580014br.gov.bcb.pix0136a1b2c3d4-e5f6-7890-abcd-ef1234567890520400005303986540510.005802BR5925STRANGER THINGS STORE6014BELO HORIZONTE62070503***6304ABCD</div>
+                        <button class="copy-btn" id="copyBtn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px;">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                            <span id="copyBtnText">COPIAR CÓDIGO PIX</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Instructions -->
+                <div class="instructions-section">
+                    <h2 class="instruction-title">Como Pagar</h2>
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <div class="step-text">Abra o app do seu banco e entre no ambiente PIX</div>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <div class="step-text">Escolha a opção "Pagar com QR Code" ou "PIX Copia e Cola"</div>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <div class="step-text">Escaneie o QR Code acima ou cole o código copiado</div>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <div class="step-text">Confirme o pagamento e aguarde a aprovação automática</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Box -->
+            <div class="info-box">
+                <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+                <div class="info-text">
+                    <strong>Pagamento instantâneo:</strong> Assim que o pagamento for confirmado, você será redirecionado automaticamente para a página de confirmação. Não feche esta página!
+                </div>
+            </div>
+
+            <!-- Back Button -->
+            <a href="checkout.html" class="btn btn-secondary back-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px;">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+                VOLTAR PARA CHECKOUT
+            </a>
+        </div>
+    </main>
+
+    <script>
+        // Get order data from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderId = urlParams.get('order_id') || Math.floor(100000 + Math.random() * 900000);
+        const total = parseFloat(urlParams.get('total') || '0');
+        const discount = total * 0.05;
+        const finalTotal = total - discount;
+
+        // Update page with order data
+        document.getElementById('orderNumber').textContent = `#${orderId}`;
+        document.getElementById('subtotal').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+        document.getElementById('discount').textContent = `- R$ ${discount.toFixed(2).replace('.', ',')}`;
+        document.getElementById('totalAmount').textContent = `R$ ${finalTotal.toFixed(2).replace('.', ',')}`;
+
+        // Generate PIX code (simulated)
+        const pixCode = `00020126580014br.gov.bcb.pix0136${orderId}-${Date.now()}5204000053039865406${finalTotal.toFixed(2)}5802BR5925STRANGER THINGS STORE6014BELO HORIZONTE62070503***6304${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+        document.getElementById('pixCode').textContent = pixCode;
+
+        // Generate QR Code
+        new QRCode(document.getElementById('qrcode'), {
+            text: pixCode,
+            width: 200,
+            height: 200,
+            colorDark: '#000000',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.H
+        });
+
+        // Copy to clipboard
+        const copyBtn = document.getElementById('copyBtn');
+        const copyBtnText = document.getElementById('copyBtnText');
+
+        copyBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(pixCode).then(() => {
+                copyBtn.classList.add('copied');
+                copyBtnText.textContent = '✓ CÓDIGO COPIADO!';
+                
+                setTimeout(() => {
+                    copyBtn.classList.remove('copied');
+                    copyBtnText.textContent = 'COPIAR CÓDIGO PIX';
+                }, 3000);
+            });
+        });
+
+        // Countdown timer (15 minutes)
+        let timeLeft = 15 * 60; // 15 minutes in seconds
+        const timerDisplay = document.getElementById('timerDisplay');
+
+        function updateTimer() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                alert('O tempo para pagamento expirou. Por favor, gere um novo código PIX.');
+                window.location.href = 'checkout.html';
+            } else if (timeLeft <= 60) {
+                timerDisplay.style.color = '#EF4444';
+            } else if (timeLeft <= 180) {
+                timerDisplay.style.color = '#F59E0B';
+            }
+
+            timeLeft--;
+        }
+
+        const timerInterval = setInterval(updateTimer, 1000);
+        updateTimer();
+
+        // Simulate payment check every 3 seconds
+        let checkCount = 0;
+        const maxChecks = 100; // 5 minutes max
+
+        const paymentCheckInterval = setInterval(() => {
+            checkCount++;
+            
+            // Simulate random payment success (10% chance per check for demo)
+            // In production, this would be an API call to check payment status
+            const isPaymentApproved = Math.random() < 0.02; // 2% chance per check
+            
+            if (isPaymentApproved || checkCount >= maxChecks) {
+                clearInterval(paymentCheckInterval);
+                clearInterval(timerInterval);
+                
+                if (isPaymentApproved) {
+                    // Redirect to success page
+                    window.location.href = `order-success-card.html?order_id=${orderId}&total=${finalTotal.toFixed(2).replace('.', ',')}&payment=PIX&email=${urlParams.get('email') || 'seu@email.com'}`;
+                }
+            }
+        }, 3000);
+    </script>
+</body>
+</html>

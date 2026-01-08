@@ -5,6 +5,40 @@ const sessionId = localStorage.getItem('cart_session_id');
 
 let cart = [];
 
+// Função de notificação (necessária para feedback ao usuário)
+function showNotification(message, type = 'success') {
+    const existing = document.querySelector('.notification');
+    if (existing) existing.remove();
+
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.style.cssText = `
+        position: fixed;
+        top: 80px;
+        right: 16px;
+        background: var(--dark-gray, #1a1a1a);
+        border: 2px solid ${type === 'success' ? 'var(--netflix-red, #e50914)' : type === 'error' ? '#ef4444' : '#f59e0b'};
+        color: var(--text-white, #ffffff);
+        padding: 16px 24px;
+        border-radius: 8px;
+        z-index: 3000;
+        font-family: 'Teko', sans-serif;
+        font-size: 16px;
+        font-weight: 500;
+        max-width: 350px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        animation: slideInRight 0.3s ease-out;
+    `;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        notification.style.transition = 'opacity 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
 // Mostrar spinner
 function showSpinner() {
     const spinner = document.getElementById('checkoutSpinner');
@@ -129,6 +163,35 @@ function renderCheckout() {
 
                 <h2 class="section-title">
                     <svg class="section-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M1 3h15v13H1zM16 8h6l3 3v5h-9zM5.5 18a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM18.5 18a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Frete
+                </h2>
+                <div class="shipping-options">
+                    <div class="shipping-option selected" data-shipping="sedex">
+                        <div class="shipping-radio">
+                            <div class="radio-dot"></div>
+                        </div>
+                        <div class="shipping-info">
+                            <div class="shipping-name">SEDEX</div>
+                            <div class="shipping-time">Entrega em 3-5 dias úteis</div>
+                        </div>
+                        <div class="shipping-price">R$ 15,00</div>
+                    </div>
+                    <div class="shipping-option" data-shipping="pac">
+                        <div class="shipping-radio">
+                            <div class="radio-dot"></div>
+                        </div>
+                        <div class="shipping-info">
+                            <div class="shipping-name">PAC</div>
+                            <div class="shipping-time">Entrega em 7-12 dias úteis</div>
+                        </div>
+                        <div class="shipping-price">R$ 10,00</div>
+                    </div>
+                </div>
+
+                <h2 class="section-title">
+                    <svg class="section-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" stroke-width="2"/>
                         <path d="M2 10h20" stroke="currentColor" stroke-width="2"/>
                     </svg>
@@ -156,120 +219,38 @@ function renderCheckout() {
                 </div>
 
                 <div class="payment-details" id="paymentDetails">
-                    <!-- PIX Details -->
+                    <!-- PIX Details - Simples (sem gerar antes) -->
                     <div class="payment-detail-section active" data-payment="pix">
-                        <!-- Estado inicial: antes de gerar -->
-                        <div class="pix-generate-state">
-                            <div class="pix-benefit-cards">
-                                <div class="benefit-card">
-                                    <div class="benefit-icon">
-                                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M13 2L3 14h8l-1 8 10-12h-8l1-8z" fill="#E50914" stroke="#E50914" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                        </svg>
-                                    </div>
-                                    <div class="benefit-text">
-                                        <div class="benefit-title">Aprovação instantânea</div>
-                                        <div class="benefit-desc">Confirmação automática em segundos</div>
-                                    </div>
-                                </div>
-                                <div class="benefit-card">
-                                    <div class="benefit-icon">
-                                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z" fill="#fbbf24" stroke="#f59e0b" stroke-width="2" stroke-linejoin="round"/>
-                                            <circle cx="7" cy="7" r="1.5" fill="#fff"/>
-                                        </svg>
-                                    </div>
-                                    <div class="benefit-text">
-                                        <div class="benefit-title">5% de desconto</div>
-                                        <div class="benefit-desc">Economize R$ ${(total * 0.05).toFixed(2).replace('.', ',')} pagando com PIX</div>
-                                    </div>
-                                </div>
-                                <div class="benefit-card">
-                                    <div class="benefit-icon">
-                                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="#22c55e" stroke="#16a34a" stroke-width="2"/>
-                                            <path d="M9 12l2 2 4-4" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                        </svg>
-                                    </div>
-                                    <div class="benefit-text">
-                                        <div class="benefit-title">100% seguro</div>
-                                        <div class="benefit-desc">Tecnologia de criptografia avançada</div>
-                                    </div>
-                                </div>
+                        <div class="pix-info-box">
+                            <div class="pix-icon-large">
+                                <img src="https://files.passeidireto.com/2889edc1-1a70-456a-a32c-e3f050102347/2889edc1-1a70-456a-a32c-e3f050102347.png" alt="PIX" style="width: 64px; height: 64px;">
                             </div>
-                            <div class="pix-total-preview">
-                                <div class="total-label">Total com desconto PIX:</div>
-                                <div class="total-value">R$ ${(total * 0.95).toFixed(2).replace('.', ',')}</div>
-                                <div class="total-original">De R$ ${total.toFixed(2).replace('.', ',')}</div>
-                            </div>
-                            <button type="button" class="btn-generate-pix">
-                                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M12 2L2 7v10c0 5.5 3.8 10.7 10 12 6.2-1.3 10-6.5 10-12V7l-10-5z" fill="currentColor" opacity="0.2"/>
-                                    <path d="M9 11l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                                Gerar código PIX
-                            </button>
-                        </div>
-                        
-                        <!-- Estado após gerar: QR Code -->
-                        <div class="pix-qrcode-state" style="display: none;">
-                            <div class="pix-qr-container">
-                                <div class="qr-glow"></div>
-                                <div class="pix-qr-box">
-                                    <svg class="qr-code-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                                        <rect width="100" height="100" fill="#fff" rx="4"/>
-                                        <g fill="#000">
-                                            <rect x="10" y="10" width="15" height="15"/>
-                                            <rect x="75" y="10" width="15" height="15"/>
-                                            <rect x="10" y="75" width="15" height="15"/>
-                                            <rect x="35" y="35" width="30" height="30"/>
-                                            <rect x="45" y="15" width="10" height="10"/>
-                                            <rect x="15" y="45" width="10" height="10"/>
-                                            <rect x="75" y="45" width="10" height="10"/>
-                                            <rect x="45" y="75" width="10" height="10"/>
-                                        </g>
+                            <h3 style="font-family: var(--font-teko); font-size: 1.5rem; color: #46d369; margin: 16px 0 8px 0;">Pagamento via PIX</h3>
+                            <p style="color: rgba(255,255,255,0.7); margin-bottom: 24px;">O código PIX será gerado após você finalizar o pedido</p>
+                            <div class="pix-benefits-list">
+                                <div class="benefit-item">
+                                    <svg viewBox="0 0 24 24" fill="none" style="width: 20px; height: 20px; stroke: #46d369;">
+                                        <path d="M5 13l4 4L19 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                     </svg>
-                                    <div class="pix-logo-badge">
-                                        <img src="https://files.passeidireto.com/2889edc1-1a70-456a-a32c-e3f050102347/2889edc1-1a70-456a-a32c-e3f050102347.png" alt="PIX">
-                                    </div>
+                                    <span>Aprovação instantânea</span>
+                                </div>
+                                <div class="benefit-item">
+                                    <svg viewBox="0 0 24 24" fill="none" style="width: 20px; height: 20px; stroke: #fbbf24;">
+                                        <path d="M5 13l4 4L19 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    <span>5% de desconto (R$ ${(total * 0.05).toFixed(2).replace('.', ',')})</span>
+                                </div>
+                                <div class="benefit-item">
+                                    <svg viewBox="0 0 24 24" fill="none" style="width: 20px; height: 20px; stroke: #22c55e;">
+                                        <path d="M5 13l4 4L19 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    <span>100% seguro e criptografado</span>
                                 </div>
                             </div>
-                            <div class="pix-instructions-box">
-                                <div class="instruction-step">
-                                    <span class="step-number">1</span>
-                                    <span class="step-text">Abra o app do seu banco</span>
-                                </div>
-                                <div class="instruction-step">
-                                    <span class="step-number">2</span>
-                                    <span class="step-text">Escolha pagar com PIX QR Code</span>
-                                </div>
-                                <div class="instruction-step">
-                                    <span class="step-number">3</span>
-                                    <span class="step-text">Escaneie o código acima</span>
-                                </div>
-                            </div>
-                            <div class="pix-divider">
-                                <span>ou</span>
-                            </div>
-                            <div class="pix-code-container">
-                                <label class="code-label">Copiar código PIX Copia e Cola</label>
-                                <div class="pix-code-box">
-                                    <input type="text" class="pix-code-input" value="00020126580014br.gov.bcb.pix0136${Date.now()}52040000530398654040.015802BR5925STRANGER THINGS STORE6009SAO PAULO62410503***50300017BR.GOV.BCB.BRCODE01051.0.06304" readonly>
-                                    <button type="button" class="pix-copy-btn">
-                                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 18px; height: 18px;">
-                                            <rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" stroke-width="2"/>
-                                            <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke="currentColor" stroke-width="2"/>
-                                        </svg>
-                                        Copiar código
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="pix-timer">
-                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 16px; height: 16px;">
-                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
-                                    <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                                </svg>
-                                <span>Código expira em <strong>14:59</strong></span>
+                            <div class="pix-total-box">
+                                <div class="pix-total-label">Total com PIX:</div>
+                                <div class="pix-total-value">R$ ${(total * 0.95).toFixed(2).replace('.', ',')}</div>
+                                <div class="pix-total-original">De R$ ${total.toFixed(2).replace('.', ',')}</div>
                             </div>
                         </div>
                     </div>
@@ -357,7 +338,19 @@ function renderCheckout() {
         </div>
     `;
 
-    // Event listeners
+    // Event listeners para métodos de frete
+    document.querySelectorAll('.shipping-option').forEach(option => {
+        option.addEventListener('click', () => {
+            document.querySelectorAll('.shipping-option').forEach(o => o.classList.remove('selected'));
+            option.classList.add('selected');
+            
+            // Atualizar valor do frete no resumo (se necessário)
+            const freteValue = option.dataset.shipping === 'sedex' ? 15.00 : 10.00;
+            console.log('Frete selecionado:', option.dataset.shipping, 'R$', freteValue);
+        });
+    });
+
+    // Event listeners para métodos de pagamento
     document.querySelectorAll('.payment-method').forEach(method => {
         method.addEventListener('click', () => {
             document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected'));
@@ -415,24 +408,39 @@ function renderCheckout() {
     // PIX copy button
     const pixCopyBtn = document.querySelector('.pix-copy-btn');
     if (pixCopyBtn) {
-        pixCopyBtn.addEventListener('click', () => {
+        pixCopyBtn.addEventListener('click', async () => {
             const pixCode = document.querySelector('.pix-code-input');
-            pixCode.select();
-            document.execCommand('copy');
             
-            const originalHTML = pixCopyBtn.innerHTML;
-            pixCopyBtn.innerHTML = `
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 18px; height: 18px;">
-                    <path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                Copiado!
-            `;
-            pixCopyBtn.style.background = '#22c55e';
-            
-            setTimeout(() => {
-                pixCopyBtn.innerHTML = originalHTML;
-                pixCopyBtn.style.background = '';
-            }, 2000);
+            try {
+                // Clipboard API moderna (Chrome 90+, Firefox, Edge)
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(pixCode.value);
+                } else {
+                    // Fallback para navegadores antigos
+                    pixCode.select();
+                    pixCode.setSelectionRange(0, 99999); // Mobile
+                    document.execCommand('copy');
+                }
+                
+                const originalHTML = pixCopyBtn.innerHTML;
+                pixCopyBtn.innerHTML = `
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 18px; height: 18px;">
+                        <path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Copiado!
+                `;
+                pixCopyBtn.style.background = '#22c55e';
+                
+                showNotification('Código PIX copiado!', 'success');
+                
+                setTimeout(() => {
+                    pixCopyBtn.innerHTML = originalHTML;
+                    pixCopyBtn.style.background = '';
+                }, 2000);
+            } catch (err) {
+                console.error('Erro ao copiar código PIX:', err);
+                showNotification('Erro ao copiar código PIX', 'error');
+            }
         });
     }
 
@@ -485,17 +493,216 @@ function startPixTimer() {
     }, 1000);
 }
 
-function handleCheckout(e) {
+async function handleCheckout(e) {
     e.preventDefault();
-    const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData);
+    
+    // Validar formulário
+    const form = e.target;
+    if (!form.checkValidity()) {
+        showNotification('Por favor, preencha todos os campos obrigatórios', 'error');
+        return;
+    }
+    
+    // Coletar dados do cliente
+    const formData = new FormData(form);
+    const customerData = Object.fromEntries(formData);
+    
     const paymentMethod = document.querySelector('.payment-method.selected').dataset.method;
     
-    console.log('Pedido:', { ...data, paymentMethod, cart });
+    // Validar método de pagamento
+    if (paymentMethod === 'card') {
+        const cardNumber = document.getElementById('cardNumber')?.value;
+        const cardName = document.getElementById('cardName')?.value;
+        const cardExpiry = document.getElementById('cardExpiry')?.value;
+        const cardCvv = document.getElementById('cardCvv')?.value;
+        
+        if (!cardNumber || !cardName || !cardExpiry || !cardCvv) {
+            showNotification('Por favor, preencha os dados do cartão', 'error');
+            return;
+        }
+    }
     
-    alert('Pedido realizado com sucesso! 🎉\n\nEm breve você receberá a confirmação por email.');
-    localStorage.removeItem('cart_session_id');
-    window.location.href = 'index.html';
+    // Mostrar loading
+    showCheckoutLoading(paymentMethod);
+    
+    try {
+        // Calcular valores
+        const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        const shipping = 25.00;
+        const discount = paymentMethod === 'pix' ? subtotal * 0.05 : 0;
+        const total = subtotal + shipping - discount;
+        
+        // Criar pedido
+        const orderData = {
+            customer_name: customerData.name,
+            customer_email: customerData.email,
+            customer_phone: customerData.phone,
+            customer_address: `${customerData.street}, ${customerData.number}${customerData.complement ? ', ' + customerData.complement : ''} - ${customerData.neighborhood}, ${customerData.city} - CEP: ${customerData.cep}`,
+            items: cart,
+            payment_method: paymentMethod,
+            subtotal: subtotal,
+            shipping: shipping,
+            discount: discount,
+            total: total,
+            session_id: sessionId,
+            status: 'pending'
+        };
+        
+        const response = await fetch(`${API_URL}/orders`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-session-id': sessionId
+            },
+            body: JSON.stringify(orderData)
+        });
+        
+        if (!response.ok) {
+            throw new Error('Erro ao processar pedido');
+        }
+        
+        const result = await response.json();
+        const orderId = result.order_id;
+        
+        // Processar pagamento
+        if (paymentMethod === 'pix') {
+            // Redirecionar para página PIX
+            setTimeout(() => {
+                hideCheckoutLoading();
+                window.location.href = `order-success-pix.html?order_id=${orderId}&total=${total.toFixed(2)}&email=${customerData.email}`;
+            }, 1500);
+        } else {
+            // Processar pagamento com cartão
+            const cardData = {
+                number: document.getElementById('cardNumber').value.replace(/\s/g, ''),
+                name: document.getElementById('cardName').value,
+                expiry: document.getElementById('cardExpiry').value,
+                cvv: document.getElementById('cardCvv').value
+            };
+            
+            const paymentResponse = await fetch(`${API_URL}/payments/process`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    order_id: orderId,
+                    card: cardData,
+                    amount: total
+                })
+            });
+            
+            const paymentResult = await paymentResponse.json();
+            
+            setTimeout(() => {
+                hideCheckoutLoading();
+                
+                if (paymentResult.status === 'approved') {
+                    // Limpar carrinho
+                    localStorage.removeItem('cart_session_id');
+                    
+                    // Redirecionar para sucesso
+                    window.location.href = `order-success-card.html?order_id=${orderId}&total=${total.toFixed(2).replace('.', ',')}&email=${customerData.email}&payment=Cartão de Crédito`;
+                } else {
+                    showNotification('Pagamento recusado. Verifique os dados do cartão.', 'error');
+                }
+            }, 2000);
+        }
+        
+    } catch (error) {
+        console.error('Erro ao finalizar compra:', error);
+        hideCheckoutLoading();
+        showNotification('Erro ao processar pedido. Tente novamente.', 'error');
+    }
+}
+
+// Mostrar loading durante checkout
+function showCheckoutLoading(paymentMethod) {
+    const loadingHtml = `
+        <div class="checkout-loading-overlay" id="checkoutLoadingOverlay">
+            <div class="checkout-loading-content">
+                <div class="loading-spinner-large"></div>
+                <h2 class="loading-title">${paymentMethod === 'pix' ? 'GERANDO CÓDIGO PIX...' : 'PROCESSANDO PAGAMENTO...'}</h2>
+                <p class="loading-subtitle">${paymentMethod === 'pix' ? 'Aguarde enquanto geramos seu código PIX' : 'Estamos validando seu cartão de crédito'}</p>
+            </div>
+        </div>
+        <style>
+            .checkout-loading-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: rgba(0, 0, 0, 0.95);
+                z-index: 10000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                animation: fadeIn 0.3s ease;
+            }
+            
+            .checkout-loading-content {
+                text-align: center;
+                animation: slideUp 0.5s ease;
+            }
+            
+            .loading-spinner-large {
+                width: 80px;
+                height: 80px;
+                border: 4px solid rgba(229, 9, 20, 0.2);
+                border-top: 4px solid #E50914;
+                border-radius: 50%;
+                margin: 0 auto 2rem;
+                animation: spin 1s linear infinite;
+            }
+            
+            .loading-title {
+                font-family: var(--font-teko);
+                font-size: 2rem;
+                color: #E50914;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                margin-bottom: 1rem;
+                text-shadow: 0 0 20px rgba(229, 9, 20, 0.5);
+            }
+            
+            .loading-subtitle {
+                color: var(--text-gray);
+                font-size: 1rem;
+            }
+            
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+            
+            @keyframes slideUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            
+            @keyframes spin {
+                to { transform: rotate(360deg); }
+            }
+        </style>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', loadingHtml);
+}
+
+// Esconder loading
+function hideCheckoutLoading() {
+    const overlay = document.getElementById('checkoutLoadingOverlay');
+    if (overlay) {
+        overlay.style.opacity = '0';
+        setTimeout(() => overlay.remove(), 300);
+    }
 }
 
 // Buscar CEP via ViaCEP API

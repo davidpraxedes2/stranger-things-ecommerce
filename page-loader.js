@@ -31,9 +31,11 @@
     // Expose functions globally
     window.showPageLoader = function () {
         if (loader) {
+            hidden = false;
             loader.style.display = 'flex';
             loader.classList.remove('hidden');
-            hidden = false;
+            loader.classList.add('active');
+            document.body.classList.add('no-scroll');
         }
     };
 

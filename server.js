@@ -379,6 +379,7 @@ function initializeDatabase() {
         description TEXT,
         is_active INTEGER DEFAULT 1,
         sort_order INTEGER DEFAULT 0,
+        default_view TEXT DEFAULT 'grid',
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`, (err) => {
         if (!err) {
@@ -416,6 +417,15 @@ function initializeDatabase() {
                     console.log('✅ Coleções iniciais inseridas no banco de dados');
                 }
             });
+        }
+    });
+    
+    // Migration: Adicionar coluna default_view se não existir
+    db.run(`ALTER TABLE collections ADD COLUMN default_view TEXT DEFAULT 'grid'`, (err) => {
+        if (err && !err.message.includes('duplicate column')) {
+            console.log('Coluna default_view já existe ou erro:', err.message);
+        } else if (!err) {
+            console.log('✅ Coluna default_view adicionada à tabela collections');
         }
     });
 
@@ -838,9 +848,9 @@ app.get('/api/admin/collections', authenticateToken, async (req, res) => {
 
 // Admin: Criar Coleção
 app.post('/api/admin/collections', authenticateToken, (req, res) => {
-    const { name, slug, description, is_active } = req.body;
-    db.run('INSERT INTO collections (name, slug, description, is_active, sort_order) VALUES (?, ?, ?, ?, (SELECT COALESCE(MAX(sort_order), -1) + 1 FROM collections))',
-        [name, slug, description, is_active ? 1 : 0],
+    const { name, slug, description, is_active, default_view } = req.body;
+    db.run('INSERT INTO collections (name, slug, description, is_active, default_view, sort_order) VALUES (?, ?, ?, ?, ?, (SELECT COALESCE(MAX(sort_order), -1) + 1 FROM collections))',
+        [name, slug, description, is_active ? 1 : 0, default_view || 'grid'],
         function (err) {
             if (err) return res.status(500).json({ error: err.message });
             res.json({ success: true, id: this.lastID, message: 'Coleção criada com sucesso' });
@@ -873,24 +883,46 @@ app.put('/api/admin/collections/reorder', authenticateToken, async (req, res) =>
 // Admin: Atualizar Coleção
 app.put('/api/admin/collections/:id', authenticateToken, (req, res) => {
     const { id } = req.params;
-    const { name, slug, description, is_active } = req.body;
+    const { name, slug, description, is_active, default_view } = req.body;
 
-    // Se passar apenas is_active (toggle)
-    if (name === undefined && is_active !== undefined) {
-        db.run('UPDATE collections SET is_active = ? WHERE id = ?', [is_active ? 1 : 0, id], function (err) {
-            if (err) return res.status(500).json({ error: err.message });
-            res.json({ success: true, message: 'Status atualizado' });
-        });
-        return;
-    }
-
-    db.run('UPDATE collections SET name = ?, slug = ?, description = ?, is_active = ? WHERE id = ?',
-        [name, slug, description, is_active ? 1 : 0, id],
-        function (err) {
-            if (err) return res.status(500).json({ error: err.message });
-            res.json({ success: true, message: 'Coleção atualizada' });
+    try {
+        // Se passar apenas default_view (toggle de visualização)
+        if (name === undefined && slug === undefined && description === undefined && default_view !== undefined) {
+            const stmt = db.prepare('UPDATE collections SET default_view = ? WHERE id = ?');
+            const result = stmt.run(default_view, id);
+            
+            if (result.changes === 0) {
+                return res.status(404).json({ error: 'Coleção não encontrada' });
+            }
+            
+            return res.json({ success: true, message: 'Visualização padrão atualizada' });
         }
-    );
+
+        // Se passar apenas is_active (toggle de status)
+        if (name === undefined && is_active !== undefined && default_view === undefined) {
+            const stmt = db.prepare('UPDATE collections SET is_active = ? WHERE id = ?');
+            const result = stmt.run(is_active ? 1 : 0, id);
+            
+            if (result.changes === 0) {
+                return res.status(404).json({ error: 'Coleção não encontrada' });
+            }
+            
+            return res.json({ success: true, message: 'Status atualizado' });
+        }
+
+        // Atualização completa
+        const stmt = db.prepare('UPDATE collections SET name = ?, slug = ?, description = ?, is_active = ?, default_view = ? WHERE id = ?');
+        const result = stmt.run(name, slug, description, is_active ? 1 : 0, default_view || 'grid', id);
+        
+        if (result.changes === 0) {
+            return res.status(404).json({ error: 'Coleção não encontrada' });
+        }
+        
+        res.json({ success: true, message: 'Coleção atualizada' });
+    } catch (error) {
+        console.error('Erro ao atualizar coleção:', error);
+        res.status(500).json({ error: error.message });
+    }
 });
 
 // Admin: Reordenar Coleções
@@ -1006,6 +1038,56 @@ app.put('/api/admin/collections/:id/reorder-products', authenticateToken, (req, 
     }
 });
 
+// Admin: Listar todos os pedidos
+app.get('/api/admin/orders', authenticateToken, (req, res) => {
+    try {
+        const orders = db.prepare(`
+            SELECT o.*, 
+                   COUNT(oi.id) as item_count
+            FROM orders o
+            LEFT JOIN order_items oi ON o.id = oi.order_id
+            GROUP BY o.id
+            ORDER BY o.created_at DESC
+        `).all();
+        
+        // Buscar itens de cada pedido
+        orders.forEach(order => {
+            const items = db.prepare(`
+                SELECT oi.*, p.name as product_name, p.image_url
+                FROM order_items oi
+                JOIN products p ON oi.product_id = p.id
+                WHERE oi.order_id = ?
+            `).all(order.id);
+            
+            order.items = items;
+        });
+        
+        res.json(orders);
+    } catch (error) {
+        console.error('Erro ao buscar pedidos:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Admin: Atualizar status do pedido
+app.put('/api/admin/orders/:id/status', authenticateToken, (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
+    
+    try {
+        const stmt = db.prepare('UPDATE orders SET status = ? WHERE id = ?');
+        const result = stmt.run(status, id);
+        
+        if (result.changes === 0) {
+            return res.status(404).json({ error: 'Pedido não encontrado' });
+        }
+        
+        res.json({ success: true, message: 'Status atualizado' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Buscar produto por ID (público)
 app.get('/api/products/:id', (req, res) => {
     // ...
@@ -1037,41 +1119,78 @@ app.get('/api/products/:id', (req, res) => {
 
 // Criar pedido (público)
 app.post('/api/orders', (req, res) => {
-    const { customer_name, customer_email, customer_phone, shipping_address, payment_method, items, total } = req.body;
+    const { customer_name, customer_email, customer_phone, customer_address, payment_method, items, subtotal, shipping, discount, total, session_id, status } = req.body;
 
     if (!items || !Array.isArray(items) || items.length === 0) {
         return res.status(400).json({ error: 'Pedido vazio' });
     }
 
-    db.run(
-        'INSERT INTO orders (customer_name, customer_email, customer_phone, shipping_address, payment_method, total) VALUES (?, ?, ?, ?, ?, ?)',
-        [customer_name, customer_email, customer_phone, shipping_address || null, payment_method || null, total],
-        function (err) {
-            if (err) {
-                res.status(500).json({ error: err.message });
-                return;
-            }
+    try {
+        // Inserir pedido
+        const stmt = db.prepare(`
+            INSERT INTO orders (customer_name, customer_email, customer_phone, total, status, created_at)
+            VALUES (?, ?, ?, ?, ?, datetime('now'))
+        `);
+        
+        const result = stmt.run(customer_name, customer_email, customer_phone, total, status || 'pending');
+        const orderId = result.lastID;
 
-            const orderId = this.lastID;
-            const stmt = db.prepare('INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)');
+        // Inserir itens do pedido
+        const itemStmt = db.prepare('INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)');
+        
+        items.forEach(item => {
+            itemStmt.run(orderId, item.id, item.quantity, item.price);
+        });
 
-            items.forEach(item => {
-                stmt.run([orderId, item.product_id, item.quantity, item.price]);
-            });
+        // Limpar carrinho da sessão se fornecido
+        if (session_id) {
+            db.prepare('DELETE FROM cart WHERE session_id = ?').run(session_id);
+        }
 
-            stmt.finalize((err) => {
-                if (err) {
-                    res.status(500).json({ error: err.message });
-                    return;
-                }
+        res.json({
+            success: true,
+            order_id: orderId,
+            message: 'Pedido criado com sucesso'
+        });
+    } catch (error) {
+        console.error('Erro ao criar pedido:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Processar pagamento (público)
+app.post('/api/payments/process', (req, res) => {
+    const { order_id, card, amount } = req.body;
+
+    // Simular processamento de pagamento
+    // Em produção, integrar com gateway de pagamento real (Stripe, PagSeguro, etc)
+    
+    setTimeout(() => {
+        // 90% de chance de aprovação para demo
+        const isApproved = Math.random() < 0.9;
+        
+        if (isApproved) {
+            // Atualizar status do pedido
+            try {
+                db.prepare('UPDATE orders SET status = ? WHERE id = ?').run('paid', order_id);
+                
                 res.json({
                     success: true,
-                    message: 'Pedido criado com sucesso',
-                    order_id: orderId
+                    status: 'approved',
+                    message: 'Pagamento aprovado',
+                    transaction_id: `TXN-${Date.now()}-${Math.floor(Math.random() * 10000)}`
                 });
+            } catch (error) {
+                res.status(500).json({ error: error.message });
+            }
+        } else {
+            res.json({
+                success: false,
+                status: 'declined',
+                message: 'Pagamento recusado. Verifique os dados do cartão.'
             });
         }
-    );
+    }, 1000); // Simular latência da rede
 });
 
 // ===== ROTAS DE CARRINHO =====
@@ -1529,6 +1648,136 @@ app.delete('/api/admin/customers/:id', authenticateToken, (req, res) => {
         }
         res.json({ success: true, message: 'Cliente deletado com sucesso' });
     });
+});
+
+// ===== SISTEMA DE ANALYTICS E RASTREAMENTO =====
+
+// Armazenamento em memória para analytics (em produção, usar Redis ou banco)
+const analyticsData = {
+    activeSessions: new Map(),
+    pageViews: new Map(),
+    visitorLocations: new Map()
+};
+
+// Middleware para rastrear visitantes
+app.use((req, res, next) => {
+    if (!req.path.startsWith('/api/admin') && !req.path.startsWith('/admin')) {
+        const sessionId = req.headers['x-session-id'] || req.ip;
+        const now = Date.now();
+        
+        analyticsData.activeSessions.set(sessionId, {
+            lastActivity: now,
+            ip: req.ip,
+            userAgent: req.headers['user-agent'],
+            currentPage: req.path
+        });
+        
+        const page = req.path;
+        analyticsData.pageViews.set(page, (analyticsData.pageViews.get(page) || 0) + 1);
+    }
+    next();
+});
+
+// Limpar sessões inativas (mais de 5 minutos)
+setInterval(() => {
+    const fiveMinutesAgo = Date.now() - (5 * 60 * 1000);
+    for (const [sessionId, data] of analyticsData.activeSessions.entries()) {
+        if (data.lastActivity < fiveMinutesAgo) {
+            analyticsData.activeSessions.delete(sessionId);
+        }
+    }
+}, 60000);
+
+// API: Contador de visitantes online
+app.get('/api/admin/analytics/online-count', authenticateToken, (req, res) => {
+    res.json({ count: analyticsData.activeSessions.size });
+});
+
+// API: Localizações de visitantes (coordenadas para o mapa)
+app.get('/api/admin/analytics/visitor-locations', authenticateToken, (req, res) => {
+    const cityCoordinates = {
+        'São Paulo': { x: 420, y: 480 },
+        'Rio de Janeiro': { x: 460, y: 500 },
+        'Brasília': { x: 380, y: 380 },
+        'Belo Horizonte': { x: 450, y: 440 },
+        'Curitiba': { x: 390, y: 530 },
+        'Porto Alegre': { x: 350, y: 600 },
+        'Salvador': { x: 500, y: 320 },
+        'Recife': { x: 540, y: 230 },
+        'Fortaleza': { x: 530, y: 190 },
+        'Manaus': { x: 200, y: 190 },
+        'Goiânia': { x: 400, y: 410 },
+        'Florianópolis': { x: 400, y: 560 }
+    };
+    
+    const locationCounts = new Map();
+    
+    for (const [sessionId, data] of analyticsData.activeSessions.entries()) {
+        const cachedLocation = analyticsData.visitorLocations.get(data.ip);
+        if (cachedLocation) {
+            const key = `${cachedLocation.city},${cachedLocation.state}`;
+            locationCounts.set(key, (locationCounts.get(key) || 0) + 1);
+        }
+    }
+    
+    const locations = [];
+    for (const [key, count] of locationCounts.entries()) {
+        const [city, state] = key.split(',');
+        const coords = cityCoordinates[city];
+        if (coords) {
+            locations.push({
+                city,
+                state,
+                count,
+                x: coords.x,
+                y: coords.y
+            });
+        }
+    }
+    
+    res.json(locations);
+});
+
+// API: Sessões ativas detalhadas
+app.get('/api/admin/sessions/active', authenticateToken, (req, res) => {
+    const sessions = [];
+    const now = Date.now();
+    
+    for (const [sessionId, data] of analyticsData.activeSessions.entries()) {
+        const location = analyticsData.visitorLocations.get(data.ip) || { 
+            city: 'Desconhecido', 
+            state: 'BR' 
+        };
+        
+        const durationMs = now - data.lastActivity;
+        const durationMin = Math.floor(durationMs / 60000);
+        
+        const deviceType = data.userAgent?.includes('Mobile') ? '📱 Mobile' : '💻 Desktop';
+        
+        sessions.push({
+            city: location.city,
+            state: location.state,
+            ip: data.ip.includes('::ffff:') ? data.ip.replace('::ffff:', '') : data.ip,
+            page: data.currentPage || '/',
+            duration: `${durationMin} min`,
+            device: deviceType,
+            isNewUser: !analyticsData.visitorLocations.has(data.ip)
+        });
+    }
+    
+    res.json(sessions.slice(0, 12));
+});
+
+// API: Registrar localização do visitante (chamado do front-end)
+app.post('/api/analytics/track-location', (req, res) => {
+    const { city, state, ip } = req.body;
+    const visitorIp = ip || req.ip;
+    
+    if (city && state) {
+        analyticsData.visitorLocations.set(visitorIp, { city, state, timestamp: Date.now() });
+    }
+    
+    res.json({ success: true });
 });
 
 // Iniciar servidor (apenas em desenvolvimento local)

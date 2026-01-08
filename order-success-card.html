@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedido Aprovado! - Stranger Things Store</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Teko:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 0 !important;
+        }
+
+        .success-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-3xl) var(--spacing-md);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .success-container {
+            max-width: 700px;
+            width: 100%;
+            background: linear-gradient(135deg, var(--dark-gray) 0%, #1a0a0a 100%);
+            border: 2px solid var(--netflix-red);
+            border-radius: 16px;
+            padding: var(--spacing-3xl) var(--spacing-xl);
+            box-shadow: 0 0 40px rgba(229, 9, 20, 0.3), 0 0 80px rgba(229, 9, 20, 0.2);
+            position: relative;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .success-header {
+            text-align: center;
+            margin-bottom: var(--spacing-2xl);
+        }
+
+        .success-icon-wrapper {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.05));
+            border: 3px solid #10B981;
+            border-radius: 50%;
+            margin-bottom: var(--spacing-xl);
+            animation: scaleIn 0.5s ease-out 0.3s both;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+            }
+            to {
+                transform: scale(1);
+            }
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.8));
+        }
+
+        .success-title {
+            font-family: var(--font-teko);
+            font-size: clamp(2rem, 5vw, 3rem);
+            color: #10B981;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: var(--spacing-md);
+            text-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+            animation: fadeIn 0.6s ease-out 0.4s both;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .success-subtitle {
+            font-size: var(--fs-lg);
+            color: var(--text-gray);
+            margin-bottom: var(--spacing-2xl);
+            animation: fadeIn 0.6s ease-out 0.5s both;
+        }
+
+        .order-details {
+            background: var(--medium-gray);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: var(--spacing-xl);
+            margin-bottom: var(--spacing-2xl);
+            animation: fadeIn 0.6s ease-out 0.6s both;
+        }
+
+        .order-detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-md) 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .order-detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .order-detail-label {
+            font-size: var(--fs-sm);
+            color: var(--text-gray);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .order-detail-value {
+            font-family: var(--font-teko);
+            font-size: var(--fs-xl);
+            color: var(--text-white);
+            font-weight: 600;
+        }
+
+        .order-detail-value.highlight {
+            color: #10B981;
+            font-size: var(--fs-2xl);
+        }
+
+        .info-box {
+            background: rgba(229, 9, 20, 0.1);
+            border: 1px solid rgba(229, 9, 20, 0.3);
+            border-radius: 8px;
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+            animation: fadeIn 0.6s ease-out 0.7s both;
+        }
+
+        .info-box-title {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            font-family: var(--font-teko);
+            font-size: var(--fs-lg);
+            color: var(--netflix-red);
+            text-transform: uppercase;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .info-box-text {
+            font-size: var(--fs-sm);
+            color: var(--text-gray);
+            line-height: 1.6;
+        }
+
+        .next-steps {
+            margin-bottom: var(--spacing-2xl);
+            animation: fadeIn 0.6s ease-out 0.8s both;
+        }
+
+        .next-steps-title {
+            font-family: var(--font-teko);
+            font-size: var(--fs-xl);
+            color: var(--text-white);
+            text-transform: uppercase;
+            margin-bottom: var(--spacing-lg);
+            text-align: center;
+        }
+
+        .step {
+            display: flex;
+            gap: var(--spacing-md);
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-sm);
+            background: var(--medium-gray);
+            border-radius: 8px;
+            border-left: 3px solid var(--netflix-red);
+        }
+
+        .step-number {
+            width: 32px;
+            height: 32px;
+            background: var(--netflix-red);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-teko);
+            font-weight: 700;
+            font-size: var(--fs-lg);
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-title {
+            font-family: var(--font-teko);
+            font-size: var(--fs-base);
+            color: var(--text-white);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        .step-description {
+            font-size: var(--fs-sm);
+            color: var(--text-gray);
+        }
+
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+            animation: fadeIn 0.6s ease-out 0.9s both;
+        }
+
+        @media (min-width: 768px) {
+            .actions {
+                flex-direction: row;
+            }
+        }
+
+        .confetti {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body>
+    <!-- Grid Background -->
+    <div class="grid-background"></div>
+
+    <!-- Confetti Animation -->
+    <canvas class="confetti" id="confettiCanvas"></canvas>
+
+    <!-- Success Page -->
+    <main class="success-page">
+        <div class="success-container">
+            <div class="success-header">
+                <div class="success-icon-wrapper">
+                    <div class="success-icon">✓</div>
+                </div>
+                <h1 class="success-title">Pagamento Aprovado!</h1>
+                <p class="success-subtitle">Seu pedido foi confirmado com sucesso</p>
+            </div>
+
+            <div class="order-details">
+                <div class="order-detail-row">
+                    <span class="order-detail-label">Número do Pedido</span>
+                    <span class="order-detail-value highlight" id="orderNumber">#000000</span>
+                </div>
+                <div class="order-detail-row">
+                    <span class="order-detail-label">Forma de Pagamento</span>
+                    <span class="order-detail-value" id="paymentMethod">Cartão de Crédito</span>
+                </div>
+                <div class="order-detail-row">
+                    <span class="order-detail-label">Valor Total</span>
+                    <span class="order-detail-value" id="totalAmount">R$ 0,00</span>
+                </div>
+                <div class="order-detail-row">
+                    <span class="order-detail-label">Status</span>
+                    <span class="order-detail-value" style="color: #10B981;">APROVADO</span>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px;">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                    Confirmação Enviada
+                </div>
+                <p class="info-box-text">
+                    Enviamos um email de confirmação para <strong id="customerEmail">seu@email.com</strong> com todos os detalhes do pedido e informações de rastreamento.
+                </p>
+            </div>
+
+            <div class="next-steps">
+                <h2 class="next-steps-title">Próximos Passos</h2>
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <div class="step-title">Preparação do Pedido</div>
+                        <div class="step-description">Seu pedido será separado e embalado em até 2 dias úteis</div>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <div class="step-title">Envio</div>
+                        <div class="step-description">Você receberá o código de rastreamento por email assim que o pedido for despachado</div>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <div class="step-title">Entrega</div>
+                        <div class="step-description">Prazo estimado: <span id="deliveryEstimate">5-10 dias úteis</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions">
+                <a href="index.html" class="btn btn-primary btn-block">CONTINUAR COMPRANDO</a>
+                <a href="index.html#produtos" class="btn btn-secondary btn-block">VER MAIS PRODUTOS</a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Get order data from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderId = urlParams.get('order_id') || Math.floor(100000 + Math.random() * 900000);
+        const total = urlParams.get('total') || '0,00';
+        const email = urlParams.get('email') || 'seu@email.com';
+        const payment = urlParams.get('payment') || 'Cartão de Crédito';
+
+        // Update page with order data
+        document.getElementById('orderNumber').textContent = `#${orderId}`;
+        document.getElementById('totalAmount').textContent = `R$ ${total}`;
+        document.getElementById('customerEmail').textContent = email;
+        document.getElementById('paymentMethod').textContent = payment;
+
+        // Confetti animation
+        const canvas = document.getElementById('confettiCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const confetti = [];
+        const colors = ['#E50914', '#10B981', '#F59E0B', '#3B82F6', '#8B5CF6'];
+
+        for (let i = 0; i < 150; i++) {
+            confetti.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height - canvas.height,
+                r: Math.random() * 6 + 2,
+                d: Math.random() * 10 + 5,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                tilt: Math.random() * 10 - 5,
+                tiltAngleIncremental: Math.random() * 0.07 + 0.05,
+                tiltAngle: 0
+            });
+        }
+
+        function drawConfetti() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            confetti.forEach((c, index) => {
+                ctx.beginPath();
+                ctx.lineWidth = c.r / 2;
+                ctx.strokeStyle = c.color;
+                ctx.moveTo(c.x + c.tilt + c.r / 3, c.y);
+                ctx.lineTo(c.x + c.tilt, c.y + c.tilt + c.r / 5);
+                ctx.stroke();
+
+                c.tiltAngle += c.tiltAngleIncremental;
+                c.y += (Math.cos(c.d) + 3 + c.r / 2) / 2;
+                c.tilt = Math.sin(c.tiltAngle - index / 3) * 15;
+
+                if (c.y > canvas.height) {
+                    confetti[index] = {
+                        x: Math.random() * canvas.width,
+                        y: -20,
+                        r: c.r,
+                        d: c.d,
+                        color: c.color,
+                        tilt: c.tilt,
+                        tiltAngleIncremental: c.tiltAngleIncremental,
+                        tiltAngle: c.tiltAngle
+                    };
+                }
+            });
+
+            requestAnimationFrame(drawConfetti);
+        }
+
+        drawConfetti();
+
+        // Stop confetti after 5 seconds
+        setTimeout(() => {
+            confetti.length = 0;
+        }, 5000);
+
+        // Clear cart
+        if (typeof localStorage !== 'undefined') {
+            localStorage.removeItem('cart');
+        }
+    </script>
+</body>
+</html>

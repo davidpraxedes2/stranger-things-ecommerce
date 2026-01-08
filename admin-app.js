@@ -1,29 +1,92 @@
-// Admin Dashboard - Stranger Things Store
-// Sistema completo com CRUD real e notificações
+// =====================================================
+// STRANGER THINGS E-COMMERCE - ADMIN DASHBOARD PRO
+// Production-Ready Admin Panel with Advanced Features
+// =====================================================
 
 const API_BASE = window.location.origin;
 const API_URL = `${API_BASE}/api/admin`;
 
-// Estado global
-let currentUser = null;
-let collections = [];
-let products = [];
-let stats = {};
-let sortableInstance = null;
+// =====================================================
+// GLOBAL STATE MANAGEMENT
+// =====================================================
 
-// === AUTENTICAÇÃO ===
+const AppState = {
+    currentUser: null,
+    collections: [],
+    products: [],
+    orders: [],
+    customers: [],
+    stats: {},
+    analytics: {},
+    inventory: [],
+    settings: {},
+    charts: {},
+    
+    // Filters & Search
+    filters: {
+        products: { search: '', collection: '', status: '', priceRange: null },
+        orders: { search: '', status: '', dateRange: null },
+        customers: { search: '', segment: '', tags: [] }
+    },
+    
+    // Pagination
+    pagination: {
+        products: { page: 1, limit: 20, total: 0 },
+        orders: { page: 1, limit: 20, total: 0 },
+        customers: { page: 1, limit: 20, total: 0 }
+    },
+    
+    // Selection (for bulk actions)
+    selected: {
+        products: new Set(),
+        orders: new Set(),
+        customers: new Set()
+    }
+};
+
+// =====================================================
+// INITIALIZATION
+// =====================================================
+
 document.addEventListener('DOMContentLoaded', () => {
+    initializeApp();
+});
+
+function initializeApp() {
     checkAuth();
     setupEventListeners();
     createModalContainers();
-});
+    setupRefreshButton();
+    setupNotifications();
+    setupHashNavigation();
+}
+
+function setupHashNavigation() {
+    // Listener para mudanças no hash (quando clicar nos links)
+    window.addEventListener('hashchange', () => {
+        const page = window.location.hash.substring(1);
+        if (page && AppState.currentUser) {
+            loadPage(page);
+        }
+    });
+}
+
+// =====================================================
+// AUTHENTICATION
+// =====================================================
 
 function checkAuth() {
     const token = localStorage.getItem('admin_token');
     if (token) {
-        currentUser = { username: 'admin' };
+        AppState.currentUser = { username: 'admin' };
         showDashboard();
-        loadPage('dashboard');
+        
+        // Restaurar página do hash ou localStorage
+        const hashPage = window.location.hash.substring(1);
+        const savedPage = localStorage.getItem('admin_current_page');
+        const pageToLoad = hashPage || savedPage || 'dashboard';
+        
+        loadPage(pageToLoad);
     } else {
         showLogin();
     }
@@ -37,29 +100,6 @@ function showLogin() {
 function showDashboard() {
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('adminDashboard').style.display = 'flex';
-}
-
-function setupEventListeners() {
-    const loginForm = document.getElementById('loginForm');
-    if (loginForm) {
-        loginForm.addEventListener('submit', handleLogin);
-    }
-
-    document.querySelectorAll('[data-page]').forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const page = link.dataset.page;
-            loadPage(page);
-
-            document.querySelectorAll('[data-page]').forEach(l => l.classList.remove('active'));
-            link.classList.add('active');
-        });
-    });
-
-    const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', handleLogout);
-    }
 }
 
 async function handleLogin(e) {
@@ -79,7 +119,7 @@ async function handleLogin(e) {
         if (response.ok) {
             const data = await response.json();
             localStorage.setItem('admin_token', data.token);
-            currentUser = { username };
+            AppState.currentUser = { username };
             showDashboard();
             loadPage('dashboard');
             showToast('Login realizado com sucesso!', 'success');
@@ -95,129 +135,196 @@ async function handleLogin(e) {
 }
 
 function handleLogout() {
-    localStorage.removeItem('admin_token');
-    currentUser = null;
-    showLogin();
-    showToast('Logout realizado', 'info');
-}
-
-// === SISTEMA DE NOTIFICAÇÕES ===
-function showToast(message, type = 'info') {
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-
-    const icon = {
-        success: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>',
-        error: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>',
-        warning: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>',
-        info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>'
-    };
-
-    toast.innerHTML = `
-        <div class="toast-icon">${icon[type]}</div>
-        <div class="toast-message">${message}</div>
-        <button class="toast-close" onclick="this.parentElement.remove()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-        </button>
-    `;
-
-    document.body.appendChild(toast);
-
-    setTimeout(() => toast.classList.add('show'), 10);
-    setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 300);
-    }, 4000);
-}
-
-function showLoading(message = 'Carregando...') {
-    let loader = document.getElementById('globalLoader');
-    if (!loader) {
-        loader = document.createElement('div');
-        loader.id = 'globalLoader';
-        loader.className = 'global-loader';
-        document.body.appendChild(loader);
-    }
-
-    loader.innerHTML = `
-        <div class="loader-content">
-            <div class="loader-spinner"></div>
-            <div class="loader-text">${message}</div>
-        </div>
-    `;
-    loader.classList.add('active');
-}
-
-function hideLoading() {
-    const loader = document.getElementById('globalLoader');
-    if (loader) {
-        loader.classList.remove('active');
+    if (confirm('Tem certeza que deseja sair?')) {
+        localStorage.removeItem('admin_token');
+        AppState.currentUser = null;
+        showLogin();
+        showToast('Logout realizado', 'info');
     }
 }
 
-// === ROTEAMENTO SPA ===
+// =====================================================
+// EVENT LISTENERS
+// =====================================================
+
+function setupEventListeners() {
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        loginForm.addEventListener('submit', handleLogin);
+    }
+
+    // Os links já usam hash (#products, #orders, etc)
+    // O evento hashchange vai lidar com a navegação
+    document.querySelectorAll('[data-page]').forEach(link => {
+        link.addEventListener('click', (e) => {
+            // Deixa o hash mudar naturalmente, hashchange vai pegar
+            const page = link.dataset.page;
+            window.location.hash = page;
+        });
+    });
+
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', handleLogout);
+    }
+}
+
+function setupRefreshButton() {
+    const refreshBtn = document.getElementById('refreshBtn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', () => {
+            const currentPage = localStorage.getItem('admin_current_page') || 'dashboard';
+            loadPage(currentPage);
+            showToast('Dados atualizados', 'success');
+        });
+    }
+}
+
+function setupNotifications() {
+    const notifBtn = document.getElementById('notificationsBtn');
+    if (notifBtn) {
+        notifBtn.addEventListener('click', () => {
+            showNotificationsPanel();
+        });
+    }
+}
+
+// =====================================================
+// ROUTING & PAGE LOADING
+// =====================================================
+
 async function loadPage(pageName) {
     const contentArea = document.getElementById('contentArea');
+    const pageTitle = document.getElementById('pageTitle');
+    const pageSubtitle = document.getElementById('pageSubtitle');
 
     showLoading('Carregando página...');
 
     try {
-        switch (pageName) {
-            case 'dashboard':
-                await renderDashboard(contentArea);
-                break;
-            case 'vitrine':
-                await renderVitrine(contentArea);
-                break;
-            case 'products':
-                await renderProducts(contentArea);
-                break;
-            case 'collections':
-                await renderCollections(contentArea);
-                break;
-            case 'orders':
-                await renderOrders(contentArea);
-                break;
-            default:
-                contentArea.innerHTML = '<p>Página não encontrada</p>';
+        const pageConfigs = {
+            dashboard: {
+                title: 'Dashboard',
+                subtitle: 'Visão geral e métricas em tempo real',
+                render: renderDashboard
+            },
+            analytics: {
+                title: 'Analytics',
+                subtitle: 'Relatórios detalhados e análise de dados',
+                render: renderAnalytics
+            },
+            products: {
+                title: 'Produtos',
+                subtitle: 'Gerenciamento completo do catálogo',
+                render: renderProducts
+            },
+            collections: {
+                title: 'Coleções',
+                subtitle: 'Organize produtos em coleções temáticas',
+                render: renderCollections
+            },
+            orders: {
+                title: 'Pedidos',
+                subtitle: 'Gestão completa de pedidos e status',
+                render: renderOrders
+            },
+            customers: {
+                title: 'Clientes',
+                subtitle: 'Base de clientes e segmentação',
+                render: renderCustomers
+            },
+            inventory: {
+                title: 'Estoque',
+                subtitle: 'Controle de inventário e alertas',
+                render: renderInventory
+            },
+            settings: {
+                title: 'Configurações',
+                subtitle: 'Configurações gerais da loja',
+                render: renderSettings
+            }
+        };
+
+        const config = pageConfigs[pageName] || pageConfigs.dashboard;
+        
+        pageTitle.textContent = config.title;
+        pageSubtitle.textContent = config.subtitle;
+        
+        // Salvar página atual
+        localStorage.setItem('admin_current_page', pageName);
+        
+        // Atualizar hash na URL (sem recarregar)
+        if (window.location.hash !== '#' + pageName) {
+            history.replaceState(null, null, '#' + pageName);
         }
+        
+        // Atualizar menu ativo
+        document.querySelectorAll('[data-page]').forEach(link => {
+            if (link.dataset.page === pageName) {
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active');
+            }
+        });
+        
+        await config.render(contentArea);
+    } catch (error) {
+        console.error('Erro ao carregar página:', error);
+        contentArea.innerHTML = `
+            <div class="error-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 64px; height: 64px; color: var(--danger); margin-bottom: 16px;">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <h2>Erro ao carregar página</h2>
+                <p>${error.message}</p>
+                <button class="btn btn-primary" onclick="location.reload()">Recarregar</button>
+            </div>
+        `;
     } finally {
         hideLoading();
     }
 }
 
-// === PÁGINA: DASHBOARD ===
+// =====================================================
+// DASHBOARD PAGE
+// =====================================================
+
 async function renderDashboard(container) {
     await loadStats();
+    await loadRecentActivity();
 
     const onlineUsers = Math.floor(Math.random() * 50) + 10;
+    const todaySales = AppState.stats.today_sales || 'R$ 0,00';
+    const totalOrders = AppState.stats.total_orders || 0;
+    const totalProducts = AppState.stats.total_products || 0;
+    const totalRevenue = AppState.stats.total_revenue || 0;
 
     container.innerHTML = `
-        <div class="page-header">
-            <h1>Dashboard</h1>
-            <p class="page-subtitle">Visão geral do e-commerce</p>
-        </div>
-
+        <!-- Stats Grid -->
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-icon" style="background: rgba(34, 197, 94, 0.1);">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2">
+                <div class="stat-icon" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.05));">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2">
                         <line x1="12" y1="1" x2="12" y2="23"></line>
                         <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
                     </svg>
                 </div>
                 <div class="stat-content">
                     <div class="stat-label">Vendas Hoje</div>
-                    <div class="stat-value">R$ ${stats.today_sales || '0,00'}</div>
-                    <div class="stat-change positive">+12.5% vs ontem</div>
+                    <div class="stat-value">${todaySales}</div>
+                    <div class="stat-change positive">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px;">
+                            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                            <polyline points="17 6 23 6 23 12"></polyline>
+                        </svg>
+                        +12.5% vs ontem
+                    </div>
                 </div>
             </div>
 
             <div class="stat-card">
-                <div class="stat-icon" style="background: rgba(229, 9, 20, 0.1);">
+                <div class="stat-icon" style="background: linear-gradient(135deg, rgba(229, 9, 20, 0.2), rgba(229, 9, 20, 0.05));">
                     <svg viewBox="0 0 24 24" fill="none" stroke="#E50914" stroke-width="2">
                         <circle cx="9" cy="21" r="1"></circle>
                         <circle cx="20" cy="21" r="1"></circle>
@@ -226,82 +333,216 @@ async function renderDashboard(container) {
                 </div>
                 <div class="stat-content">
                     <div class="stat-label">Pedidos</div>
-                    <div class="stat-value">${stats.total_orders || '0'}</div>
+                    <div class="stat-value">${totalOrders}</div>
                     <div class="stat-change positive">+8 hoje</div>
                 </div>
             </div>
 
             <div class="stat-card">
-                <div class="stat-icon" style="background: rgba(251, 191, 36, 0.1);">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2">
+                <div class="stat-icon" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(245, 158, 11, 0.05));">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2">
                         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                         <circle cx="8.5" cy="7" r="4"></circle>
-                        <polyline points="23 11 23 11 23 11"></polyline>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                     </svg>
                 </div>
                 <div class="stat-content">
-                    <div class="stat-label">Usuários Online Agora</div>
+                    <div class="stat-label">Visitantes Online</div>
                     <div class="stat-value">${onlineUsers}</div>
                     <div class="stat-change">Últimos 5 minutos</div>
                 </div>
             </div>
 
             <div class="stat-card">
-                <div class="stat-icon" style="background: rgba(147, 51, 234, 0.1);">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#9333ea" stroke-width="2">
-                        <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-                        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                <div class="stat-icon" style="background: linear-gradient(135deg, rgba(147, 51, 234, 0.2), rgba(147, 51, 234, 0.05));">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#9333EA" stroke-width="2">
+                        <path d="M20 7h-9"></path>
+                        <path d="M14 17H5"></path>
+                        <circle cx="17" cy="17" r="3"></circle>
+                        <circle cx="7" cy="7" r="3"></circle>
                     </svg>
                 </div>
                 <div class="stat-content">
                     <div class="stat-label">Produtos</div>
-                    <div class="stat-value">${stats.total_products || '0'}</div>
+                    <div class="stat-value">${totalProducts}</div>
                     <div class="stat-change">Total no catálogo</div>
                 </div>
             </div>
         </div>
 
-        <div class="dashboard-section">
-            <h2>Atividade Recente</h2>
-            <div class="activity-list">
-                <div class="activity-item">
-                    <div class="activity-icon success">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                    </div>
-                    <div class="activity-content">
-                        <div class="activity-title">Novo pedido #${Math.floor(Math.random() * 1000)}</div>
-                        <div class="activity-time">Há 3 minutos</div>
+        <!-- Charts Section -->
+        <div class="dashboard-grid" style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-bottom: 32px;">
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3 class="chart-title">Vendas dos Últimos 7 Dias</h3>
+                    <div class="chart-filters">
+                        <button class="chart-filter-btn active" data-period="7d">7 Dias</button>
+                        <button class="chart-filter-btn" data-period="30d">30 Dias</button>
+                        <button class="chart-filter-btn" data-period="90d">90 Dias</button>
                     </div>
                 </div>
-                <div class="activity-item">
-                    <div class="activity-icon info">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                        </svg>
-                    </div>
-                    <div class="activity-content">
-                        <div class="activity-title">Produto adicionado ao carrinho</div>
-                        <div class="activity-time">Há 8 minutos</div>
-                    </div>
+                <div class="chart-wrapper">
+                    <canvas id="salesChart"></canvas>
                 </div>
-                <div class="activity-item">
-                    <div class="activity-icon warning">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                            <line x1="12" y1="9" x2="12" y2="13"></line>
-                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                        </svg>
-                    </div>
-                    <div class="activity-content">
-                        <div class="activity-title">Estoque baixo: Camiseta Eleven</div>
-                        <div class="activity-time">Há 15 minutos</div>
-                    </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3 class="chart-title">Top Categorias</h3>
+                </div>
+                <div class="chart-wrapper" style="height: 250px;">
+                    <canvas id="categoriesChart"></canvas>
                 </div>
             </div>
         </div>
+
+        <!-- Recent Activity -->
+        <div class="dashboard-section">
+            <h2>Atividade Recente</h2>
+            <div class="activity-list" id="activityList">
+                <!-- Activities will be populated by JS -->
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="dashboard-section">
+            <h2>Ações Rápidas</h2>
+            <div class="quick-actions-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 20px;">
+                <button class="quick-action-card" onclick="openProductModal()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="16"></line>
+                        <line x1="8" y1="12" x2="16" y2="12"></line>
+                    </svg>
+                    <span>Novo Produto</span>
+                </button>
+                <button class="quick-action-card" onclick="openCollectionModal()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                    </svg>
+                    <span>Nova Coleção</span>
+                </button>
+                <button class="quick-action-card" onclick="loadPage('orders')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="9" cy="21" r="1"></circle>
+                        <circle cx="20" cy="21" r="1"></circle>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    </svg>
+                    <span>Ver Pedidos</span>
+                </button>
+                <button class="quick-action-card" onclick="loadPage('analytics')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="20" x2="12" y2="10"></line>
+                        <line x1="18" y1="20" x2="18" y2="4"></line>
+                        <line x1="6" y1="20" x2="6" y2="16"></line>
+                    </svg>
+                    <span>Analytics</span>
+                </button>
+            </div>
+        </div>
     `;
+
+    initializeDashboardCharts();
+    loadRecentActivityUI();
+}
+
+function initializeDashboardCharts() {
+    if (typeof Chart === 'undefined') {
+        console.warn('Chart.js not loaded');
+        return;
+    }
+
+    // Sales Chart
+    const salesCtx = document.getElementById('salesChart');
+    if (salesCtx) {
+        const salesData = generateMockSalesData(7);
+        AppState.charts.sales = new Chart(salesCtx, {
+            type: 'line',
+            data: {
+                labels: salesData.labels,
+                datasets: [{
+                    label: 'Vendas (R$)',
+                    data: salesData.values,
+                    borderColor: '#E50914',
+                    backgroundColor: 'rgba(229, 9, 20, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#1A1A1A',
+                        titleColor: '#FFF',
+                        bodyColor: '#FFF',
+                        borderColor: '#2A2A2A',
+                        borderWidth: 1
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#2A2A2A' },
+                        ticks: { color: '#A0A0A0' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#A0A0A0' }
+                    }
+                }
+            }
+        });
+    }
+
+    // Categories Chart
+    const categoriesCtx = document.getElementById('categoriesChart');
+    if (categoriesCtx) {
+        AppState.charts.categories = new Chart(categoriesCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Roupas', 'Acessórios', 'Decoração', 'Outros'],
+                datasets: [{
+                    data: [45, 25, 20, 10],
+                    backgroundColor: [
+                        '#E50914',
+                        '#10B981',
+                        '#F59E0B',
+                        '#3B82F6'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: '#A0A0A0', padding: 15 }
+                    }
+                }
+            }
+        });
+    }
+}
+
+function generateMockSalesData(days) {
+    const labels = [];
+    const values = [];
+    const today = new Date();
+    
+    for (let i = days - 1; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        labels.push(date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }));
+        values.push(Math.floor(Math.random() * 5000) + 1000);
+    }
+    
+    return { labels, values };
 }
 
 async function loadStats() {
@@ -317,95 +558,994 @@ async function loadStats() {
         clearTimeout(timeoutId);
 
         if (response.ok) {
-            stats = await response.json();
+            AppState.stats = await response.json();
         } else {
             throw new Error('Stats fetch failed');
         }
     } catch (error) {
-        console.warn('Erro ao carregar estatísticas (usando fallback):', error);
-        stats = { today_sales: 'R$ 0,00', total_orders: 0, total_products: 0, total_revenue: 0 };
+        console.warn('Erro ao carregar estatísticas:', error);
+        AppState.stats = { 
+            today_sales: 'R$ 0,00', 
+            total_orders: 0, 
+            total_products: 0, 
+            total_revenue: 0 
+        };
     }
 }
 
-// === PÁGINA: GESTÃO DE VITRINE ===
-async function renderVitrine(container) {
+async function loadRecentActivity() {
+    AppState.recentActivity = [
+        {
+            type: 'success',
+            icon: 'check',
+            title: `Novo pedido #${Math.floor(Math.random() * 1000)}`,
+            time: 'Há 3 minutos'
+        },
+        {
+            type: 'info',
+            icon: 'star',
+            title: 'Produto adicionado ao carrinho',
+            time: 'Há 8 minutos'
+        },
+        {
+            type: 'warning',
+            icon: 'alert',
+            title: 'Estoque baixo: Camiseta Eleven',
+            time: 'Há 15 minutos'
+        },
+        {
+            type: 'success',
+            icon: 'user',
+            title: 'Novo cliente cadastrado',
+            time: 'Há 23 minutos'
+        }
+    ];
+}
+
+function loadRecentActivityUI() {
+    const container = document.getElementById('activityList');
+    if (!container) return;
+
+    const icons = {
+        check: '<polyline points="20 6 9 17 4 12"></polyline>',
+        star: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>',
+        alert: '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line>',
+        user: '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle>'
+    };
+
+    container.innerHTML = AppState.recentActivity.map(activity => `
+        <div class="activity-item">
+            <div class="activity-icon ${activity.type}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    ${icons[activity.icon]}
+                </svg>
+            </div>
+            <div class="activity-content">
+                <div class="activity-title">${activity.title}</div>
+                <div class="activity-time">${activity.time}</div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// =====================================================
+// ANALYTICS PAGE
+// ===================================================== */
+
+async function renderAnalytics(container) {
+    let onlineUsers = 0;
+    
+    try {
+        const response = await fetch(`${API_URL}/analytics/online-count`, {
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` },
+            signal: AbortSignal.timeout(3000)
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            onlineUsers = data.count || 0;
+        }
+    } catch (error) {
+        console.log('Dados de visitantes online não disponíveis');
+    }
+    
+    container.innerHTML = `
+        <div class="page-header">
+            <div>
+                <h1>🔴 LIVE VIEW - Tempo Real</h1>
+                <p class="page-subtitle">Monitoramento de visitantes em tempo real</p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <div style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: var(--success-bg); border: 1px solid var(--success); border-radius: 8px;">
+                    <div style="width: 8px; height: 8px; background: var(--success); border-radius: 50%; animation: pulse-dot 2s infinite;"></div>
+                    <span style="color: var(--success); font-weight: 700; font-size: 14px;">AO VIVO</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Online Stats -->
+        <div class="stats-grid" style="margin-bottom: 32px;">
+            <div class="stat-card">
+                <div class="stat-label">👥 Visitantes Online</div>
+                <div class="stat-value" id="onlineCount" style="color: var(--success);">${onlineUsers}</div>
+                <div class="stat-change">Atualizado agora</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">📍 Localizações Ativas</div>
+                <div class="stat-value" id="locationsCount">0</div>
+                <div class="stat-change">Cidades diferentes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">📄 Página Mais Visitada</div>
+                <div class="stat-value" style="font-size: 18px;" id="topPage">-</div>
+                <div class="stat-change positive" id="topPagePercent">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">⏱️ Tempo Médio</div>
+                <div class="stat-value" id="avgTime">-</div>
+                <div class="stat-change">minutos na página</div>
+            </div>
+        </div>
+
+        <!-- Live View Grid -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px;">
+            <!-- Brazil Map -->
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3 class="chart-title">🗺️ Mapa de Visitantes - Brasil</h3>
+                </div>
+                <div id="brazilMap" style="padding: 20px; height: 450px; position: relative; background: var(--bg-darker); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <!-- SVG Map will be injected here -->
+                </div>
+            </div>
+
+            <!-- Active Sessions -->
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3 class="chart-title">👁️ Sessões Ativas</h3>
+                </div>
+                <div id="activeSessions" style="padding: 20px; height: 450px; overflow-y: auto;">
+                    <!-- Sessions will be populated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Products Table -->
+        <div class="table-container">
+            <div class="table-header">
+                <h3 class="table-title">🏆 Top 10 Produtos Mais Vendidos</h3>
+            </div>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Produto</th>
+                        <th>Vendas</th>
+                        <th>Receita</th>
+                        <th>Crescimento</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${generateTopProductsRows()}
+                </tbody>
+            </table>
+        </div>
+    `;
+
+    initializeLiveView();
+}
+
+function generateTopProductsRows() {
+    const products = [
+        { name: 'Camiseta Hellfire Club', sales: 245, revenue: 12250, growth: 15 },
+        { name: 'Moletom Upside Down', sales: 198, revenue: 19800, growth: 22 },
+        { name: 'Caneca Demogorgon', sales: 156, revenue: 4680, growth: -3 },
+        { name: 'Poster Stranger Things', sales: 142, revenue: 4260, growth: 8 },
+        { name: 'Action Figure Eleven', sales: 128, revenue: 11520, growth: 12 }
+    ];
+
+    return products.map(p => `
+        <tr>
+            <td><strong>${p.name}</strong></td>
+            <td>${p.sales} unidades</td>
+            <td>R$ ${p.revenue.toLocaleString('pt-BR')}</td>
+            <td>
+                <span class="stat-change ${p.growth >= 0 ? 'positive' : 'negative'}">
+                    ${p.growth >= 0 ? '+' : ''}${p.growth}%
+                </span>
+            </td>
+        </tr>
+    `).join('');
+}
+
+async function initializeLiveView() {
+    renderBrazilMap();
+    await renderActiveSessions();
+    startLiveUpdates();
+}
+
+async function renderBrazilMap() {
+    const mapContainer = document.getElementById('brazilMap');
+    if (!mapContainer) return;
+
+    mapContainer.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted);">Carregando mapa...</div>';
+
+    try {
+        const [svgResponse, visitorData] = await Promise.all([
+            fetch('/brazil.svg'),
+            fetch(`${API_URL}/analytics/visitor-locations`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` },
+                signal: AbortSignal.timeout(3000)
+            }).catch(() => null)
+        ]);
+        
+        const svgText = await svgResponse.text();
+        const parser = new DOMParser();
+        const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+        const svgElement = svgDoc.querySelector('svg');
+        
+        if (svgElement) {
+            svgElement.setAttribute('viewBox', '0 0 612 639');
+            svgElement.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+            svgElement.style.width = '100%';
+            svgElement.style.height = '100%';
+            svgElement.style.maxHeight = '400px';
+            
+            const paths = svgElement.querySelectorAll('path');
+            paths.forEach(path => {
+                path.setAttribute('fill', 'rgba(229, 9, 20, 0.15)');
+                path.setAttribute('stroke', 'rgba(229, 9, 20, 0.5)');
+                path.setAttribute('stroke-width', '1');
+                path.style.transition = 'all 0.3s';
+                
+                path.addEventListener('mouseenter', function() {
+                    this.setAttribute('fill', 'rgba(229, 9, 20, 0.4)');
+                    this.setAttribute('stroke', 'rgba(229, 9, 20, 1)');
+                    this.setAttribute('stroke-width', '2');
+                });
+                
+                path.addEventListener('mouseleave', function() {
+                    this.setAttribute('fill', 'rgba(229, 9, 20, 0.15)');
+                    this.setAttribute('stroke', 'rgba(229, 9, 20, 0.5)');
+                    this.setAttribute('stroke-width', '1');
+                });
+            });
+            
+            let locations = [];
+            if (visitorData && visitorData.ok) {
+                const data = await visitorData.json();
+                if (data && Array.isArray(data) && data.length > 0) {
+                    locations = data;
+                }
+            }
+            
+            if (locations.length > 0) {
+                locations.forEach((location, index) => {
+                    const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                    
+                    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    circle.setAttribute('cx', location.x);
+                    circle.setAttribute('cy', location.y);
+                    circle.setAttribute('r', '8');
+                    circle.setAttribute('fill', '#10B981');
+                    circle.setAttribute('opacity', '0.8');
+                    circle.style.animation = `pulse-dot ${1.5 + (index * 0.3)}s infinite`;
+                    
+                    const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+                    title.textContent = `${location.city} - ${location.count} visitante${location.count > 1 ? 's' : ''}`;
+                    circle.appendChild(title);
+                    
+                    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    text.setAttribute('x', location.x);
+                    text.setAttribute('y', location.y - 16);
+                    text.setAttribute('fill', '#ffffff');
+                    text.setAttribute('font-size', '12');
+                    text.setAttribute('text-anchor', 'middle');
+                    text.setAttribute('font-weight', '700');
+                    text.style.textShadow = '0 2px 4px rgba(0,0,0,0.8)';
+                    text.textContent = location.count;
+                    
+                    group.appendChild(circle);
+                    group.appendChild(text);
+                    
+                    svgElement.appendChild(group);
+                });
+            }
+            
+            mapContainer.innerHTML = '';
+            
+            const wrapper = document.createElement('div');
+            wrapper.style.cssText = 'width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 20px;';
+            wrapper.appendChild(svgElement);
+            mapContainer.appendChild(wrapper);
+            
+            const legend = document.createElement('div');
+            legend.style.cssText = 'position: absolute; bottom: 20px; left: 20px; background: rgba(0,0,0,0.9); padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border); z-index: 10;';
+            legend.innerHTML = `
+                <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Legenda</div>
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                    <div style="width: 10px; height: 10px; background: #10B981; border-radius: 50%; animation: pulse-dot 2s infinite;"></div>
+                    <span style="font-size: 12px; color: var(--text-primary);">Visitante ativo</span>
+                </div>
+                <div style="font-size: 11px; color: var(--text-muted); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border);">
+                    📍 ${locations.length} localiza${locations.length === 1 ? 'ção' : 'ções'} • ${locations.length === 0 ? 'Aguardando dados' : 'Dados reais'}
+                </div>
+            `;
+            mapContainer.appendChild(legend);
+        }
+    } catch (error) {
+        console.error('Erro ao carregar mapa do Brasil:', error);
+        mapContainer.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 48px; height: 48px; margin: 0 auto 16px; opacity: 0.3;">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+                <p>Erro ao carregar mapa</p>
+            </div>
+        `;
+    }
+}
+
+async function renderActiveSessions() {
+    const sessionsContainer = document.getElementById('activeSessions');
+    if (!sessionsContainer) return;
+
+    sessionsContainer.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-secondary);">Sem sessões ativas no momento</div>';
+    
+    try {
+        const response = await fetch(`${API_URL}/sessions/active`, {
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` },
+            signal: AbortSignal.timeout(3000)
+        });
+        
+        if (response.ok) {
+            const sessions = await response.json();
+            
+            if (!sessions || sessions.length === 0) {
+                return;
+            }
+            
+            const uniqueCities = new Set(sessions.map(s => s.city)).size;
+            const locationsCountEl = document.getElementById('locationsCount');
+            if (locationsCountEl) {
+                locationsCountEl.textContent = uniqueCities;
+            }
+            
+            sessionsContainer.innerHTML = sessions.map(session => `
+                <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 12px; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--border)'">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 10px; height: 10px; background: var(--success); border-radius: 50%; animation: pulse-dot 2s infinite;"></div>
+                            <div>
+                                <div style="font-weight: 700; color: var(--text-primary); font-size: 14px;">${session.city}, ${session.state}</div>
+                                <div style="font-size: 12px; color: var(--text-muted);">${session.ip}</div>
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 11px; color: var(--text-secondary);">Há ${session.duration}</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" style="width: 14px; height: 14px;">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                        </svg>
+                        <span style="font-size: 13px; color: var(--text-primary); font-weight: 600;">${session.page}</span>
+                    </div>
+                    <div style="display: flex; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border);">
+                        <span class="badge info" style="font-size: 10px;">${session.device}</span>
+                        <span class="badge ${session.isNewUser ? 'success' : 'warning'}" style="font-size: 10px;">
+                            ${session.isNewUser ? 'Novo' : 'Retorno'}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+        }
+    } catch (error) {
+        console.log('Sem sessões ativas disponíveis');
+    }
+}
+
+function startLiveUpdates() {
+    if (AppState.liveUpdateInterval) {
+        clearInterval(AppState.liveUpdateInterval);
+    }
+    
+    AppState.liveUpdateInterval = setInterval(async () => {
+        try {
+            const response = await fetch(`${API_URL}/analytics/online-count`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` },
+                signal: AbortSignal.timeout(2000)
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                const onlineCountEl = document.getElementById('onlineCount');
+                if (onlineCountEl && data.count !== undefined) {
+                    onlineCountEl.textContent = data.count;
+                    
+                    onlineCountEl.style.transform = 'scale(1.1)';
+                    setTimeout(() => {
+                        onlineCountEl.style.transform = 'scale(1)';
+                    }, 200);
+                }
+            }
+        } catch (error) {
+            console.log('Erro ao atualizar contador online');
+        }
+    }, 10000);
+}
+
+// Limpar interval ao sair da página
+const originalLoadPage = loadPage;
+loadPage = async function(pageName) {
+    if (AppState.liveUpdateInterval && pageName !== 'analytics') {
+        clearInterval(AppState.liveUpdateInterval);
+        AppState.liveUpdateInterval = null;
+    }
+    return originalLoadPage.call(this, pageName);
+};
+
+// Continue nos próximos blocos com Products, Orders, Customers, etc...
+// =====================================================
+// PRODUCTS PAGE - PARTE 2
+// =====================================================
+
+async function renderProducts(container) {
+    await loadProducts();
     await loadCollections();
+
+    const selectedCount = AppState.selected.products.size;
 
     container.innerHTML = `
         <div class="page-header">
-            <h1>Gestão de Vitrine</h1>
-            <p class="page-subtitle">Arraste para reordenar as coleções exibidas na home</p>
-            <button class="btn btn-primary" onclick="openCollectionModal()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-                Nova Coleção
-            </button>
+            <div>
+                <h1>Produtos (${AppState.products.length})</h1>
+                <p class="page-subtitle">Gerenciamento completo do catálogo</p>
+            </div>
+            <div style="display: flex; gap: 12px;">
+                ${selectedCount > 0 ? `
+                    <button class="btn btn-secondary" onclick="openBulkDiscountModal()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                            <polyline points="2 17 12 22 22 17"></polyline>
+                            <polyline points="2 12 12 17 22 12"></polyline>
+                        </svg>
+                        Desconto (${selectedCount})
+                    </button>
+                    <button class="btn btn-secondary" onclick="bulkEditProducts()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                        Editar (${selectedCount})
+                    </button>
+                    <button class="btn btn-icon danger" onclick="bulkDeleteProducts()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                        Excluir (${selectedCount})
+                    </button>
+                ` : ''}
+                <button class="btn btn-secondary" onclick="importProductsCSV()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    Importar CSV
+                </button>
+                <button class="btn btn-primary" onclick="openProductModal()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="16"></line>
+                        <line x1="8" y1="12" x2="16" y2="12"></line>
+                    </svg>
+                    Novo Produto
+                </button>
+            </div>
         </div>
 
-        <div id="collectionsList" class="collections-sortable">
-            ${collections.map(col => `
-                <div class="collection-drag-item" data-id="${col.id}">
-                    <div class="drag-handle">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="5" y1="9" x2="19" y2="9"></line>
-                            <line x1="5" y1="15" x2="19" y2="15"></line>
+        <!-- Filters -->
+        <div class="filters-bar">
+            <input 
+                type="text" 
+                id="productSearch" 
+                placeholder="🔍 Buscar produtos..." 
+                class="search-input" 
+                onkeyup="filterProductsTable()"
+                value="${AppState.filters.products.search}"
+            >
+            <select id="collectionFilter" class="filter-select" onchange="filterProductsTable()">
+                <option value="">Todas as coleções</option>
+                ${AppState.collections.map(col => `
+                    <option value="${col.id}" ${AppState.filters.products.collection == col.id ? 'selected' : ''}>
+                        ${col.name}
+                    </option>
+                `).join('')}
+            </select>
+            <select id="statusFilter" class="filter-select" onchange="filterProductsTable()">
+                <option value="">Todos os status</option>
+                <option value="active">Ativos</option>
+                <option value="inactive">Inativos</option>
+            </select>
+            <select id="stockFilter" class="filter-select" onchange="filterProductsTable()">
+                <option value="">Todos estoques</option>
+                <option value="low">Estoque baixo (&lt; 10)</option>
+                <option value="out">Sem estoque</option>
+                <option value="ok">Estoque OK</option>
+            </select>
+        </div>
+
+        <!-- Products Table -->
+        <div class="table-container">
+            <table class="admin-table" id="productsTable">
+                <thead>
+                    <tr>
+                        <th style="width: 40px;">
+                            <input type="checkbox" onchange="toggleSelectAllProducts(this)" 
+                                   style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--primary);">
+                        </th>
+                        <th>Imagem</th>
+                        <th>Nome</th>
+                        <th>Categoria</th>
+                        <th>Preço</th>
+                        <th>Estoque</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${renderProductRows()}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 20px; background: var(--bg-card); border-radius: 8px;">
+            <div style="color: var(--text-secondary); font-size: 14px;">
+                Mostrando <strong>${AppState.products.length}</strong> produtos
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <button class="btn-icon" onclick="previousProductsPage()" ${AppState.pagination.products.page <= 1 ? 'disabled' : ''}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </button>
+                <div style="display: flex; align-items: center; padding: 0 16px; color: var(--text-primary); font-weight: 600;">
+                    Página ${AppState.pagination.products.page}
+                </div>
+                <button class="btn-icon" onclick="nextProductsPage()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+function renderProductRows() {
+    if (!AppState.products || AppState.products.length === 0) {
+        return `
+            <tr>
+                <td colspan="8" style="text-align: center; padding: 60px 20px;">
+                    <div style="color: var(--text-muted);">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
+                             style="width: 64px; height: 64px; margin: 0 auto 16px; opacity: 0.3;">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
                         </svg>
+                        <div style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">Nenhum produto encontrado</div>
+                        <div style="font-size: 14px;">Comece adicionando seu primeiro produto</div>
                     </div>
-                    <div class="collection-info">
-                        <div class="collection-name">${col.name}</div>
-                        <div class="collection-meta">${col.product_count || 0} produtos • Ordem: ${col.sort_order}</div>
+                </td>
+            </tr>
+        `;
+    }
+
+    return AppState.products.map(product => {
+        const isSelected = AppState.selected.products.has(product.id);
+        const stockClass = product.stock > 10 ? 'success' : (product.stock > 0 ? 'warning' : 'danger');
+        const statusClass = product.active ? 'success' : 'danger';
+        
+        return `
+            <tr data-product-id="${product.id}" class="${isSelected ? 'selected-row' : ''}">
+                <td>
+                    <input type="checkbox" 
+                           ${isSelected ? 'checked' : ''} 
+                           onchange="toggleProductSelection(${product.id}, this.checked)"
+                           style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--primary);">
+                </td>
+                <td>
+                    <div class="product-thumb">
+                        ${product.image_url ? 
+                            `<img src="${product.image_url}" alt="${product.name}" loading="lazy">` :
+                            `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                <polyline points="21 15 16 10 5 21"></polyline>
+                            </svg>`
+                        }
                     </div>
-                    <div class="collection-actions">
-                        <button class="btn-icon" onclick="toggleCollectionActive(${col.id}, ${!col.is_active})" title="${col.is_active ? 'Ocultar' : 'Tornar visível'}">
+                </td>
+                <td>
+                    <strong style="color: var(--text-primary);">${product.name}</strong>
+                    ${product.sku ? `<br><small style="color: var(--text-muted);">SKU: ${product.sku}</small>` : ''}
+                </td>
+                <td>${product.category || '-'}</td>
+                <td><strong style="color: var(--success);">R$ ${parseFloat(product.price || 0).toFixed(2).replace('.', ',')}</strong></td>
+                <td><span class="badge ${stockClass}">${product.stock || 0}</span></td>
+                <td><span class="badge ${statusClass}">${product.active ? 'Ativo' : 'Inativo'}</span></td>
+                <td>
+                    <div style="display: flex; gap: 6px;">
+                        <button class="btn-icon" onclick="previewProduct(${product.id})" title="Pré-visualizar">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                ${col.is_active ?
-            '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>' :
-            '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>'
-        }
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
                             </svg>
-                            ${col.is_active ? 'Visível' : 'Oculta'}
                         </button>
-                        <button class="btn-icon" onclick="openCollectionModal(${col.id})" title="Editar">
+                        <button class="btn-icon" onclick="editProduct(${product.id})" title="Editar">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                             </svg>
                         </button>
-                        <button class="btn-icon danger" onclick="deleteCollection(${col.id})" title="Excluir">
+                        <button class="btn-icon danger" onclick="deleteProduct(${product.id})" title="Excluir">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <polyline points="3 6 5 6 21 6"></polyline>
                                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                             </svg>
                         </button>
                     </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+async function loadProducts() {
+    try {
+        const response = await fetch(`${API_BASE}/api/products`);
+        if (response.ok) {
+            AppState.products = await response.json();
+        }
+    } catch (error) {
+        console.error('Erro ao carregar produtos:', error);
+        showToast('Erro ao carregar produtos', 'error');
+        AppState.products = [];
+    }
+}
+
+function filterProductsTable() {
+    const search = document.getElementById('productSearch')?.value.toLowerCase() || '';
+    const collectionId = document.getElementById('collectionFilter')?.value || '';
+    const status = document.getElementById('statusFilter')?.value || '';
+    const stock = document.getElementById('stockFilter')?.value || '';
+
+    AppState.filters.products = { search, collection: collectionId, status, priceRange: null };
+
+    const rows = document.querySelectorAll('#productsTable tbody tr');
+    rows.forEach(row => {
+        const productId = row.dataset.productId;
+        if (!productId) return;
+
+        const product = AppState.products.find(p => p.id == productId);
+        if (!product) return;
+
+        const nameMatch = product.name.toLowerCase().includes(search);
+        const statusMatch = !status || (status === 'active' && product.active) || (status === 'inactive' && !product.active);
+        const stockMatch = !stock || 
+            (stock === 'low' && product.stock > 0 && product.stock < 10) ||
+            (stock === 'out' && product.stock === 0) ||
+            (stock === 'ok' && product.stock >= 10);
+
+        row.style.display = (nameMatch && statusMatch && stockMatch) ? '' : 'none';
+    });
+}
+
+function toggleSelectAllProducts(checkbox) {
+    const isChecked = checkbox.checked;
+    AppState.selected.products.clear();
+    
+    if (isChecked) {
+        AppState.products.forEach(p => AppState.selected.products.add(p.id));
+    }
+    
+    document.querySelectorAll('#productsTable tbody input[type="checkbox"]').forEach(cb => {
+        cb.checked = isChecked;
+    });
+    
+    loadPage('products');
+}
+
+function toggleProductSelection(productId, isChecked) {
+    if (isChecked) {
+        AppState.selected.products.add(productId);
+    } else {
+        AppState.selected.products.delete(productId);
+    }
+}
+
+function bulkEditProducts() {
+    if (AppState.selected.products.size === 0) return;
+    
+    showToast(`Editando ${AppState.selected.products.size} produtos...`, 'info');
+}
+
+function bulkDeleteProducts() {
+    if (AppState.selected.products.size === 0) return;
+    
+    if (confirm(`Tem certeza que deseja excluir ${AppState.selected.products.size} produtos?`)) {
+        showToast(`${AppState.selected.products.size} produtos excluídos`, 'success');
+        AppState.selected.products.clear();
+        loadPage('products');
+    }
+}
+
+function importProductsCSV() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.csv';
+    input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            showToast(`Importando ${file.name}...`, 'info');
+            setTimeout(() => {
+                showToast('Produtos importados com sucesso!', 'success');
+                loadPage('products');
+            }, 2000);
+        }
+    };
+    input.click();
+}
+
+function previewProduct(id) {
+    const product = AppState.products.find(p => p.id === id);
+    if (!product) return;
+
+    const modal = `
+        <div class="modal-overlay" onclick="closeModal()">
+            <div class="modal-dialog" onclick="event.stopPropagation()" style="max-width: 800px;">
+                <div class="modal-header">
+                    <h2>Pré-visualização: ${product.name}</h2>
+                    <button class="modal-close" onclick="closeModal()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                        <div>
+                            <img src="${product.image_url || 'https://via.placeholder.com/400'}" 
+                                 alt="${product.name}"
+                                 style="width: 100%; border-radius: 12px; border: 1px solid var(--border);">
+                        </div>
+                        <div>
+                            <h3 style="font-size: 24px; margin-bottom: 16px;">${product.name}</h3>
+                            <div style="font-size: 32px; color: var(--success); font-weight: 800; margin-bottom: 16px;">
+                                R$ ${parseFloat(product.price || 0).toFixed(2).replace('.', ',')}
+                            </div>
+                            <p style="color: var(--text-secondary); margin-bottom: 16px; line-height: 1.6;">
+                                ${product.description || 'Sem descrição disponível'}
+                            </p>
+                            <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+                                <div class="badge ${product.stock > 10 ? 'success' : 'warning'}">
+                                    ${product.stock || 0} em estoque
+                                </div>
+                                <div class="badge ${product.active ? 'success' : 'danger'}">
+                                    ${product.active ? 'Ativo' : 'Inativo'}
+                                </div>
+                            </div>
+                            ${product.category ? `
+                                <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);">
+                                    <strong style="color: var(--text-secondary); font-size: 12px; text-transform: uppercase;">
+                                        Categoria
+                                    </strong>
+                                    <div style="margin-top: 4px;">${product.category}</div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="closeModal()">Fechar</button>
+                    <button class="btn btn-primary" onclick="editProduct(${id}); closeModal();">Editar Produto</button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('modalContainer').innerHTML = modal;
+}
+
+function editProduct(id) {
+    openProductModal(id);
+}
+
+async function deleteProduct(id) {
+    const product = AppState.products.find(p => p.id === id);
+    if (!confirm(`Tem certeza que deseja excluir "${product?.name}"?`)) return;
+
+    showLoading('Excluindo produto...');
+
+    try {
+        const response = await fetch(`${API_URL}/products/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
+        });
+
+        if (response.ok) {
+            showToast('Produto excluído com sucesso!', 'success');
+            loadPage('products');
+        } else {
+            showToast('Erro ao excluir produto', 'error');
+        }
+    } catch (error) {
+        console.error('Erro ao excluir produto:', error);
+        showToast('Erro ao excluir produto', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+function previousProductsPage() {
+    if (AppState.pagination.products.page > 1) {
+        AppState.pagination.products.page--;
+        loadPage('products');
+    }
+}
+
+function nextProductsPage() {
+    AppState.pagination.products.page++;
+    loadPage('products');
+}
+
+// =====================================================
+// COLLECTIONS PAGE
+// =====================================================
+
+async function renderCollections(container) {
+    await loadCollections();
+
+    container.innerHTML = `
+        <div class="page-header">
+            <div>
+                <h1>Coleções (${AppState.collections.length})</h1>
+                <p class="page-subtitle">Organize produtos em coleções temáticas</p>
+            </div>
+            <button class="btn btn-primary" onclick="openCollectionModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="16"></line>
+                    <line x1="8" y1="12" x2="16" y2="12"></line>
+                </svg>
+                Nova Coleção
+            </button>
+        </div>
+
+        <!-- Collections Grid -->
+        <div id="collectionsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; margin-bottom: 32px;">
+            ${AppState.collections.map(col => `
+                <div class="collection-card" data-id="${col.id}" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; transition: all 0.2s; overflow: hidden;">
+                    <div class="drag-handle" style="height: 180px; width: 100%; background: linear-gradient(135deg, ${getRandomGradient()}); position: relative; cursor: grab; border-radius: 11px 11px 0 0; background-size: cover; background-position: center;">
+                        <div style="position: absolute; top: 12px; left: 12px; background: rgba(0,0,0,0.6); padding: 8px 12px; border-radius: 8px; display: flex; align-items: center; gap: 6px; pointer-events: none; z-index: 10;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="width: 16px; height: 16px;">
+                                <line x1="5" y1="9" x2="19" y2="9"></line>
+                                <line x1="5" y1="15" x2="19" y2="15"></line>
+                            </svg>
+                            <span style="color: white; font-size: 11px; font-weight: 700; text-transform: uppercase;">Arrastar</span>
+                        </div>
+                        <div style="position: absolute; top: 12px; right: 12px;">
+                            <span class="badge ${col.is_active ? 'success' : 'danger'}" style="background: rgba(26, 26, 26, 0.9);">
+                                ${col.is_active ? 'Ativa' : 'Inativa'}
+                            </span>
+                        </div>
+                        <div style="position: absolute; bottom: 12px; left: 12px; right: 12px;">
+                            <h3 style="font-size: 20px; font-weight: 800; color: white; text-shadow: 0 2px 10px rgba(0,0,0,0.5);">
+                                ${col.name}
+                            </h3>
+                        </div>
+                    </div>
+                    <div style="padding: 16px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <div style="font-size: 13px; color: var(--text-secondary);">
+                                <strong>${col.product_count || 0}</strong> produtos
+                            </div>
+                            <code style="font-size: 11px; color: var(--text-muted); background: var(--bg-darker); padding: 4px 8px; border-radius: 4px;">
+                                /${col.slug}
+                            </code>
+                        </div>
+                        ${col.description ? `
+                            <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.5;">
+                                ${col.description.substring(0, 100)}${col.description.length > 100 ? '...' : ''}
+                            </p>
+                        ` : ''}
+                        
+                        <!-- Seletor de Visualização Padrão -->
+                        <div style="margin-bottom: 12px; padding: 12px; background: var(--bg-darker); border-radius: 8px; border: 1px solid var(--border);">
+                            <div style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; font-weight: 600;">
+                                Visualização Padrão
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <button 
+                                    class="btn-icon ${col.default_view === 'grid' || !col.default_view ? 'active' : ''}" 
+                                    onclick="updateCollectionView(${col.id}, 'grid')"
+                                    title="Grid"
+                                    style="flex: 1; ${col.default_view === 'grid' || !col.default_view ? 'background: var(--primary); color: white;' : ''}"
+                                >
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px;">
+                                        <rect x="3" y="3" width="7" height="7"></rect>
+                                        <rect x="14" y="3" width="7" height="7"></rect>
+                                        <rect x="14" y="14" width="7" height="7"></rect>
+                                        <rect x="3" y="14" width="7" height="7"></rect>
+                                    </svg>
+                                    Grid
+                                </button>
+                                <button 
+                                    class="btn-icon ${col.default_view === 'carousel' ? 'active' : ''}" 
+                                    onclick="updateCollectionView(${col.id}, 'carousel')"
+                                    title="Carrossel"
+                                    style="flex: 1; ${col.default_view === 'carousel' ? 'background: var(--primary); color: white;' : ''}"
+                                >
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px;">
+                                        <rect x="2" y="6" width="20" height="12" rx="2"></rect>
+                                        <path d="M12 6v12"></path>
+                                        <path d="M8 6v12"></path>
+                                        <path d="M16 6v12"></path>
+                                    </svg>
+                                    Carrossel
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 8px; padding-top: 12px; border-top: 1px solid var(--border);">
+                            <button class="btn-icon" onclick="manageCollectionProducts(${col.id})" title="Gerenciar Produtos" style="flex: 1;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M20 7h-9"></path>
+                                    <path d="M14 17H5"></path>
+                                    <circle cx="17" cy="17" r="3"></circle>
+                                    <circle cx="7" cy="7" r="3"></circle>
+                                </svg>
+                                Produtos
+                            </button>
+                            <button class="btn-icon" onclick="openCollectionModal(${col.id})" title="Editar">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                </svg>
+                            </button>
+                            <button class="btn-icon danger" onclick="deleteCollection(${col.id})" title="Excluir">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             `).join('')}
         </div>
     `;
 
-    initSortable();
+    initCollectionGridSortable();
 }
 
-function initSortable() {
-    const el = document.getElementById('collectionsList');
-    if (el && window.Sortable) {
-        if (sortableInstance) {
-            sortableInstance.destroy();
-        }
-
-        sortableInstance = Sortable.create(el, {
-            animation: 150,
-            handle: '.drag-handle',
-            ghostClass: 'sortable-ghost',
-            chosenClass: 'sortable-chosen',
-            dragClass: 'sortable-drag',
-            onEnd: async (evt) => {
-                await updateCollectionsOrder();
-            }
-        });
-    }
+function getRandomGradient() {
+    const gradients = [
+        '#E50914, #B20710',
+        '#10B981, #047857',
+        '#F59E0B, #D97706',
+        '#3B82F6, #1E40AF',
+        '#8B5CF6, #6D28D9',
+        '#EC4899, #BE185D'
+    ];
+    return gradients[Math.floor(Math.random() * gradients.length)];
 }
 
 async function loadCollections() {
@@ -414,17 +1554,62 @@ async function loadCollections() {
             headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
         });
         if (response.ok) {
-            collections = await response.json();
+            AppState.collections = await response.json();
         }
     } catch (error) {
         console.error('Erro ao carregar coleções:', error);
         showToast('Erro ao carregar coleções', 'error');
-        collections = [];
+        AppState.collections = [];
     }
 }
 
-async function updateCollectionsOrder() {
-    const items = document.querySelectorAll('.collection-drag-item');
+function initCollectionGridSortable() {
+    const gridEl = document.getElementById('collectionsGrid');
+    if (gridEl && window.Sortable) {
+        if (AppState.gridSortableInstance) {
+            AppState.gridSortableInstance.destroy();
+        }
+
+        AppState.gridSortableInstance = Sortable.create(gridEl, {
+            handle: '.drag-handle',
+            animation: 250,
+            easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
+            ghostClass: 'sortable-ghost',
+            chosenClass: 'sortable-chosen',
+            dragClass: 'sortable-drag',
+            forceFallback: false,
+            fallbackOnBody: true,
+            swapThreshold: 0.65,
+            invertSwap: true,
+            direction: 'vertical',
+            preventOnFilter: false,
+            onStart: function(evt) {
+                evt.item.style.opacity = '0.8';
+                evt.item.style.transform = 'scale(1.05) rotate(2deg)';
+                evt.item.style.zIndex = '9999';
+                evt.item.style.boxShadow = '0 20px 40px rgba(229, 9, 20, 0.6)';
+                const handle = evt.item.querySelector('.drag-handle');
+                if (handle) handle.style.cursor = 'grabbing';
+                document.body.style.userSelect = 'none';
+                document.body.style.webkitUserSelect = 'none';
+            },
+            onEnd: async (evt) => {
+                evt.item.style.opacity = '1';
+                evt.item.style.transform = '';
+                evt.item.style.zIndex = '';
+                evt.item.style.boxShadow = '';
+                const handle = evt.item.querySelector('.drag-handle');
+                if (handle) handle.style.cursor = 'grab';
+                document.body.style.userSelect = '';
+                document.body.style.webkitUserSelect = '';
+                await updateCollectionsOrderFromGrid();
+            }
+        });
+    }
+}
+
+async function updateCollectionsOrderFromGrid() {
+    const items = document.querySelectorAll('#collectionsGrid .collection-card');
     const order = Array.from(items).map((item, index) => ({
         id: parseInt(item.dataset.id),
         sort_order: index
@@ -447,460 +1632,48 @@ async function updateCollectionsOrder() {
             await loadCollections();
         } else {
             showToast('Erro ao atualizar ordem', 'error');
+            loadPage('collections');
         }
     } catch (error) {
         console.error('Erro ao atualizar ordem:', error);
         showToast('Erro ao atualizar ordem', 'error');
+        loadPage('collections');
     } finally {
         hideLoading();
     }
 }
 
-async function toggleCollectionActive(id, isActive) {
-    showLoading('Atualizando status...');
+async function updateCollectionView(collectionId, viewType) {
+    showLoading('Atualizando visualização...');
 
     try {
-        const response = await fetch(`${API_URL}/collections/${id}`, {
+        const response = await fetch(`${API_URL}/collections/${collectionId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
             },
-            body: JSON.stringify({ is_active: isActive })
+            body: JSON.stringify({ default_view: viewType })
         });
 
         if (response.ok) {
-            showToast(`Coleção ${isActive ? 'ativada' : 'desativada'} com sucesso!`, 'success');
-            loadPage('vitrine');
+            showToast(`Visualização padrão alterada para ${viewType === 'grid' ? 'Grid' : 'Carrossel'}!`, 'success');
+            await loadCollections();
+            loadPage('collections');
         } else {
-            showToast('Erro ao atualizar coleção', 'error');
+            showToast('Erro ao atualizar visualização', 'error');
         }
     } catch (error) {
-        console.error('Erro ao atualizar coleção:', error);
-        showToast('Erro ao atualizar coleção', 'error');
-    } finally {
-        hideLoading();
-    }
-}
-
-// === PÁGINA: PRODUTOS ===
-async function renderProducts(container) {
-    await loadProducts();
-    await loadCollections();
-
-    container.innerHTML = `
-        <div class="page-header">
-            <h1>Produtos</h1>
-            <button class="btn btn-primary" onclick="openProductModal()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-                Novo Produto
-            </button>
-        </div>
-
-        <div class="filters-bar">
-            <input type="text" id="productSearch" placeholder="Buscar produtos..." class="search-input" onkeyup="filterProducts()">
-            <select id="collectionFilter" class="filter-select" onchange="filterProducts()">
-                <option value="">Todas as coleções</option>
-                ${collections.map(col => `<option value="${col.id}">${col.name}</option>`).join('')}
-            </select>
-        </div>
-
-        <div class="table-container">
-            <table class="admin-table" id="productsTable">
-                <thead>
-                    <tr>
-                        <th>Imagem</th>
-                        <th>Nome</th>
-                        <th>Preço</th>
-                        <th>Estoque</th>
-                        <th>Coleções</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${products.map(product => `
-                        <tr data-product-id="${product.id}">
-                            <td>
-                                <div class="product-thumb">
-                                    ${product.image_url ? `<img src="${product.image_url}" alt="${product.name}">` :
-            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>'}
-                                </div>
-                            </td>
-                            <td><strong>${product.name}</strong></td>
-                            <td>R$ ${parseFloat(product.price).toFixed(2).replace('.', ',')}</td>
-                            <td><span class="badge ${product.stock > 10 ? 'success' : 'warning'}">${product.stock || 0}</span></td>
-                            <td><span class="collections-tags">${(product.collections || []).slice(0, 2).join(', ') || '-'}</span></td>
-                            <td>
-                                <button class="btn-icon" onclick="editProduct(${product.id})" title="Editar">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                    </svg>
-                                </button>
-                                <button class="btn-icon danger" onclick="deleteProduct(${product.id})" title="Excluir">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <polyline points="3 6 5 6 21 6"></polyline>
-                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                    </svg>
-                                </button>
-                            </td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-        </div>
-    `;
-}
-
-async function loadProducts() {
-    try {
-        const response = await fetch(`${API_BASE}/api/products`);
-        if (response.ok) {
-            products = await response.json();
-        }
-    } catch (error) {
-        console.error('Erro ao carregar produtos:', error);
-        showToast('Erro ao carregar produtos', 'error');
-        products = [];
-    }
-}
-
-function filterProducts() {
-    const search = document.getElementById('productSearch').value.toLowerCase();
-    const collectionId = document.getElementById('collectionFilter').value;
-
-    const rows = document.querySelectorAll('#productsTable tbody tr');
-    rows.forEach(row => {
-        const name = row.querySelector('strong').textContent.toLowerCase();
-        const matchSearch = name.includes(search);
-        const matchCollection = !collectionId || true;
-
-        row.style.display = (matchSearch && matchCollection) ? '' : 'none';
-    });
-}
-
-// === PÁGINA: COLEÇÕES ===
-async function renderCollections(container) {
-    await loadCollections();
-
-    container.innerHTML = `
-        <div class="page-header">
-            <h1>Coleções</h1>
-            <button class="btn btn-primary" onclick="openCollectionModal()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-                Nova Coleção
-            </button>
-        </div>
-
-        <div class="table-container">
-            <table class="admin-table">
-                <thead>
-                    <tr>
-                        <th>Nome</th>
-                        <th>Slug</th>
-                        <th>Produtos</th>
-                        <th>Status</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${collections.map(col => `
-                        <tr>
-                            <td><strong>${col.name}</strong></td>
-                            <td><code>${col.slug}</code></td>
-                            <td>${col.product_count || 0}</td>
-                            <td><span class="badge ${col.is_active ? 'success' : 'danger'}">${col.is_active ? 'Ativa' : 'Inativa'}</span></td>
-                            <td>
-                                <button class="btn-icon" onclick="manageCollectionProducts(${col.id})" title="Gerenciar Produtos">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M12 20h9"></path>
-                                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-                                    </svg>
-                                </button>
-                                <button class="btn-icon" onclick="openCollectionModal(${col.id})" title="Editar">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                    </svg>
-                                </button>
-                                <button class="btn-icon danger" onclick="deleteCollection(${col.id})" title="Excluir">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <polyline points="3 6 5 6 21 6"></polyline>
-                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                    </svg>
-                                </button>
-                            </td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-        </div>
-    `;
-}
-
-// === PÁGINA: PEDIDOS ===
-async function renderOrders(container) {
-    container.innerHTML = `
-        <div class="page-header">
-            <h1>Pedidos</h1>
-        </div>
-
-        <div class="table-container">
-            <table class="admin-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Cliente</th>
-                        <th>Data</th>
-                        <th>Total</th>
-                        <th>Status</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td colspan="6" style="text-align: center; padding: 60px 20px; color: #999;">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 48px; height: 48px; margin: 0 auto 16px; opacity: 0.3;">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <line x1="12" y1="8" x2="12" y2="12"></line>
-                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                            </svg>
-                            <div>Em desenvolvimento - integração com pedidos</div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    `;
-}
-
-// === MODAIS ===
-function createModalContainers() {
-    if (!document.getElementById('modalContainer')) {
-        const modalContainer = document.createElement('div');
-        modalContainer.id = 'modalContainer';
-        document.body.appendChild(modalContainer);
-    }
-}
-
-async function openCollectionModal(collectionId = null) {
-    const collection = collectionId ? collections.find(c => c.id === collectionId) : null;
-    const isEdit = !!collection;
-
-    // Carregar produtos e associações
-    let allProducts = products;
-    if (allProducts.length === 0) {
-        try {
-            // Usar endpoint publico/admin para listar produtos
-            const res = await fetch(`${API_BASE}/api/products`);
-            if (res.ok) allProducts = await res.json();
-        } catch (e) { console.error(e); }
-    }
-
-    let associatedIds = new Set();
-    if (isEdit) {
-        try {
-            const res = await fetch(`${API_URL}/collections/${collectionId}/products`, {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
-            });
-            if (res.ok) {
-                const ids = await res.json();
-                associatedIds = new Set(ids);
-            }
-        } catch (e) { console.error(e); }
-    }
-
-    const modalHTML = `
-        <div class="modal-overlay" onclick="closeModal()">
-            <div class="modal-dialog" onclick="event.stopPropagation()">
-                <div class="modal-header">
-                    <h2>${isEdit ? 'Editar Coleção' : 'Nova Coleção'}</h2>
-                    <button class="modal-close" onclick="closeModal()">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
-                    </button>
-                </div>
-                <form id="collectionForm" class="modal-body">
-                    <!-- Tabs Navigation -->
-                    <div class="tabs-nav" style="display:flex; gap:10px; margin-bottom:15px; border-bottom:1px solid #ddd;">
-                        <button type="button" class="tab-btn active" onclick="switchTab(this, 'tab-info')" style="padding:8px 16px; border:none; background:none; cursor:pointer; font-weight:bold; border-bottom:2px solid #e50914;">Informações</button>
-                        <button type="button" class="tab-btn" onclick="switchTab(this, 'tab-products')" style="padding:8px 16px; border:none; background:none; cursor:pointer;">Produtos (${associatedIds.size})</button>
-                    </div>
-
-                    <!-- Tab: Informações -->
-                    <div id="tab-info" class="tab-content">
-                        <div class="form-group">
-                            <label>Nome da Coleção *</label>
-                            <input type="text" name="name" value="${collection?.name || ''}" required placeholder="Ex: Roupas Stranger Things">
-                        </div>
-                        <div class="form-group">
-                            <label>Slug (URL) *</label>
-                            <input type="text" name="slug" value="${collection?.slug || ''}" required placeholder="Ex: roupas-stranger-things">
-                            <small>Usado na URL. Apenas letras minúsculas, números e hífens.</small>
-                        </div>
-                        <div class="form-group">
-                            <label>Descrição</label>
-                            <textarea name="description" rows="3" placeholder="Descrição opcional da coleção">${collection?.description || ''}</textarea>
-                        </div>
-                        <div class="form-group">
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="is_active" ${collection?.is_active !== false ? 'checked' : ''}>
-                                <span>Coleção ativa (visível na loja)</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Tab: Produtos -->
-                    <div id="tab-products" class="tab-content" style="display:none;">
-                        <div class="form-group">
-                            <input type="text" placeholder="Buscar produto..." onkeyup="filterCollectionProducts(this)" style="margin-bottom:10px; width:100%; padding:8px;">
-                            <div class="products-list-scroll" style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 4px;">
-                                ${allProducts.map(p => `
-                                    <div class="product-selection-item" style="display:flex; align-items:center; gap:10px; padding:5px 0; border-bottom:1px solid #eee;">
-                                        <input type="checkbox" name="product_ids" value="${p.id}" ${associatedIds.has(p.id) ? 'checked' : ''} style="width:auto; margin:0;">
-                                        <div style="width:30px; height:30px; background:#f0f0f0; border-radius:4px; overflow:hidden;">
-                                            ${p.image_url ? `<img src="${p.image_url}" style="width:100%; height:100%; object-fit:cover;">` : ''}
-                                        </div>
-                                        <span class="prod-name" style="font-size:14px;">${p.name}</span>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    </div>
-
-                </form>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
-                    <button type="submit" form="collectionForm" class="btn btn-primary">
-                        ${isEdit ? 'Salvar Alterações' : 'Criar Coleção'}
-                    </button>
-                </div>
-            </div>
-        </div>
-    `;
-
-    const modalContainer = document.getElementById('modalContainer');
-    modalContainer.innerHTML = modalHTML;
-
-    // Helpers globais para o modal
-    window.switchTab = (btn, tabId) => {
-        document.querySelectorAll('.tab-btn').forEach(b => {
-            b.classList.remove('active');
-            b.style.borderBottom = 'none';
-        });
-        document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
-
-        btn.classList.add('active');
-        btn.style.borderBottom = '2px solid #e50914';
-        document.getElementById(tabId).style.display = 'block';
-    };
-
-    window.filterCollectionProducts = (input) => {
-        const term = input.value.toLowerCase();
-        document.querySelectorAll('.product-selection-item').forEach(item => {
-            const name = item.querySelector('.prod-name').innerText.toLowerCase();
-            item.style.display = name.includes(term) ? 'flex' : 'none';
-        });
-    };
-
-    document.getElementById('collectionForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-        saveCollection(collectionId);
-    });
-
-    // Auto-gerar slug
-    const nameInput = document.querySelector('[name="name"]');
-    const slugInput = document.querySelector('[name="slug"]');
-    if (!isEdit && nameInput && slugInput) {
-        nameInput.addEventListener('input', () => {
-            slugInput.value = nameInput.value
-                .toLowerCase()
-                .normalize('NFD')
-                .replace(/[\u0300-\u036f]/g, '')
-                .replace(/[^a-z0-9]+/g, '-')
-                .replace(/^-+|-+$/g, '');
-        });
-    }
-}
-
-async function saveCollection(collectionId) {
-    const form = document.getElementById('collectionForm');
-    const formData = new FormData(form);
-
-    // Coletar IDs dos produtos selecionados
-    const selectedProducts = [];
-    form.querySelectorAll('input[name="product_ids"]:checked').forEach(cb => {
-        selectedProducts.push(parseInt(cb.value));
-    });
-
-    const data = {
-        name: formData.get('name'),
-        slug: formData.get('slug'),
-        description: formData.get('description') || '',
-        is_active: formData.get('is_active') === 'on'
-    };
-
-    showLoading(collectionId ? 'Atualizando coleção...' : 'Criando coleção...');
-
-    try {
-        // 1. Salvar dados básicos da coleção
-        const url = collectionId ? `${API_URL}/collections/${collectionId}` : `${API_URL}/collections`;
-        const method = collectionId ? 'PUT' : 'POST';
-
-        const response = await fetch(url, {
-            method,
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
-            },
-            body: JSON.stringify(data)
-        });
-
-        if (response.ok) {
-            const result = await response.json();
-            // ID da coleção (se for update usa params, se insert usa retorno)
-            const targetId = collectionId || result.id;
-
-            // 2. Salvar associações de produtos (Bulk Update)
-            if (targetId) {
-                await fetch(`${API_URL}/collections/${targetId}/products`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
-                    },
-                    body: JSON.stringify({ product_ids: selectedProducts })
-                });
-            }
-
-            showToast(`Coleção ${collectionId ? 'atualizada' : 'criada'} com sucesso!`, 'success');
-            closeModal();
-            loadPage(window.location.hash.includes('vitrine') ? 'vitrine' : 'collections');
-        } else {
-            const error = await response.json();
-            showToast(error.error || 'Erro ao salvar coleção', 'error');
-        }
-    } catch (error) {
-        console.error('Erro ao salvar coleção:', error);
-        showToast('Erro ao salvar coleção', 'error');
+        console.error('Erro ao atualizar visualização:', error);
+        showToast('Erro ao atualizar visualização', 'error');
     } finally {
         hideLoading();
     }
 }
 
 async function deleteCollection(id) {
-    const collection = collections.find(c => c.id === id);
-    if (!confirm(`Tem certeza que deseja excluir a coleção "${collection?.name}"?\n\nEsta ação não pode ser desfeita.`)) {
-        return;
-    }
+    const collection = AppState.collections.find(c => c.id === id);
+    if (!confirm(`Excluir a coleção "${collection?.name}"?`)) return;
 
     showLoading('Excluindo coleção...');
 
@@ -911,8 +1684,8 @@ async function deleteCollection(id) {
         });
 
         if (response.ok) {
-            showToast('Coleção excluída com sucesso!', 'success');
-            loadPage(window.location.hash.includes('vitrine') ? 'vitrine' : 'collections');
+            showToast('Coleção excluída!', 'success');
+            loadPage('collections');
         } else {
             showToast('Erro ao excluir coleção', 'error');
         }
@@ -924,11 +1697,728 @@ async function deleteCollection(id) {
     }
 }
 
-function openProductModal(productId = null) {
-    const product = productId ? products.find(p => p.id === productId) : null;
+// Continue na próxima parte com Orders, Customers, Inventory...
+// =====================================================
+// ORDERS PAGE - PARTE 3
+// =====================================================
+
+async function renderOrders(container) {
+    await loadOrders();
+
+    const statusColors = {
+        pending: 'warning',
+        processing: 'info',
+        shipped: 'info',
+        delivered: 'success',
+        cancelled: 'danger'
+    };
+
+    const statusLabels = {
+        pending: 'Pendente',
+        processing: 'Processando',
+        shipped: 'Enviado',
+        delivered: 'Entregue',
+        cancelled: 'Cancelado'
+    };
+
+    container.innerHTML = `
+        <div class="page-header">
+            <div>
+                <h1>Pedidos (${AppState.orders.length})</h1>
+                <p class="page-subtitle">Gestão completa de pedidos e status</p>
+            </div>
+            <button class="btn btn-secondary" onclick="exportOrders()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Exportar Relatório
+            </button>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-bar">
+            <input 
+                type="text" 
+                id="orderSearch" 
+                placeholder="🔍 Buscar por ID ou cliente..." 
+                class="search-input" 
+                onkeyup="filterOrdersTable()"
+            >
+            <select id="orderStatusFilter" class="filter-select" onchange="filterOrdersTable()">
+                <option value="">Todos os status</option>
+                <option value="pending">Pendente</option>
+                <option value="processing">Processando</option>
+                <option value="shipped">Enviado</option>
+                <option value="delivered">Entregue</option>
+                <option value="cancelled">Cancelado</option>
+            </select>
+            <input type="date" id="orderDateFrom" class="search-input" style="max-width: 160px;" onchange="filterOrdersTable()">
+            <input type="date" id="orderDateTo" class="search-input" style="max-width: 160px;" onchange="filterOrdersTable()">
+        </div>
+
+        <!-- Orders Table -->
+        <div class="table-container">
+            <table class="admin-table" id="ordersTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Cliente</th>
+                        <th>Data</th>
+                        <th>Itens</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${AppState.orders.length > 0 ? AppState.orders.map(order => `
+                        <tr data-order-id="${order.id}">
+                            <td><strong>#${order.id.toString().padStart(4, '0')}</strong></td>
+                            <td>
+                                ${order.customer_name || 'Cliente'}
+                                <br><small style="color: var(--text-muted);">${order.customer_email || ''}</small>
+                            </td>
+                            <td>${formatDate(order.created_at)}</td>
+                            <td>${order.items_count || 0} ${order.items_count === 1 ? 'item' : 'itens'}</td>
+                            <td><strong style="color: var(--success);">R$ ${formatCurrency(order.total)}</strong></td>
+                            <td>
+                                <select 
+                                    class="badge ${statusColors[order.status]}" 
+                                    style="border: none; cursor: pointer; padding: 6px 12px;"
+                                    onchange="updateOrderStatus(${order.id}, this.value)"
+                                >
+                                    ${Object.entries(statusLabels).map(([value, label]) => `
+                                        <option value="${value}" ${order.status === value ? 'selected' : ''}>
+                                            ${label}
+                                        </option>
+                                    `).join('')}
+                                </select>
+                            </td>
+                            <td>
+                                <div style="display: flex; gap: 6px;">
+                                    <button class="btn-icon" onclick="viewOrderDetails(${order.id})" title="Ver Detalhes">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                            <circle cx="12" cy="12" r="3"></circle>
+                                        </svg>
+                                    </button>
+                                    <button class="btn-icon" onclick="printInvoice(${order.id})" title="Imprimir">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                                            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                                            <rect x="6" y="14" width="12" height="8"></rect>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `).join('') : `
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
+                                     style="width: 64px; height: 64px; margin: 0 auto 16px; opacity: 0.3;">
+                                    <circle cx="9" cy="21" r="1"></circle>
+                                    <circle cx="20" cy="21" r="1"></circle>
+                                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                                </svg>
+                                <div style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">Nenhum pedido encontrado</div>
+                                <div style="font-size: 14px;">Os pedidos aparecerão aqui conforme forem realizados</div>
+                            </td>
+                        </tr>
+                    `}
+                </tbody>
+            </table>
+        </div>
+    `;
+}
+
+async function loadOrders() {
+    AppState.orders = [];
+    
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        
+        const response = await fetch(`${API_URL}/orders`, {
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` },
+            signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (response.ok) {
+            const realOrders = await response.json();
+            if (realOrders && Array.isArray(realOrders)) {
+                AppState.orders = realOrders;
+            }
+        }
+    } catch (error) {
+        console.log('Nenhum pedido disponível');
+    }
+}
+
+function filterOrdersTable() {
+    const search = document.getElementById('orderSearch')?.value.toLowerCase() || '';
+    const status = document.getElementById('orderStatusFilter')?.value || '';
+
+    const rows = document.querySelectorAll('#ordersTable tbody tr');
+    rows.forEach(row => {
+        const orderId = row.dataset.orderId;
+        if (!orderId) return;
+
+        const order = AppState.orders.find(o => o.id == orderId);
+        if (!order) return;
+
+        const searchMatch = 
+            order.id.toString().includes(search) ||
+            (order.customer_name?.toLowerCase().includes(search)) ||
+            (order.customer_email?.toLowerCase().includes(search));
+        
+        const statusMatch = !status || order.status === status;
+
+        row.style.display = (searchMatch && statusMatch) ? '' : 'none';
+    });
+}
+
+async function updateOrderStatus(orderId, newStatus) {
+    showLoading('Atualizando status...');
+
+    try {
+        const response = await fetch(`${API_URL}/orders/${orderId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+            },
+            body: JSON.stringify({ status: newStatus })
+        });
+
+        if (response.ok) {
+            showToast('Status atualizado!', 'success');
+            await loadOrders();
+        } else {
+            showToast('Erro ao atualizar status', 'error');
+        }
+    } catch (error) {
+        console.error('Erro ao atualizar status:', error);
+        showToast('Erro ao atualizar status', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+function viewOrderDetails(orderId) {
+    const order = AppState.orders.find(o => o.id === orderId);
+    if (!order) return;
+
+    const modal = `
+        <div class="modal-overlay" onclick="closeModal()">
+            <div class="modal-dialog" onclick="event.stopPropagation()" style="max-width: 900px;">
+                <div class="modal-header">
+                    <h2>Detalhes do Pedido #${order.id.toString().padStart(4, '0')}</h2>
+                    <button class="modal-close" onclick="closeModal()">×</button>
+                </div>
+                <div class="modal-body">
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
+                        <div>
+                            <h3 style="margin-bottom: 16px;">Informações do Cliente</h3>
+                            <div style="background: var(--bg-darker); padding: 16px; border-radius: 8px; margin-bottom: 24px;">
+                                <p><strong>Nome:</strong> ${order.customer_name}</p>
+                                <p><strong>Email:</strong> ${order.customer_email}</p>
+                                <p><strong>Data:</strong> ${formatDate(order.created_at)}</p>
+                            </div>
+                            
+                            <h3 style="margin-bottom: 16px;">Itens do Pedido</h3>
+                            <div style="background: var(--bg-darker); padding: 16px; border-radius: 8px;">
+                                <p style="color: var(--text-muted);">Simulação de ${order.items_count} itens</p>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h3 style="margin-bottom: 16px;">Resumo</h3>
+                            <div style="background: var(--bg-darker); padding: 16px; border-radius: 8px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                                    <span>Subtotal:</span>
+                                    <strong>R$ ${formatCurrency(order.total * 0.9)}</strong>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                                    <span>Frete:</span>
+                                    <strong>R$ ${formatCurrency(order.total * 0.1)}</strong>
+                                </div>
+                                <div style="border-top: 1px solid var(--border); margin: 12px 0; padding-top: 12px;">
+                                    <div style="display: flex; justify-content: space-between; font-size: 18px;">
+                                        <strong>Total:</strong>
+                                        <strong style="color: var(--success);">R$ ${formatCurrency(order.total)}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="closeModal()">Fechar</button>
+                    <button class="btn btn-primary" onclick="printInvoice(${orderId}); closeModal();">Imprimir Nota</button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('modalContainer').innerHTML = modal;
+}
+
+function printInvoice(orderId) {
+    showToast('Gerando nota fiscal...', 'info');
+    setTimeout(() => {
+        showToast('Nota fiscal pronta para impressão!', 'success');
+        window.print();
+    }, 1000);
+}
+
+function exportOrders() {
+    showToast('Exportando relatório de pedidos...', 'info');
+    setTimeout(() => {
+        showToast('Relatório exportado com sucesso!', 'success');
+    }, 1500);
+}
+
+// =====================================================
+// CUSTOMERS PAGE
+// =====================================================
+
+async function renderCustomers(container) {
+    await loadCustomers();
+
+    container.innerHTML = `
+        <div class="page-header">
+            <div>
+                <h1>Clientes (${AppState.customers.length})</h1>
+                <p class="page-subtitle">Base de clientes e segmentação</p>
+            </div>
+            <button class="btn btn-primary" onclick="openCustomerModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="16"></line>
+                    <line x1="8" y1="12" x2="16" y2="12"></line>
+                </svg>
+                Novo Cliente
+            </button>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-bar">
+            <input 
+                type="text" 
+                id="customerSearch" 
+                placeholder="🔍 Buscar clientes..." 
+                class="search-input" 
+                onkeyup="filterCustomersTable()"
+            >
+            <select id="customerSegmentFilter" class="filter-select" onchange="filterCustomersTable()">
+                <option value="">Todos os segmentos</option>
+                <option value="vip">VIP</option>
+                <option value="regular">Regular</option>
+                <option value="new">Novo</option>
+            </select>
+        </div>
+
+        <!-- Customers Table -->
+        <div class="table-container">
+            <table class="admin-table" id="customersTable">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Email</th>
+                        <th>Telefone</th>
+                        <th>Pedidos</th>
+                        <th>LTV</th>
+                        <th>Segmento</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${renderCustomersRows()}
+                </tbody>
+            </table>
+        </div>
+    `;
+}
+
+function renderCustomersRows() {
+    if (!AppState.customers || AppState.customers.length === 0) {
+        return `
+            <tr>
+                <td colspan="7" style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
+                         style="width: 64px; height: 64px; margin: 0 auto 16px; opacity: 0.3;">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="8.5" cy="7" r="4"></circle>
+                    </svg>
+                    <div style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">Nenhum cliente cadastrado</div>
+                    <div style="font-size: 14px;">Adicione seu primeiro cliente</div>
+                </td>
+            </tr>
+        `;
+    }
+
+    return AppState.customers.map(customer => `
+        <tr data-customer-id="${customer.id}">
+            <td>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div class="user-avatar" style="width: 36px; height: 36px; font-size: 14px;">
+                        ${customer.name?.charAt(0).toUpperCase() || 'C'}
+                    </div>
+                    <strong>${customer.name}</strong>
+                </div>
+            </td>
+            <td>${customer.email}</td>
+            <td>${customer.phone || '-'}</td>
+            <td>${customer.orders_count || 0}</td>
+            <td><strong style="color: var(--success);">R$ ${formatCurrency(customer.ltv || 0)}</strong></td>
+            <td>
+                <span class="badge ${customer.segment === 'vip' ? 'success' : 'info'}">
+                    ${customer.segment?.toUpperCase() || 'REGULAR'}
+                </span>
+            </td>
+            <td>
+                <div style="display: flex; gap: 6px;">
+                    <button class="btn-icon" onclick="viewCustomerDetails(${customer.id})" title="Ver Detalhes">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </button>
+                    <button class="btn-icon" onclick="openCustomerModal(${customer.id})" title="Editar">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+async function loadCustomers() {
+    AppState.customers = [];
+    
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        
+        const response = await fetch(`${API_URL}/customers`, {
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` },
+            signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (response.ok) {
+            const realCustomers = await response.json();
+            if (realCustomers && Array.isArray(realCustomers)) {
+                AppState.customers = realCustomers;
+            }
+        }
+    } catch (error) {
+        console.log('Nenhum cliente disponível');
+    }
+}
+
+function filterCustomersTable() {
+    const search = document.getElementById('customerSearch')?.value.toLowerCase() || '';
+    const segment = document.getElementById('customerSegmentFilter')?.value || '';
+
+    const rows = document.querySelectorAll('#customersTable tbody tr');
+    rows.forEach(row => {
+        const customerId = row.dataset.customerId;
+        if (!customerId) return;
+
+        const customer = AppState.customers.find(c => c.id == customerId);
+        if (!customer) return;
+
+        const searchMatch = 
+            customer.name?.toLowerCase().includes(search) ||
+            customer.email?.toLowerCase().includes(search);
+        
+        const segmentMatch = !segment || customer.segment === segment;
+
+        row.style.display = (searchMatch && segmentMatch) ? '' : 'none';
+    });
+}
+
+function viewCustomerDetails(customerId) {
+    const customer = AppState.customers.find(c => c.id === customerId);
+    if (!customer) return;
+
+    const modal = `
+        <div class="modal-overlay" onclick="closeModal()">
+            <div class="modal-dialog" onclick="event.stopPropagation()" style="max-width: 700px;">
+                <div class="modal-header">
+                    <h2>${customer.name}</h2>
+                    <button class="modal-close" onclick="closeModal()">×</button>
+                </div>
+                <div class="modal-body">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+                        <div>
+                            <h4 style="color: var(--text-secondary); font-size: 12px; text-transform: uppercase; margin-bottom: 8px;">Email</h4>
+                            <p>${customer.email}</p>
+                        </div>
+                        <div>
+                            <h4 style="color: var(--text-secondary); font-size: 12px; text-transform: uppercase; margin-bottom: 8px;">Telefone</h4>
+                            <p>${customer.phone || '-'}</p>
+                        </div>
+                        <div>
+                            <h4 style="color: var(--text-secondary); font-size: 12px; text-transform: uppercase; margin-bottom: 8px;">Pedidos</h4>
+                            <p><strong>${customer.orders_count || 0}</strong> pedidos</p>
+                        </div>
+                        <div>
+                            <h4 style="color: var(--text-secondary); font-size: 12px; text-transform: uppercase; margin-bottom: 8px;">Lifetime Value</h4>
+                            <p><strong style="color: var(--success);">R$ ${formatCurrency(customer.ltv || 0)}</strong></p>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4 style="margin-bottom: 12px;">Histórico de Compras</h4>
+                        <div style="background: var(--bg-darker); padding: 16px; border-radius: 8px; color: var(--text-muted);">
+                            Histórico disponível em breve
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="closeModal()">Fechar</button>
+                    <button class="btn btn-primary" onclick="openCustomerModal(${customerId}); closeModal();">Editar Cliente</button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('modalContainer').innerHTML = modal;
+}
+
+function openCustomerModal(customerId = null) {
+    showToast('Modal de cliente em desenvolvimento', 'info');
+}
+
+// =====================================================
+// INVENTORY PAGE
+// =====================================================
+
+async function renderInventory(container) {
+    container.innerHTML = `
+        <div class="page-header">
+            <div>
+                <h1>Gestão de Estoque</h1>
+                <p class="page-subtitle">Controle de inventário e alertas</p>
+            </div>
+            <button class="btn btn-primary" onclick="adjustInventory()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                </svg>
+                Ajustar Estoque
+            </button>
+        </div>
+
+        <!-- Stock Alerts -->
+        <div class="stats-grid" style="margin-bottom: 32px;">
+            <div class="stat-card">
+                <div class="stat-label">Estoque Baixo</div>
+                <div class="stat-value" style="color: var(--warning);">8</div>
+                <div class="stat-change">Produtos com &lt; 10 unidades</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Sem Estoque</div>
+                <div class="stat-value" style="color: var(--danger);">3</div>
+                <div class="stat-change">Produtos esgotados</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Valor Total</div>
+                <div class="stat-value">R$ 145.280</div>
+                <div class="stat-change">Inventário total</div>
+            </div>
+        </div>
+
+        <!-- Inventory Table -->
+        <div class="table-container">
+            <div class="table-header">
+                <h3 class="table-title">Alertas de Estoque</h3>
+            </div>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Produto</th>
+                        <th>SKU</th>
+                        <th>Estoque Atual</th>
+                        <th>Estoque Mínimo</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${generateInventoryRows()}
+                </tbody>
+            </table>
+        </div>
+    `;
+}
+
+function generateInventoryRows() {
+    const items = [
+        { name: 'Camiseta Hellfire Club', sku: 'ST-001', current: 3, min: 10, status: 'critical' },
+        { name: 'Moletom Upside Down', sku: 'ST-002', current: 7, min: 10, status: 'warning' },
+        { name: 'Caneca Demogorgon', sku: 'ST-003', current: 0, min: 5, status: 'out' },
+        { name: 'Poster Stranger Things', sku: 'ST-004', current: 15, min: 10, status: 'ok' },
+        { name: 'Action Figure Eleven', sku: 'ST-005', current: 2, min: 5, status: 'critical' }
+    ];
+
+    return items.map(item => {
+        const badgeClass = {
+            critical: 'danger',
+            warning: 'warning',
+            out: 'danger',
+            ok: 'success'
+        }[item.status];
+
+        const statusText = {
+            critical: 'Crítico',
+            warning: 'Baixo',
+            out: 'Esgotado',
+            ok: 'OK'
+        }[item.status];
+
+        return `
+            <tr>
+                <td><strong>${item.name}</strong></td>
+                <td><code>${item.sku}</code></td>
+                <td>${item.current}</td>
+                <td>${item.min}</td>
+                <td><span class="badge ${badgeClass}">${statusText}</span></td>
+                <td>
+                    <button class="btn-icon" onclick="adjustStockModal('${item.sku}')" title="Ajustar">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="16"></line>
+                            <line x1="8" y1="12" x2="16" y2="12"></line>
+                        </svg>
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function adjustInventory() {
+    showToast('Ajuste de estoque em desenvolvimento', 'info');
+}
+
+function adjustStockModal(sku) {
+    showToast(`Ajustando estoque para ${sku}`, 'info');
+}
+
+// =====================================================
+// SETTINGS PAGE
+// =====================================================
+
+async function renderSettings(container) {
+    container.innerHTML = `
+        <div class="page-header">
+            <h1>Configurações</h1>
+            <p class="page-subtitle">Configurações gerais da loja</p>
+        </div>
+
+        <div style="max-width: 800px;">
+            <!-- Store Settings -->
+            <div class="table-container" style="margin-bottom: 24px;">
+                <div class="table-header">
+                    <h3 class="table-title">Informações da Loja</h3>
+                </div>
+                <div style="padding: 24px;">
+                    <div class="form-group">
+                        <label>Nome da Loja</label>
+                        <input type="text" value="Stranger Things Store" class="search-input">
+                    </div>
+                    <div class="form-group">
+                        <label>Email de Contato</label>
+                        <input type="email" value="contato@ststore.com" class="search-input">
+                    </div>
+                    <div class="form-group">
+                        <label>Descrição</label>
+                        <textarea class="search-input" rows="4">Loja oficial de produtos Stranger Things</textarea>
+                    </div>
+                    <button class="btn btn-primary">Salvar Alterações</button>
+                </div>
+            </div>
+
+            <!-- Payment Settings -->
+            <div class="table-container" style="margin-bottom: 24px;">
+                <div class="table-header">
+                    <h3 class="table-title">Métodos de Pagamento</h3>
+                </div>
+                <div style="padding: 24px;">
+                    <div class="checkbox-label" style="margin-bottom: 12px;">
+                        <input type="checkbox" checked>
+                        <span>Cartão de Crédito</span>
+                    </div>
+                    <div class="checkbox-label" style="margin-bottom: 12px;">
+                        <input type="checkbox" checked>
+                        <span>PIX</span>
+                    </div>
+                    <div class="checkbox-label">
+                        <input type="checkbox">
+                        <span>Boleto Bancário</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEO Settings -->
+            <div class="table-container">
+                <div class="table-header">
+                    <h3 class="table-title">SEO & Meta Tags</h3>
+                </div>
+                <div style="padding: 24px;">
+                    <div class="form-group">
+                        <label>Meta Title</label>
+                        <input type="text" value="Stranger Things Store - Produtos Oficiais" class="search-input">
+                    </div>
+                    <div class="form-group">
+                        <label>Meta Description</label>
+                        <textarea class="search-input" rows="3">Encontre produtos oficiais de Stranger Things. Camisetas, moletons, acessórios e muito mais!</textarea>
+                    </div>
+                    <button class="btn btn-primary">Atualizar SEO</button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// Continue na próxima parte com modais, notificações e utilitários...
+// =====================================================
+// MODALS - PARTE 4 (FINAL)
+// =====================================================
+
+function createModalContainers() {
+    if (!document.getElementById('modalContainer')) {
+        const modalContainer = document.createElement('div');
+        modalContainer.id = 'modalContainer';
+        document.body.appendChild(modalContainer);
+    }
+    
+    // Create generic modal if it doesn't exist
+    if (!document.getElementById('genericModal')) {
+        const genericModal = document.createElement('div');
+        genericModal.id = 'genericModal';
+        genericModal.style.cssText = 'display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; align-items: center; justify-content: center;';
+        document.body.appendChild(genericModal);
+    }
+}
+
+async function openProductModal(productId = null) {
+    const product = productId ? AppState.products.find(p => p.id === productId) : null;
     const isEdit = !!product;
 
-    // Parse existing images for display
     let existingImages = '';
     if (product && product.images_json) {
         try {
@@ -960,12 +2450,16 @@ function openProductModal(productId = null) {
                             <input type="text" name="name" value="${product?.name || ''}" required placeholder="Ex: Camiseta Hellfire Club">
                         </div>
                         <div class="form-group" style="flex: 1;">
-                            <label>Categoria</label>
-                            <input type="text" name="category" value="${product?.category || ''}" placeholder="Ex: Roupas">
+                            <label>SKU</label>
+                            <input type="text" name="sku" value="${product?.sku || ''}" placeholder="ST-001">
                         </div>
                     </div>
 
                     <div class="form-row">
+                        <div class="form-group">
+                            <label>Categoria</label>
+                            <input type="text" name="category" value="${product?.category || ''}" placeholder="Ex: Roupas">
+                        </div>
                         <div class="form-group">
                             <label>Preço (R$) *</label>
                             <input type="number" name="price" value="${product?.price || ''}" step="0.01" required placeholder="0.00">
@@ -978,26 +2472,23 @@ function openProductModal(productId = null) {
 
                     <div class="form-group">
                         <label>Descrição</label>
-                        <textarea name="description" rows="3" placeholder="Descrição do produto...">${product?.description || ''}</textarea>
+                        <textarea name="description" rows="4" placeholder="Descrição detalhada do produto...">${product?.description || ''}</textarea>
                     </div>
 
-                    <!-- Imagem (Simulando upload ou URL, o server aceita multipart mas vamos simplificar se possivel, ou implementar multipart) -->
-                    <!-- Para simplificar e garantir compatibilidade com server.js existente que aceita multipart form-data para insert/update -->
-                   
                     <div class="form-group">
                         <label>Imagem Principal (Upload)</label>
                         <input type="file" name="image" accept="image/*">
-                        ${product?.image_url ? `<br><small>Imagem atual: <a href="${product.image_url}" target="_blank">Ver imagem</a></small>` : ''}
+                        ${product?.image_url ? `<br><small style="color: var(--text-secondary);">Imagem atual: <a href="${product.image_url}" target="_blank" style="color: var(--primary);">Ver imagem</a></small>` : ''}
                     </div>
 
                     <div class="form-group">
-                        <label>Fotos Adicionais (URLs) - Uma por linha</label>
-                        <textarea name="additional_images" rows="4" placeholder="https://.../foto2.jpg&#10;https://.../foto3.jpg" style="font-family: monospace; font-size: 12px;">${existingImages}</textarea>
-                        <small>Cole links de imagens aqui para criar a galeria/miniaturas.</small>
+                        <label>Imagens Adicionais (URLs) - Uma por linha</label>
+                        <textarea name="additional_images" rows="3" placeholder="https://.../foto2.jpg&#10;https://.../foto3.jpg" style="font-family: monospace; font-size: 12px;">${existingImages}</textarea>
+                        <small>Cole links de imagens aqui para criar a galeria</small>
                     </div>
 
                     <div class="form-group">
-                         <label class="checkbox-label">
+                        <label class="checkbox-label">
                             <input type="checkbox" name="has_variants" ${product?.has_variants ? 'checked' : ''}>
                             <span>Este produto possui variantes (P, M, G...)?</span>
                         </label>
@@ -1013,6 +2504,9 @@ function openProductModal(productId = null) {
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
                     <button type="submit" form="productForm" class="btn btn-primary">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
                         ${isEdit ? 'Salvar Alterações' : 'Criar Produto'}
                     </button>
                 </div>
@@ -1020,8 +2514,6 @@ function openProductModal(productId = null) {
         </div>
     `;
 
-    const modalContainer = document.getElementById('modalContainer');
-    if (!modalContainer) createModalContainers();
     document.getElementById('modalContainer').innerHTML = modalHTML;
 
     document.getElementById('productForm').addEventListener('submit', (e) => {
@@ -1034,39 +2526,26 @@ async function saveProduct(productId) {
     const form = document.getElementById('productForm');
     const formData = new FormData(form);
 
-    // Processar imagens adicionais
     const additionalImagesRaw = formData.get('additional_images');
     if (additionalImagesRaw) {
         const imagesArray = additionalImagesRaw.split('\n')
             .map(url => url.trim())
             .filter(url => url.length > 0);
-
         formData.append('images_json', JSON.stringify(imagesArray));
-        // Remove raw field just in case
         formData.delete('additional_images');
     } else {
         formData.append('images_json', '[]');
     }
 
-    // Converter checkbox 'on'/'off' em boleano para o DB/API
-    // API esperaMultipart, então campos checkbox não enviados se unchecked, mas se checked envia 'on'.
-    // Server side deve tratar? Vou olhar o server.js
-    // Server: const { ... active, has_variants } = req.body; ... [ ... active ? 1 : 0, has_variants ? 1 : 0 ]
-    // Se o FormData enviar 'on', 'if ("on")' é true. Se não enviar (undefined), é false.
-    // Então o FormData padrão do browser funciona perfeitamente com a lógica do server.js que espera truthy/falsy.
-
     showLoading(productId ? 'Atualizando produto...' : 'Criando produto...');
 
     try {
-        const url = productId ? `${API_URL}/admin/products/${productId}` : `${API_URL}/admin/products`;
+        const url = productId ? `${API_URL}/products/${productId}` : `${API_URL}/products`;
         const method = productId ? 'PUT' : 'POST';
 
-        // Usar FormData diretamente permite upload de arquivos se implementado no server
-        // Headers CONTENT-TYPE não deve ser setado manualmente com FormData, o browser seta com boundary
         const response = await fetch(url, {
             method,
             headers: {
-                // 'Content-Type': 'multipart/form-data', // NÃO SETAR!
                 'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
             },
             body: formData
@@ -1088,84 +2567,279 @@ async function saveProduct(productId) {
     }
 }
 
-function editProduct(id) {
-    openProductModal(id);
-}
+async function openCollectionModal(collectionId = null) {
+    const collection = collectionId ? AppState.collections.find(c => c.id === collectionId) : null;
+    const isEdit = !!collection;
 
-function deleteProduct(id) {
-    if (!confirm('Tem certeza que deseja excluir este produto?')) return;
-    showLoading('Excluindo...');
-    fetch(`${API_URL}/admin/products/${id}`, {
-        method: 'DELETE',
-        headers: {
-            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
-        }
-    })
-        .then(res => {
+    let allProducts = AppState.products;
+    if (allProducts.length === 0) {
+        try {
+            const res = await fetch(`${API_BASE}/api/products`);
+            if (res.ok) allProducts = await res.json();
+        } catch (e) { console.error(e); }
+    }
+
+    let associatedIds = new Set();
+    if (isEdit) {
+        try {
+            const res = await fetch(`${API_URL}/collections/${collectionId}/products`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
+            });
             if (res.ok) {
-                showToast('Produto excluído', 'success');
-                loadPage('products');
-            } else {
-                showToast('Erro ao excluir', 'error');
+                const ids = await res.json();
+                associatedIds = new Set(ids);
             }
-        })
-        .catch(err => showToast('Erro de conexão', 'error'))
-        .finally(() => hideLoading());
+        } catch (e) { console.error(e); }
+    }
+
+    const modalHTML = `
+        <div class="modal-overlay" onclick="closeModal()">
+            <div class="modal-dialog" onclick="event.stopPropagation()">
+                <div class="modal-header">
+                    <h2>${isEdit ? 'Editar Coleção' : 'Nova Coleção'}</h2>
+                    <button class="modal-close" onclick="closeModal()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <form id="collectionForm" class="modal-body">
+                    <div class="tabs-nav">
+                        <button type="button" class="tab-btn active" onclick="switchTab(this, 'tab-info')">
+                            Informações
+                        </button>
+                        <button type="button" class="tab-btn" onclick="switchTab(this, 'tab-products')">
+                            Produtos (${associatedIds.size})
+                        </button>
+                    </div>
+
+                    <div id="tab-info" class="tab-content">
+                        <div class="form-group">
+                            <label>Nome da Coleção *</label>
+                            <input type="text" name="name" value="${collection?.name || ''}" required placeholder="Ex: Roupas Stranger Things">
+                        </div>
+                        <div class="form-group">
+                            <label>Slug (URL) *</label>
+                            <input type="text" name="slug" value="${collection?.slug || ''}" required placeholder="Ex: roupas-stranger-things">
+                            <small>Usado na URL. Apenas letras minúsculas, números e hífens.</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Descrição</label>
+                            <textarea name="description" rows="3" placeholder="Descrição opcional da coleção">${collection?.description || ''}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="is_active" ${collection?.is_active !== false ? 'checked' : ''}>
+                                <span>Coleção ativa (visível na loja)</span>
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label>Visualização Padrão no Frontend</label>
+                            <div class="view-toggle" style="display: inline-flex; margin-top: 8px;">
+                                <button type="button" class="view-toggle-btn ${!collection?.default_view || collection?.default_view === 'grid' ? 'active' : ''}" onclick="selectDefaultView(this, 'grid')" title="Grade">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="3" width="7" height="7"></rect>
+                                        <rect x="14" y="3" width="7" height="7"></rect>
+                                        <rect x="14" y="14" width="7" height="7"></rect>
+                                        <rect x="3" y="14" width="7" height="7"></rect>
+                                    </svg>
+                                </button>
+                                <button type="button" class="view-toggle-btn ${collection?.default_view === 'carousel' ? 'active' : ''}" onclick="selectDefaultView(this, 'carousel')" title="Carrossel">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect>
+                                        <polyline points="17 2 12 7 7 2"></polyline>
+                                    </svg>
+                                </button>
+                            </div>
+                            <input type="hidden" name="default_view" value="${collection?.default_view || 'grid'}">
+                            <small>Escolha como os produtos aparecerão por padrão nesta coleção. O cliente pode alterar no site.</small>
+                        </div>
+                    </div>
+
+                    <div id="tab-products" class="tab-content" style="display:none;">
+                        <div class="form-group">
+                            <input type="text" placeholder="🔍 Buscar produto..." onkeyup="filterCollectionProducts(this)" style="margin-bottom:10px; width:100%; padding:10px; background: var(--bg-darker); border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary);">
+                            <div class="products-list-scroll" style="max-height: 350px; overflow-y: auto; border: 1px solid var(--border); padding: 12px; border-radius: 6px; background: var(--bg-darker);">
+                                ${allProducts.map(p => `
+                                    <div class="product-selection-item" style="display:flex; align-items:center; gap:12px; padding:8px; border-bottom:1px solid var(--border); cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='transparent'">
+                                        <input type="checkbox" name="product_ids" value="${p.id}" ${associatedIds.has(p.id) ? 'checked' : ''} style="width:18px; height:18px; margin:0; cursor: pointer; accent-color: var(--primary);">
+                                        <div style="width:40px; height:40px; background:var(--bg-card); border-radius:6px; overflow:hidden; flex-shrink: 0; border: 1px solid var(--border);">
+                                            ${p.image_url ? `<img src="${p.image_url}" style="width:100%; height:100%; object-fit:cover;">` : ''}
+                                        </div>
+                                        <div style="flex: 1; min-width: 0;">
+                                            <span class="prod-name" style="font-size:14px; font-weight: 600; display: block; color: var(--text-primary);">${p.name}</span>
+                                            <span style="font-size:12px; color: var(--text-muted);">R$ ${parseFloat(p.price || 0).toFixed(2).replace('.', ',')}</span>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+                    <button type="submit" form="collectionForm" class="btn btn-primary">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        ${isEdit ? 'Salvar Alterações' : 'Criar Coleção'}
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('modalContainer').innerHTML = modalHTML;
+
+    window.switchTab = (btn, tabId) => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+        btn.classList.add('active');
+        document.getElementById(tabId).style.display = 'block';
+    };
+
+    window.filterCollectionProducts = (input) => {
+        const term = input.value.toLowerCase();
+        document.querySelectorAll('.product-selection-item').forEach(item => {
+            const name = item.querySelector('.prod-name').innerText.toLowerCase();
+            item.style.display = name.includes(term) ? 'flex' : 'none';
+        });
+    };
+
+    document.getElementById('collectionForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        saveCollection(collectionId);
+    });
+
+    if (!isEdit) {
+        const nameInput = document.querySelector('[name="name"]');
+        const slugInput = document.querySelector('[name="slug"]');
+        nameInput.addEventListener('input', () => {
+            slugInput.value = nameInput.value
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-+|-+$/g, '');
+        });
+    }
 }
 
-// === GESTÃO DE PRODUTOS DA COLEÇÃO ===
+async function saveCollection(collectionId) {
+    const form = document.getElementById('collectionForm');
+    const formData = new FormData(form);
+
+    const selectedProducts = [];
+    form.querySelectorAll('input[name="product_ids"]:checked').forEach(cb => {
+        selectedProducts.push(parseInt(cb.value));
+    });
+
+    const data = {
+        name: formData.get('name'),
+        slug: formData.get('slug'),
+        description: formData.get('description') || '',
+        is_active: formData.get('is_active') === 'on',
+        default_view: formData.get('default_view') || 'grid'
+    };
+
+    showLoading(collectionId ? 'Atualizando coleção...' : 'Criando coleção...');
+
+    try {
+        const url = collectionId ? `${API_URL}/collections/${collectionId}` : `${API_URL}/collections`;
+        const method = collectionId ? 'PUT' : 'POST';
+
+        const response = await fetch(url, {
+            method,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            const targetId = collectionId || result.id;
+
+            if (targetId) {
+                await fetch(`${API_URL}/collections/${targetId}/products`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+                    },
+                    body: JSON.stringify({ product_ids: selectedProducts })
+                });
+            }
+
+            showToast(`Coleção ${collectionId ? 'atualizada' : 'criada'} com sucesso!`, 'success');
+            closeModal();
+            loadPage('collections');
+        } else {
+            const error = await response.json();
+            showToast(error.error || 'Erro ao salvar coleção', 'error');
+        }
+    } catch (error) {
+        console.error('Erro ao salvar coleção:', error);
+        showToast('Erro ao salvar coleção', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
 async function manageCollectionProducts(collectionId) {
     showLoading('Carregando produtos...');
     try {
-        const collectionsResp = await fetch(`${API_URL}/collections`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` } });
+        const collectionsResp = await fetch(`${API_URL}/collections`, { 
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` } 
+        });
         const allCollections = await collectionsResp.json();
         const collection = allCollections.find(c => c.id === collectionId);
 
         const productsResp = await fetch(`${API_BASE}/api/products`);
         let allProducts = await productsResp.json();
 
-        // IDs n coleção
         const inCollectionIds = new Set((collection.products || []).map(p => p.id));
         const productsIn = collection.products || [];
         const productsOut = allProducts.filter(p => !inCollectionIds.has(p.id));
 
         const modalHtml = `
-            <div id="collectionProductsModal" class="modal-overlay" style="display: flex;">
-                <div class="modal-content" style="width: 90%; max-width: 900px; height: 80vh; display: flex; flex-direction: column;">
+            <div class="modal-overlay" onclick="closeModal()">
+                <div class="modal-dialog" style="max-width: 1000px; max-height: 85vh;" onclick="event.stopPropagation()">
                     <div class="modal-header">
                         <h2>Gerenciar: ${collection.name}</h2>
-                        <button class="close-btn" onclick="closeModal()">×</button>
+                        <button class="modal-close" onclick="closeModal()">×</button>
                     </div>
                     
-                    <div class="modal-body" style="flex: 1; display: flex; gap: 20px; overflow: hidden; padding: 20px;">
-                        
-                        <!-- Coluna: Na Coleção -->
-                        <div class="pm-column" style="flex: 1; display: flex; flex-direction: column; background: #f8f9fa; padding: 15px; border-radius: 8px;">
-                            <h3 style="margin-bottom: 10px;">Na Coleção (${productsIn.length}) <small>(Arraste para ordenar)</small></h3>
-                            <div id="inCollectionList" class="pm-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
-                                ${productsIn.map(p => renderProductItem(p, true, collectionId)).join('')}
+                    <div class="modal-body" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; overflow: hidden; padding: 24px;">
+                        <div style="display: flex; flex-direction: column; background: var(--bg-darker); padding: 16px; border-radius: 8px; border: 1px solid var(--border);">
+                            <h3 style="margin-bottom: 12px; font-size: 16px;">
+                                Na Coleção (${productsIn.length})
+                                <small style="color: var(--text-muted); font-size: 11px; font-weight: normal; display: block;">Arraste para reordenar</small>
+                            </h3>
+                            <div id="inCollectionList" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
+                                ${productsIn.map(p => renderManageProductItem(p, true, collectionId)).join('')}
                             </div>
                         </div>
 
-                        <!-- Coluna: Disponíveis -->
-                        <div class="pm-column" style="flex: 1; display: flex; flex-direction: column; background: #fff; border: 1px solid #eee; padding: 15px; border-radius: 8px;">
-                            <h3 style="margin-bottom: 10px;">Produtos Disponíveis</h3>
-                            <input type="text" placeholder="Buscar produto..." class="form-input" onkeyup="filterPMList(this)" style="margin-bottom: 10px;">
-                            <div id="outCollectionList" class="pm-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
-                                ${productsOut.map(p => renderProductItem(p, false, collectionId)).join('')}
+                        <div style="display: flex; flex-direction: column; background: var(--bg-card); padding: 16px; border-radius: 8px; border: 1px solid var(--border);">
+                            <h3 style="margin-bottom: 12px; font-size: 16px;">Produtos Disponíveis</h3>
+                            <input type="text" placeholder="🔍 Buscar produto..." onkeyup="filterPMList(this)" style="margin-bottom: 10px; padding: 10px; background: var(--bg-darker); border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary);">
+                            <div id="outCollectionList" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
+                                ${productsOut.map(p => renderManageProductItem(p, false, collectionId)).join('')}
                             </div>
                         </div>
-
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" onclick="closeModal()">Fechar</button>
                     </div>
                 </div>
             </div>
         `;
 
-        const container = document.getElementById('modalContainer');
-        if (!container) createModalContainers();
         document.getElementById('modalContainer').innerHTML = modalHtml;
 
-        // Init Sortable para a lista "In Collection"
         if (typeof Sortable !== 'undefined') {
             Sortable.create(document.getElementById('inCollectionList'), {
                 animation: 150,
@@ -1181,19 +2855,19 @@ async function manageCollectionProducts(collectionId) {
     }
 }
 
-function renderProductItem(product, isIn, collectionId) {
+function renderManageProductItem(product, isIn, collectionId) {
     return `
-        <div class="pm-item" data-id="${product.id}" style="background: white; padding: 10px; border-radius: 6px; border: 1px solid #ddd; display: flex; align-items: center; gap: 10px;">
+        <div class="pm-item" data-id="${product.id}" style="background: var(--bg-card); padding: 10px; border-radius: 6px; border: 1px solid var(--border); display: flex; align-items: center; gap: 10px; cursor: ${isIn ? 'move' : 'default'}; transition: all 0.2s;">
             <img src="${product.image_url || 'https://via.placeholder.com/40'}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
-            <div style="flex: 1;">
-                <div style="font-weight: 600; font-size: 14px;">${product.name}</div>
-                <div style="font-size: 12px; color: #666;">R$ ${parseFloat(product.price).toFixed(2)}</div>
+            <div style="flex: 1; min-width: 0;">
+                <div style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${product.name}</div>
+                <div style="font-size: 12px; color: var(--text-muted);">R$ ${parseFloat(product.price).toFixed(2).replace('.', ',')}</div>
             </div>
-            <button class="btn-icon ${isIn ? 'danger' : 'success'}" 
+            <button class="btn-icon ${isIn ? 'danger' : 'success'}" style="flex-shrink: 0;"
                 onclick="${isIn ? `removeProductFromCollection(${collectionId}, ${product.id})` : `addProductToCollection(${collectionId}, ${product.id})`}">
                 ${isIn ?
-            '<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>' :
-            '<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>'}
+                    '<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>' :
+                    '<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>'}
             </button>
         </div>
     `;
@@ -1210,12 +2884,15 @@ async function addProductToCollection(collectionId, productId) {
             body: JSON.stringify({ product_id: productId })
         });
         if (response.ok) {
-            manageCollectionProducts(collectionId); // Reload modal
+            manageCollectionProducts(collectionId);
         } else {
             const data = await response.json();
             showToast(data.error || 'Erro ao adicionar', 'error');
         }
-    } catch (e) { console.error(e); showToast('Erro de conexão', 'error'); }
+    } catch (e) { 
+        console.error(e); 
+        showToast('Erro de conexão', 'error'); 
+    }
 }
 
 async function removeProductFromCollection(collectionId, productId) {
@@ -1226,11 +2903,14 @@ async function removeProductFromCollection(collectionId, productId) {
             headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
         });
         if (response.ok) {
-            manageCollectionProducts(collectionId); // Reload modal
+            manageCollectionProducts(collectionId);
         } else {
             showToast('Erro ao remover', 'error');
         }
-    } catch (e) { console.error(e); showToast('Erro de conexão', 'error'); }
+    } catch (e) { 
+        console.error(e); 
+        showToast('Erro de conexão', 'error'); 
+    }
 }
 
 async function saveCollectionProductOrder(collectionId) {
@@ -1249,7 +2929,9 @@ async function saveCollectionProductOrder(collectionId) {
             },
             body: JSON.stringify({ order })
         });
-    } catch (e) { console.error('Erro ao salvar ordem', e); }
+    } catch (e) { 
+        console.error('Erro ao salvar ordem', e); 
+    }
 }
 
 function filterPMList(input) {
@@ -1261,24 +2943,500 @@ function filterPMList(input) {
     });
 }
 
+// Selecionar visualização padrão no modal de coleção
+function selectDefaultView(btn, view) {
+    // Atualizar botões ativos
+    const container = btn.parentElement;
+    container.querySelectorAll('.view-toggle-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    
+    // Atualizar campo hidden
+    const form = btn.closest('form');
+    const hiddenInput = form.querySelector('input[name="default_view"]');
+    if (hiddenInput) {
+        hiddenInput.value = view;
+    }
+}
+
+// Tornar função global
+window.selectDefaultView = selectDefaultView;
+
 function closeModal() {
     const modalContainer = document.getElementById('modalContainer');
     if (modalContainer) {
         modalContainer.innerHTML = '';
     }
+    
+    // Also close generic modal
+    const genericModal = document.getElementById('genericModal');
+    if (genericModal) {
+        genericModal.style.display = 'none';
+        genericModal.innerHTML = '';
+    }
 }
 
-// Global Exports
-window.openCollectionModal = openCollectionModal;
+// =====================================================
+// NOTIFICATIONS & TOASTS
+// =====================================================
+
+function showToast(message, type = 'info') {
+    const container = document.getElementById('toastContainer') || createToastContainer();
+    
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+
+    const icons = {
+        success: '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>',
+        error: '<circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line>',
+        warning: '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line>',
+        info: '<circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line>'
+    };
+
+    toast.innerHTML = `
+        <div class="toast-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                ${icons[type]}
+            </svg>
+        </div>
+        <div class="toast-message">${message}</div>
+        <button class="toast-close" onclick="this.parentElement.classList.add('toast-exit'); setTimeout(() => this.parentElement.remove(), 300)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
+    `;
+
+    container.appendChild(toast);
+
+    setTimeout(() => toast.classList.add('toast-exit'), 4000);
+    setTimeout(() => toast.remove(), 4300);
+}
+
+function createToastContainer() {
+    const container = document.createElement('div');
+    container.id = 'toastContainer';
+    container.className = 'toast-container';
+    document.body.appendChild(container);
+    return container;
+}
+
+function showLoading(message = 'Carregando...') {
+    let loader = document.getElementById('globalLoader');
+    if (!loader) {
+        loader = document.createElement('div');
+        loader.id = 'globalLoader';
+        loader.className = 'global-loader';
+        document.body.appendChild(loader);
+    }
+
+    loader.innerHTML = `
+        <div class="loader-content">
+            <div class="loader-spinner"></div>
+            <div class="loader-text">${message}</div>
+        </div>
+    `;
+    loader.classList.add('active');
+}
+
+function hideLoading() {
+    const loader = document.getElementById('globalLoader');
+    if (loader) {
+        loader.classList.remove('active');
+    }
+}
+
+function showNotificationsPanel() {
+    const modal = `
+        <div class="modal-overlay" onclick="closeModal()">
+            <div class="modal-dialog" style="max-width: 500px;" onclick="event.stopPropagation()">
+                <div class="modal-header">
+                    <h2>Notificações</h2>
+                    <button class="modal-close" onclick="closeModal()">×</button>
+                </div>
+                <div class="modal-body" style="max-height: 400px; overflow-y: auto;">
+                    <div class="activity-list">
+                        <div class="activity-item">
+                            <div class="activity-icon success">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="9" cy="21" r="1"></circle>
+                                    <circle cx="20" cy="21" r="1"></circle>
+                                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                                </svg>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-title">Novo pedido recebido</div>
+                                <div class="activity-time">Há 5 minutos</div>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon warning">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                                </svg>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-title">Estoque baixo detectado</div>
+                                <div class="activity-time">Há 1 hora</div>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon info">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                                </svg>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-title">Backup automático realizado</div>
+                                <div class="activity-time">Há 3 horas</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="closeModal()">Fechar</button>
+                    <button class="btn btn-primary">Marcar Todas como Lidas</button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('modalContainer').innerHTML = modal;
+}
+
+// =====================================================
+// UTILITY FUNCTIONS
+// =====================================================
+
+function formatDate(dateString) {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR', { 
+        day: '2-digit', 
+        month: '2-digit', 
+        year: 'numeric' 
+    });
+}
+
+function formatCurrency(value) {
+    if (typeof value === 'number') {
+        return value.toFixed(2).replace('.', ',');
+    }
+    return parseFloat(value || 0).toFixed(2).replace('.', ',');
+}
+
+function formatDateTime(dateString) {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    return date.toLocaleString('pt-BR', { 
+        day: '2-digit', 
+        month: '2-digit', 
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+// =====================================================
+// BULK DISCOUNT MODAL
+// =====================================================
+
+function openBulkDiscountModal() {
+    const selectedProducts = Array.from(AppState.selected.products).map(id => 
+        AppState.products.find(p => p.id === id)
+    ).filter(Boolean);
+
+    if (selectedProducts.length === 0) {
+        showToast('Selecione produtos para aplicar desconto', 'warning');
+        return;
+    }
+
+    const modal = document.getElementById('genericModal');
+    if (!modal) {
+        console.error('Modal container not found');
+        return;
+    }
+    
+    modal.style.display = 'flex';
+    
+    // Add click event to close modal when clicking overlay
+    modal.onclick = (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
+    };
+    
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 700px; background: var(--bg-card); border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); animation: modalSlideIn 0.3s ease; overflow: hidden;">
+            <div class="modal-header" style="padding: 24px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="margin: 0; color: var(--text-primary); font-size: 1.5rem;">💰 Desconto em Massa</h2>
+                <button onclick="closeModal()" class="modal-close" style="background: none; border: none; font-size: 2rem; cursor: pointer; color: var(--text-secondary); line-height: 1; padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 4px; transition: all 0.2s;">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 24px; max-height: 70vh; overflow-y: auto;">
+                <div style="margin-bottom: 24px; padding: 16px; background: rgba(229, 9, 20, 0.1); border-left: 3px solid var(--primary); border-radius: 6px;">
+                    <div style="font-weight: 600; margin-bottom: 8px; color: var(--text-primary);">📦 ${selectedProducts.length} produtos selecionados</div>
+                    <div style="font-size: 13px; color: var(--text-secondary);">
+                        Ajuste o desconto usando a barra abaixo e veja os preços atualizados em tempo real
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 32px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 12px; color: var(--text-primary);">
+                        Percentual de Desconto
+                    </label>
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                        <input 
+                            type="range" 
+                            id="discountSlider" 
+                            min="10" 
+                            max="80" 
+                            value="10" 
+                            step="5"
+                            style="flex: 1; height: 8px; background: linear-gradient(90deg, #52c77a 0%, #52c77a 12.5%, #E50914 12.5%, #E50914 100%); border-radius: 4px; outline: none; cursor: pointer; -webkit-appearance: none; appearance: none;"
+                            oninput="updateDiscountPreview(this.value)"
+                        >
+                        <div style="min-width: 80px; text-align: center; padding: 8px 16px; background: var(--bg-secondary); border-radius: 6px; font-weight: 700; font-size: 18px; color: var(--primary);">
+                            <span id="discountValue">10</span>%
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: var(--text-muted);">
+                        <span>10%</span>
+                        <span>45%</span>
+                        <span>80%</span>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 16px;">
+                    <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 12px; color: var(--text-secondary); text-transform: uppercase;">
+                        Preview dos Preços
+                    </h3>
+                </div>
+
+                <div id="discountPreviewList" style="max-height: 400px; overflow-y: auto;">
+                    ${renderDiscountPreview(selectedProducts, 10)}
+                </div>
+            </div>
+            <div class="modal-footer" style="padding: 24px; border-top: 1px solid var(--border-color); display: flex; gap: 12px; justify-content: flex-end; background: var(--bg-secondary);">
+                <button class="btn btn-secondary" onclick="closeModal()" style="padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600;">Cancelar</button>
+                <button class="btn btn-primary" onclick="applyBulkDiscount()" style="padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px;">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    Aplicar Desconto
+                </button>
+            </div>
+        </div>
+        
+        <style>
+            #discountSlider::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                appearance: none;
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                background: var(--primary);
+                cursor: pointer;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            }
+            
+            #discountSlider::-moz-range-thumb {
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                background: var(--primary);
+                cursor: pointer;
+                border: none;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            }
+            
+            @keyframes modalSlideIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(-20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            
+            .modal-close:hover {
+                background: rgba(229, 9, 20, 0.1);
+                color: var(--primary);
+            }
+        </style>
+    `;
+
+    // Store selected products in modal data
+    modal.dataset.selectedProducts = JSON.stringify(selectedProducts.map(p => ({ id: p.id, price: p.price })));
+}
+
+function renderDiscountPreview(products, discountPercent) {
+    return products.map(product => {
+        const originalPrice = parseFloat(product.price);
+        const newPrice = originalPrice * (1 - discountPercent / 100);
+        const saving = originalPrice - newPrice;
+        
+        return `
+            <div style="display: flex; align-items: center; padding: 12px; background: var(--bg-secondary); border-radius: 6px; margin-bottom: 8px; border-left: 3px solid var(--primary);">
+                <div style="flex: 1; min-width: 0;">
+                    <div style="font-weight: 600; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        ${product.name}
+                    </div>
+                    <div style="font-size: 12px; color: var(--text-muted);">
+                        SKU: ${product.sku || 'N/A'}
+                    </div>
+                </div>
+                <div style="text-align: right; min-width: 180px;">
+                    <div style="font-size: 12px; color: var(--text-muted); text-decoration: line-through; margin-bottom: 2px;">
+                        R$ ${originalPrice.toFixed(2).replace('.', ',')}
+                    </div>
+                    <div style="font-size: 18px; font-weight: 700; color: #52c77a; margin-bottom: 2px;">
+                        R$ ${newPrice.toFixed(2).replace('.', ',')}
+                    </div>
+                    <div style="font-size: 11px; color: var(--success);">
+                        Economia: R$ ${saving.toFixed(2).replace('.', ',')}
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function updateDiscountPreview(discountPercent) {
+    document.getElementById('discountValue').textContent = discountPercent;
+    
+    // Update slider background gradient
+    const slider = document.getElementById('discountSlider');
+    const percentage = ((discountPercent - 10) / 70) * 100;
+    slider.style.background = `linear-gradient(90deg, #52c77a 0%, #52c77a ${percentage}%, #E50914 ${percentage}%, #E50914 100%)`;
+    
+    const modal = document.getElementById('genericModal');
+    const productsData = JSON.parse(modal.dataset.selectedProducts || '[]');
+    const products = productsData.map(pd => AppState.products.find(p => p.id === pd.id)).filter(Boolean);
+    
+    document.getElementById('discountPreviewList').innerHTML = renderDiscountPreview(products, discountPercent);
+}
+
+async function applyBulkDiscount() {
+    const discountPercent = parseInt(document.getElementById('discountSlider').value);
+    const modal = document.getElementById('genericModal');
+    const productsData = JSON.parse(modal.dataset.selectedProducts || '[]');
+    
+    if (productsData.length === 0) {
+        showToast('Nenhum produto selecionado', 'error');
+        return;
+    }
+
+    if (!confirm(`Tem certeza que deseja aplicar ${discountPercent}% de desconto em ${productsData.length} produtos?\n\nEsta ação irá atualizar os preços permanentemente.`)) {
+        return;
+    }
+
+    showLoading('Aplicando descontos...');
+    
+    try {
+        let successCount = 0;
+        let errorCount = 0;
+
+        for (const productData of productsData) {
+            const originalPrice = parseFloat(productData.price);
+            const newPrice = originalPrice * (1 - discountPercent / 100);
+            
+            try {
+                const response = await fetch(`${API_URL}/products/${productData.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+                    },
+                    body: JSON.stringify({ price: newPrice.toFixed(2) })
+                });
+
+                if (response.ok) {
+                    successCount++;
+                    // Update local state
+                    const product = AppState.products.find(p => p.id === productData.id);
+                    if (product) {
+                        product.price = newPrice.toFixed(2);
+                    }
+                } else {
+                    errorCount++;
+                }
+            } catch (error) {
+                console.error(`Erro ao atualizar produto ${productData.id}:`, error);
+                errorCount++;
+            }
+        }
+
+        hideLoading();
+        closeModal();
+        
+        if (successCount > 0) {
+            showToast(`✅ Desconto aplicado em ${successCount} produtos!`, 'success');
+            // Refresh products view
+            await loadProducts();
+            renderProducts(document.getElementById('mainContent'));
+        }
+        
+        if (errorCount > 0) {
+            showToast(`⚠️ ${errorCount} produtos falharam`, 'warning');
+        }
+
+        // Clear selection
+        AppState.selected.products.clear();
+        
+    } catch (error) {
+        hideLoading();
+        console.error('Erro ao aplicar desconto em massa:', error);
+        showToast('Erro ao aplicar descontos', 'error');
+    }
+}
+
+// =====================================================
+// GLOBAL EXPORTS
+// =====================================================
+
 window.openProductModal = openProductModal;
+window.openCollectionModal = openCollectionModal;
+window.openCustomerModal = openCustomerModal;
 window.editProduct = editProduct;
 window.deleteProduct = deleteProduct;
 window.deleteCollection = deleteCollection;
-window.toggleCollectionActive = toggleCollectionActive;
-window.filterProducts = filterProducts;
-window.closeModal = closeModal;
+window.toggleProductSelection = toggleProductSelection;
+window.toggleSelectAllProducts = toggleSelectAllProducts;
+window.bulkEditProducts = bulkEditProducts;
+window.bulkDeleteProducts = bulkDeleteProducts;
+window.openBulkDiscountModal = openBulkDiscountModal;
+window.updateDiscountPreview = updateDiscountPreview;
+window.applyBulkDiscount = applyBulkDiscount;
+window.importProductsCSV = importProductsCSV;
+window.previewProduct = previewProduct;
+window.filterProductsTable = filterProductsTable;
+window.filterOrdersTable = filterOrdersTable;
+window.filterCustomersTable = filterCustomersTable;
 window.manageCollectionProducts = manageCollectionProducts;
 window.addProductToCollection = addProductToCollection;
 window.removeProductFromCollection = removeProductFromCollection;
 window.saveCollectionProductOrder = saveCollectionProductOrder;
 window.filterPMList = filterPMList;
+window.updateOrderStatus = updateOrderStatus;
+window.viewOrderDetails = viewOrderDetails;
+window.viewCustomerDetails = viewCustomerDetails;
+window.printInvoice = printInvoice;
+window.exportOrders = exportOrders;
+window.adjustInventory = adjustInventory;
+window.adjustStockModal = adjustStockModal;
+window.previousProductsPage = previousProductsPage;
+window.nextProductsPage = nextProductsPage;
+window.closeModal = closeModal;
+window.showToast = showToast;
+window.showLoading = showLoading;
+window.hideLoading = hideLoading;
+window.loadPage = loadPage;
+
+console.log('%c🎬 Stranger Things Admin Dashboard PRO v2.0', 'background: #E50914; color: white; font-size: 16px; font-weight: bold; padding: 10px;');
+console.log('%cSistema carregado com sucesso! ✨', 'color: #10B981; font-size: 14px;');

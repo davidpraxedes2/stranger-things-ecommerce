@@ -12,6 +12,9 @@ if (!localStorage.getItem('cart_session_id')) {
     localStorage.setItem('cart_session_id', cartSessionId);
 }
 
+// Exportar globalmente para uso em script.js
+window.sessionId = cartSessionId;
+
 console.log('🔑 Cart Session ID:', cartSessionId);
 
 function getCartHeaders() {
@@ -21,7 +24,11 @@ function getCartHeaders() {
     };
 }
 
+// Exportar globalmente
+window.getCartHeaders = getCartHeaders;
+
 let cart = [];
+window.cart = cart;  // Exportar referência inicial
 
 // Load cart from API
 async function loadCartFromAPI() {
@@ -33,8 +40,8 @@ async function loadCartFromAPI() {
 
         if (response.ok) {
             const data = await response.json();
-            cart = data.items || [];
-            console.log('✅ Carrinho carregado:', cart);
+            window.cart = data.items || [];
+            console.log('✅ Carrinho carregado:', window.cart);
             updateCartUI();
         }
     } catch (error) {
@@ -45,12 +52,16 @@ async function loadCartFromAPI() {
 // Update cart UI
 function updateCartUI() {
     console.log('🎨 Atualizando UI do carrinho...');
+    console.log('🛒 Cart atual:', window.cart);
     const cartCount = document.getElementById('cartCount');
     const cartItems = document.getElementById('cartItems');
     const cartTotal = document.getElementById('cartTotal');
 
     // Update cart count
-    const totalItems = cart.reduce((sum, item) => sum + (item.quantity || 0), 0);
+    const totalItems = window.cart.reduce((sum, item) => {
+        console.log('🔢 Item:', item.name, 'qty:', item.quantity);
+        return sum + (parseInt(item.quantity) || 0);
+    }, 0);
     console.log('📊 Total de itens:', totalItems);
 
     if (cartCount) {
@@ -59,7 +70,7 @@ function updateCartUI() {
     }
 
     // Update cart total
-    const total = cart.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 0)), 0);
+    const total = window.cart.reduce((sum, item) => sum + ((parseFloat(item.price) || 0) * (parseInt(item.quantity) || 0)), 0);
     console.log('💰 Total R$:', total.toFixed(2));
 
     if (cartTotal) {
@@ -68,7 +79,7 @@ function updateCartUI() {
 
     // Render cart items
     if (cartItems) {
-        if (cart.length === 0) {
+        if (window.cart.length === 0) {
             cartItems.innerHTML = `
                 <div class="empty-cart">
                     <div class="empty-cart-icon">
@@ -83,7 +94,10 @@ function updateCartUI() {
                 </div>
             `;
         } else {
-            cartItems.innerHTML = cart.map(item => `
+            cartItems.innerHTML = window.cart.map(item => {
+                const qty = parseInt(item.quantity) || 1;
+                const price = parseFloat(item.price) || 0;
+                return `
                 <div class="cart-item">
                     <div class="cart-item-image">
                         ${item.image_url ?
@@ -93,16 +107,17 @@ function updateCartUI() {
                     </div>
                     <div class="cart-item-info">
                         <div class="cart-item-name">${item.name || 'Produto'}</div>
-                        <div class="cart-item-price">R$ ${((item.price || 0) * (item.quantity || 1)).toFixed(2).replace('.', ',')}</div>
+                        <div class="cart-item-price">R$ ${(price * qty).toFixed(2).replace('.', ',')}</div>
                         <div class="cart-item-controls">
-                            <button class="quantity-btn" onclick="updateCartQuantity(${item.id}, ${(item.quantity || 1) - 1})" aria-label="Diminuir quantidade">-</button>
-                            <span class="quantity-value">${item.quantity || 1}x</span>
-                            <button class="quantity-btn" onclick="updateCartQuantity(${item.id}, ${(item.quantity || 1) + 1})" aria-label="Aumentar quantidade">+</button>
+                            <button class="quantity-btn" onclick="updateCartQuantity(${item.id}, ${qty - 1})" aria-label="Diminuir quantidade">-</button>
+                            <span class="quantity-value">${qty}x</span>
+                            <button class="quantity-btn" onclick="updateCartQuantity(${item.id}, ${qty + 1})" aria-label="Aumentar quantidade">+</button>
                         </div>
                         <button class="remove-item" onclick="removeCartItem(${item.id})">REMOVER</button>
                     </div>
                 </div>
-            `).join('');
+                `;
+            }).join('');
         }
     }
 }
@@ -199,7 +214,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (checkoutBtn) {
         checkoutBtn.addEventListener('click', () => {
-            window.location.href = 'checkout.html';
+            // Fechar drawer com animação
+            closeCartDrawer();
+            
+            // Fade-out suave da página
+            document.body.style.transition = 'opacity 0.3s ease-out';
+            document.body.style.opacity = '0';
+            
+            // Navegar após a transição
+            setTimeout(() => {
+                window.location.href = 'checkout.html';
+            }, 300);
         });
     }
 

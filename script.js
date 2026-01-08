@@ -10,6 +10,47 @@ const API_URL = window.API_URL;
 let products = [];
 let collections = [];
 
+// ===== SISTEMA DE ANALYTICS - RASTREAMENTO DE VISITANTES =====
+
+async function initAnalytics() {
+    try {
+        const response = await fetch('https://ipapi.co/json/', {
+            signal: AbortSignal.timeout(3000)
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            
+            // Tentar enviar analytics, mas não crashar se falhar
+            try {
+                await fetch(`${API_URL}/analytics/track-location`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-session-id': window.sessionId || 'anonymous'
+                    },
+                    body: JSON.stringify({
+                        city: data.city || 'Desconhecido',
+                        state: data.region_code || data.region || 'BR',
+                        ip: data.ip
+                    }),
+                    signal: AbortSignal.timeout(2000)
+                });
+            } catch (analyticsError) {
+                // Ignorar erro de analytics silenciosamente
+            }
+        }
+    } catch (error) {
+        // Geolocalização falhou - não é crítico
+    }
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAnalytics);
+} else {
+    initAnalytics();
+}
+
 // Debounce helper para otimizar eventos
 function debounce(func, wait) {
     let timeout;
@@ -65,23 +106,76 @@ async function renderCollectionsSections() {
         if (activeCollections.length > 0) {
             console.log('✅✅✅ RENDERIZANDO COLEÇÕES CONFIGURADAS NO ADMIN');
 
-            const html = activeCollections.map(col => `
+            const html = activeCollections.map((col, index) => {
+                // Determinar visualização inicial:
+                // 1. Preferência do usuário (localStorage) - mais alta prioridade
+                // 2. Configuração do admin (default_view do backend)
+                // 3. Fallback hard-coded ('grid')
+                const userPreference = localStorage.getItem(`collection_${col.id}_view`);
+                const initialView = userPreference || col.default_view || 'grid';
+                
+                const isGridActive = initialView === 'grid';
+                const isCarouselActive = initialView === 'carousel';
+                
+                return `
                 <section class="products-section collection-section animate-entry" data-collection-id="${col.id}">
                     <div class="container">
                         <div class="section-header">
                             <div>
-                                <h2 class="section-title">${col.name.toUpperCase()}</h2>
-                                ${col.description ? `<p class="section-subtitle">${col.description}</p>` : ''}
+                                <h2 class="section-title">${(col.name || '').replace(/[<>]/g, '').toUpperCase()}</h2>
+                                ${col.description ? `<p class="section-subtitle">${(col.description || '').replace(/[<>]/g, '')}</p>` : ''}
+                            </div>
+                            <div class="view-toggle">
+                                <button class="view-toggle-btn ${isGridActive ? 'active' : ''}" data-view="grid" data-collection="${col.id}" title="Visualização em Grade">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="3" width="7" height="7"></rect>
+                                        <rect x="14" y="3" width="7" height="7"></rect>
+                                        <rect x="14" y="14" width="7" height="7"></rect>
+                                        <rect x="3" y="14" width="7" height="7"></rect>
+                                    </svg>
+                                </button>
+                                <button class="view-toggle-btn ${isCarouselActive ? 'active' : ''}" data-view="carousel" data-collection="${col.id}" title="Visualização em Carrossel">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect>
+                                        <polyline points="17 2 12 7 7 2"></polyline>
+                                    </svg>
+                                </button>
                             </div>
                         </div>
-                        <div class="products-grid">
+                        
+                        <!-- Grid View -->
+                        <div class="products-grid collection-view-grid" data-collection="${col.id}" style="display: ${isGridActive ? 'grid' : 'none'};">
                             ${col.products.map(p => renderProductCard(p)).join('')}
+                        </div>
+                        
+                        <!-- Carousel View -->
+                        <div class="products-carousel collection-view-carousel" data-collection="${col.id}" style="display: ${isCarouselActive ? 'block' : 'none'};">
+                            <button class="carousel-nav-btn carousel-prev" data-collection="${col.id}">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="15 18 9 12 15 6"></polyline>
+                                </svg>
+                            </button>
+                            <div class="carousel-track-container">
+                                <div class="carousel-track" data-collection="${col.id}">
+                                    ${col.products.map(p => renderProductCard(p)).join('')}
+                                </div>
+                            </div>
+                            <button class="carousel-nav-btn carousel-next" data-collection="${col.id}">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </button>
                         </div>
                     </div>
                 </section>
-            `).join('');
+                `;
+            }).join('');
 
             container.innerHTML = html;
+            
+            // Inicializar controles de carrossel
+            initializeCollectionToggles();
+            
         } else {
             // Fallback: Mostrar tudo em "Destaques" se não houver coleções configuradas
             console.log('⚠️ Nenhuma coleção configurada com produtos. Usando fallback DESTAQUES.');
@@ -117,15 +211,101 @@ async function renderCollectionsSections() {
 
         console.log('✅ Renderização concluída');
 
-        // Hide loader when collections are rendered
-        if (window.hidePageLoader) {
-            console.log('🙈 Hiding page loader via renderCollectionsSections');
-            window.hidePageLoader();
-        }
+        // Hide loader when collections are rendered - com retry mechanism
+        hidePageLoaderWithRetry();
 
     } catch (error) {
         console.error('❌❌❌ ERRO EM renderCollectionsSections:', error);
     }
+}
+
+// Initialize collection view toggles and carousel navigation
+function initializeCollectionToggles() {
+    // Toggle entre grid e carousel
+    document.querySelectorAll('.view-toggle-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const view = this.dataset.view;
+            const collectionId = this.dataset.collection;
+            
+            // Salvar preferência do usuário no localStorage
+            localStorage.setItem(`collection_${collectionId}_view`, view);
+            
+            // Atualizar botões ativos
+            const toggleContainer = this.parentElement;
+            toggleContainer.querySelectorAll('.view-toggle-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Toggle views
+            const gridView = document.querySelector(`.collection-view-grid[data-collection="${collectionId}"]`);
+            const carouselView = document.querySelector(`.collection-view-carousel[data-collection="${collectionId}"]`);
+            
+            if (view === 'grid') {
+                gridView.style.display = 'grid';
+                carouselView.style.display = 'none';
+            } else {
+                gridView.style.display = 'none';
+                carouselView.style.display = 'block';
+            }
+        });
+    });
+    
+    // Navegação do carrossel
+    document.querySelectorAll('.carousel-prev, .carousel-next').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const collectionId = this.dataset.collection;
+            const track = document.querySelector(`.carousel-track[data-collection="${collectionId}"]`);
+            const isPrev = this.classList.contains('carousel-prev');
+            
+            if (!track) return;
+            
+            const cardWidth = track.querySelector('.product-card').offsetWidth;
+            const gap = 16; // spacing-md
+            const scrollAmount = (cardWidth + gap) * 3; // Scroll 3 cards por vez
+            
+            const currentScroll = track.scrollLeft;
+            const targetScroll = isPrev 
+                ? Math.max(0, currentScroll - scrollAmount)
+                : Math.min(track.scrollWidth - track.offsetWidth, currentScroll + scrollAmount);
+            
+            track.scrollTo({
+                left: targetScroll,
+                behavior: 'smooth'
+            });
+        });
+    });
+}
+
+// Helper para esconder page loader com retry (caso script não tenha carregado ainda)
+function hidePageLoaderWithRetry(maxAttempts = 5, interval = 200) {
+    let attempts = 0;
+    
+    const tryHide = () => {
+        attempts++;
+        
+        if (window.hidePageLoader && typeof window.hidePageLoader === 'function') {
+            console.log('🙈 Hiding page loader (tentativa ' + attempts + ')');
+            window.hidePageLoader();
+            return true;
+        }
+        
+        if (attempts < maxAttempts) {
+            console.log('⏳ Page loader não disponível, tentando novamente... (' + attempts + '/' + maxAttempts + ')');
+            setTimeout(tryHide, interval);
+        } else {
+            console.warn('⚠️ Page loader não encontrado após ' + maxAttempts + ' tentativas');
+            // Fallback: esconder manualmente se elemento existir
+            const loader = document.getElementById('pageLoader');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(() => {
+                    loader.style.display = 'none';
+                    document.body.classList.remove('loading');
+                }, 300);
+            }
+        }
+    };
+    
+    tryHide();
 }
 
 // Render single product card
@@ -138,35 +318,41 @@ function renderProductCard(product) {
     // Calcular parcelamento e PIX (Home)
     const installmentValue = (price / 3).toFixed(2).replace('.', ',');
     const pixDiscount = (price * 0.95).toFixed(2).replace('.', ',');
+    
+    // Sanitizar dados do produto para prevenir XSS
+    const safeName = (product.name || '').replace(/[<>]/g, '');
+    const safeDescription = (product.description || '').replace(/[<>]/g, '');
+    const safeImageUrl = (product.image_url || '').replace(/[<>"']/g, '');
+    const safeId = parseInt(product.id) || 0;
 
     return `
-        <a href="product.html?id=${product.id}" class="product-card animate-entry" data-product-id="${product.id}">
+        <a href="product.html?id=${safeId}" class="product-card animate-entry" data-product-id="${safeId}">
             <div class="product-image-wrapper">
                 ${hasDiscount && discountPercent > 0 ? `<span class="product-badge discount">-${discountPercent}%</span>` : ''}
                 <div class="product-image">
                     ${product.image_url ?
-            `<img src="${product.image_url}" alt="${product.name}" loading="lazy">` :
+            `<img src="${safeImageUrl}" alt="${safeName}" loading="lazy">` :
             '<div style="font-size: 3rem; display: flex; align-items: center; justify-content: center; height: 100%;">📦</div>'
         }
                 </div>
             </div>
             <div class="product-info">
-                <h3 class="product-name">${product.name}</h3>
-                <p class="product-description">${product.description || ''}</p>
+                <h3 class="product-name">${safeName}</h3>
+                <p class="product-description">${safeDescription}</p>
                 <div class="product-price">
-                    ${hasDiscount ? `<span class="product-price-old">R$ ${originalPrice.toFixed(2).replace('.', ',')}</span>` : ''}
+                    <span class="product-price-old">R$ ${(price * 1.6).toFixed(2).replace('.', ',')}</span>
                     <span>R$ ${price.toFixed(2).replace('.', ',')}</span>
                 </div>
                 
-                <!-- Parcelamento e PIX (Home - Restaurado do Checkout) -->
-                <div class="product-installments-home" style="margin-top: 8px; font-size: 0.85em; color: var(--text-gray);">
+                <!-- Parcelamento e PIX (Home - sutil) -->
+                <div class="product-installments-home" style="margin-top: 8px; font-size: 0.9em; color: var(--text-gray);">
                     <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
                         <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" style="width: 16px; height: 16px; min-width: 16px; opacity: 0.8;">
                             <rect x="4" y="12" width="40" height="24" rx="3" fill="none" stroke="currentColor" stroke-width="4"/>
                             <rect x="4" y="18" width="40" height="6" fill="currentColor" fill-opacity="0.3"/>
                             <rect x="8" y="28" width="12" height="4" rx="1" fill="currentColor"/>
                         </svg>
-                        <span>3x R$ ${installmentValue} sem juros</span>
+                        <span style="font-weight: 400;">3x R$ ${installmentValue} sem juros</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 6px;">
                         <img src="https://files.passeidireto.com/2889edc1-1a70-456a-a32c-e3f050102347/2889edc1-1a70-456a-a32c-e3f050102347.png" alt="PIX" style="width: 16px; height: 16px; object-fit: contain;">
@@ -188,19 +374,6 @@ function showAllProducts(collectionSlug) {
         allProductsSection.scrollIntoView({ behavior: 'smooth' });
         renderProducts(document.getElementById('productsGrid'));
     }
-}
-
-// Debounce helper para otimizar eventos
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
 }
 
 // Helper para categorizar produtos no frontend (já que o backend foi revertido)
@@ -276,18 +449,17 @@ async function loadProductsFromAPI() {
             console.log(`✅ ${products.length} produtos carregados da API`);
             console.log('📦 Primeiro produto:', products[0]);
 
-            // FORÇAR renderização IMEDIATAMENTE
-            console.log('🎨 FORÇANDO RENDERIZAÇÃO AGORA');
+            // CARREGAR COLLECTIONS PRIMEIRO (para garantir ordem correta)
+            console.log('📞 Carregando collections ANTES de renderizar...');
+            await loadCollections();
+            console.log('✅ Collections carregadas');
 
-            console.log('📞 Chamando renderCollectionsSections() DIRETO (sem esperar collections)...');
+            // AGORA renderizar COM collections (ordem correta garantida)
+            console.log('🎨 Renderizando produtos com ordem correta...');
             renderCollectionsSections();
-            console.log('✅ renderCollectionsSections() chamado');
-
-            console.log('📞 Chamando loadCollections() em background...');
-            loadCollections(); // SEM await - não bloquear
+            console.log('✅ Renderização concluída');
 
             console.log('📞 Chamando loadCartFromAPI()...');
-            await loadCartFromAPI();
             await loadCartFromAPI();
             console.log('✅ loadCartFromAPI() concluído');
 
@@ -302,41 +474,23 @@ async function loadProductsFromAPI() {
         console.error('❌ Erro ao conectar com API:', error.message);
         products = [];
     } finally {
-        // SEMPRE tentar renderizar, mesmo se der erro
-        console.log('🔄 FINALLY: Garantindo renderização');
+        // Garantir renderização final apenas se ainda não foi renderizada (erro no carregamento)
+        console.log('🔄 FINALLY: Verificando estado de renderização');
         console.log('📊 Total de produtos:', products.length);
 
+        // Se não temos produtos, renderizar mensagem vazia
         if (products.length === 0) {
-            console.log('⚠️ Nenhum produto - tentando renderizar mensagem vazia');
-        }
-
-        await loadCollections();
-        renderCollectionsSections();
-        await loadCartFromAPI();
-
-        // Timeout de segurança - forçar renderização após 2 segundos
-        setTimeout(() => {
-            console.log('⏰ TIMEOUT DE SEGURANÇA - Forçando renderização final');
-            console.log('📊 Produtos disponíveis:', products.length);
+            console.log('⚠️ Nenhum produto - garantindo renderização de fallback');
             renderCollectionsSections();
-        }, 2000);
+        }
+        
+        // Garantir que loader seja escondido mesmo em caso de erro
+        if (window.hidePageLoader) window.hidePageLoader();
     }
 }
 
-// Cart Management
-let cart = [];
-let sessionId = localStorage.getItem('cart_session_id') || 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-if (!localStorage.getItem('cart_session_id')) {
-    localStorage.setItem('cart_session_id', sessionId);
-}
-
-// Função auxiliar para headers com session ID
-function getCartHeaders() {
-    return {
-        'Content-Type': 'application/json',
-        'x-session-id': sessionId
-    };
-}
+// Cart Management - usando variáveis do product-cart.js
+// cart, sessionId e getCartHeaders já estão definidos em product-cart.js
 
 // DOM Elements
 const productsGrid = document.getElementById('productsGrid');
@@ -375,6 +529,11 @@ function initPageTransitions() {
                 }
 
                 e.preventDefault();
+
+                // Mostrar page loader antes de navegar
+                if (window.showPageLoader) {
+                    window.showPageLoader();
+                }
 
                 // Aplicar fade-out
                 document.body.classList.add('fade-out');
@@ -475,14 +634,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Search toggle - funcionalidade movida para search.js
     // Mantido apenas para compatibilidade, o search.js cuida de tudo
-
-    // Account toggle (placeholder)
-    const accountToggle = document.getElementById('accountToggle');
-    if (accountToggle) {
-        accountToggle.addEventListener('click', () => {
-            alert('Área de conta em desenvolvimento');
-        });
-    }
 
     // Filter toggle
     const filterToggle = document.getElementById('filterToggle');
@@ -727,7 +878,7 @@ function renderProducts(container = productsGrid, limit = null) {
                 <h3 class="product-name">${product.name}</h3>
                 <p class="product-description">${product.description || ''}</p>
                 <div class="product-price">
-                    ${hasDiscount ? `<span class="product-price-old">R$ ${originalPrice.toFixed(2).replace('.', ',')}</span>` : ''}
+                    <span class="product-price-old">R$ ${(price * 1.6).toFixed(2).replace('.', ',')}</span>
                     <span>R$ ${price.toFixed(2).replace('.', ',')}</span>
                 </div>
                 <button class="add-to-cart" onclick="event.preventDefault(); addToCart(${product.id});">
@@ -742,13 +893,13 @@ function renderProducts(container = productsGrid, limit = null) {
 // Load Cart from API
 async function loadCartFromAPI() {
     try {
-        const response = await fetch(`${API_URL}/cart?session_id=${sessionId}`, {
-            headers: getCartHeaders()
+        const response = await fetch(`${API_URL}/cart?session_id=${window.sessionId}`, {
+            headers: window.getCartHeaders()
         });
 
         if (response.ok) {
             const data = await response.json();
-            cart = data.items || [];
+            window.cart = data.items || [];
             updateCartUI();
         }
     } catch (error) {
@@ -764,13 +915,13 @@ async function addToCart(productId, quantity = 1, selectedVariant = null) {
     try {
         const response = await fetch(`${API_URL}/cart/add`, {
             method: 'POST',
-            headers: getCartHeaders(),
+            headers: window.getCartHeaders(),
             body: JSON.stringify({
                 product_id: productId,
                 quantity: quantity,
                 selected_variant: selectedVariant,
                 price: product.price,
-                session_id: sessionId
+                session_id: window.sessionId
             })
         });
 
@@ -794,12 +945,12 @@ async function removeFromCart(cartItemId) {
     try {
         const response = await fetch(`${API_URL}/cart/remove/${cartItemId}`, {
             method: 'DELETE',
-            headers: getCartHeaders()
+            headers: window.getCartHeaders()
         });
 
         if (response.ok) {
             await loadCartFromAPI();
-            if (cart.length === 0) {
+            if ((window.cart || []).length === 0) {
                 closeCartDrawer();
             }
         } else {
@@ -821,8 +972,8 @@ async function updateQuantity(cartItemId, quantity) {
     try {
         const response = await fetch(`${API_URL}/cart/update/${cartItemId}`, {
             method: 'PUT',
-            headers: getCartHeaders(),
-            body: JSON.stringify({ quantity: quantity, session_id: sessionId })
+            headers: window.getCartHeaders(),
+            body: JSON.stringify({ quantity: quantity, session_id: window.sessionId })
         });
 
         if (response.ok) {
@@ -838,6 +989,7 @@ async function updateQuantity(cartItemId, quantity) {
 
 // Update Cart UI
 function updateCartUI() {
+    const cart = window.cart || [];
     const totalItems = cart.reduce((sum, item) => sum + (item.quantity || 0), 0);
     if (cartCount) {
         cartCount.textContent = totalItems;
@@ -865,32 +1017,80 @@ function updateCartUI() {
                 </div>
             `;
         } else {
-            cartItems.innerHTML = cart.map(item => `
-                <div class="cart-item">
+            cartItems.innerHTML = cart.map(item => {
+                // Sanitizar dados do item do carrinho para prevenir XSS
+                const safeName = (item.name || '').replace(/[<>]/g, '');
+                const safeImageUrl = (item.image_url || '').replace(/[<>"']/g, '');
+                const safeId = parseInt(item.id) || 0;
+                const quantity = parseInt(item.quantity) || 1;
+                const price = parseFloat(item.price) || 0;
+                
+                return `
+                <div class="cart-item" data-cart-item-id="${safeId}">
                     <div class="cart-item-image">
                         ${item.image_url ?
-                    `<img src="${item.image_url}" alt="${item.name}">` :
+                    `<img src="${safeImageUrl}" alt="${safeName}">` :
                     '<div style="font-size: 2rem;">👕</div>'
                 }
                     </div>
                     <div class="cart-item-info">
-                        <div class="cart-item-name">${item.name}</div>
-                        <div class="cart-item-price">R$ ${((item.price || 0) * (item.quantity || 1)).toFixed(2).replace('.', ',')}</div>
+                        <div class="cart-item-name">${safeName}</div>
+                        <div class="cart-item-price">R$ ${(price * quantity).toFixed(2).replace('.', ',')}</div>
                         <div class="cart-item-controls">
-                            <button class="quantity-btn" onclick="updateQuantity(${item.id}, ${(item.quantity || 1) - 1})" aria-label="Diminuir quantidade">-</button>
-                            <span class="quantity-value">${item.quantity || 1}x</span>
-                            <button class="quantity-btn" onclick="updateQuantity(${item.id}, ${(item.quantity || 1) + 1})" aria-label="Aumentar quantidade">+</button>
+                            <button class="quantity-btn quantity-decrease" data-item-id="${safeId}" data-quantity="${quantity - 1}" aria-label="Diminuir quantidade">-</button>
+                            <span class="quantity-value">${quantity}x</span>
+                            <button class="quantity-btn quantity-increase" data-item-id="${safeId}" data-quantity="${quantity + 1}" aria-label="Aumentar quantidade">+</button>
                         </div>
-                        <button class="remove-item" onclick="removeFromCart(${item.id})">REMOVER</button>
+                        <button class="remove-item" data-item-id="${safeId}">REMOVER</button>
                     </div>
                 </div>
-            `).join('');
+                `;
+            }).join('');
+            
+            // Event delegation para botões do carrinho
+            setupCartEventDelegation();
         }
     }
 }
 
+// Setup event delegation para botões do carrinho (evita inline onclick)
+function setupCartEventDelegation() {
+    const cartItemsContainer = document.getElementById('cartItems');
+    if (!cartItemsContainer) return;
+    
+    // Remover listener anterior se existir
+    if (cartItemsContainer._hasCartListener) return;
+    cartItemsContainer._hasCartListener = true;
+    
+    cartItemsContainer.addEventListener('click', (e) => {
+        const target = e.target.closest('button');
+        if (!target) return;
+        
+        const itemId = parseInt(target.dataset.itemId);
+        if (!itemId) return;
+        
+        // Botão de diminuir quantidade
+        if (target.classList.contains('quantity-decrease')) {
+            const quantity = parseInt(target.dataset.quantity);
+            updateQuantity(itemId, quantity);
+        }
+        
+        // Botão de aumentar quantidade
+        if (target.classList.contains('quantity-increase')) {
+            const quantity = parseInt(target.dataset.quantity);
+            updateQuantity(itemId, quantity);
+        }
+        
+        // Botão de remover
+        if (target.classList.contains('remove-item')) {
+            removeFromCart(itemId);
+        }
+    });
+}
+
 // Checkout
 async function handleCheckout() {
+    const cart = window.cart || [];
     if (cart.length === 0) {
         showNotification('Sua sacola está vazia!', 'error');
         return;

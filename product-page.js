@@ -156,24 +156,20 @@ function renderProduct(product) {
 
     if (priceEl) {
         const price = parseFloat(product.price) || 0;
-        const originalPrice = product.original_price ? parseFloat(product.original_price) : null;
-        const hasDiscount = originalPrice && originalPrice > price;
+        const oldPrice = price * 1.6; // Sempre 60% maior que o preço atual
 
         // Remove skeleton class
         priceEl.classList.remove('skeleton-text');
         priceEl.style.width = 'auto';
         priceEl.style.height = 'auto';
 
-        if (hasDiscount) {
-            priceEl.innerHTML = `
-                <span class="product-price-old" style="font-size: 1.5rem; text-decoration: line-through; color: var(--text-light-gray); margin-right: 0.5rem;">
-                    R$ ${originalPrice.toFixed(2).replace('.', ',')}
-                </span>
-                <span>R$ ${price.toFixed(2).replace('.', ',')}</span>
-            `;
-        } else {
-            priceEl.textContent = `R$ ${price.toFixed(2).replace('.', ',')}`;
-        }
+        // Sempre mostra preço antigo riscado
+        priceEl.innerHTML = `
+            <span class="product-price-old" style="font-size: 1.5rem; text-decoration: line-through; color: var(--text-light-gray); margin-right: 0.5rem;">
+                R$ ${oldPrice.toFixed(2).replace('.', ',')}
+            </span>
+            <span>R$ ${price.toFixed(2).replace('.', ',')}</span>
+        `;
 
         // Adicionar informações de parcelamento
         if (installmentsEl && price > 0) {
@@ -181,16 +177,16 @@ function renderProduct(product) {
             const pixDiscount = (price * 0.95).toFixed(2).replace('.', ',');
 
             installmentsEl.innerHTML = `
-                <div class="installment-line" style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px; color: var(--text-gray);">
-                    <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" style="width: 20px; height: 20px; min-width: 20px;">
+                <div class="installment-line" style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px; color: var(--text-gray); font-size: 1.05em;">
+                    <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" style="width: 26px; height: 26px; min-width: 26px;">
                         <rect x="4" y="12" width="40" height="24" rx="3" fill="none" stroke="currentColor" stroke-width="3"/>
                         <rect x="4" y="18" width="40" height="6" fill="currentColor" fill-opacity="0.3"/>
                         <rect x="8" y="28" width="12" height="4" rx="1" fill="currentColor"/>
                     </svg>
-                    <span>3x de R$ ${installmentValue} sem juros</span>
+                    <span style="font-weight: 500;">3x de R$ ${installmentValue} sem juros</span>
                 </div>
-                <div class="pix-line" style="display: flex; align-items: center; gap: 8px; color: #46d369; font-weight: 500;">
-                    <img src="https://files.passeidireto.com/2889edc1-1a70-456a-a32c-e3f050102347/2889edc1-1a70-456a-a32c-e3f050102347.png" alt="PIX" style="width: 20px; height: 20px; object-fit: contain;">
+                <div class="pix-line" style="display: flex; align-items: center; gap: 10px; color: #46d369; font-weight: 600; font-size: 1.05em;">
+                    <img src="https://files.passeidireto.com/2889edc1-1a70-456a-a32c-e3f050102347/2889edc1-1a70-456a-a32c-e3f050102347.png" alt="PIX" style="width: 26px; height: 26px; object-fit: contain;">
                     <span>R$ ${pixDiscount} no PIX (5% OFF)</span>
                 </div>
             `;
@@ -214,32 +210,43 @@ function renderProduct(product) {
     console.log('📸 images_json:', product.images_json);
     console.log('📸 product.images:', product.images);
 
-    // Set images
+    // Coletar todas as imagens disponíveis
     let images = [];
-    if (product.images_json) {
+    
+    // Prioridade 1: usar product.images se já vier parseado da API
+    if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+        images = [...product.images];
+        console.log('✅ Usando product.images (já parseado):', images.length, 'imagens');
+    }
+    // Prioridade 2: fazer parse do images_json se disponível
+    else if (product.images_json) {
         try {
-            images = JSON.parse(product.images_json);
+            const parsedImages = JSON.parse(product.images_json);
+            if (Array.isArray(parsedImages) && parsedImages.length > 0) {
+                images = [...parsedImages];
+                console.log('✅ Parse de images_json:', images.length, 'imagens');
+            }
         } catch (e) {
-            images = [];
+            console.warn('⚠️ Erro ao fazer parse de images_json:', e);
         }
     }
-
-    // Add main image if available
-    if (product.image_url) {
+    
+    // Adicionar image_url se não estiver na lista
+    if (product.image_url && !images.includes(product.image_url)) {
         images.unshift(product.image_url);
+        console.log('➕ Adicionado image_url ao início');
     }
 
-    // Use images array if available (from API), BUT only if we don't already have images from JSON
-    // Or if the API provides more images than we found in JSON
-    if (product.images && Array.isArray(product.images) && product.images.length > images.length) {
-        images = product.images;
-    }
+    // Remover duplicatas e valores vazios
+    images = [...new Set(images.filter(img => img && typeof img === 'string'))];
+    
+    console.log('📸 Total de imagens finais:', images.length);
+    console.log('📸 URLs:', images);
 
-    // Remove duplicates
-    images = [...new Set(images)];
-
+    // Fallback se não houver imagens
     if (images.length === 0) {
-        images = ['👕']; // Fallback
+        images = ['👕'];
+        console.warn('⚠️ Nenhuma imagem encontrada, usando fallback');
     }
 
     selectedImages = images;
@@ -568,14 +575,11 @@ function renderRelatedProducts(products, container) {
     container.innerHTML = products.map(product => {
         // Convert prices to numbers (PostgreSQL returns DECIMAL as string)
         const price = parseFloat(product.price) || 0;
-        const originalPrice = product.original_price ? parseFloat(product.original_price) : null;
-        const hasDiscount = originalPrice && originalPrice > price;
-        const discountPercent = hasDiscount ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0;
+        const oldPrice = price * 1.6; // Sempre 60% maior que o preço atual
 
         return `
         <a href="product.html?id=${product.id}" class="product-card">
             <div class="product-image-wrapper">
-                ${hasDiscount && discountPercent > 0 ? `<span class="product-badge discount">-${discountPercent}%</span>` : ''}
                 <div class="product-image">
                     ${product.image_url ?
                 `<img src="${product.image_url}" alt="${product.name}">` :
@@ -587,7 +591,7 @@ function renderRelatedProducts(products, container) {
                 <h3 class="product-name">${product.name}</h3>
                 <p class="product-description">${(product.description || '').substring(0, 60)}...</p>
                 <div class="product-price">
-                    ${hasDiscount && originalPrice ? `<span class="product-price-old">R$ ${originalPrice.toFixed(2).replace('.', ',')}</span>` : ''}
+                    <span class="product-price-old">R$ ${oldPrice.toFixed(2).replace('.', ',')}</span>
                     <span>R$ ${price.toFixed(2).replace('.', ',')}</span>
                 </div>
             </div>
