@@ -4,10 +4,20 @@
 async function migratePostgres(db) {
     if (!db.isPostgres) {
         console.log('⏩ SQLite detectado - migração não necessária');
-        return;
+        return true;
     }
 
     console.log('🔄 Iniciando migração PostgreSQL...');
+    
+    // Helper to convert db.get callback to promise
+    const dbGet = (query, params = []) => {
+        return new Promise((resolve, reject) => {
+            db.get(query, params, (err, row) => {
+                if (err) reject(err);
+                else resolve(row);
+            });
+        });
+    };
 
     try {
         // Tabela de produtos
@@ -143,7 +153,7 @@ async function migratePostgres(db) {
         console.log('  ✅ Tabela shipping_options criada');
         
         // Verificar se há fretes cadastrados
-        const shippingCount = await db.get('SELECT COUNT(*) as count FROM shipping_options');
+        const shippingCount = await dbGet('SELECT COUNT(*) as count FROM shipping_options');
         const shipCount = parseInt(shippingCount?.count || 0);
         
         if (shipCount === 0) {
@@ -157,7 +167,7 @@ async function migratePostgres(db) {
 
         // Criar usuário admin padrão se não existir
         const bcrypt = require('bcryptjs');
-        const adminExists = await db.get('SELECT id FROM users WHERE username = $1', ['admin']);
+        const adminExists = await dbGet('SELECT id FROM users WHERE username = $1', ['admin']);
         
         if (!adminExists) {
             const defaultPassword = bcrypt.hashSync('admin123', 10);
@@ -171,7 +181,7 @@ async function migratePostgres(db) {
         }
 
         // Verificar se há produtos
-        const productCount = await db.get('SELECT COUNT(*) as count FROM products');
+        const productCount = await dbGet('SELECT COUNT(*) as count FROM products');
         const count = parseInt(productCount?.count || 0);
 
         if (count === 0) {
@@ -192,7 +202,7 @@ async function migratePostgres(db) {
         }
 
         // Verificar coleções
-        const collectionCount = await db.get('SELECT COUNT(*) as count FROM collections');
+        const collectionCount = await dbGet('SELECT COUNT(*) as count FROM collections');
         const colCount = parseInt(collectionCount?.count || 0);
 
         if (colCount === 0) {
