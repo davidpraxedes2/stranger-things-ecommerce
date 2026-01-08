@@ -1682,7 +1682,15 @@ app.delete('/api/admin/products/:id', authenticateToken, (req, res) => {
 
 // Listar pedidos (admin)
 app.get('/api/admin/orders', authenticateToken, (req, res) => {
-    db.all('SELECT * FROM orders ORDER BY created_at DESC', (err, rows) => {
+    db.all(`
+        SELECT 
+            o.*,
+            COUNT(oi.id) as items_count
+        FROM orders o
+        LEFT JOIN order_items oi ON o.id = oi.order_id
+        GROUP BY o.id
+        ORDER BY o.created_at DESC
+    `, (err, rows) => {
         if (err) {
             res.status(500).json({ error: err.message });
             return;

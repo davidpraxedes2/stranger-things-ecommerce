@@ -1854,7 +1854,7 @@ async function loadOrders() {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 3000);
         
-        const response = await fetch(`${API_URL}/orders`, {
+        const response = await fetch(`${API_URL}/admin/orders`, {
             headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` },
             signal: controller.signal
         });
@@ -1899,7 +1899,7 @@ async function updateOrderStatus(orderId, newStatus) {
     showLoading('Atualizando status...');
 
     try {
-        const response = await fetch(`${API_URL}/orders/${orderId}`, {
+        const response = await fetch(`${API_URL}/admin/orders/${orderId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
