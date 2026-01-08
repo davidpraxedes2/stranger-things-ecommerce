@@ -2,18 +2,34 @@
   "version": 2,
   "builds": [
     {
-      "src": "server-simple.js",
+      "src": "server.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
+      "src": "/admin",
+      "dest": "/public/admin.html"
+    },
+    {
+      "src": "/admin.html",
+      "dest": "/public/admin.html"
+    },
+    {
+      "src": "/(.*\\.(css|js|png|jpg|jpeg|gif|svg|ico|webp|woff|woff2|ttf|eot|json|html))",
+      "dest": "/$1"
+    },
+    {
       "src": "/api/(.*)",
-      "dest": "/server-simple.js"
+      "dest": "/server.js"
     },
     {
       "src": "/(.*)",
-      "dest": "/server-simple.js"
+      "dest": "/server.js"
     }
-  ]
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
 }
+
