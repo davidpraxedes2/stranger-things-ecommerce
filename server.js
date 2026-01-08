@@ -135,6 +135,14 @@ app.get('/order-success.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'order-success.html'));
 });
 
+app.get('/order-success-pix.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'order-success-pix.html'));
+});
+
+app.get('/order-success-card.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'order-success-card.html'));
+});
+
 app.get('/admin.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
