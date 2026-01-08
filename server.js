@@ -1409,6 +1409,45 @@ app.post('/api/admin/login', (req, res) => {
 
         console.log('👤 User found:', user ? user.username : 'NOT FOUND');
 
+        // Se não encontrou usuário E o username é 'admin', criar o usuário padrão
+        if (!user && username === 'admin') {
+            console.log('⚠️ Admin user not found, creating default admin...');
+            const defaultPassword = bcrypt.hashSync('admin123', 10);
+            
+            db.run(`INSERT OR IGNORE INTO users (username, email, password, role) 
+                    VALUES ('admin', 'admin@strangerthings.com', ?, 'admin')`, [defaultPassword], (insertErr) => {
+                if (insertErr) {
+                    console.error('❌ Error creating admin:', insertErr);
+                    res.status(500).json({ error: 'Erro ao criar usuário admin' });
+                    return;
+                }
+                
+                console.log('✅ Admin user created successfully');
+                
+                // Tentar login novamente após criar
+                if (password === 'admin123') {
+                    const token = jwt.sign(
+                        { id: 1, username: 'admin', role: 'admin' },
+                        JWT_SECRET,
+                        { expiresIn: '24h' }
+                    );
+                    
+                    res.json({
+                        token,
+                        user: {
+                            id: 1,
+                            username: 'admin',
+                            email: 'admin@strangerthings.com',
+                            role: 'admin'
+                        }
+                    });
+                } else {
+                    res.status(401).json({ error: 'Credenciais inválidas' });
+                }
+            });
+            return;
+        }
+
         if (!user) {
             res.status(401).json({ error: 'Credenciais inválidas' });
             return;
