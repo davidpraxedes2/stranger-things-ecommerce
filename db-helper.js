@@ -49,6 +49,9 @@ if (!USE_POSTGRES && !process.env.VERCEL) {
 
 // Helper functions
 const db = {
+    // Flag to check if using PostgreSQL
+    isPostgres: USE_POSTGRES,
+    
     // Run query (INSERT, UPDATE, DELETE)
     run: function (query, params = [], callback) {
         if (USE_POSTGRES) {
@@ -83,6 +86,14 @@ const db = {
         } else {
             return sqliteDb.prepare(query);
         }
+    },
+    
+    // Direct query for PostgreSQL (for migrations)
+    query: async function (query, params = []) {
+        if (!USE_POSTGRES) {
+            throw new Error('query() only available for PostgreSQL');
+        }
+        return await queryPostgres(query, params);
     }
 };
 
@@ -353,6 +364,20 @@ function preparePostgres(query) {
             if (callback) callback();
         }
     };
+}
+
+// Direct query for migrations (returns promise)
+async function queryPostgres(query, params = []) {
+    const { Client } = require('pg');
+    const client = new Client({
+        connectionString: process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL
+    });
+
+    await client.connect();
+    const result = await client.query(query, params);
+    await client.end();
+    
+    return result;
 }
 
 // Initialize database
