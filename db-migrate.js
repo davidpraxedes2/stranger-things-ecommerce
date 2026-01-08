@@ -29,6 +29,20 @@ async function migratePostgres(db) {
                 has_variants INTEGER DEFAULT 0
             )
         `);
+        
+        // Adicionar colunas que podem não existir (migrations)
+        try {
+            await db.query('ALTER TABLE products ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP');
+        } catch (e) {
+            // Coluna já existe
+        }
+        
+        try {
+            await db.query('ALTER TABLE products ADD COLUMN IF NOT EXISTS has_variants INTEGER DEFAULT 0');
+        } catch (e) {
+            // Coluna já existe
+        }
+        
         console.log('  ✅ Tabela products criada');
 
         // Tabela de usuários/admin
