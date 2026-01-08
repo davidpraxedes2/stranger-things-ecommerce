@@ -102,6 +102,44 @@ function renderCheckout() {
     const total = subtotal + frete;
 
     content.innerHTML = `
+        <!-- RESUMO DO PEDIDO - TOPO -->
+        <div class="checkout-section order-summary">
+            <h2 class="section-title">Resumo do Pedido</h2>
+            <div class="summary-items">
+                ${cart.map(item => `
+                    <div class="summary-item">
+                        <div class="summary-item-image">
+                            ${item.image_url ? `<img src="${item.image_url}" alt="${item.name}">` : ''}
+                        </div>
+                        <div class="summary-item-info">
+                            <div class="summary-item-name">${item.name}</div>
+                            ${item.selected_variant ? `<div class="summary-item-variant">Tamanho ${item.selected_variant}</div>` : ''}
+                            <div class="summary-item-price">
+                                <span>Qtd ${item.quantity}</span>
+                                <span>R$ ${(item.price * item.quantity).toFixed(2).replace('.', ',')}</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+            
+            <div class="summary-totals">
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <span>R$ ${subtotal.toFixed(2).replace('.', ',')}</span>
+                </div>
+                <div class="summary-row">
+                    <span>Entrega</span>
+                    <span>R$ ${frete.toFixed(2).replace('.', ',')}</span>
+                </div>
+                <div class="summary-row total">
+                    <span>Total</span>
+                    <span>R$ ${total.toFixed(2).replace('.', ',')}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- FORMULÁRIO DE DADOS - MEIO -->
         <div class="checkout-section">
             <form id="checkoutForm">
                 <h2 class="section-title">
@@ -296,45 +334,10 @@ function renderCheckout() {
                         <div class="security-subtitle">Seus dados estão protegidos</div>
                     </div>
                 </div>
+                
+                <!-- BOTÃO FINALIZAR PEDIDO - EMBAIXO -->
+                <button type="submit" class="checkout-btn">Finalizar Pedido</button>
             </form>
-        </div>
-
-        <div class="checkout-section order-summary">
-            <h2 class="section-title">Resumo</h2>
-            <div class="summary-items">
-                ${cart.map(item => `
-                    <div class="summary-item">
-                        <div class="summary-item-image">
-                            ${item.image_url ? `<img src="${item.image_url}" alt="${item.name}">` : ''}
-                        </div>
-                        <div class="summary-item-info">
-                            <div class="summary-item-name">${item.name}</div>
-                            ${item.selected_variant ? `<div class="summary-item-variant">Tamanho ${item.selected_variant}</div>` : ''}
-                            <div class="summary-item-price">
-                                <span>Qtd ${item.quantity}</span>
-                                <span>R$ ${(item.price * item.quantity).toFixed(2).replace('.', ',')}</span>
-                            </div>
-                        </div>
-                    </div>
-                `).join('')}
-            </div>
-            
-            <div class="summary-totals">
-                <div class="summary-row">
-                    <span>Subtotal</span>
-                    <span>R$ ${subtotal.toFixed(2).replace('.', ',')}</span>
-                </div>
-                <div class="summary-row">
-                    <span>Entrega</span>
-                    <span>R$ ${frete.toFixed(2).replace('.', ',')}</span>
-                </div>
-                <div class="summary-row total">
-                    <span>Total</span>
-                    <span>R$ ${total.toFixed(2).replace('.', ',')}</span>
-                </div>
-            </div>
-
-            <button type="submit" form="checkoutForm" class="checkout-btn">Finalizar Pedido</button>
         </div>
     `;
 

@@ -9,6 +9,99 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Teko:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* Loading Screen Inicial */
+        #pageLoader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #000000 0%, #0a0000 100%);
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 1;
+            transition: opacity 0.4s ease-out;
+        }
+        
+        #pageLoader.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .loader-content {
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .loader-spinner {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 2rem;
+        }
+        
+        .loader-spinner::before,
+        .loader-spinner::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            border-radius: 50%;
+        }
+        
+        .loader-spinner::before {
+            width: 100%;
+            height: 100%;
+            border: 4px solid rgba(16, 185, 129, 0.1);
+        }
+        
+        .loader-spinner::after {
+            width: 100%;
+            height: 100%;
+            border: 4px solid transparent;
+            border-top-color: #10B981;
+            animation: loaderSpin 1s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+        }
+        
+        .loader-text {
+            font-family: 'Teko', sans-serif;
+            font-size: 2rem;
+            color: #10B981;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+            animation: loaderGlow 2s ease-in-out infinite;
+            margin: 0;
+        }
+        
+        .loader-subtext {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            letter-spacing: 1px;
+        }
+        
+        @keyframes loaderSpin {
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes loaderGlow {
+            0%, 100% { 
+                text-shadow: 0 0 20px rgba(16, 185, 129, 0.5), 0 0 40px rgba(16, 185, 129, 0.3);
+            }
+            50% { 
+                text-shadow: 0 0 30px rgba(16, 185, 129, 0.8), 0 0 60px rgba(16, 185, 129, 0.5);
+            }
+        }
+        
+        /* Esconder conteúdo enquanto carrega */
+        body.loading .success-page {
+            opacity: 0;
+            visibility: hidden;
+        }
+        
         body {
             padding-top: 0 !important;
         }
@@ -250,7 +343,16 @@
         }
     </style>
 </head>
-<body>
+<body class="loading">
+    <!-- Page Loader -->
+    <div id="pageLoader">
+        <div class="loader-content">
+            <div class="loader-spinner"></div>
+            <div class="loader-text">PEDIDO APROVADO</div>
+            <div class="loader-subtext">Carregando confirmação...</div>
+        </div>
+    </div>
+
     <!-- Grid Background -->
     <div class="grid-background"></div>
 
@@ -332,6 +434,31 @@
         </div>
     </main>
 
+    <script>
+        // Hide page loader quando DOMContentLoaded
+        document.addEventListener('DOMContentLoaded', function() {
+            document.body.classList.remove('loading');
+            
+            setTimeout(function() {
+                const loader = document.getElementById('pageLoader');
+                if (loader) {
+                    loader.classList.add('hidden');
+                    setTimeout(function() {
+                        loader.remove();
+                    }, 400);
+                }
+            }, 200);
+        });
+        
+        // Fallback
+        setTimeout(function() {
+            document.body.classList.remove('loading');
+            const loader = document.getElementById('pageLoader');
+            if (loader && !loader.classList.contains('hidden')) {
+                loader.classList.add('hidden');
+            }
+        }, 2000);
+    </script>
     <script>
         // Get order data from URL
         const urlParams = new URLSearchParams(window.location.search);

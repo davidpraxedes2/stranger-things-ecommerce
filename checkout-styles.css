@@ -115,10 +115,31 @@ body:has(.announcement-bar:not(.hidden)).checkout-page {
     gap: 32px;
 }
 
+/* Mobile: resumo aparece primeiro (no topo) */
+.order-summary {
+    order: 1;
+}
+
+.checkout-section:not(.order-summary) {
+    order: 2;
+}
+
 @media (min-width: 1024px) {
     .checkout-grid {
         grid-template-columns: 1fr 480px;
         gap: 48px;
+    }
+    
+    /* Forçar order-summary para a coluna da DIREITA */
+    .order-summary {
+        order: 2;
+        grid-column: 2;
+    }
+    
+    /* Formulário fica na coluna da ESQUERDA */
+    .checkout-section:not(.order-summary) {
+        order: 1;
+        grid-column: 1;
     }
 }
 
