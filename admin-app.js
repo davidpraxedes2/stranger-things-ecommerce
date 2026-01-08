@@ -767,28 +767,124 @@ async function renderBrazilMap() {
     const mapContainer = document.getElementById('brazilMap');
     if (!mapContainer) return;
 
-    // Simplified Brazil map with visitor stats (no external SVG needed)
-    mapContainer.innerHTML = `
-        <div style="padding: 2rem; text-align: center;">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
-                <div style="background: var(--medium-gray); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-color);">
-                    <div style="font-size: 2rem; color: var(--netflix-red); margin-bottom: 0.5rem;">🇧🇷</div>
-                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-white); margin-bottom: 0.25rem;">Brasil</div>
-                    <div style="color: var(--text-muted); font-size: 0.875rem;">100% dos visitantes</div>
+    mapContainer.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted);">Carregando mapa...</div>';
+
+    try {
+        const [svgResponse, visitorData] = await Promise.all([
+            fetch('/brazil.svg'),
+            fetch(`${API_URL}/analytics/visitor-locations`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` },
+                signal: AbortSignal.timeout(3000)
+            }).catch(() => null)
+        ]);
+        
+        const svgText = await svgResponse.text();
+        const parser = new DOMParser();
+        const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+        const svgElement = svgDoc.querySelector('svg');
+        
+        if (svgElement) {
+            svgElement.setAttribute('viewBox', '0 0 612 639');
+            svgElement.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+            svgElement.style.width = '100%';
+            svgElement.style.height = '100%';
+            svgElement.style.maxHeight = '400px';
+            
+            const paths = svgElement.querySelectorAll('path');
+            paths.forEach(path => {
+                path.setAttribute('fill', 'rgba(229, 9, 20, 0.15)');
+                path.setAttribute('stroke', 'rgba(229, 9, 20, 0.5)');
+                path.setAttribute('stroke-width', '1');
+                path.style.transition = 'all 0.3s';
+                
+                path.addEventListener('mouseenter', function() {
+                    this.setAttribute('fill', 'rgba(229, 9, 20, 0.4)');
+                    this.setAttribute('stroke', 'rgba(229, 9, 20, 1)');
+                    this.setAttribute('stroke-width', '2');
+                });
+                
+                path.addEventListener('mouseleave', function() {
+                    this.setAttribute('fill', 'rgba(229, 9, 20, 0.15)');
+                    this.setAttribute('stroke', 'rgba(229, 9, 20, 0.5)');
+                    this.setAttribute('stroke-width', '1');
+                });
+            });
+            
+            let locations = [];
+            if (visitorData && visitorData.ok) {
+                const data = await visitorData.json();
+                if (data && Array.isArray(data) && data.length > 0) {
+                    locations = data;
+                }
+            }
+            
+            if (locations.length > 0) {
+                locations.forEach((location, index) => {
+                    const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                    
+                    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    circle.setAttribute('cx', location.x);
+                    circle.setAttribute('cy', location.y);
+                    circle.setAttribute('r', '8');
+                    circle.setAttribute('fill', '#10B981');
+                    circle.setAttribute('opacity', '0.8');
+                    circle.style.animation = `pulse-dot ${1.5 + (index * 0.3)}s infinite`;
+                    
+                    const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+                    title.textContent = `${location.city} - ${location.count} visitante${location.count > 1 ? 's' : ''}`;
+                    circle.appendChild(title);
+                    
+                    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    text.setAttribute('x', location.x);
+                    text.setAttribute('y', location.y - 16);
+                    text.setAttribute('fill', '#ffffff');
+                    text.setAttribute('font-size', '12');
+                    text.setAttribute('text-anchor', 'middle');
+                    text.setAttribute('font-weight', '700');
+                    text.style.textShadow = '0 2px 4px rgba(0,0,0,0.8)';
+                    text.textContent = location.count;
+                    
+                    group.appendChild(circle);
+                    group.appendChild(text);
+                    
+                    svgElement.appendChild(group);
+                });
+            }
+            
+            mapContainer.innerHTML = '';
+            
+            const wrapper = document.createElement('div');
+            wrapper.style.cssText = 'width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 20px;';
+            wrapper.appendChild(svgElement);
+            mapContainer.appendChild(wrapper);
+            
+            const legend = document.createElement('div');
+            legend.style.cssText = 'position: absolute; bottom: 20px; left: 20px; background: rgba(0,0,0,0.9); padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border); z-index: 10;';
+            legend.innerHTML = `
+                <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Legenda</div>
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                    <div style="width: 10px; height: 10px; background: #10B981; border-radius: 50%; animation: pulse-dot 2s infinite;"></div>
+                    <span style="font-size: 12px; color: var(--text-primary);">Visitante ativo</span>
                 </div>
-                <div style="background: var(--medium-gray); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-color);">
-                    <div style="font-size: 2rem; color: #10b981; margin-bottom: 0.5rem;">📍</div>
-                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-white); margin-bottom: 0.25rem;">São Paulo</div>
-                    <div style="color: var(--text-muted); font-size: 0.875rem;">Principal região</div>
+                <div style="font-size: 11px; color: var(--text-muted); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border);">
+                    📍 ${locations.length} localiza${locations.length === 1 ? 'ção' : 'ções'} • ${locations.length === 0 ? 'Aguardando dados' : 'Dados reais'}
                 </div>
-                <div style="background: var(--medium-gray); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-color);">
-                    <div style="font-size: 2rem; color: #f59e0b; margin-bottom: 0.5rem;">⏱️</div>
-                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-white); margin-bottom: 0.25rem;">2m 45s</div>
-                    <div style="color: var(--text-muted); font-size: 0.875rem;">Tempo médio</div>
-                </div>
+            `;
+            mapContainer.appendChild(legend);
+        }
+    } catch (error) {
+        console.error('Erro ao carregar mapa do Brasil:', error);
+        mapContainer.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 48px; height: 48px; margin: 0 auto 16px; opacity: 0.3;">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+                <p>Erro ao carregar mapa</p>
             </div>
-        </div>
-    `;
+        `;
+    }
 }
 
 async function renderActiveSessions() {

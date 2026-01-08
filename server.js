@@ -1,6 +1,5 @@
-// Database configuration (PostgreSQL/SQLite)
-const db = require('./db-config');
-const { migratePostgres } = require('./db-migrate');
+// Database helper - usar db-helper para compatibilidade com localhost
+const db = require('./db-helper');
 
 const express = require('express');
 const cors = require('cors');
@@ -16,11 +15,6 @@ const JWT_SECRET = process.env.JWT_SECRET || 'stranger-things-secret-key-change-
 // Log de inicialização
 console.log('🚀 Servidor iniciando...');
 console.log('📦 Ambiente:', process.env.NODE_ENV || 'development');
-
-// Executar migração PostgreSQL se necessário
-(async () => {
-    await migratePostgres(db);
-})().catch(err => console.error('Erro na migração:', err));
 
 // Middleware
 app.use(cors({
@@ -115,6 +109,12 @@ app.get('/admin-app.js', (req, res) => {
 app.get('/admin-styles.css', (req, res) => {
     res.sendFile(path.join(__dirname, 'admin-styles.css'), {
         headers: { 'Content-Type': 'text/css' }
+    });
+});
+
+app.get('/brazil.svg', (req, res) => {
+    res.sendFile(path.join(__dirname, 'brazil.svg'), {
+        headers: { 'Content-Type': 'image/svg+xml' }
     });
 });
 
