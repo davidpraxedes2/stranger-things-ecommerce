@@ -60,10 +60,6 @@ ADMIN_FEATURES.txt
 ANALYTICS_SYSTEM.md
 FRONTEND_ISSUES_REPORT.md
 
-# SVG files (temporary)
-brazil-map.svg
-brazil.svg
-
 # Git helper scripts
 .git-push.sh
 .git-credentials
