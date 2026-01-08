@@ -739,26 +739,82 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (checkoutBtn) {
         checkoutBtn.addEventListener('click', () => {
-            // Mostrar loading profissional
-            const loadingHTML = `
-                <div id="checkoutLoadingOverlay" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.95); z-index: 10000; display: flex; align-items: center; justify-content: center; animation: fadeIn 0.3s ease;">
-                    <div style="text-align: center;">
-                        <div style="width: 80px; height: 80px; border: 4px solid rgba(229,9,20,0.2); border-top: 4px solid #E50914; border-radius: 50%; margin: 0 auto 2rem; animation: spin 1s linear infinite;"></div>
-                        <h2 style="font-family: 'Teko', sans-serif; font-size: 2rem; color: #E50914; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 1rem; text-shadow: 0 0 20px rgba(229,9,20,0.5);">CARREGANDO CHECKOUT...</h2>
-                        <p style="color: var(--text-gray); font-size: 1rem;">Preparando seu pedido</p>
-                    </div>
-                    <style>
-                        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-                        @keyframes spin { to { transform: rotate(360deg); } }
-                    </style>
-                </div>
-            `;
-            document.body.insertAdjacentHTML('beforeend', loadingHTML);
+            // Validar se há itens no carrinho
+            if (!window.cart || window.cart.length === 0) {
+                showNotification('Seu carrinho está vazio!', 'error');
+                return;
+            }
             
-            // Redirecionar após 800ms
+            // Fechar o drawer com animação
+            if (cartDrawer) {
+                cartDrawer.classList.add('closing');
+            }
+            if (cartOverlay) {
+                cartOverlay.classList.add('closing');
+            }
+            
+            // Aguardar animação do drawer e mostrar loading profissional
             setTimeout(() => {
-                window.location.href = 'checkout.html';
-            }, 800);
+                // Remover classes do drawer
+                if (cartDrawer) {
+                    cartDrawer.classList.remove('active', 'closing');
+                }
+                if (cartOverlay) {
+                    cartOverlay.classList.remove('active', 'closing');
+                }
+                document.body.classList.remove('no-scroll');
+                
+                // Mostrar loading profissional
+                const loadingHTML = `
+                    <div id="checkoutLoadingOverlay" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: linear-gradient(135deg, rgba(0,0,0,0.95) 0%, rgba(20,0,0,0.98) 100%); z-index: 10000; display: flex; align-items: center; justify-content: center; animation: fadeIn 0.3s ease;">
+                        <div style="text-align: center; padding: 2rem;">
+                            <!-- Spinner animado -->
+                            <div style="position: relative; width: 120px; height: 120px; margin: 0 auto 2.5rem;">
+                                <div style="position: absolute; width: 100%; height: 100%; border: 4px solid rgba(229,9,20,0.1); border-radius: 50%;"></div>
+                                <div style="position: absolute; width: 100%; height: 100%; border: 4px solid transparent; border-top-color: #E50914; border-radius: 50%; animation: spin 1s cubic-bezier(0.5, 0, 0.5, 1) infinite;"></div>
+                                <div style="position: absolute; width: 80%; height: 80%; top: 10%; left: 10%; border: 3px solid transparent; border-top-color: #FF1744; border-radius: 50%; animation: spin 1.5s cubic-bezier(0.5, 0, 0.5, 1) infinite reverse;"></div>
+                                <div style="position: absolute; width: 60%; height: 60%; top: 20%; left: 20%; background: radial-gradient(circle, rgba(229,9,20,0.3) 0%, transparent 70%); border-radius: 50%; animation: pulse 2s ease-in-out infinite;"></div>
+                            </div>
+                            
+                            <!-- Texto -->
+                            <h2 style="font-family: 'Teko', sans-serif; font-size: 2.5rem; color: #E50914; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 1rem; text-shadow: 0 0 30px rgba(229,9,20,0.6), 0 0 60px rgba(229,9,20,0.4); animation: glow 2s ease-in-out infinite;">PROCESSANDO...</h2>
+                            <p style="color: rgba(255,255,255,0.7); font-size: 1.1rem; letter-spacing: 1px;">Preparando seu checkout</p>
+                            
+                            <!-- Barra de progresso falsa -->
+                            <div style="width: 200px; height: 3px; background: rgba(229,9,20,0.2); margin: 2rem auto 0; border-radius: 3px; overflow: hidden;">
+                                <div style="width: 70%; height: 100%; background: linear-gradient(90deg, transparent, #E50914, transparent); animation: shimmer 1.5s infinite;"></div>
+                            </div>
+                        </div>
+                        <style>
+                            @keyframes fadeIn { 
+                                from { opacity: 0; backdrop-filter: blur(0px); } 
+                                to { opacity: 1; backdrop-filter: blur(10px); } 
+                            }
+                            @keyframes spin { 
+                                to { transform: rotate(360deg); } 
+                            }
+                            @keyframes pulse {
+                                0%, 100% { opacity: 0.5; transform: scale(1); }
+                                50% { opacity: 1; transform: scale(1.1); }
+                            }
+                            @keyframes glow {
+                                0%, 100% { text-shadow: 0 0 20px rgba(229,9,20,0.4), 0 0 40px rgba(229,9,20,0.2); }
+                                50% { text-shadow: 0 0 30px rgba(229,9,20,0.8), 0 0 60px rgba(229,9,20,0.4), 0 0 90px rgba(229,9,20,0.2); }
+                            }
+                            @keyframes shimmer {
+                                0% { transform: translateX(-100%); }
+                                100% { transform: translateX(300%); }
+                            }
+                        </style>
+                    </div>
+                `;
+                document.body.insertAdjacentHTML('beforeend', loadingHTML);
+                
+                // Redirecionar após 1 segundo
+                setTimeout(() => {
+                    window.location.href = 'checkout.html';
+                }, 1000);
+            }, 300);
         });
     }
 
