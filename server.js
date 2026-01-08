@@ -99,6 +99,18 @@ app.get('/collection-page.js', (req, res) => {
     });
 });
 
+app.get('/search.js', (req, res) => {
+    res.sendFile(path.join(__dirname, 'search.js'), {
+        headers: { 'Content-Type': 'application/javascript' }
+    });
+});
+
+app.get('/performance-optimizations.js', (req, res) => {
+    res.sendFile(path.join(__dirname, 'performance-optimizations.js'), {
+        headers: { 'Content-Type': 'application/javascript' }
+    });
+});
+
 // Admin files
 app.get('/admin-app.js', (req, res) => {
     res.sendFile(path.join(__dirname, 'admin-app.js'), {

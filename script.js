@@ -798,9 +798,21 @@ document.addEventListener('DOMContentLoaded', () => {
 // Mobile Menu Functions
 function toggleMobileMenu() {
     if (mainNav) {
-        mainNav.classList.toggle('active');
+        const isActive = mainNav.classList.toggle('active');
+        const mobileNavOverlay = document.getElementById('mobileNavOverlay');
+        
         if (mobileMenuToggle) {
             mobileMenuToggle.classList.toggle('active');
+        }
+        
+        if (mobileNavOverlay) {
+            if (isActive) {
+                mobileNavOverlay.classList.add('active');
+                document.body.classList.add('no-scroll');
+            } else {
+                mobileNavOverlay.classList.remove('active');
+                document.body.classList.remove('no-scroll');
+            }
         }
     }
 }
