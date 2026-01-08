@@ -739,7 +739,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (checkoutBtn) {
         checkoutBtn.addEventListener('click', () => {
-            window.location.href = 'checkout.html';
+            // Mostrar loading profissional
+            const loadingHTML = `
+                <div id="checkoutLoadingOverlay" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.95); z-index: 10000; display: flex; align-items: center; justify-content: center; animation: fadeIn 0.3s ease;">
+                    <div style="text-align: center;">
+                        <div style="width: 80px; height: 80px; border: 4px solid rgba(229,9,20,0.2); border-top: 4px solid #E50914; border-radius: 50%; margin: 0 auto 2rem; animation: spin 1s linear infinite;"></div>
+                        <h2 style="font-family: 'Teko', sans-serif; font-size: 2rem; color: #E50914; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 1rem; text-shadow: 0 0 20px rgba(229,9,20,0.5);">CARREGANDO CHECKOUT...</h2>
+                        <p style="color: var(--text-gray); font-size: 1rem;">Preparando seu pedido</p>
+                    </div>
+                    <style>
+                        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+                        @keyframes spin { to { transform: rotate(360deg); } }
+                    </style>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', loadingHTML);
+            
+            // Redirecionar após 800ms
+            setTimeout(() => {
+                window.location.href = 'checkout.html';
+            }, 800);
         });
     }
 

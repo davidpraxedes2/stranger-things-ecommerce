@@ -128,6 +128,33 @@ async function migratePostgres(db) {
         `);
         console.log('  ✅ Tabela cart criada');
 
+        // Tabela de fretes
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS shipping_options (
+                id SERIAL PRIMARY KEY,
+                name TEXT NOT NULL,
+                price REAL NOT NULL,
+                delivery_time TEXT,
+                active INTEGER DEFAULT 1,
+                sort_order INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        console.log('  ✅ Tabela shipping_options criada');
+        
+        // Verificar se há fretes cadastrados
+        const shippingCount = await db.get('SELECT COUNT(*) as count FROM shipping_options');
+        const shipCount = parseInt(shippingCount?.count || 0);
+        
+        if (shipCount === 0) {
+            await db.query(`
+                INSERT INTO shipping_options (name, price, delivery_time, active, sort_order) VALUES
+                ($1, $2, $3, $4, $5),
+                ($6, $7, $8, $9, $10)
+            `, ['PAC', 15.00, '7-12 dias úteis', 1, 0, 'SEDEX', 25.00, '3-5 dias úteis', 1, 1]);
+            console.log('  ✅ Fretes padrão criados (PAC e SEDEX)');
+        }
+
         // Criar usuário admin padrão se não existir
         const bcrypt = require('bcryptjs');
         const adminExists = await db.get('SELECT id FROM users WHERE username = $1', ['admin']);
