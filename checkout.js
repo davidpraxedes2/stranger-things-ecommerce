@@ -100,6 +100,8 @@ function renderCheckout() {
     const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const frete = 15.00;
     const total = subtotal + frete;
+    const descontoPix = total * 0.05; // 5% de desconto
+    const totalComPix = total - descontoPix;
 
     content.innerHTML = `
         <!-- RESUMO DO PEDIDO - TOPO -->
@@ -123,7 +125,7 @@ function renderCheckout() {
                 `).join('')}
             </div>
             
-            <div class="summary-totals">
+            <div class="summary-totals" id="summaryTotals">
                 <div class="summary-row">
                     <span>Subtotal</span>
                     <span>R$ ${subtotal.toFixed(2).replace('.', ',')}</span>
@@ -132,9 +134,27 @@ function renderCheckout() {
                     <span>Entrega</span>
                     <span>R$ ${frete.toFixed(2).replace('.', ',')}</span>
                 </div>
-                <div class="summary-row total">
+                <div class="summary-row total" id="totalRow">
                     <span>Total</span>
-                    <span>R$ ${total.toFixed(2).replace('.', ',')}</span>
+                    <span id="totalValue">R$ ${total.toFixed(2).replace('.', ',')}</span>
+                </div>
+            </div>
+            
+            <!-- Aviso de Desconto PIX - Visível por padrão (PIX selecionado) -->
+            <div id="pixDiscountBanner" style="margin-top: 16px; padding: 16px; background: linear-gradient(135deg, rgba(70, 211, 105, 0.15), rgba(70, 211, 105, 0.05)); border: 2px solid #46d369; border-radius: 8px; animation: slideDown 0.3s ease;">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                    <img src="https://files.passeidireto.com/2889edc1-1a70-456a-a32c-e3f050102347/2889edc1-1a70-456a-a32c-e3f050102347.png" alt="PIX" style="width: 24px; height: 24px;">
+                    <span style="font-family: var(--font-teko); font-size: 1.25rem; color: #46d369; text-transform: uppercase; letter-spacing: 1px;">Desconto PIX Ativado!</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: rgba(0, 0, 0, 0.3); border-radius: 6px;">
+                    <div>
+                        <div style="font-size: 0.875rem; color: rgba(255,255,255,0.7); margin-bottom: 4px;">Você economiza:</div>
+                        <div style="font-size: 1.5rem; font-family: var(--font-teko); font-weight: 700; color: #46d369;">- R$ ${descontoPix.toFixed(2).replace('.', ',')}</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 0.875rem; color: rgba(255,255,255,0.7); margin-bottom: 4px;">Total com PIX:</div>
+                        <div style="font-size: 1.75rem; font-family: var(--font-teko); font-weight: 700; color: #fff;">R$ ${totalComPix.toFixed(2).replace('.', ',')}</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -241,7 +261,9 @@ function renderCheckout() {
                             <img src="https://files.passeidireto.com/2889edc1-1a70-456a-a32c-e3f050102347/2889edc1-1a70-456a-a32c-e3f050102347.png" alt="PIX">
                         </div>
                         <div class="payment-label">PIX</div>
-                        <div class="payment-info">Aprovação instantânea</div>
+                        <div class="payment-info">
+                            <span style="color: #46d369; font-weight: 600;">💰 5% de desconto</span>
+                        </div>
                     </div>
                     <div class="payment-method" data-method="card">
                         <div class="payment-icon">
@@ -365,6 +387,14 @@ function renderCheckout() {
                 section.classList.remove('active');
             });
             document.querySelector(`.payment-detail-section[data-payment="${paymentType}"]`).classList.add('active');
+            
+            // Mostrar/ocultar banner de desconto PIX
+            const pixBanner = document.getElementById('pixDiscountBanner');
+            if (paymentType === 'pix') {
+                pixBanner.style.display = 'block';
+            } else {
+                pixBanner.style.display = 'none';
+            }
             
             // Reset PIX state quando trocar de método
             const pixGenerateState = document.querySelector('.pix-generate-state');
