@@ -99,6 +99,31 @@ app.get('/checkout.js', (req, res) => {
     });
 });
 
+app.get('/checkout-styles.css', (req, res) => {
+    res.sendFile(path.join(__dirname, 'checkout-styles.css'), {
+        headers: { 'Content-Type': 'text/css' }
+    });
+});
+
+app.get('/collection-page.js', (req, res) => {
+    res.sendFile(path.join(__dirname, 'collection-page.js'), {
+        headers: { 'Content-Type': 'application/javascript' }
+    });
+});
+
+// Admin files
+app.get('/admin-app.js', (req, res) => {
+    res.sendFile(path.join(__dirname, 'admin-app.js'), {
+        headers: { 'Content-Type': 'application/javascript' }
+    });
+});
+
+app.get('/admin-styles.css', (req, res) => {
+    res.sendFile(path.join(__dirname, 'admin-styles.css'), {
+        headers: { 'Content-Type': 'text/css' }
+    });
+});
+
 // Rotas para servir HTML files
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
