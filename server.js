@@ -1488,20 +1488,46 @@ app.post('/api/admin/login', async (req, res) => {
 // Dashboard stats - Version 3 (Paralelo)
 app.get('/api/admin/stats', authenticateToken, async (req, res) => {
     try {
-        const [productCount, orderCount, revenue] = await Promise.all([
-            new Promise((resolve, reject) => db.get('SELECT COUNT(*) as count FROM products', [], (err, row) => err ? reject(err) : resolve(row.count))),
-            new Promise((resolve, reject) => db.get('SELECT COUNT(*) as count FROM orders', [], (err, row) => err ? reject(err) : resolve(row.count))),
-            new Promise((resolve, reject) => db.get("SELECT SUM(total) as total FROM orders WHERE status = 'completed'", [], (err, row) => err ? reject(err) : resolve(row.total || 0)))
-        ]);
+        let productCount = 0;
+        let orderCount = 0;
+        let revenue = 0;
+
+        if (db.isPostgres) {
+            // PostgreSQL async
+            const [products, orders, revenueData] = await Promise.all([
+                db.get('SELECT COUNT(*) as count FROM products', []),
+                db.get('SELECT COUNT(*) as count FROM orders', []),
+                db.get("SELECT COALESCE(SUM(total), 0) as total FROM orders WHERE status = 'paid' OR status = 'completed'", [])
+            ]);
+            
+            productCount = parseInt(products?.count || 0);
+            orderCount = parseInt(orders?.count || 0);
+            revenue = parseFloat(revenueData?.total || 0);
+        } else {
+            // SQLite síncrono
+            const products = db.prepare('SELECT COUNT(*) as count FROM products').get();
+            const orders = db.prepare('SELECT COUNT(*) as count FROM orders').get();
+            const revenueData = db.prepare("SELECT COALESCE(SUM(total), 0) as total FROM orders WHERE status = 'paid' OR status = 'completed'").get();
+            
+            productCount = parseInt(products?.count || 0);
+            orderCount = parseInt(orders?.count || 0);
+            revenue = parseFloat(revenueData?.total || 0);
+        }
 
         res.json({
             total_products: productCount,
             total_orders: orderCount,
-            total_revenue: revenue
+            total_revenue: revenue,
+            today_sales: `R$ ${revenue.toFixed(2).replace('.', ',')}`
         });
     } catch (err) {
         console.error('Erro em stats:', err);
-        res.status(500).json({ error: err.message });
+        res.json({
+            total_products: 0,
+            total_orders: 0,
+            total_revenue: 0,
+            today_sales: 'R$ 0,00'
+        });
     }
 });
 
