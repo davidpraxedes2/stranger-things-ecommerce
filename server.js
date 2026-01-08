@@ -1197,6 +1197,34 @@ app.post('/api/orders', (req, res) => {
     }
 });
 
+// Buscar pedido por ID (público - para página de sucesso)
+app.get('/api/orders/:id', (req, res) => {
+    const { id } = req.params;
+    
+    try {
+        const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(id);
+        
+        if (!order) {
+            return res.status(404).json({ error: 'Pedido não encontrado' });
+        }
+        
+        // Buscar itens do pedido com dados dos produtos
+        const items = db.prepare(`
+            SELECT oi.*, p.name, p.image_url
+            FROM order_items oi
+            LEFT JOIN products p ON oi.product_id = p.id
+            WHERE oi.order_id = ?
+        `).all(id);
+        
+        order.items = items;
+        
+        res.json(order);
+    } catch (error) {
+        console.error('Erro ao buscar pedido:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Processar pagamento (público)
 app.post('/api/payments/process', (req, res) => {
     const { order_id, card, amount } = req.body;

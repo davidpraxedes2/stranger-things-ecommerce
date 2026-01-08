@@ -416,9 +416,22 @@
                     <span class="summary-label">Pedido</span>
                     <span class="summary-value" id="orderNumber">#000000</span>
                 </div>
+                
+                <!-- Products List -->
+                <div id="productsList" style="margin: 1.5rem 0; padding: 1rem 0; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">
+                    <div style="font-size: 0.875rem; color: var(--text-gray); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 1px;">Produtos</div>
+                    <div id="productsContainer" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <!-- Products will be loaded here -->
+                    </div>
+                </div>
+                
                 <div class="summary-row">
                     <span class="summary-label">Subtotal</span>
                     <span class="summary-value" id="subtotal">R$ 0,00</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Frete</span>
+                    <span class="summary-value" id="shipping">R$ 0,00</span>
                 </div>
                 <div class="summary-row">
                     <span class="summary-label">Desconto PIX <span class="discount-badge">-5%</span></span>
@@ -504,19 +517,56 @@
     </main>
 
     <script>
+        const API_URL = `${window.location.origin}/api`;
+        
         // Get order data from URL
         const urlParams = new URLSearchParams(window.location.search);
         const orderId = urlParams.get('order_id') || Math.floor(100000 + Math.random() * 900000);
         const total = parseFloat(urlParams.get('total') || '0');
-        const discount = total * 0.05;
+        const shipping = parseFloat(urlParams.get('shipping') || '15.00');
+        const subtotal = total - shipping;
+        const discount = subtotal * 0.05;
         const finalTotal = total - discount;
 
         // Update page with order data
         document.getElementById('orderNumber').textContent = `#${orderId}`;
-        document.getElementById('subtotal').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+        document.getElementById('subtotal').textContent = `R$ ${subtotal.toFixed(2).replace('.', ',')}`;
+        document.getElementById('shipping').textContent = `R$ ${shipping.toFixed(2).replace('.', ',')}`;
         document.getElementById('discount').textContent = `- R$ ${discount.toFixed(2).replace('.', ',')}`;
         document.getElementById('totalAmount').textContent = `R$ ${finalTotal.toFixed(2).replace('.', ',')}`;
 
+        // Load order details from API
+        async function loadOrderDetails() {
+            try {
+                const response = await fetch(`${API_URL}/orders/${orderId}`);
+                if (response.ok) {
+                    const order = await response.json();
+                    
+                    // Render products
+                    const productsContainer = document.getElementById('productsContainer');
+                    if (order.items && order.items.length > 0) {
+                        productsContainer.innerHTML = order.items.map(item => `
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0;">
+                                <div style="display: flex; align-items: center; gap: 0.75rem; flex: 1;">
+                                    ${item.image_url ? `<img src="${item.image_url}" alt="${item.name}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border-color);">` : ''}
+                                    <div style="flex: 1;">
+                                        <div style="font-size: 0.875rem; color: var(--text-white); margin-bottom: 0.125rem;">${item.name || item.product_name}</div>
+                                        <div style="font-size: 0.75rem; color: var(--text-gray);">Qtd: ${item.quantity}</div>
+                                    </div>
+                                </div>
+                                <div style="font-size: 0.875rem; color: var(--text-white); font-weight: 600;">R$ ${((item.price || 0) * (item.quantity || 1)).toFixed(2).replace('.', ',')}</div>
+                            </div>
+                        `).join('');
+                    }
+                }
+            } catch (error) {
+                console.error('Erro ao carregar detalhes do pedido:', error);
+                // Manter valores da URL se API falhar
+            }
+        }
+        
+        // Load order details
+        loadOrderDetails();
         // Generate PIX code (simulated)
         const pixCode = `00020126580014br.gov.bcb.pix0136${orderId}-${Date.now()}5204000053039865406${finalTotal.toFixed(2)}5802BR5925STRANGER THINGS STORE6014BELO HORIZONTE62070503***6304${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
         document.getElementById('pixCode').textContent = pixCode;
