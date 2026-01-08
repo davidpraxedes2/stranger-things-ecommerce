@@ -369,6 +369,52 @@
             display: inline-block;
             animation: spin 1s linear infinite;
         }
+        
+        /* Mobile QR Code Toggle */
+        .qr-toggle-mobile {
+            display: none;
+            width: 100%;
+            padding: 1rem;
+            background: var(--medium-gray);
+            border: 2px solid #00D1C1;
+            border-radius: 12px;
+            color: #00D1C1;
+            font-family: var(--font-teko);
+            font-size: 1.25rem;
+            text-transform: uppercase;
+            cursor: pointer;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .qr-toggle-mobile svg {
+            transition: transform 0.3s ease;
+            width: 24px;
+            height: 24px;
+        }
+        
+        .qr-toggle-mobile.active svg {
+            transform: rotate(180deg);
+        }
+        
+        .qr-collapsible {
+            max-height: 2000px;
+            transition: max-height 0.4s ease, opacity 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .qr-collapsible.collapsed {
+            max-height: 0;
+            opacity: 0;
+        }
+        
+        @media (max-width: 768px) {
+            .qr-toggle-mobile {
+                display: flex;
+            }
+        }
     </style>
 </head>
 <body>
@@ -447,10 +493,20 @@
             <div class="content-grid">
                 <!-- QR Code Section -->
                 <div class="qr-section">
-                    <div class="qr-label">Escaneie o QR Code com seu app de banco</div>
-                    <div class="qr-wrapper">
-                        <div id="qrcode"></div>
-                    </div>
+                    <!-- Mobile Toggle Button -->
+                    <button class="qr-toggle-mobile" id="qrToggle">
+                        <span>VER QR CODE PIX</span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    
+                    <!-- Collapsible QR Content -->
+                    <div class="qr-collapsible" id="qrContent">
+                        <div class="qr-label">Escaneie o QR Code com seu app de banco</div>
+                        <div class="qr-wrapper">
+                            <div id="qrcode"></div>
+                        </div>
                     <div class="pix-code-section">
                         <div class="pix-code-label">Ou copie o código PIX</div>
                         <div class="pix-code-box" id="pixCode">00020126580014br.gov.bcb.pix0136a1b2c3d4-e5f6-7890-abcd-ef1234567890520400005303986540510.005802BR5925STRANGER THINGS STORE6014BELO HORIZONTE62070503***6304ABCD</div>
@@ -461,6 +517,7 @@
                             </svg>
                             <span id="copyBtnText">COPIAR CÓDIGO PIX</span>
                         </button>
+                    </div>
                     </div>
                 </div>
 
@@ -621,6 +678,28 @@
 
         const timerInterval = setInterval(updateTimer, 1000);
         updateTimer();
+        
+        // QR Code Toggle (Mobile)
+        const qrToggle = document.getElementById('qrToggle');
+        const qrContent = document.getElementById('qrContent');
+        
+        if (qrToggle && qrContent) {
+            qrToggle.addEventListener('click', () => {
+                qrToggle.classList.toggle('active');
+                qrContent.classList.toggle('collapsed');
+                
+                if (qrToggle.classList.contains('active')) {
+                    qrToggle.querySelector('span').textContent = 'OCULTAR QR CODE';
+                } else {
+                    qrToggle.querySelector('span').textContent = 'VER QR CODE PIX';
+                }
+            });
+            
+            // Start collapsed on mobile
+            if (window.innerWidth <= 768) {
+                qrContent.classList.add('collapsed');
+            }
+        }
 
         // Simulate payment check every 3 seconds
         let checkCount = 0;
