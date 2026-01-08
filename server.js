@@ -1,17 +1,6 @@
-// Wrapper para evitar crash no require
-let db = null;
-try {
-    db = require('./db-helper');
-} catch (error) {
-    console.error('Erro ao carregar db-helper:', error.message);
-    // Criar um mock db para não crashar
-    db = {
-        get: () => { },
-        all: () => { },
-        run: () => { },
-        prepare: () => { }
-    };
-}
+// Database configuration (PostgreSQL/SQLite)
+const db = require('./db-config');
+const { migratePostgres } = require('./db-migrate');
 
 const express = require('express');
 const cors = require('cors');
@@ -27,6 +16,11 @@ const JWT_SECRET = process.env.JWT_SECRET || 'stranger-things-secret-key-change-
 // Log de inicialização
 console.log('🚀 Servidor iniciando...');
 console.log('📦 Ambiente:', process.env.NODE_ENV || 'development');
+
+// Executar migração PostgreSQL se necessário
+(async () => {
+    await migratePostgres(db);
+})().catch(err => console.error('Erro na migração:', err));
 
 // Middleware
 app.use(cors({
@@ -1395,16 +1389,23 @@ app.post('/api/auth/login', (req, res) => {
 });
 
 // Admin login (alias para /api/auth/login)
-app.post('/api/admin/login', (req, res) => {
+app.post('/api/admin/login', async (req, res) => {
     const { username, password } = req.body;
 
     console.log('🔐 Admin login attempt:', { username, password: password ? '***' : 'EMPTY' });
 
-    db.get('SELECT * FROM users WHERE username = ? OR email = ?', [username, username], (err, user) => {
-        if (err) {
-            console.error('❌ DB error:', err);
-            res.status(500).json({ error: err.message });
-            return;
+    try {
+        // PostgreSQL usa $1, $2; SQLite usa posicional
+        const query = db.isPostgres 
+            ? 'SELECT * FROM users WHERE username = $1 OR email = $2'
+            : 'SELECT * FROM users WHERE username = ? OR email = ?';
+        
+        let user;
+        if (db.isPostgres) {
+            user = await db.get(query, [username, username]);
+        } else {
+            // SQLite síncrono
+            user = db.prepare(query).get(username, username);
         }
 
         console.log('👤 User found:', user ? user.username : 'NOT FOUND');
@@ -1414,49 +1415,51 @@ app.post('/api/admin/login', (req, res) => {
             console.log('⚠️ Admin user not found, creating default admin...');
             const defaultPassword = bcrypt.hashSync('admin123', 10);
             
-            db.run(`INSERT OR IGNORE INTO users (username, email, password, role) 
-                    VALUES ('admin', 'admin@strangerthings.com', ?, 'admin')`, [defaultPassword], (insertErr) => {
-                if (insertErr) {
-                    console.error('❌ Error creating admin:', insertErr);
-                    res.status(500).json({ error: 'Erro ao criar usuário admin' });
-                    return;
-                }
+            const insertQuery = db.isPostgres
+                ? 'INSERT INTO users (username, email, password, role) VALUES ($1, $2, $3, $4) ON CONFLICT (username) DO NOTHING RETURNING id'
+                : 'INSERT OR IGNORE INTO users (username, email, password, role) VALUES (?, ?, ?, ?)';
+            
+            if (db.isPostgres) {
+                const result = await db.query(insertQuery, ['admin', 'admin@strangerthings.com', defaultPassword, 'admin']);
+                console.log('✅ Admin user created successfully (PostgreSQL)');
                 
-                console.log('✅ Admin user created successfully');
+                // Buscar ID do admin recém-criado
+                user = await db.get('SELECT * FROM users WHERE username = $1', ['admin']);
+            } else {
+                db.prepare(insertQuery).run('admin', 'admin@strangerthings.com', defaultPassword, 'admin');
+                console.log('✅ Admin user created successfully (SQLite)');
+                user = db.prepare('SELECT * FROM users WHERE username = ?').get('admin');
+            }
+            
+            // Tentar login novamente após criar
+            if (password === 'admin123' && user) {
+                const token = jwt.sign(
+                    { id: user.id, username: 'admin', role: 'admin' },
+                    JWT_SECRET,
+                    { expiresIn: '24h' }
+                );
                 
-                // Tentar login novamente após criar
-                if (password === 'admin123') {
-                    const token = jwt.sign(
-                        { id: 1, username: 'admin', role: 'admin' },
-                        JWT_SECRET,
-                        { expiresIn: '24h' }
-                    );
-                    
-                    res.json({
-                        token,
-                        user: {
-                            id: 1,
-                            username: 'admin',
-                            email: 'admin@strangerthings.com',
-                            role: 'admin'
-                        }
-                    });
-                } else {
-                    res.status(401).json({ error: 'Credenciais inválidas' });
-                }
-            });
-            return;
+                return res.json({
+                    token,
+                    user: {
+                        id: user.id,
+                        username: 'admin',
+                        email: 'admin@strangerthings.com',
+                        role: 'admin'
+                    }
+                });
+            } else {
+                return res.status(401).json({ error: 'Credenciais inválidas' });
+            }
         }
 
         if (!user) {
-            res.status(401).json({ error: 'Credenciais inválidas' });
-            return;
+            return res.status(401).json({ error: 'Credenciais inválidas' });
         }
 
         const validPassword = bcrypt.compareSync(password, user.password);
         if (!validPassword) {
-            res.status(401).json({ error: 'Credenciais inválidas' });
-            return;
+            return res.status(401).json({ error: 'Credenciais inválidas' });
         }
 
         const token = jwt.sign(
@@ -1474,7 +1477,10 @@ app.post('/api/admin/login', (req, res) => {
                 role: user.role
             }
         });
-    });
+    } catch (err) {
+        console.error('❌ DB error:', err);
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // ===== ROTAS ADMIN (PROTEGIDAS) =====
