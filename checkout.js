@@ -893,7 +893,7 @@ async function handleCheckout(e) {
 
                     // Sucesso PIX
                     localStorage.removeItem('cart_session_id');
-                    window.location.href = `order-success-pix.html?order_id=${createdOrderId}&total=${total.toFixed(2).replace('.', ',')}&email=${customerData.email}`;
+                    window.location.href = `order-success-pix.html?order_id=${createdOrderId}&total=${total.toFixed(2).replace('.', ',')}&email=${customerData.email}&bestfy=true`;
 
                 } catch (pixError) {
                     console.error('Erro ao gerar PIX:', pixError);
