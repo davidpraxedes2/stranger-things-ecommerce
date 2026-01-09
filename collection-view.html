@@ -1,136 +1,132 @@
-<script>
-    // Force redirect to new version to bypass cache
-    window.location.replace('collection-view.html' + window.location.search);
-</script>
-</head>
+<!DOCTYPE html>
+<html lang="pt-BR">
 
-<body>
-    Redirecting...
-</body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title id="pageTitle">Coleção - Stranger Things Store</title>
+    <link rel="preload" href="logo.png" as="image">
+    <link rel="stylesheet" href="styles.css?v=18">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Teko:wght@300;400;500;600;700&family=display=swap"
+        rel="stylesheet">
 
-</html>
-<link rel="preload" href="logo.png" as="image">
-<link rel="stylesheet" href="styles.css?v=18">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Teko:wght@300;400;500;600;700&family=display=swap"
-    rel="stylesheet">
-
-<style>
-    /* CSS CRÍTICO INLINE - FORÇAR desde o início */
-    body:has(.announcement-bar:not(.hidden)),
-    body.has-announcement {
-        padding-top: 48px !important;
-    }
-
-    /* Header SEMPRE abaixo do announcement bar */
-    body:has(.announcement-bar:not(.hidden)) .header,
-    body.has-announcement .header,
-    .announcement-bar:not(.hidden)~.header {
-        top: 48px !important;
-        z-index: 1003 !important;
-    }
-
-    /* Announcement bar SEMPRE no topo */
-    .announcement-bar:not(.hidden) {
-        position: fixed !important;
-        top: 0 !important;
-        z-index: 1004 !important;
-        height: 48px !important;
-    }
-
-    /* Collection page specific styles */
-    .collection-header {
-        /* Espaçamento superior considerando header (60px) + espaço */
-        padding-top: 100px;
-        padding-bottom: var(--spacing-2xl);
-        padding-left: var(--spacing-md);
-        padding-right: var(--spacing-md);
-        background: linear-gradient(135deg, rgba(229, 9, 20, 0.1) 0%, rgba(0, 0, 0, 0.9) 100%);
-        border-bottom: 1px solid var(--border-color);
-        text-align: center;
-    }
-
-    /* Quando há announcement bar */
-    body.has-announcement .collection-header {
-        padding-top: 120px;
-    }
-
-    .collection-title {
-        font-family: var(--font-teko);
-        font-size: var(--fs-4xl);
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 4px;
-        margin-bottom: var(--spacing-md);
-        color: var(--netflix-red);
-        text-shadow: 0 0 20px rgba(229, 9, 20, 0.8);
-        animation: pulse-glow 2s ease-in-out infinite;
-    }
-
-    .collection-description {
-        font-size: var(--fs-lg);
-        color: var(--text-gray);
-        max-width: 700px;
-        margin: 0 auto var(--spacing-md);
-        line-height: 1.6;
-    }
-
-    .collection-count {
-        font-family: var(--font-teko);
-        font-size: var(--fs-xl);
-        color: var(--text-white);
-        text-transform: uppercase;
-        letter-spacing: 2px;
-    }
-
-    .back-link {
-        display: inline-flex;
-        align-items: center;
-        gap: var(--spacing-xs);
-        font-family: var(--font-teko);
-        font-size: var(--fs-base);
-        color: var(--text-gray);
-        text-decoration: none;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-bottom: var(--spacing-lg);
-        transition: all var(--transition-base);
-    }
-
-    .back-link:hover {
-        color: var(--netflix-red);
-    }
-
-    .back-link svg {
-        width: 20px;
-        height: 20px;
-    }
-
-    .collection-products-section {
-        padding: var(--spacing-2xl) var(--spacing-md);
-    }
-
-    /* Mobile adjustments */
-    @media (max-width: 768px) {
-        .collection-header {
-            padding-top: 80px;
+    <style>
+        /* CSS CRÍTICO INLINE - FORÇAR desde o início */
+        body:has(.announcement-bar:not(.hidden)),
+        body.has-announcement {
+            padding-top: 48px !important;
         }
 
-        body.has-announcement .collection-header {
+        /* Header SEMPRE abaixo do announcement bar */
+        body:has(.announcement-bar:not(.hidden)) .header,
+        body.has-announcement .header,
+        .announcement-bar:not(.hidden)~.header {
+            top: 48px !important;
+            z-index: 1003 !important;
+        }
+
+        /* Announcement bar SEMPRE no topo */
+        .announcement-bar:not(.hidden) {
+            position: fixed !important;
+            top: 0 !important;
+            z-index: 1004 !important;
+            height: 48px !important;
+        }
+
+        /* Collection page specific styles */
+        .collection-header {
+            /* Espaçamento superior considerando header (60px) + espaço */
             padding-top: 100px;
+            padding-bottom: var(--spacing-2xl);
+            padding-left: var(--spacing-md);
+            padding-right: var(--spacing-md);
+            background: linear-gradient(135deg, rgba(229, 9, 20, 0.1) 0%, rgba(0, 0, 0, 0.9) 100%);
+            border-bottom: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        /* Quando há announcement bar */
+        body.has-announcement .collection-header {
+            padding-top: 120px;
         }
 
         .collection-title {
-            font-size: var(--fs-3xl);
-            letter-spacing: 2px;
+            font-family: var(--font-teko);
+            font-size: var(--fs-4xl);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-bottom: var(--spacing-md);
+            color: var(--netflix-red);
+            text-shadow: 0 0 20px rgba(229, 9, 20, 0.8);
+            animation: pulse-glow 2s ease-in-out infinite;
         }
 
         .collection-description {
-            font-size: var(--fs-base);
+            font-size: var(--fs-lg);
+            color: var(--text-gray);
+            max-width: 700px;
+            margin: 0 auto var(--spacing-md);
+            line-height: 1.6;
         }
-    }
-</style>
+
+        .collection-count {
+            font-family: var(--font-teko);
+            font-size: var(--fs-xl);
+            color: var(--text-white);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            font-family: var(--font-teko);
+            font-size: var(--fs-base);
+            color: var(--text-gray);
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: var(--spacing-lg);
+            transition: all var(--transition-base);
+        }
+
+        .back-link:hover {
+            color: var(--netflix-red);
+        }
+
+        .back-link svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .collection-products-section {
+            padding: var(--spacing-2xl) var(--spacing-md);
+        }
+
+        /* Mobile adjustments */
+        @media (max-width: 768px) {
+            .collection-header {
+                padding-top: 80px;
+            }
+
+            body.has-announcement .collection-header {
+                padding-top: 100px;
+            }
+
+            .collection-title {
+                font-size: var(--fs-3xl);
+                letter-spacing: 2px;
+            }
+
+            .collection-description {
+                font-size: var(--fs-base);
+            }
+        }
+    </style>
 </head>
 
 <body>

@@ -182,6 +182,10 @@ app.get('/collection.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'collection.html'));
 });
 
+app.get('/collection-view.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'collection-view.html'));
+});
+
 app.get('/checkout.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'checkout.html'));
 });

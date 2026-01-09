@@ -205,7 +205,7 @@ async function renderCollectionsSections() {
                                 ${col.description ? `<p class="section-subtitle">${(col.description || '').replace(/[<>]/g, '')}</p>` : ''}
                             </div>
                             <div class="section-header-actions">
-                                <a href="collection.html?slug=${col.slug}" class="view-all-link">
+                                <a href="collection-view.html?slug=${col.slug}" class="view-all-link">
                                     Ver Todos (${col.products.length}) →
                                 </a>
                                 <div class="view-toggle">
