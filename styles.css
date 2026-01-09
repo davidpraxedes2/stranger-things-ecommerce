@@ -3798,8 +3798,8 @@ object {
     display: flex;
     gap: var(--spacing-md);
     scroll-behavior: smooth;
-    padding: 4px;
-    /* Espaço para sombra do hover */
+    padding: 4px 20px;
+    /* Espaço para sombra do hover + padding lateral para não cortar */
 }
 
 /* Cards do carrossel: imagem QUADRADA como no grid */
