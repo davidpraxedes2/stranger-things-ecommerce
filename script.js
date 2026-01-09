@@ -994,9 +994,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Load products from API on page load
-    // Load products from API on page load - ONLY IF ON HOME OR PRODUCT PAGE (to avoid conflict with specific page logic)
+    // Load products from API on page load - ONLY IF ON HOME OR PRODUCT PAGE
     // Collection page has its own loader
-    if (!window.location.pathname.includes('collection.html')) {
+    const isCollectionPage = window.location.pathname.includes('collection');
+    console.log('📍 Current Path:', window.location.pathname, '| isCollectionPage:', isCollectionPage);
+
+    if (!isCollectionPage) {
         loadProductsFromAPI();
     } else {
         console.log('ℹ️ script.js: Skipping loadProductsFromAPI on collection page.');
