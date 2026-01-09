@@ -1392,6 +1392,74 @@ body:has(.announcement-bar:not(.hidden)) .hero-slider {
     background: rgba(229, 9, 20, 0.05);
 }
 
+/* Section Header Actions (Ver Todos + View Toggle) */
+.section-header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.view-all-link {
+    font-family: var(--font-teko);
+    font-size: var(--fs-sm);
+    color: var(--text-gray);
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all var(--transition-base);
+    white-space: nowrap;
+}
+
+.view-all-link:hover {
+    color: var(--netflix-red);
+}
+
+/* Show More Button */
+.show-more-container {
+    display: flex;
+    justify-content: center;
+    margin-top: var(--spacing-xl);
+    margin-bottom: var(--spacing-lg);
+}
+
+.show-more-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    background: transparent;
+    border: 1.5px solid var(--netflix-red);
+    color: var(--text-white);
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: var(--font-teko);
+    font-size: var(--fs-base);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all var(--transition-base);
+}
+
+.show-more-btn:hover {
+    background: var(--netflix-red);
+    box-shadow: 0 0 15px rgba(229, 9, 20, 0.5);
+    transform: translateY(-2px);
+}
+
+.show-more-btn svg {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+    transition: transform var(--transition-base);
+}
+
+.show-more-btn:hover svg {
+    transform: translateY(3px);
+}
+
+.show-more-btn span {
+    font-weight: 500;
+}
+
 .filter-toggle {
     display: flex;
     align-items: center;

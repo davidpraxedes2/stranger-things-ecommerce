@@ -123,6 +123,11 @@ async function renderCollectionsSections() {
                 const isGridActive = initialView === 'grid';
                 const isCarouselActive = initialView === 'carousel';
 
+                // Pagination: mostrar apenas 10 produtos inicialmente
+                const INITIAL_PRODUCTS = 10;
+                const initialProducts = col.products.slice(0, INITIAL_PRODUCTS);
+                const hasMore = col.products.length > INITIAL_PRODUCTS;
+
                 return `
                 <section class="products-section collection-section animate-entry" data-collection-id="${col.id}">
                     <div class="container">
@@ -131,28 +136,44 @@ async function renderCollectionsSections() {
                                 <h2 class="section-title">${(col.name || '').replace(/[<>]/g, '').toUpperCase()}</h2>
                                 ${col.description ? `<p class="section-subtitle">${(col.description || '').replace(/[<>]/g, '')}</p>` : ''}
                             </div>
-                            <div class="view-toggle">
-                                <button class="view-toggle-btn ${isGridActive ? 'active' : ''}" data-view="grid" data-collection="${col.id}" title="Visualização em Grade">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <rect x="3" y="3" width="7" height="7"></rect>
-                                        <rect x="14" y="3" width="7" height="7"></rect>
-                                        <rect x="14" y="14" width="7" height="7"></rect>
-                                        <rect x="3" y="14" width="7" height="7"></rect>
-                                    </svg>
-                                </button>
-                                <button class="view-toggle-btn ${isCarouselActive ? 'active' : ''}" data-view="carousel" data-collection="${col.id}" title="Visualização em Carrossel">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect>
-                                        <polyline points="17 2 12 7 7 2"></polyline>
-                                    </svg>
-                                </button>
+                            <div class="section-header-actions">
+                                <a href="collection.html?slug=${col.slug}" class="view-all-link">
+                                    Ver Todos (${col.products.length}) →
+                                </a>
+                                <div class="view-toggle">
+                                    <button class="view-toggle-btn ${isGridActive ? 'active' : ''}" data-view="grid" data-collection="${col.id}" title="Visualização em Grade">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="3" y="3" width="7" height="7"></rect>
+                                            <rect x="14" y="3" width="7" height="7"></rect>
+                                            <rect x="14" y="14" width="7" height="7"></rect>
+                                            <rect x="3" y="14" width="7" height="7"></rect>
+                                        </svg>
+                                    </button>
+                                    <button class="view-toggle-btn ${isCarouselActive ? 'active' : ''}" data-view="carousel" data-collection="${col.id}" title="Visualização em Carrossel">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect>
+                                            <polyline points="17 2 12 7 7 2"></polyline>
+                                        </svg>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         
                         <!-- Grid View -->
                         <div class="products-grid collection-view-grid" data-collection="${col.id}" style="display: ${isGridActive ? 'grid' : 'none'};">
-                            ${col.products.map(p => renderProductCard(p)).join('')}
+                            ${initialProducts.map(p => renderProductCard(p)).join('')}
                         </div>
+                        
+                        ${hasMore && isGridActive ? `
+                        <div class="show-more-container" data-collection="${col.id}">
+                            <button class="show-more-btn" data-collection="${col.id}" data-loaded="${INITIAL_PRODUCTS}" data-total="${col.products.length}">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                                <span>Mostrar Mais</span>
+                            </button>
+                        </div>
+                        ` : ''}
                         
                         <!-- Carousel View -->
                         <div class="products-carousel collection-view-carousel" data-collection="${col.id}" style="display: ${isCarouselActive ? 'block' : 'none'};">
@@ -277,6 +298,39 @@ function initializeCollectionToggles() {
                 left: targetScroll,
                 behavior: 'smooth'
             });
+        });
+    });
+
+    // "Mostrar Mais" button functionality
+    document.querySelectorAll('.show-more-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const collectionId = this.dataset.collection;
+            const loaded = parseInt(this.dataset.loaded);
+            const total = parseInt(this.dataset.total);
+            const LOAD_MORE_COUNT = 10;
+
+            // Encontrar a coleção nos dados
+            const collection = collections.find(c => c.id == collectionId);
+            if (!collection) return;
+
+            // Calcular próximos produtos
+            const nextBatch = collection.products.slice(loaded, loaded + LOAD_MORE_COUNT);
+            const newLoaded = loaded + nextBatch.length;
+
+            // Adicionar produtos ao grid
+            const gridView = document.querySelector(`.collection-view-grid[data-collection="${collectionId}"]`);
+            if (gridView) {
+                const newCards = nextBatch.map(p => renderProductCard(p)).join('');
+                gridView.insertAdjacentHTML('beforeend', newCards);
+            }
+
+            // Atualizar contador
+            this.dataset.loaded = newLoaded;
+
+            // Esconder botão se não houver mais produtos
+            if (newLoaded >= total) {
+                this.parentElement.style.display = 'none';
+            }
         });
     });
 }

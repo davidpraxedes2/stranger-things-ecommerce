@@ -52,6 +52,8 @@ async function seedCollections(db, returnLogs = false) {
             title: 'Capinhas de Celular',
             slug: 'capinhas-celular',
             keywords: ['capinha', 'case', 'capa', 'iphone', 'samsung', 'galaxy', 'celular'],
+            namePattern: /capinha|case|capa/i,  // Only match if name contains these words
+            strictMatch: true,  // Require namePattern match (not just keywords in description)
             priceOverride: 12.90
         }
     ];
@@ -98,6 +100,14 @@ async function seedCollections(db, returnLogs = false) {
             // Find matching products
             const matchingProducts = products.filter(p => {
                 const text = (p.name + ' ' + (p.description || '')).toLowerCase();
+                const nameText = p.name.toLowerCase();
+
+                // If strictMatch is enabled, require namePattern match
+                if (col.strictMatch && col.namePattern) {
+                    return col.namePattern.test(p.name);
+                }
+
+                // Otherwise, use keyword matching
                 return col.keywords.some(k => text.includes(k.toLowerCase()));
             });
 
