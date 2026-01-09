@@ -3919,16 +3919,21 @@ object {
 }
 
 .variant-block-wrapper select {
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    font-family: var(--font-teko);
+    /* User requested Teko */
     padding: 12px;
     border-radius: 4px;
     background: var(--medium-gray);
     color: var(--text-white);
     border: 1px solid var(--light-gray);
-    font-size: 1rem;
+    font-size: 1.2rem;
+    /* Increased for Teko legibility */
+    letter-spacing: 0.5px;
     cursor: pointer;
     transition: all 0.3s ease;
     outline: none;
+    text-transform: uppercase;
+    /* Teko looks better uppercase often */
 }
 
 .variant-block-wrapper select:focus {

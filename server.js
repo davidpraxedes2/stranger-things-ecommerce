@@ -1378,14 +1378,20 @@ app.post('/api/orders', async (req, res) => {
             }
         }
 
-        res.json({
-            success: true,
-            order_id: orderId,
-            message: 'Pedido criado com sucesso'
-        });
-    } catch (error) {
-        console.error('Erro ao criar pedido:', error);
-        res.status(500).json({ error: error.message });
+        // Notify Pending
+        // items[0] should be available
+        const mainItemName = (items && items.length > 0) ? items[0].name : 'Vários Itens';
+        sendPushcutNotification('pending', {
+            id: orderId,
+            itemName: mainItemName,
+            total: total
+        }).catch(e => console.error('Async Pushcut Fail:', e));
+
+        console.log('✅ Pedido criado com sucesso:', orderId);
+        res.status(201).json({ success: true, orderId });
+    } catch (err) {
+        console.error('Erro ao criar pedido:', err);
+        res.status(500).json({ error: err.message });
     }
 });
 
@@ -3095,6 +3101,48 @@ app.get('/api/payments/bestfy/transaction/:transactionId', async (req, res) => {
                 db.prepare(
                     'UPDATE orders SET status = ?, transaction_data = ? WHERE transaction_id = ?'
                 ).run('paid', JSON.stringify(transaction), transactionId);
+            }
+
+            // Notify Approved
+            try {
+                // Fetch Order Info (ID and Items)
+                let orderId = null;
+                let itemName = 'Produto';
+                let orderTotal = transaction.amount;
+
+                const queryStr = db.isPostgres ?
+                    'SELECT id, total FROM orders WHERE transaction_id = $1' :
+                    'SELECT id, total FROM orders WHERE transaction_id = ?';
+
+                const orderRes = db.isPostgres ?
+                    await db.query(queryStr, [transactionId]) :
+                    db.prepare(queryStr).get(transactionId);
+
+                const orderRow = db.isPostgres ? orderRes.rows?.[0] : orderRes;
+
+                if (orderRow) {
+                    orderId = orderRow.id;
+                    orderTotal = orderRow.total;
+
+                    const itemQ = db.isPostgres ?
+                        'SELECT p.name FROM order_items oi JOIN products p ON oi.product_id = p.id WHERE oi.order_id = $1 LIMIT 1' :
+                        'SELECT p.name FROM order_items oi JOIN products p ON oi.product_id = p.id WHERE oi.order_id = ? LIMIT 1';
+
+                    const itemRes = db.isPostgres ?
+                        await db.query(itemQ, [orderId]) :
+                        db.prepare(itemQ).get(orderId);
+
+                    const firstItem = db.isPostgres ? itemRes.rows?.[0] : itemRes;
+                    if (firstItem) itemName = firstItem.name;
+
+                    sendPushcutNotification('approved', {
+                        id: orderId,
+                        itemName: itemName,
+                        total: orderTotal
+                    }).catch(e => console.error('Async Pushcut Fail:', e));
+                }
+            } catch (notifyErr) {
+                console.error('Error preparing approved notification:', notifyErr);
             }
         }
 
