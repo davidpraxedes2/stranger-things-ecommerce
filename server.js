@@ -352,6 +352,20 @@ async function tryImportProductsFromJSON() {
 // Criar tabelas
 function initializeDatabase() {
     // Tabela de produtos
+
+    // Helper para evitar erros de "duplicate column" em migrações
+    const runMigration = (query) => {
+        db.run(query, (err) => {
+            if (err) {
+                // 42701 = Postgres duplicate_column code
+                const isDup = err.code === '42701' || err.message.includes('duplicate column');
+                if (!isDup) console.error(`⚠️ Migration Error (${query}):`, err.message);
+            } else {
+                // console.log(`✅ Migration success: ${query.substring(0, 30)}...`);
+            }
+        });
+    };
+
     db.run(`CREATE TABLE IF NOT EXISTS products (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
@@ -371,10 +385,10 @@ function initializeDatabase() {
             console.error('Erro ao criar tabela products:', err);
         } else {
             // Adicionar colunas que podem não existir (Schema Migrations)
-            db.run(`ALTER TABLE products ADD COLUMN images_json TEXT`, () => { });
-            db.run(`ALTER TABLE products ADD COLUMN original_price REAL`, () => { });
-            db.run(`ALTER TABLE products ADD COLUMN sku TEXT`, () => { });
-            db.run(`ALTER TABLE products ADD COLUMN has_variants INTEGER DEFAULT 0`, () => { });
+            runMigration(`ALTER TABLE products ADD COLUMN images_json TEXT`);
+            runMigration(`ALTER TABLE products ADD COLUMN original_price REAL`);
+            runMigration(`ALTER TABLE products ADD COLUMN sku TEXT`);
+            runMigration(`ALTER TABLE products ADD COLUMN has_variants INTEGER DEFAULT 0`);
 
             // Verificar se há produtos, se não tiver, criar alguns
             db.get('SELECT COUNT(*) as count FROM products', [], (err, row) => {
@@ -412,14 +426,8 @@ function initializeDatabase() {
     )`);
 
     // Migration: Adicionar colunas cpf e address se não existirem
-    try {
-        db.exec("ALTER TABLE orders ADD COLUMN customer_cpf TEXT");
-        console.log('✅ Coluna customer_cpf adicionada à tabela orders');
-    } catch (e) { }
-    try {
-        db.exec("ALTER TABLE orders ADD COLUMN customer_address TEXT");
-        console.log('✅ Coluna customer_address adicionada à tabela orders');
-    } catch (e) { }
+    runMigration("ALTER TABLE orders ADD COLUMN customer_cpf TEXT");
+    runMigration("ALTER TABLE orders ADD COLUMN customer_address TEXT");
 
     // Tabela de itens do pedido
     db.run(`CREATE TABLE IF NOT EXISTS order_items (
@@ -482,13 +490,7 @@ function initializeDatabase() {
     });
 
     // Migration: Adicionar coluna default_view se não existir
-    db.run(`ALTER TABLE collections ADD COLUMN default_view TEXT DEFAULT 'grid'`, (err) => {
-        if (err && !err.message.includes('duplicate column')) {
-            console.log('Coluna default_view já existe ou erro:', err.message);
-        } else if (!err) {
-            console.log('✅ Coluna default_view adicionada à tabela collections');
-        }
-    });
+    runMigration(`ALTER TABLE collections ADD COLUMN default_view TEXT DEFAULT 'grid'`);
 
     // Tabela de opções de frete
     db.run(`CREATE TABLE IF NOT EXISTS shipping_options (
@@ -599,6 +601,59 @@ app.get('/api/debug/db', async (req, res) => {
             stack: error.stack,
             dbType: db.isPostgres ? 'Postgres' : 'SQLite'
         });
+    }
+});
+
+
+// DEBUG: Schema Inspector
+app.get('/api/debug/schema', async (req, res) => {
+    try {
+        const info = {
+            tables: [],
+            columns: {},
+            counts: {}
+        };
+
+        if (db.isPostgres) {
+            // List tables
+            const tablesRes = await db.query("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'");
+            info.tables = tablesRes.rows.map(r => r.table_name);
+
+            // Columns for key tables
+            for (const table of ['products', 'collections', 'orders']) {
+                if (info.tables.includes(table)) {
+                    const colsRes = await db.query("SELECT column_name, data_type FROM information_schema.columns WHERE table_name = $1", [table]);
+                    info.columns[table] = colsRes.rows;
+
+                    const countRes = await db.query(`SELECT COUNT(*) as count FROM ${table}`);
+                    info.counts[table] = countRes.rows[0].count;
+                }
+            }
+        } else {
+            // SQLite
+            const tablesRes = await new Promise(resolve => {
+                db.all("SELECT name FROM sqlite_master WHERE type='table'", [], (err, rows) => resolve(rows || []));
+            });
+            info.tables = tablesRes.map(r => r.name);
+
+            for (const table of ['products', 'collections', 'orders']) {
+                if (info.tables.includes(table)) {
+                    const colsRes = await new Promise(resolve => {
+                        db.all(`PRAGMA table_info(${table})`, [], (err, rows) => resolve(rows));
+                    });
+                    info.columns[table] = colsRes;
+
+                    const countRes = await new Promise(resolve => {
+                        db.get(`SELECT COUNT(*) as count FROM ${table}`, [], (err, row) => resolve(row ? row.count : 0));
+                    });
+                    info.counts[table] = countRes;
+                }
+            }
+        }
+
+        res.json({ success: true, info });
+    } catch (e) {
+        res.status(500).json({ error: e.message, stack: e.stack });
     }
 });
 

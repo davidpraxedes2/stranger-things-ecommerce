@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DB Schema Debug</title>
+    <style>
+        body {
+            font-family: monospace;
+            background: #111;
+            color: #eee;
+            padding: 20px;
+        }
+
+        pre {
+            background: #222;
+            padding: 10px;
+            border: 1px solid #444;
+            overflow: auto;
+        }
+
+        button {
+            padding: 8px 16px;
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>DB Schema Debug</h1>
+    <button onclick="checkSchema()">Check Schema</button>
+    <div id="result"></div>
+
+    <script>
+        async function checkSchema() {
+            const div = document.getElementById('result');
+            div.innerHTML = 'Loading...';
+            try {
+                const res = await fetch('/api/debug/schema');
+                const data = await res.json();
+                div.innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            } catch (e) {
+                div.innerHTML = '<span style="color:red">Error: ' + e.message + '</span>';
+            }
+        }
+
+        // Auto run
+        checkSchema();
+    </script>
+</body>
+
+</html>
