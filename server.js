@@ -492,6 +492,16 @@ function initializeDatabase() {
     // Migration: Adicionar coluna default_view se não existir
     runMigration(`ALTER TABLE collections ADD COLUMN default_view TEXT DEFAULT 'grid'`);
 
+    // Tabela collection_products (garantir criação após Collections)
+    db.run(`CREATE TABLE IF NOT EXISTS collection_products (
+        collection_id INTEGER,
+        product_id INTEGER,
+        sort_order INTEGER DEFAULT 0,
+        PRIMARY KEY (collection_id, product_id),
+        FOREIGN KEY (collection_id) REFERENCES collections(id) ON DELETE CASCADE,
+        FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+    )`);
+
     // Tabela de opções de frete
     db.run(`CREATE TABLE IF NOT EXISTS shipping_options (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -1169,15 +1179,8 @@ app.delete('/api/admin/collections/:id', authenticateToken, (req, res) => {
     });
 });
 
-// Tabela de produtos em coleções (MxN)
-db.run(`CREATE TABLE IF NOT EXISTS collection_products (
-        collection_id INTEGER,
-        product_id INTEGER,
-        sort_order INTEGER DEFAULT 0,
-        PRIMARY KEY (collection_id, product_id),
-        FOREIGN KEY (collection_id) REFERENCES collections(id) ON DELETE CASCADE,
-        FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
-    )`);
+// Tabela collection_products movida para initializeDatabase para evitar erro de Foreign Key
+// (Código removido daqui)
 
 // ... (existing code) ...
 
