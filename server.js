@@ -2662,18 +2662,30 @@ app.get('/api/gateway/active', async (req, res) => {
 
 // Criar transação PIX via BESTFY
 app.post('/api/payments/bestfy/pix', async (req, res) => {
-    const { orderId, amount, customer, items, shipping } = req.body;
-
+    console.log('🔥 [PIX] Endpoint chamado!');
     try {
+        if (!req.body) {
+            throw new Error('Corpo da requisição vazio');
+        }
+
+        const { orderId, amount, customer, items, shipping } = req.body;
+        console.log('📦 [PIX] Payload recebido:', { orderId, amount, customerName: customer?.name });
+
+        if (!customer) {
+            throw new Error('Dados do cliente (customer) não fornecidos');
+        }
+
         // Buscar credenciais do gateway
         let gateway;
         if (db.isPostgres) {
+            console.log('🔍 [PIX] Buscando gateway no Postgres...');
             const result = await db.query(
                 'SELECT * FROM payment_gateways WHERE gateway_type = $1 AND is_active = 1',
                 ['bestfy']
             );
             gateway = result.rows?.[0];
         } else {
+            console.log('🔍 [PIX] Buscando gateway no SQLite...');
             gateway = db.prepare(
                 'SELECT * FROM payment_gateways WHERE gateway_type = ? AND is_active = 1'
             ).get('bestfy');
