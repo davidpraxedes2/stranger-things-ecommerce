@@ -174,13 +174,13 @@ app.get('/admin', (req, res) => {
         console.log('🔄 Inicializando banco de dados...');
 
         if (db.isPostgres) {
-            // Non-blocking initialization - don't crash if it fails
-            db.initialize().catch(err => {
-                console.error('⚠️ Erro na inicialização do DB (ignorado):', err.message);
-                console.log('📌 Assumindo que tabelas já existem.');
-            });
+            // Postgres - Initialize (this will run create table and migrations)
+            console.log('📦 Executando inicialização de Database Postgres...');
+            initializeDatabase();
         } else {
-            initializeDatabase(); // Local sqlite init function
+            // SQLite - Initialize
+            console.log('📦 Executando inicialização de Database SQLite...');
+            initializeDatabase();
         }
 
         console.log('✅ Banco inicializado e tabelas verificadas');
