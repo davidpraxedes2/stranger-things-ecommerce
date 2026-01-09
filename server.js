@@ -943,6 +943,7 @@ app.get('/api/products', async (req, res) => {
 
 // Função helper para buscar coleções com produtos
 function getCollectionsWithProducts(onlyActive = true) {
+    console.log(`🔍 Buscando coleções (onlyActive=${onlyActive}, Tabela=${db.isPostgres ? 'Postgres' : 'SQLite'})...`);
     return new Promise((resolve, reject) => {
         const query = `
             SELECT c.*, 
@@ -953,7 +954,15 @@ function getCollectionsWithProducts(onlyActive = true) {
         `;
 
         db.all(query, [], async (err, collections) => {
-            if (err) return reject(err);
+            if (err) {
+                console.error('❌ Erro ao buscar coleções:', err);
+                return reject(err);
+            }
+
+            console.log(`✅ Coleções encontradas: ${collections?.length || 0}`);
+            if (!collections || collections.length === 0) {
+                return resolve([]);
+            }
 
             // Para cada coleção, buscar os produtos ordenados
             for (const col of collections) {
@@ -965,12 +974,16 @@ function getCollectionsWithProducts(onlyActive = true) {
                         WHERE cp.collection_id = ? AND p.active = 1
                         ORDER BY cp.sort_order ASC
                     `, [col.id], (err, products) => {
-                        if (err) res([]);
+                        if (err) {
+                            console.error(`❌ Erro ao buscar produtos da coleção ${col.id}:`, err);
+                            res([]);
+                        }
                         else {
                             // Parse JSON fields if necessary
                             products.forEach(p => {
                                 if (p.images_json) try { p.images = JSON.parse(p.images_json) } catch (e) { }
                             });
+                            console.log(`📦 Coleção "${col.name}" (ID ${col.id}): ${products.length} produtos`);
                             res(products);
                         }
                     });
@@ -988,6 +1001,7 @@ function getCollectionsWithProducts(onlyActive = true) {
 app.get('/api/collections', async (req, res) => {
     try {
         const collections = await getCollectionsWithProducts(true);
+        console.log(`📤 Retornando ${collections.length} coleções para o front`);
         res.json(collections);
     } catch (err) {
         console.error('Erro ao buscar coleções:', err);
