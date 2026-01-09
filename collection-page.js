@@ -1,11 +1,13 @@
 // Collection Page JavaScript
-// API Base URL
+// API Base URL logic handled by script.js or fallback here
 if (typeof window.API_BASE === 'undefined') {
     window.API_BASE = window.location.origin;
     window.API_URL = `${window.API_BASE}/api`;
 }
 
-const API_URL = window.API_URL;
+// Do NOT declare const API_URL here to avoid conflict with script.js
+// Instead we use window.API_URL directly or a local var inside functions if needed
+// const API_URL = window.API_URL; // REMOVED THIS LINE
 
 // Get collection slug from URL
 const urlParams = new URLSearchParams(window.location.search);
@@ -24,15 +26,15 @@ async function loadCollectionPage() {
 
     try {
         // Load all collections
-        const collectionsResponse = await fetch(`${API_URL}/collections`);
+        const collectionsResponse = await fetch(`${window.API_URL}/collections`);
         if (!collectionsResponse.ok) {
             throw new Error('Erro ao carregar coleções');
         }
         const collections = await collectionsResponse.json();
-        
+
         // Find the collection by slug
         currentCollection = collections.find(c => c.slug === collectionSlug);
-        
+
         if (!currentCollection) {
             console.error('Coleção não encontrada:', collectionSlug);
             window.location.href = 'index.html';
@@ -43,7 +45,7 @@ async function loadCollectionPage() {
         currentView = currentCollection.default_view || 'grid';
 
         // Load all products
-        const productsResponse = await fetch(`${API_URL}/products`);
+        const productsResponse = await fetch(`${window.API_URL}/products`);
         if (!productsResponse.ok) {
             throw new Error('Erro ao carregar produtos');
         }
@@ -53,7 +55,7 @@ async function loadCollectionPage() {
         collectionProducts = allProducts.filter(p => {
             // Verificar se p.collections existe e é array
             if (!p.collections) return false;
-            
+
             // Se for string, tentar fazer parse
             let collections = p.collections;
             if (typeof collections === 'string') {
@@ -64,12 +66,12 @@ async function loadCollectionPage() {
                     collections = [collections];
                 }
             }
-            
+
             // Verificar se é array antes de usar includes
             if (!Array.isArray(collections)) {
                 collections = [collections];
             }
-            
+
             return collections.includes(currentCollection.name);
         });
 
@@ -96,13 +98,13 @@ function renderCollectionHeader() {
 // Renderizar botões de alternância de visualização
 function renderViewToggle() {
     const header = document.querySelector('.collection-header .container');
-    
+
     // Remover toggle anterior se existir
     const existingToggle = document.getElementById('viewToggle');
     if (existingToggle) {
         existingToggle.remove();
     }
-    
+
     const toggleHTML = `
         <div id="viewToggle" style="display: flex; justify-content: center; gap: 12px; margin-top: 24px;">
             <button 
@@ -133,7 +135,7 @@ function renderViewToggle() {
             </button>
         </div>
     `;
-    
+
     header.insertAdjacentHTML('beforeend', toggleHTML);
 }
 
@@ -150,7 +152,7 @@ window.changeView = changeView;
 // Render collection products
 function renderCollectionProducts() {
     const container = document.getElementById('collectionProducts');
-    
+
     if (!container) return;
 
     if (collectionProducts.length === 0) {
@@ -185,22 +187,22 @@ function renderCollectionProducts() {
         const originalPrice = product.original_price ? parseFloat(product.original_price) : null;
         const hasDiscount = originalPrice && originalPrice > price;
         const discountPercent = hasDiscount ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0;
-        
+
         // Calcular parcelamento (até 3x sem juros)
         const installmentValue = (price / 3).toFixed(2).replace('.', ',');
         const pixDiscount = (price * 0.95).toFixed(2).replace('.', ','); // 5% desconto no PIX
-        
+
         const cardStyle = currentView === 'carousel' ? 'min-width: 300px; scroll-snap-align: start;' : '';
-        
+
         return `
             <a href="product.html?id=${product.id}" class="product-card" data-product-id="${product.id}" style="${cardStyle}">
                 <div class="product-image-wrapper">
                     ${hasDiscount && discountPercent > 0 ? `<span class="product-badge discount">-${discountPercent}%</span>` : ''}
                     <div class="product-image">
-                        ${product.image_url ? 
-                            `<img src="${product.image_url}" alt="${product.name}" loading="lazy">` : 
-                            '<div style="font-size: 3rem; display: flex; align-items: center; justify-content: center; height: 100%;">📦</div>'
-                        }
+                        ${product.image_url ?
+                `<img src="${product.image_url}" alt="${product.name}" loading="lazy">` :
+                '<div style="font-size: 3rem; display: flex; align-items: center; justify-content: center; height: 100%;">📦</div>'
+            }
                     </div>
                 </div>
                 <div class="product-info">
@@ -223,7 +225,7 @@ function renderCollectionProducts() {
 // Initialize on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
     loadCollectionPage();
-    
+
     // Load cart from API on page load
     if (typeof window.loadCartFromAPI === 'function') {
         window.loadCartFromAPI();

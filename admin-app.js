@@ -1329,7 +1329,7 @@ function renderProductRows() {
                         <div style="font-size: 14px;">Comece adicionando seu primeiro produto</div>
                     </div>
                 </td>
-            </tr >
+            </tr>
                 `;
     }
 
@@ -1388,7 +1388,7 @@ function renderProductRows() {
                         </button>
                     </div>
                 </td>
-            </tr >
+            </tr>
                 `;
     }).join('');
 }
