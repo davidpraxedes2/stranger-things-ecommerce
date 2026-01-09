@@ -455,13 +455,10 @@ db.initialize = async function () {
 };
 
 async function initializePostgres() {
+    let client = null;
     try {
-        const { Client } = require('pg');
-        const client = new Client({
-            connectionString: process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL
-        });
-
-        await client.connect();
+        // Use the existing pool instead of creating a new Client
+        client = await pgPool.connect();
         console.log('✅ Conectado ao PostgreSQL');
 
         // Create tables
@@ -613,12 +610,177 @@ async function initializePostgres() {
             WHERE NOT EXISTS (SELECT 1 FROM payment_gateways WHERE gateway_type = 'bestfy')
         `);
 
-        await client.end();
         console.log('✅ Tabelas PostgreSQL criadas com sucesso');
     } catch (error) {
         console.error('❌ Erro ao criar tabelas PostgreSQL:', error);
         throw error;
+    } finally {
+        if (client) client.release();
     }
+}
+
+function initializeSQLite() {
+    // SQLite initialization happens in server.js initializeDatabase()
+    // This function is a placeholder for consistency
+}
+
+module.exports = db;
+
+// Create tables
+await client.query(`
+            CREATE TABLE IF NOT EXISTS products (
+                id SERIAL PRIMARY KEY,
+                name TEXT NOT NULL,
+                description TEXT,
+                price REAL NOT NULL,
+                category TEXT,
+                image_url TEXT,
+                stock INTEGER DEFAULT 0,
+                active INTEGER DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                images_json TEXT,
+                original_price REAL,
+                sku TEXT
+            )
+        `);
+
+await client.query(`
+            CREATE TABLE IF NOT EXISTS users (
+                id SERIAL PRIMARY KEY,
+                username TEXT UNIQUE NOT NULL,
+                email TEXT UNIQUE NOT NULL,
+                password TEXT NOT NULL,
+                role TEXT DEFAULT 'admin',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+await client.query(`
+            CREATE TABLE IF NOT EXISTS orders (
+                id SERIAL PRIMARY KEY,
+                customer_name TEXT,
+                customer_email TEXT,
+                customer_phone TEXT,
+                total REAL NOT NULL,
+                status TEXT DEFAULT 'pending',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                customer_id INTEGER,
+                shipping_address TEXT,
+                payment_method TEXT
+            )
+        `);
+
+await client.query(`
+            CREATE TABLE IF NOT EXISTS order_items (
+                id SERIAL PRIMARY KEY,
+                order_id INTEGER NOT NULL,
+                product_id INTEGER NOT NULL,
+                quantity INTEGER NOT NULL,
+                price REAL NOT NULL
+            )
+        `);
+
+await client.query(`
+            CREATE TABLE IF NOT EXISTS customers (
+                id SERIAL PRIMARY KEY,
+                name TEXT NOT NULL,
+                email TEXT UNIQUE NOT NULL,
+                password TEXT,
+                phone TEXT,
+                cpf TEXT,
+                address TEXT,
+                city TEXT,
+                state TEXT,
+                zip_code TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+await client.query(`
+            CREATE TABLE IF NOT EXISTS cart_items(
+            id SERIAL PRIMARY KEY,
+            session_id TEXT NOT NULL,
+            product_id INTEGER NOT NULL,
+            quantity INTEGER NOT NULL,
+            price REAL NOT NULL,
+            selected_variant TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+            `);
+
+await client.query(`
+            CREATE TABLE IF NOT EXISTS payment_gateways(
+                id SERIAL PRIMARY KEY,
+                name TEXT NOT NULL,
+                gateway_type TEXT NOT NULL,
+                public_key TEXT,
+                secret_key TEXT,
+                is_active INTEGER DEFAULT 0,
+                settings_json TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            `);
+
+await client.query(`
+            CREATE TABLE IF NOT EXISTS shipping_options(
+                id SERIAL PRIMARY KEY,
+                name TEXT NOT NULL,
+                price REAL NOT NULL,
+                delivery_time TEXT,
+                active INTEGER DEFAULT 1,
+                sort_order INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            `);
+
+await client.query(`
+            CREATE TABLE IF NOT EXISTS collections(
+                id SERIAL PRIMARY KEY,
+                name TEXT NOT NULL,
+                slug TEXT NOT NULL,
+                description TEXT,
+                is_active INTEGER DEFAULT 1,
+                sort_order INTEGER DEFAULT 0,
+                default_view TEXT DEFAULT 'grid',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            `);
+
+await client.query(`
+            CREATE TABLE IF NOT EXISTS collection_products(
+                collection_id INTEGER,
+                product_id INTEGER,
+                sort_order INTEGER DEFAULT 0,
+                PRIMARY KEY (collection_id, product_id),
+                FOREIGN KEY (collection_id) REFERENCES collections(id) ON DELETE CASCADE,
+                FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+            )
+            `);
+
+// Create admin user if doesn't exist
+const bcrypt = require('bcryptjs');
+const defaultPassword = bcrypt.hashSync('admin123', 10);
+await client.query(`
+            INSERT INTO users(username, email, password, role)
+            SELECT 'admin', 'admin@strangerthings.com', $1, 'admin'
+            WHERE NOT EXISTS(SELECT 1 FROM users WHERE username = 'admin')
+            `, [defaultPassword]);
+
+// Seed Bestfy Gateway if doesn't exist
+await client.query(`
+            INSERT INTO payment_gateways (name, gateway_type, public_key, secret_key, is_active, settings_json)
+            SELECT 'BESTFY Payment Gateway', 'bestfy', '', '', 0, '{}'
+            WHERE NOT EXISTS (SELECT 1 FROM payment_gateways WHERE gateway_type = 'bestfy')
+        `);
+
+await client.end();
+console.log('✅ Tabelas PostgreSQL criadas com sucesso');
+    } catch (error) {
+    console.error('❌ Erro ao criar tabelas PostgreSQL:', error);
+    throw error;
+}
 }
 
 function initializeSQLite() {
