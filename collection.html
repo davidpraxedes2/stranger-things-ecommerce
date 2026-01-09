@@ -470,37 +470,11 @@
                 }
                 // Definir visualização inicial baseada no default_view do admin
                 currentView = currentCollection.default_view || 'grid';
-                // Load all products
-                console.log('🔹 Collection Page: Fetching products...');
-                const productsResponse = await fetch(`${window.API_URL}/products`);
-                if (!productsResponse.ok) {
-                    throw new Error('Erro ao carregar produtos');
-                }
-                const allProducts = await productsResponse.json();
-                console.log('🔹 Collection Page: Products loaded:', allProducts.length);
-                // Filter products by collection - com validação robusta
-                collectionProducts = allProducts.filter(p => {
-                    let collections = p.collections || [];
-                    if (typeof collections === 'string') {
-                        try {
-                            collections = JSON.parse(collections);
-                        } catch (e) {
-                            // Se parse falhar, tratar como string única
-                            collections = [collections];
-                        }
-                    }
-                    // Verificar se é array antes de usar includes
-                    if (!Array.isArray(collections)) {
-                        collections = [collections];
-                    }
-                    // Check explicit collection name match
-                    if (collections.includes(currentCollection.name)) return true;
-                    // Check category match (fallback for seeded products)
-                    // funko-seeder uses category = 'stranger-things-funkos' (slug)
-                    if (p.category === collectionSlug) return true;
-                    if (p.category === currentCollection.name) return true;
-                    return false;
-                });
+
+                // Use products that come WITH the collection from the API
+                // The backend already associates products via collection_products table
+                collectionProducts = currentCollection.products || [];
+                console.log('🔹 Collection Page: Products in collection:', collectionProducts.length);
                 // Render page
                 console.log('🔹 Collection Page: Rendering...');
                 renderCollectionHeader();
