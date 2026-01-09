@@ -986,12 +986,37 @@ async function renderActiveSessions() {
 
                 const existingEl = currentMap.get(id);
 
-                // Safe content generation
+                // Safe content generation with enhanced page title
                 const city = session.city === 'Desconhecido' ? 'Detectando...' : session.city;
-                const pageTitle = session.pageTitle || 'Navegando...';
                 const pageUrl = session.page || '/';
                 const device = session.device || 'Desktop';
                 const duration = session.duration || '0m';
+
+                // Extract meaningful page title from URL
+                let displayTitle = session.pageTitle || 'Navegando...';
+                let pageIcon = '👁️';
+
+                // Parse URL to create better titles
+                if (pageUrl.includes('/product.html')) {
+                    const urlParams = new URLSearchParams(pageUrl.split('?')[1] || '');
+                    const productId = urlParams.get('id');
+                    displayTitle = productId ? `🛍️ Produto #${productId}` : '🛍️ Vendo Produto';
+                    pageIcon = '🛍️';
+                } else if (pageUrl.includes('/checkout')) {
+                    displayTitle = '💳 Finalizando Compra';
+                    pageIcon = '💳';
+                } else if (pageUrl.includes('/collection')) {
+                    const urlParams = new URLSearchParams(pageUrl.split('?')[1] || '');
+                    const collectionSlug = urlParams.get('slug');
+                    displayTitle = collectionSlug ? `📂 ${collectionSlug.replace(/-/g, ' ').toUpperCase()}` : '📂 Navegando Coleção';
+                    pageIcon = '📂';
+                } else if (pageUrl === '/' || pageUrl.includes('index.html')) {
+                    displayTitle = '🏠 Página Inicial';
+                    pageIcon = '🏠';
+                } else if (session.pageTitle && session.pageTitle !== 'Stranger Things Store - Loja Oficial') {
+                    // Use the actual page title if it's meaningful
+                    displayTitle = session.pageTitle;
+                }
 
                 const contentHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
@@ -1008,14 +1033,11 @@ async function renderActiveSessions() {
                     </div>
                     
                     <div style="background: rgba(0,0,0,0.2); border-left: 2px solid var(--primary); border-radius: 4px; padding: 8px 12px; display: flex; align-items: center; gap: 10px;">
-                        <div style="color: var(--text-secondary);">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
-                                <path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"></path>
-                                <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                            </svg>
+                        <div style="color: var(--text-secondary); font-size: 16px;">
+                            ${pageIcon}
                         </div>
                         <div style="flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">
-                            <div style="font-size: 13px; font-weight: 500; color: var(--text-primary); margin-bottom: 2px;">${pageTitle}</div>
+                            <div style="font-size: 13px; font-weight: 500; color: var(--text-primary); margin-bottom: 2px;">${displayTitle}</div>
                             <div style="font-size: 10px; color: var(--text-muted); font-family: monospace; opacity: 0.7;">${pageUrl}</div>
                         </div>
                     </div>
