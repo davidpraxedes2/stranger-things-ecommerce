@@ -585,6 +585,23 @@ async function initializeDatabase() {
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
 
+        // Analytics Sessions (Live View)
+        await runQuery(`CREATE TABLE IF NOT EXISTS analytics_sessions (
+            session_id TEXT PRIMARY KEY,
+            ip TEXT,
+            city TEXT,
+            region TEXT,
+            country TEXT,
+            lat REAL,
+            lon REAL,
+            current_page TEXT,
+            page_title TEXT,
+            last_action TEXT,
+            device TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            last_active_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
+
         // Admin User
         const defaultPassword = bcrypt.hashSync('admin123', 10);
         await runQuery(`INSERT OR IGNORE INTO users (username, email, password, role) 
@@ -2312,97 +2329,144 @@ setInterval(() => {
     }
 }, 60000);
 
-// API: Contador de visitantes online
-app.get('/api/admin/analytics/online-count', authenticateToken, (req, res) => {
-    res.json({ count: analyticsData.activeSessions.size });
+// API: Contador de visitantes online db-backed
+app.get('/api/admin/analytics/online-count', authenticateToken, async (req, res) => {
+    try {
+        // Active in last 5 minutes
+        const query = db.isPostgres ?
+            "SELECT COUNT(*) as count FROM analytics_sessions WHERE last_active_at > NOW() - INTERVAL '5 minutes'" :
+            "SELECT COUNT(*) as count FROM analytics_sessions WHERE last_active_at > datetime('now', '-5 minutes')";
+
+        const result = db.isPostgres ? await db.query(query) : db.prepare(query).get();
+        const count = db.isPostgres ? result.rows[0].count : result.count;
+
+        res.json({ count: parseInt(count) });
+    } catch (e) {
+        console.error('Error online count:', e);
+        res.status(500).json({ count: 0 });
+    }
 });
 
-// API: Localizações de visitantes (coordenadas para o mapa)
-app.get('/api/admin/analytics/visitor-locations', authenticateToken, (req, res) => {
-    const cityCoordinates = {
-        'São Paulo': { x: 420, y: 480 },
-        'Rio de Janeiro': { x: 460, y: 500 },
-        'Brasília': { x: 380, y: 380 },
-        'Belo Horizonte': { x: 450, y: 440 },
-        'Curitiba': { x: 390, y: 530 },
-        'Porto Alegre': { x: 350, y: 600 },
-        'Salvador': { x: 500, y: 320 },
-        'Recife': { x: 540, y: 230 },
-        'Fortaleza': { x: 530, y: 190 },
-        'Manaus': { x: 200, y: 190 },
-        'Goiânia': { x: 400, y: 410 },
-        'Florianópolis': { x: 400, y: 560 }
-    };
+// API: Localizações de visitantes (para o mapa)
+app.get('/api/admin/analytics/visitor-locations', authenticateToken, async (req, res) => {
+    try {
+        const query = db.isPostgres ?
+            "SELECT city, region, lat, lon, COUNT(*) as count FROM analytics_sessions WHERE last_active_at > NOW() - INTERVAL '5 minutes' GROUP BY city, region, lat, lon" :
+            "SELECT city, region, lat, lon, COUNT(*) as count FROM analytics_sessions WHERE last_active_at > datetime('now', '-5 minutes') GROUP BY city, region, lat, lon";
 
-    const locationCounts = new Map();
+        const result = db.isPostgres ? await db.query(query) : db.prepare(query).all();
+        const rows = db.isPostgres ? result.rows : result;
 
-    for (const [sessionId, data] of analyticsData.activeSessions.entries()) {
-        const cachedLocation = analyticsData.visitorLocations.get(data.ip);
-        if (cachedLocation) {
-            const key = `${cachedLocation.city},${cachedLocation.state} `;
-            locationCounts.set(key, (locationCounts.get(key) || 0) + 1);
-        }
+        res.json(rows.map(r => ({
+            city: r.city,
+            state: r.region,
+            count: parseInt(r.count),
+            lat: r.lat || 0,
+            lon: r.lon || 0,
+            // Fallback x/y for SVG map compatibility (although we are moving to Leaflet)
+            x: 0,
+            y: 0
+        })));
+    } catch (e) {
+        console.error('Error visitor locations:', e);
+        res.status(500).json([]);
     }
-
-    const locations = [];
-    for (const [key, count] of locationCounts.entries()) {
-        const [city, state] = key.split(',');
-        const coords = cityCoordinates[city];
-        if (coords) {
-            locations.push({
-                city,
-                state,
-                count,
-                x: coords.x,
-                y: coords.y
-            });
-        }
-    }
-
-    res.json(locations);
 });
 
 // API: Sessões ativas detalhadas
-app.get('/api/admin/sessions/active', authenticateToken, (req, res) => {
-    const sessions = [];
-    const now = Date.now();
+app.get('/api/admin/sessions/active', authenticateToken, async (req, res) => {
+    try {
+        const query = db.isPostgres ?
+            "SELECT * FROM analytics_sessions WHERE last_active_at > NOW() - INTERVAL '5 minutes' ORDER BY last_active_at DESC LIMIT 50" :
+            "SELECT * FROM analytics_sessions WHERE last_active_at > datetime('now', '-5 minutes') ORDER BY last_active_at DESC LIMIT 50";
 
-    for (const [sessionId, data] of analyticsData.activeSessions.entries()) {
-        const location = analyticsData.visitorLocations.get(data.ip) || {
-            city: 'Desconhecido',
-            state: 'BR'
-        };
+        const result = db.isPostgres ? await db.query(query) : db.prepare(query).all();
+        const rows = db.isPostgres ? result.rows : result;
 
-        const durationMs = now - data.lastActivity;
-        const durationMin = Math.floor(durationMs / 60000);
+        const sessions = rows.map(s => {
+            const now = new Date();
+            const lastActive = new Date(s.last_active_at);
+            const durationMs = now - new Date(s.created_at); // Total session duration
+            const minutes = Math.floor(durationMs / 60000);
 
-        const deviceType = data.userAgent?.includes('Mobile') ? '📱 Mobile' : '💻 Desktop';
-
-        sessions.push({
-            city: location.city,
-            state: location.state,
-            ip: data.ip.includes('::ffff:') ? data.ip.replace('::ffff:', '') : data.ip,
-            page: data.currentPage || '/',
-            duration: `${durationMin} min`,
-            device: deviceType,
-            isNewUser: !analyticsData.visitorLocations.has(data.ip)
+            return {
+                city: s.city || 'Desconhecido',
+                state: s.region || '',
+                ip: s.ip,
+                page: s.current_page,
+                pageTitle: s.page_title,
+                action: s.last_action,
+                duration: `${minutes} min`,
+                device: s.device,
+                lastActive: lastActive.toISOString()
+            };
         });
-    }
 
-    res.json(sessions.slice(0, 12));
+        res.json(sessions);
+    } catch (e) {
+        console.error('Error active sessions:', e);
+        res.status(500).json([]);
+    }
 });
 
-// API: Registrar localização do visitante (chamado do front-end)
-app.post('/api/analytics/track-location', (req, res) => {
-    const { city, state, ip } = req.body;
-    const visitorIp = ip || req.ip;
+// API: Registrar Heartbeat do visitante
+app.post('/api/analytics/heartbeat', async (req, res) => {
+    const { sessionId, page, title, action, ip: clientIp, location } = req.body;
+    const ip = clientIp || req.ip; // Fallback to connection IP if not provided
 
-    if (city && state) {
-        analyticsData.visitorLocations.set(visitorIp, { city, state, timestamp: Date.now() });
+    if (!sessionId) return res.status(400).json({ error: 'No Session ID' });
+
+    try {
+        // Upsert logic
+        let existing;
+        if (db.isPostgres) {
+            const r = await db.query('SELECT session_id FROM analytics_sessions WHERE session_id = $1', [sessionId]);
+            existing = r.rows[0];
+        } else {
+            existing = db.prepare('SELECT session_id FROM analytics_sessions WHERE session_id = ?').get(sessionId);
+        }
+
+        if (existing) {
+            // Update
+            const updateQ = db.isPostgres ?
+                "UPDATE analytics_sessions SET current_page=$1, page_title=$2, last_action=$3, last_active_at=NOW() WHERE session_id=$4" :
+                "UPDATE analytics_sessions SET current_page=?, page_title=?, last_action=?, last_active_at=CURRENT_TIMESTAMP WHERE session_id=?";
+
+            const params = [page, title, action || 'view', sessionId];
+            if (db.isPostgres) await db.query(updateQ, params);
+            else db.prepare(updateQ).run(...params);
+        } else {
+            // Insert
+            // We need location data. Ideally frontend sends it or we lookup IP.
+            // For now, trust frontend location if provided, else defaults.
+            const loc = location || { city: 'Desconhecido', region: 'BR', country: 'BR', lat: 0, lon: 0 };
+            const ua = req.headers['user-agent'] || '';
+            const device = /mobile/i.test(ua) ? 'Mobile' : 'Desktop';
+
+            const insertQ = db.isPostgres ?
+                "INSERT INTO analytics_sessions (session_id, ip, city, region, country, lat, lon, current_page, page_title, last_action, device) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)" :
+                "INSERT INTO analytics_sessions (session_id, ip, city, region, country, lat, lon, current_page, page_title, last_action, device) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+            const params = [
+                sessionId, ip,
+                loc.city, loc.region, loc.country,
+                loc.lat, loc.lon,
+                page, title, action || 'view', device
+            ];
+
+            if (db.isPostgres) await db.query(insertQ, params);
+            else db.prepare(insertQ).run(...params);
+        }
+
+        res.json({ success: true });
+    } catch (e) {
+        console.error('Heartbeat Error:', e);
+        res.status(500).json({ error: e.message });
     }
-
-    res.json({ success: true });
 });
+
+// Remove old in-memory tracking endpoint
+// app.post('/api/analytics/track-location', ...
 
 // ===== ROTAS DE FRETES (ADMIN) =====
 

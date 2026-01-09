@@ -780,134 +780,111 @@ function generateTopProductsRows() {
     `).join('');
 }
 
+// Map Instance
+let liveMap = null;
+let mapMarkers = [];
+
 async function initializeLiveView() {
-    renderBrazilMap();
-    await renderActiveSessions();
-    startLiveUpdates();
+    initLeafletMap();
+    await updateLiveViewData();
+
+    // Polling every 5 seconds
+    if (window.liveInterval) clearInterval(window.liveInterval);
+    window.liveInterval = setInterval(updateLiveViewData, 5000);
 }
 
-async function renderBrazilMap() {
+function initLeafletMap() {
     const mapContainer = document.getElementById('brazilMap');
-    if (!mapContainer) return;
+    if (!mapContainer || liveMap) return; // Already init
 
-    mapContainer.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted);">Carregando mapa...</div>';
+    // Clear loading text
+    mapContainer.innerHTML = '';
+
+    // Init Map centered on Brazil
+    liveMap = L.map('brazilMap', {
+        center: [-14.2350, -51.9253],
+        zoom: 4,
+        zoomControl: false,
+        attributionControl: false
+    });
+
+    // Dark Tile Layer (CartoDB Dark Matter)
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap &copy; CARTO',
+        subdomains: 'abcd',
+        maxZoom: 19
+    }).addTo(liveMap);
+}
+
+async function updateLiveViewData() {
+    await Promise.all([
+        renderActiveSessions(),
+        updateMapMarkers(),
+        updateOnlineCount() // Helper to update the big number
+    ]);
+}
+
+async function updateOnlineCount() {
+    try {
+        const res = await fetch(`${API_URL}/analytics/online-count`, {
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
+        });
+        const data = await res.json();
+        const el = document.getElementById('onlineCount');
+        if (el) el.textContent = data.count;
+    } catch (e) { }
+}
+
+async function updateMapMarkers() {
+    if (!liveMap) return;
 
     try {
-        const [svgResponse, visitorData] = await Promise.all([
-            fetch('/brazil.svg'),
-            fetch(`${API_URL}/analytics/visitor-locations`, {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` },
-                signal: AbortSignal.timeout(3000)
-            }).catch(() => null)
-        ]);
+        const res = await fetch(`${API_URL}/analytics/visitor-locations`, {
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
+        });
+        const locations = await res.json();
 
-        const svgText = await svgResponse.text();
-        const parser = new DOMParser();
-        const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
-        const svgElement = svgDoc.querySelector('svg');
+        // Clear existing markers
+        mapMarkers.forEach(m => liveMap.removeLayer(m));
+        mapMarkers = [];
 
-        if (svgElement) {
-            svgElement.setAttribute('viewBox', '0 0 612 639');
-            svgElement.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-            svgElement.style.width = '100%';
-            svgElement.style.height = '100%';
-            svgElement.style.maxHeight = '400px';
-
-            const paths = svgElement.querySelectorAll('path');
-            paths.forEach(path => {
-                path.setAttribute('fill', 'rgba(229, 9, 20, 0.15)');
-                path.setAttribute('stroke', 'rgba(229, 9, 20, 0.5)');
-                path.setAttribute('stroke-width', '1');
-                path.style.transition = 'all 0.3s';
-
-                path.addEventListener('mouseenter', function () {
-                    this.setAttribute('fill', 'rgba(229, 9, 20, 0.4)');
-                    this.setAttribute('stroke', 'rgba(229, 9, 20, 1)');
-                    this.setAttribute('stroke-width', '2');
+        // Add new markers
+        locations.forEach(loc => {
+            if (loc.lat && loc.lon) {
+                const pulseIcon = L.divIcon({
+                    className: 'custom-div-icon',
+                    html: `<div style="
+                        width: 12px;
+                        height: 12px;
+                        background-color: #10B981;
+                        border-radius: 50%;
+                        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+                        animation: leaflet-pulse 2s infinite;
+                    "></div>`,
+                    iconSize: [20, 20],
+                    iconAnchor: [10, 10]
                 });
 
-                path.addEventListener('mouseleave', function () {
-                    this.setAttribute('fill', 'rgba(229, 9, 20, 0.15)');
-                    this.setAttribute('stroke', 'rgba(229, 9, 20, 0.5)');
-                    this.setAttribute('stroke-width', '1');
-                });
-            });
-
-            let locations = [];
-            if (visitorData && visitorData.ok) {
-                const data = await visitorData.json();
-                if (data && Array.isArray(data) && data.length > 0) {
-                    locations = data;
-                }
+                const marker = L.marker([loc.lat, loc.lon], { icon: pulseIcon }).addTo(liveMap);
+                marker.bindPopup(`<b>${loc.city}</b><br>${loc.count} visitantes`);
+                mapMarkers.push(marker);
             }
+        });
+    } catch (e) { console.error('Map Update Error', e); }
+}
 
-            if (locations.length > 0) {
-                locations.forEach((location, index) => {
-                    const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-
-                    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                    circle.setAttribute('cx', location.x);
-                    circle.setAttribute('cy', location.y);
-                    circle.setAttribute('r', '8');
-                    circle.setAttribute('fill', '#10B981');
-                    circle.setAttribute('opacity', '0.8');
-                    circle.style.animation = `pulse-dot ${1.5 + (index * 0.3)}s infinite`;
-
-                    const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
-                    title.textContent = `${location.city} - ${location.count} visitante${location.count > 1 ? 's' : ''}`;
-                    circle.appendChild(title);
-
-                    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-                    text.setAttribute('x', location.x);
-                    text.setAttribute('y', location.y - 16);
-                    text.setAttribute('fill', '#ffffff');
-                    text.setAttribute('font-size', '12');
-                    text.setAttribute('text-anchor', 'middle');
-                    text.setAttribute('font-weight', '700');
-                    text.style.textShadow = '0 2px 4px rgba(0,0,0,0.8)';
-                    text.textContent = location.count;
-
-                    group.appendChild(circle);
-                    group.appendChild(text);
-
-                    svgElement.appendChild(group);
-                });
-            }
-
-            mapContainer.innerHTML = '';
-
-            const wrapper = document.createElement('div');
-            wrapper.style.cssText = 'width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 20px;';
-            wrapper.appendChild(svgElement);
-            mapContainer.appendChild(wrapper);
-
-            const legend = document.createElement('div');
-            legend.style.cssText = 'position: absolute; bottom: 20px; left: 20px; background: rgba(0,0,0,0.9); padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border); z-index: 10;';
-            legend.innerHTML = `
-                <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Legenda</div>
-                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                    <div style="width: 10px; height: 10px; background: #10B981; border-radius: 50%; animation: pulse-dot 2s infinite;"></div>
-                    <span style="font-size: 12px; color: var(--text-primary);">Visitante ativo</span>
-                </div>
-                <div style="font-size: 11px; color: var(--text-muted); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border);">
-                    📍 ${locations.length} localiza${locations.length === 1 ? 'ção' : 'ções'} • ${locations.length === 0 ? 'Aguardando dados' : 'Dados reais'}
-                </div>
-            `;
-            mapContainer.appendChild(legend);
+// Add CSS for pulse animation if not exists
+if (!document.getElementById('leaflet-custom-styles')) {
+    const style = document.createElement('style');
+    style.id = 'leaflet-custom-styles';
+    style.textContent = `
+        @keyframes leaflet-pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
         }
-    } catch (error) {
-        console.error('Erro ao carregar mapa do Brasil:', error);
-        mapContainer.innerHTML = `
-            <div style="text-align: center; padding: 40px; color: var(--text-muted);">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 48px; height: 48px; margin: 0 auto 16px; opacity: 0.3;">
-                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                    <line x1="12" y1="9" x2="12" y2="13"></line>
-                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                </svg>
-                <p>Erro ao carregar mapa</p>
-            </div>
-        `;
-    }
+    `;
+    document.head.appendChild(style);
 }
 
 async function renderActiveSessions() {
@@ -942,13 +919,29 @@ async function renderActiveSessions() {
                             <div style="width: 10px; height: 10px; background: var(--success); border-radius: 50%; animation: pulse-dot 2s infinite;"></div>
                             <div>
                                 <div style="font-weight: 700; color: var(--text-primary); font-size: 14px;">${session.city}, ${session.state}</div>
-                                <div style="font-size: 12px; color: var(--text-muted);">${session.ip}</div>
+                                <div style="font-size: 12px; color: var(--text-muted);">${session.ip} • ${session.device}</div>
                             </div>
                         </div>
                         <div style="text-align: right;">
-                            <div style="font-size: 11px; color: var(--text-secondary);">Há ${session.duration}</div>
+                            <div style="font-size: 11px; color: var(--text-secondary);">${session.duration} ativo</div>
                         </div>
                     </div>
+                    
+                    <div style="background: rgba(0,0,0,0.3); border-radius: 6px; padding: 8px 12px; display: flex; align-items: center; gap: 8px;">
+                        <div style="color: var(--text-secondary);">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                        </div>
+                        <div style="flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">
+                            <span style="font-size: 13px; font-weight: 500; color: var(--text-primary);">
+                                ${session.pageTitle || 'Navegando...'}
+                            </span>
+                            <div style="font-size: 11px; color: var(--text-muted); font-family: monospace;">${session.page}</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
                     <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
                         <svg viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" style="width: 14px; height: 14px;">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -962,8 +955,8 @@ async function renderActiveSessions() {
                             ${session.isNewUser ? 'Novo' : 'Retorno'}
                         </span>
                     </div>
-                </div>
-            `).join('');
+                </div >
+                `).join('');
         }
     } catch (error) {
         console.log('Sem sessões ativas disponíveis');
@@ -977,8 +970,8 @@ function startLiveUpdates() {
 
     AppState.liveUpdateInterval = setInterval(async () => {
         try {
-            const response = await fetch(`${API_URL}/analytics/online-count`, {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` },
+            const response = await fetch(`${ API_URL } /analytics/online - count`, {
+                headers: { 'Authorization': `Bearer ${ localStorage.getItem('admin_token') } ` },
                 signal: AbortSignal.timeout(2000)
             });
 
@@ -1022,7 +1015,7 @@ async function renderProducts(container) {
     const selectedCount = AppState.selected.products.size;
 
     container.innerHTML = `
-        <div class="page-header">
+                < div class="page-header" >
             <div>
                 <h1>Produtos (${AppState.products.length})</h1>
                 <p class="page-subtitle">Gerenciamento completo do catálogo</p>
@@ -1069,9 +1062,9 @@ async function renderProducts(container) {
                     Novo Produto
                 </button>
             </div>
-        </div>
+        </div >
 
-        <!-- Filters -->
+        < !--Filters -->
         <div class="filters-bar">
             <input 
                 type="text" 
@@ -1102,7 +1095,7 @@ async function renderProducts(container) {
             </select>
         </div>
 
-        <!-- Products Table -->
+        <!--Products Table-- >
         <div class="table-container">
             <table class="admin-table" id="productsTable">
                 <thead>
@@ -1126,38 +1119,38 @@ async function renderProducts(container) {
             </table>
         </div>
 
-        <!-- Pagination -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 20px; background: var(--bg-card); border-radius: 8px;">
-            <div style="color: var(--text-secondary); font-size: 14px;">
-                Mostrando <strong>${AppState.products.length}</strong> produtos
-            </div>
-            <div style="display: flex; gap: 8px;">
-                <button class="btn-icon" onclick="previousProductsPage()" ${AppState.pagination.products.page <= 1 ? 'disabled' : ''}>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="15 18 9 12 15 6"></polyline>
-                    </svg>
-                </button>
-                <div style="display: flex; align-items: center; padding: 0 16px; color: var(--text-primary); font-weight: 600;">
-                    Página ${AppState.pagination.products.page}
+        <!--Pagination -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 20px; background: var(--bg-card); border-radius: 8px;">
+                    <div style="color: var(--text-secondary); font-size: 14px;">
+                        Mostrando <strong>${AppState.products.length}</strong> produtos
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn-icon" onclick="previousProductsPage()" ${AppState.pagination.products.page <= 1 ? 'disabled' : ''}>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="15 18 9 12 15 6"></polyline>
+                            </svg>
+                        </button>
+                        <div style="display: flex; align-items: center; padding: 0 16px; color: var(--text-primary); font-weight: 600;">
+                            Página ${AppState.pagination.products.page}
+                        </div>
+                        <button class="btn-icon" onclick="nextProductsPage()">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
-                <button class="btn-icon" onclick="nextProductsPage()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="9 18 15 12 9 6"></polyline>
-                    </svg>
-                </button>
-            </div>
-        </div>
-    `;
+            `;
 }
 
 function renderProductRows() {
     if (!AppState.products || AppState.products.length === 0) {
         return `
-            <tr>
+                < tr >
                 <td colspan="8" style="text-align: center; padding: 60px 20px;">
                     <div style="color: var(--text-muted);">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
-                             style="width: 64px; height: 64px; margin: 0 auto 16px; opacity: 0.3;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            style="width: 64px; height: 64px; margin: 0 auto 16px; opacity: 0.3;">
                             <circle cx="12" cy="12" r="10"></circle>
                             <line x1="12" y1="8" x2="12" y2="12"></line>
                             <line x1="12" y1="16" x2="12.01" y2="16"></line>
@@ -1166,8 +1159,8 @@ function renderProductRows() {
                         <div style="font-size: 14px;">Comece adicionando seu primeiro produto</div>
                     </div>
                 </td>
-            </tr>
-        `;
+            </tr >
+                `;
     }
 
     return AppState.products.map(product => {
@@ -1176,7 +1169,7 @@ function renderProductRows() {
         const statusClass = product.active ? 'success' : 'danger';
 
         return `
-            <tr data-product-id="${product.id}" class="${isSelected ? 'selected-row' : ''}">
+                < tr data - product - id="${product.id}" class="${isSelected ? 'selected-row' : ''}" >
                 <td>
                     <input type="checkbox" 
                            ${isSelected ? 'checked' : ''} 
@@ -1225,14 +1218,14 @@ function renderProductRows() {
                         </button>
                     </div>
                 </td>
-            </tr>
-        `;
+            </tr >
+                `;
     }).join('');
 }
 
 async function loadProducts() {
     try {
-        const response = await fetch(`${API_BASE}/api/products`);
+        const response = await fetch(`${ API_BASE } /api/products`);
         if (response.ok) {
             AppState.products = await response.json();
         }
@@ -1296,14 +1289,14 @@ function toggleProductSelection(productId, isChecked) {
 function bulkEditProducts() {
     if (AppState.selected.products.size === 0) return;
 
-    showToast(`Editando ${AppState.selected.products.size} produtos...`, 'info');
+    showToast(`Editando ${ AppState.selected.products.size } produtos...`, 'info');
 }
 
 function bulkDeleteProducts() {
     if (AppState.selected.products.size === 0) return;
 
-    if (confirm(`Tem certeza que deseja excluir ${AppState.selected.products.size} produtos?`)) {
-        showToast(`${AppState.selected.products.size} produtos excluídos`, 'success');
+    if (confirm(`Tem certeza que deseja excluir ${ AppState.selected.products.size } produtos ? `)) {
+        showToast(`${ AppState.selected.products.size } produtos excluídos`, 'success');
         AppState.selected.products.clear();
         loadPage('products');
     }
@@ -1316,7 +1309,7 @@ function importProductsCSV() {
     input.onchange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            showToast(`Importando ${file.name}...`, 'info');
+            showToast(`Importando ${ file.name }...`, 'info');
             setTimeout(() => {
                 showToast('Produtos importados com sucesso!', 'success');
                 loadPage('products');
@@ -1331,41 +1324,41 @@ function previewProduct(id) {
     if (!product) return;
 
     const modal = `
-        <div class="modal-overlay" onclick="closeModal()">
-            <div class="modal-dialog" onclick="event.stopPropagation()" style="max-width: 800px;">
-                <div class="modal-header">
-                    <h2>Pré-visualização: ${product.name}</h2>
-                    <button class="modal-close" onclick="closeModal()">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
-                        <div>
-                            <img src="${product.image_url || 'https://via.placeholder.com/400'}" 
-                                 alt="${product.name}"
-                                 style="width: 100%; border-radius: 12px; border: 1px solid var(--border);">
+                < div class="modal-overlay" onclick = "closeModal()" >
+                    <div class="modal-dialog" onclick="event.stopPropagation()" style="max-width: 800px;">
+                        <div class="modal-header">
+                            <h2>Pré-visualização: ${product.name}</h2>
+                            <button class="modal-close" onclick="closeModal()">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </button>
                         </div>
-                        <div>
-                            <h3 style="font-size: 24px; margin-bottom: 16px;">${product.name}</h3>
-                            <div style="font-size: 32px; color: var(--success); font-weight: 800; margin-bottom: 16px;">
-                                R$ ${parseFloat(product.price || 0).toFixed(2).replace('.', ',')}
-                            </div>
-                            <p style="color: var(--text-secondary); margin-bottom: 16px; line-height: 1.6;">
-                                ${product.description || 'Sem descrição disponível'}
-                            </p>
-                            <div style="display: flex; gap: 12px; margin-bottom: 16px;">
-                                <div class="badge ${product.stock > 10 ? 'success' : 'warning'}">
-                                    ${product.stock || 0} em estoque
+                        <div class="modal-body">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                                <div>
+                                    <img src="${product.image_url || 'https://via.placeholder.com/400'}"
+                                        alt="${product.name}"
+                                        style="width: 100%; border-radius: 12px; border: 1px solid var(--border);">
                                 </div>
-                                <div class="badge ${product.active ? 'success' : 'danger'}">
-                                    ${product.active ? 'Ativo' : 'Inativo'}
-                                </div>
-                            </div>
-                            ${product.category ? `
+                                <div>
+                                    <h3 style="font-size: 24px; margin-bottom: 16px;">${product.name}</h3>
+                                    <div style="font-size: 32px; color: var(--success); font-weight: 800; margin-bottom: 16px;">
+                                        R$ ${parseFloat(product.price || 0).toFixed(2).replace('.', ',')}
+                                    </div>
+                                    <p style="color: var(--text-secondary); margin-bottom: 16px; line-height: 1.6;">
+                                        ${product.description || 'Sem descrição disponível'}
+                                    </p>
+                                    <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+                                        <div class="badge ${product.stock > 10 ? 'success' : 'warning'}">
+                                            ${product.stock || 0} em estoque
+                                        </div>
+                                        <div class="badge ${product.active ? 'success' : 'danger'}">
+                                            ${product.active ? 'Ativo' : 'Inativo'}
+                                        </div>
+                                    </div>
+                                    ${product.category ? `
                                 <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);">
                                     <strong style="color: var(--text-secondary); font-size: 12px; text-transform: uppercase;">
                                         Categoria
@@ -1373,16 +1366,16 @@ function previewProduct(id) {
                                     <div style="margin-top: 4px;">${product.category}</div>
                                 </div>
                             ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" onclick="closeModal()">Fechar</button>
+                            <button class="btn btn-primary" onclick="editProduct(${id}); closeModal();">Editar Produto</button>
                         </div>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" onclick="closeModal()">Fechar</button>
-                    <button class="btn btn-primary" onclick="editProduct(${id}); closeModal();">Editar Produto</button>
-                </div>
-            </div>
-        </div>
-    `;
+        </div >
+                `;
 
     document.getElementById('modalContainer').innerHTML = modal;
 }
@@ -1393,14 +1386,14 @@ function editProduct(id) {
 
 async function deleteProduct(id) {
     const product = AppState.products.find(p => p.id === id);
-    if (!confirm(`Tem certeza que deseja excluir "${product?.name}"?`)) return;
+    if (!confirm(`Tem certeza que deseja excluir "${product?.name}" ? `)) return;
 
     showLoading('Excluindo produto...');
 
     try {
-        const response = await fetch(`${API_URL}/products/${id}`, {
+        const response = await fetch(`${ API_URL } /products/${ id } `, {
             method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
+            headers: { 'Authorization': `Bearer ${ localStorage.getItem('admin_token') } ` }
         });
 
         if (response.ok) {
@@ -1437,7 +1430,7 @@ async function renderCollections(container) {
     await loadCollections();
 
     container.innerHTML = `
-        <div class="page-header">
+                < div class="page-header" >
             <div>
                 <h1>Coleções (${AppState.collections.length})</h1>
                 <p class="page-subtitle">Organize produtos em coleções temáticas</p>
@@ -1450,11 +1443,11 @@ async function renderCollections(container) {
                 </svg>
                 Nova Coleção
             </button>
-        </div>
+        </div >
 
-        <!-- Collections Grid -->
-        <div id="collectionsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; margin-bottom: 32px;">
-            ${AppState.collections.map(col => `
+        < !--Collections Grid-- >
+                <div id="collectionsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; margin-bottom: 32px;">
+                    ${AppState.collections.map(col => `
                 <div class="collection-card" data-id="${col.id}" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; transition: all 0.2s; overflow: hidden;">
                     <div class="drag-handle" style="height: 180px; width: 100%; background: linear-gradient(135deg, ${getRandomGradient()}); position: relative; cursor: grab; border-radius: 11px 11px 0 0; background-size: cover; background-position: center;">
                         <div style="position: absolute; top: 12px; left: 12px; background: rgba(0,0,0,0.6); padding: 8px 12px; border-radius: 8px; display: flex; align-items: center; gap: 6px; pointer-events: none; z-index: 10;">
@@ -1553,8 +1546,8 @@ async function renderCollections(container) {
                     </div>
                 </div>
             `).join('')}
-        </div>
-    `;
+                </div>
+            `;
 
     initCollectionGridSortable();
 }
@@ -1573,7 +1566,7 @@ function getRandomGradient() {
 
 async function loadCollections() {
     try {
-        const response = await fetch(`${API_URL}/collections`, {
+        const response = await fetch(`${ API_URL }/collections`, {
             headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
         });
         if (response.ok) {

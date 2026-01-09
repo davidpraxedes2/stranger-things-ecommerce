@@ -9,37 +9,6 @@ var API_URL = window.API_URL;
 let products = [];
 let collections = [];
 
-// ===== SISTEMA DE ANALYTICS - RASTREAMENTO DE VISITANTES =====
-
-async function initAnalytics() {
-    try {
-        const response = await fetch('https://ipapi.co/json/', {
-            signal: AbortSignal.timeout(3000)
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-
-            // Tentar enviar analytics, mas não crashar se falhar
-            try {
-                await fetch(`${API_URL}/analytics/track-location`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-session-id': window.sessionId || 'anonymous'
-                    },
-                    body: JSON.stringify({
-                        city: data.city || 'Desconhecido',
-                        state: data.region_code || data.region || 'BR',
-                        ip: data.ip
-                    }),
-                    signal: AbortSignal.timeout(2000)
-                });
-            } catch (analyticsError) {
-                // Ignorar erro de analytics silenciosamente
-            }
-        }
-    } catch (error) {
         // Geolocalização falhou - não é crítico
     }
 }
