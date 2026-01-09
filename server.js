@@ -9,6 +9,7 @@ const jwt = require('jsonwebtoken');
 const BestfyService = require('./bestfy-service');
 require('dotenv').config();
 const { seedCollections } = require('./collection-seeder');
+const { seedFunkos } = require('./funko-seeder');
 
 const app = express();
 
@@ -226,6 +227,7 @@ app.get('/admin', (req, res) => {
         setImmediate(() => {
             populateDatabaseIfEmpty();
             seedCollections(db);
+            seedFunkos(db);
         });
     } catch (error) {
         console.error('❌ Erro ao inicializar banco de dados:', error);
@@ -2334,17 +2336,18 @@ setInterval(() => {
 }, 60000);
 
 // API: Contador de visitantes online db-backed
-app.get('/api/admin/analytics/online-count', authenticateToken, async (req, res) => {
+app.get('/api/admin/analytics/online-count', authenticateToken, (req, res) => {
     try {
         // Active in last 5 minutes
-        const query = db.isPostgres ?
-            "SELECT COUNT(*) as count FROM analytics_sessions WHERE last_active_at > NOW() - INTERVAL '5 minutes'" :
-            "SELECT COUNT(*) as count FROM analytics_sessions WHERE last_active_at > datetime('now', '-5 minutes')";
+        const query = "SELECT COUNT(*) as count FROM analytics_sessions WHERE last_active_at > datetime('now', '-5 minutes')";
 
-        const result = db.isPostgres ? await db.query(query) : db.prepare(query).get();
-        const count = db.isPostgres ? result.rows[0].count : result.count;
-
-        res.json({ count: parseInt(count) });
+        db.get(query, [], (err, result) => {
+            if (err) {
+                console.error('Error online count:', err);
+                return res.status(500).json({ count: 0 });
+            }
+            res.json({ count: parseInt(result?.count || 0) });
+        });
     } catch (e) {
         console.error('Error online count:', e);
         res.status(500).json({ count: 0 });
@@ -2352,25 +2355,27 @@ app.get('/api/admin/analytics/online-count', authenticateToken, async (req, res)
 });
 
 // API: Localizações de visitantes (para o mapa)
-app.get('/api/admin/analytics/visitor-locations', authenticateToken, async (req, res) => {
+app.get('/api/admin/analytics/visitor-locations', authenticateToken, (req, res) => {
     try {
-        const query = db.isPostgres ?
-            "SELECT city, region, lat, lon, COUNT(*) as count FROM analytics_sessions WHERE last_active_at > NOW() - INTERVAL '5 minutes' GROUP BY city, region, lat, lon" :
-            "SELECT city, region, lat, lon, COUNT(*) as count FROM analytics_sessions WHERE last_active_at > datetime('now', '-5 minutes') GROUP BY city, region, lat, lon";
+        const query = "SELECT city, region, lat, lon, COUNT(*) as count FROM analytics_sessions WHERE last_active_at > datetime('now', '-5 minutes') GROUP BY city, region, lat, lon";
 
-        const result = db.isPostgres ? await db.query(query) : db.prepare(query).all();
-        const rows = db.isPostgres ? result.rows : result;
+        db.all(query, [], (err, rows) => {
+            if (err) {
+                console.error('Error visitor locations:', err);
+                return res.status(500).json([]);
+            }
 
-        res.json(rows.map(r => ({
-            city: r.city,
-            state: r.region,
-            count: parseInt(r.count),
-            lat: r.lat || 0,
-            lon: r.lon || 0,
-            // Fallback x/y for SVG map compatibility (although we are moving to Leaflet)
-            x: 0,
-            y: 0
-        })));
+            res.json((rows || []).map(r => ({
+                city: r.city,
+                state: r.region,
+                count: parseInt(r.count),
+                lat: r.lat || 0,
+                lon: r.lon || 0,
+                // Fallback x/y for SVG map compatibility
+                x: 0,
+                y: 0
+            })));
+        });
     } catch (e) {
         console.error('Error visitor locations:', e);
         res.status(500).json([]);
@@ -2378,40 +2383,42 @@ app.get('/api/admin/analytics/visitor-locations', authenticateToken, async (req,
 });
 
 // API: Sessões ativas detalhadas
-app.get('/api/admin/sessions/active', authenticateToken, async (req, res) => {
+app.get('/api/admin/sessions/active', authenticateToken, (req, res) => {
     try {
-        const query = db.isPostgres ?
-            "SELECT * FROM analytics_sessions WHERE last_active_at > NOW() - INTERVAL '5 minutes' ORDER BY last_active_at DESC LIMIT 50" :
-            "SELECT * FROM analytics_sessions WHERE last_active_at > datetime('now', '-5 minutes') ORDER BY last_active_at DESC LIMIT 50";
+        const query = "SELECT * FROM analytics_sessions WHERE last_active_at > datetime('now', '-5 minutes') ORDER BY last_active_at DESC LIMIT 50";
 
-        const result = db.isPostgres ? await db.query(query) : db.prepare(query).all();
-        const rows = db.isPostgres ? result.rows : result;
+        db.all(query, [], (err, rows) => {
+            if (err) {
+                console.error('Error active sessions:', err);
+                return res.status(500).json([]);
+            }
 
-        const sessions = rows.map(s => {
-            const now = new Date();
-            const lastActive = new Date(s.last_active_at);
-            const durationMs = now - new Date(s.created_at); // Total session duration
-            const minutes = Math.floor(durationMs / 60000);
+            const sessions = (rows || []).map(s => {
+                const now = new Date();
+                const lastActive = new Date(s.last_active_at);
+                const durationMs = now - new Date(s.created_at); // Total session duration
+                const minutes = Math.floor(durationMs / 60000);
 
-            return {
-                session_id: s.session_id,
-                city: s.city || 'Desconhecido',
-                state: s.region || '',
-                ip: s.ip,
-                page: s.current_page,
-                pageTitle: s.page_title,
-                action: s.last_action,
-                duration: `${minutes} min`,
-                device: s.device,
-                browser: s.browser,
-                utm_source: s.utm_source,
-                utm_medium: s.utm_medium,
-                utm_campaign: s.utm_campaign,
-                lastActive: lastActive.toISOString()
-            };
+                return {
+                    session_id: s.session_id,
+                    city: s.city || 'Desconhecido',
+                    state: s.region || '',
+                    ip: s.ip,
+                    page: s.current_page,
+                    pageTitle: s.page_title,
+                    action: s.last_action,
+                    duration: `${minutes} min`,
+                    device: s.device,
+                    browser: s.browser,
+                    utm_source: s.utm_source,
+                    utm_medium: s.utm_medium,
+                    utm_campaign: s.utm_campaign,
+                    lastActive: lastActive.toISOString()
+                };
+            });
+
+            res.json(sessions);
         });
-
-        res.json(sessions);
     } catch (e) {
         console.error('Error active sessions:', e);
         res.status(500).json([]);
