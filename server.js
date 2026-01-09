@@ -1671,7 +1671,13 @@ app.post('/api/admin/login', async (req, res) => {
                     }
                 });
             } else {
-                return res.status(401).json({ error: 'Credenciais inválidas' });
+                return res.status(401).json({
+                    error: 'DEBUG: Falha crítica - Admin criado mas login falhou',
+                    details: {
+                        hasUser: !!user,
+                        passMatch: password === 'admin123'
+                    }
+                });
             }
         }
 
