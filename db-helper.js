@@ -384,6 +384,58 @@ function preparePostgres(query) {
                 else throw error;
             }
         },
+        all: async function (params = [], callback) {
+            // Se params for callback (overload)
+            if (typeof params === 'function') {
+                callback = params;
+                params = [];
+            } else if (!Array.isArray(params) && params !== undefined) {
+                // better-sqlite3 aceita varargs: .all(1, 2)
+                // mas aqui vamos simplificar assumindo array ou nada
+                params = [params];
+            }
+
+            try {
+                // Reutilizar lógica de allPostgres
+                if (!callback) {
+                    return new Promise((resolve, reject) => {
+                        allPostgres(query, params, (err, rows) => {
+                            if (err) reject(err);
+                            else resolve(rows);
+                        });
+                    });
+                }
+                return allPostgres(query, params, callback);
+            } catch (error) {
+                if (callback) callback(error);
+                else throw error;
+            }
+        },
+        get: async function (params = [], callback) {
+            // Se params for callback (overload)
+            if (typeof params === 'function') {
+                callback = params;
+                params = [];
+            } else if (!Array.isArray(params) && params !== undefined) {
+                params = [params];
+            }
+
+            try {
+                // Reutilizar lógica de getPostgres
+                if (!callback) {
+                    return new Promise((resolve, reject) => {
+                        getPostgres(query, params, (err, row) => {
+                            if (err) reject(err);
+                            else resolve(row);
+                        });
+                    });
+                }
+                return getPostgres(query, params, callback);
+            } catch (error) {
+                if (callback) callback(error);
+                else throw error;
+            }
+        },
         finalize: function (callback) {
             if (callback) callback();
         }
