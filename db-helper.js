@@ -282,7 +282,10 @@ function runPostgres(query, params, callback) {
                 callback(null, mockResult);
             }
         } catch (error) {
-            console.error('PG Run Error:', error);
+            // Ignore duplicate column errors or harmless migration errors
+            if (error.code !== '42701' && !error.message?.includes('duplicate column')) {
+                console.error('PG Run Error:', error);
+            }
             if (callback) {
                 callback(error);
             }

@@ -804,7 +804,12 @@ async function handleCheckout(e) {
         const data = await response.json();
 
         if (response.ok) {
-            const createdOrderId = data.order_id;
+            const createdOrderId = data.orderId || data.order_id;
+
+            if (!createdOrderId) {
+                console.error("DEBUG: Order ID missing in response", data);
+                throw new Error("Falha ao recuperar ID do pedido");
+            }
 
             // Se for cartão, processar pagamento
             if (paymentMethod === 'card') {
