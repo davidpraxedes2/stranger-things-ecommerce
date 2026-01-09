@@ -2339,15 +2339,26 @@ setInterval(() => {
 app.get('/api/admin/analytics/online-count', authenticateToken, (req, res) => {
     try {
         // Active in last 5 minutes
-        const query = "SELECT COUNT(*) as count FROM analytics_sessions WHERE last_active_at > datetime('now', '-5 minutes')";
+        const query = db.isPostgres ?
+            "SELECT COUNT(*) as count FROM analytics_sessions WHERE last_active_at > NOW() - INTERVAL '5 minutes'" :
+            "SELECT COUNT(*) as count FROM analytics_sessions WHERE last_active_at > datetime('now', '-5 minutes')";
 
-        db.get(query, [], (err, result) => {
-            if (err) {
-                console.error('Error online count:', err);
-                return res.status(500).json({ count: 0 });
-            }
-            res.json({ count: parseInt(result?.count || 0) });
-        });
+        if (db.isPostgres) {
+            db.query(query, []).then(result => {
+                res.json({ count: parseInt(result.rows[0]?.count || 0) });
+            }).catch(err => {
+                console.error('Error online count PG:', err);
+                res.status(500).json({ count: 0 });
+            });
+        } else {
+            db.get(query, [], (err, result) => {
+                if (err) {
+                    console.error('Error online count SQLite:', err);
+                    return res.status(500).json({ count: 0 });
+                }
+                res.json({ count: parseInt(result?.count || 0) });
+            });
+        }
     } catch (e) {
         console.error('Error online count:', e);
         res.status(500).json({ count: 0 });
@@ -2357,25 +2368,42 @@ app.get('/api/admin/analytics/online-count', authenticateToken, (req, res) => {
 // API: Localizações de visitantes (para o mapa)
 app.get('/api/admin/analytics/visitor-locations', authenticateToken, (req, res) => {
     try {
-        const query = "SELECT city, region, lat, lon, COUNT(*) as count FROM analytics_sessions WHERE last_active_at > datetime('now', '-5 minutes') GROUP BY city, region, lat, lon";
+        const query = db.isPostgres ?
+            "SELECT city, region, lat, lon, COUNT(*) as count FROM analytics_sessions WHERE last_active_at > NOW() - INTERVAL '5 minutes' GROUP BY city, region, lat, lon" :
+            "SELECT city, region, lat, lon, COUNT(*) as count FROM analytics_sessions WHERE last_active_at > datetime('now', '-5 minutes') GROUP BY city, region, lat, lon";
 
-        db.all(query, [], (err, rows) => {
-            if (err) {
-                console.error('Error visitor locations:', err);
-                return res.status(500).json([]);
-            }
-
-            res.json((rows || []).map(r => ({
-                city: r.city,
-                state: r.region,
-                count: parseInt(r.count),
-                lat: r.lat || 0,
-                lon: r.lon || 0,
-                // Fallback x/y for SVG map compatibility
-                x: 0,
-                y: 0
-            })));
-        });
+        if (db.isPostgres) {
+            db.query(query, []).then(result => {
+                res.json((result.rows || []).map(r => ({
+                    city: r.city,
+                    state: r.region,
+                    count: parseInt(r.count),
+                    lat: r.lat || 0,
+                    lon: r.lon || 0,
+                    x: 0,
+                    y: 0
+                })));
+            }).catch(err => {
+                console.error('Error visitor locations PG:', err);
+                res.status(500).json([]);
+            });
+        } else {
+            db.all(query, [], (err, rows) => {
+                if (err) {
+                    console.error('Error visitor locations SQLite:', err);
+                    return res.status(500).json([]);
+                }
+                res.json((rows || []).map(r => ({
+                    city: r.city,
+                    state: r.region,
+                    count: parseInt(r.count),
+                    lat: r.lat || 0,
+                    lon: r.lon || 0,
+                    x: 0,
+                    y: 0
+                })));
+            });
+        }
     } catch (e) {
         console.error('Error visitor locations:', e);
         res.status(500).json([]);
@@ -2385,18 +2413,15 @@ app.get('/api/admin/analytics/visitor-locations', authenticateToken, (req, res) 
 // API: Sessões ativas detalhadas
 app.get('/api/admin/sessions/active', authenticateToken, (req, res) => {
     try {
-        const query = "SELECT * FROM analytics_sessions WHERE last_active_at > datetime('now', '-5 minutes') ORDER BY last_active_at DESC LIMIT 50";
+        const query = db.isPostgres ?
+            "SELECT * FROM analytics_sessions WHERE last_active_at > NOW() - INTERVAL '5 minutes' ORDER BY last_active_at DESC LIMIT 50" :
+            "SELECT * FROM analytics_sessions WHERE last_active_at > datetime('now', '-5 minutes') ORDER BY last_active_at DESC LIMIT 50";
 
-        db.all(query, [], (err, rows) => {
-            if (err) {
-                console.error('Error active sessions:', err);
-                return res.status(500).json([]);
-            }
-
-            const sessions = (rows || []).map(s => {
+        const processRows = (rows) => {
+            return (rows || []).map(s => {
                 const now = new Date();
                 const lastActive = new Date(s.last_active_at);
-                const durationMs = now - new Date(s.created_at); // Total session duration
+                const durationMs = now - new Date(s.created_at);
                 const minutes = Math.floor(durationMs / 60000);
 
                 return {
@@ -2416,9 +2441,24 @@ app.get('/api/admin/sessions/active', authenticateToken, (req, res) => {
                     lastActive: lastActive.toISOString()
                 };
             });
+        };
 
-            res.json(sessions);
-        });
+        if (db.isPostgres) {
+            db.query(query, []).then(result => {
+                res.json(processRows(result.rows));
+            }).catch(err => {
+                console.error('Error active sessions PG:', err);
+                res.status(500).json([]);
+            });
+        } else {
+            db.all(query, [], (err, rows) => {
+                if (err) {
+                    console.error('Error active sessions SQLite:', err);
+                    return res.status(500).json([]);
+                }
+                res.json(processRows(rows));
+            });
+        }
     } catch (e) {
         console.error('Error active sessions:', e);
         res.status(500).json([]);
