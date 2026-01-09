@@ -1676,7 +1676,7 @@ app.post('/api/admin/login', async (req, res) => {
         }
 
         if (!user) {
-            return res.status(401).json({ error: 'Credenciais inválidas' });
+            return res.status(401).json({ error: 'DEBUG: Usuário não encontrado (nem após tentativa de criação)' });
         }
 
         // AUTO-CHECK: Se for admin e senha admin123, garantir que o hash bate
@@ -1696,7 +1696,7 @@ app.post('/api/admin/login', async (req, res) => {
 
         const validPassword = bcrypt.compareSync(password, user.password);
         if (!validPassword) {
-            return res.status(401).json({ error: 'Credenciais inválidas' });
+            return res.status(401).json({ error: 'DEBUG: Senha incorreta' });
         }
 
         const token = jwt.sign(
