@@ -38,13 +38,55 @@ async function initRealTimeTracking() {
         } catch (e) { console.warn('Loc Fail', e); }
     }
 
+    // Extract UTM parameters (capture once per session)
+    const getUTMParams = () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        return {
+            source: urlParams.get('utm_source') || null,
+            medium: urlParams.get('utm_medium') || null,
+            campaign: urlParams.get('utm_campaign') || null,
+            term: urlParams.get('utm_term') || null,
+            content: urlParams.get('utm_content') || null
+        };
+    };
+
+    // Detect device type and browser
+    const getDeviceInfo = () => {
+        const ua = navigator.userAgent;
+
+        // Device detection
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+        const isTablet = /iPad|Android(?!.*Mobile)/i.test(ua);
+        let deviceType = 'Desktop';
+        if (isTablet) deviceType = 'Tablet';
+        else if (isMobile) deviceType = 'Mobile';
+
+        // Browser detection
+        let browser = 'Unknown';
+        if (ua.indexOf('Firefox') > -1) browser = 'Firefox';
+        else if (ua.indexOf('SamsungBrowser') > -1) browser = 'Samsung';
+        else if (ua.indexOf('Opera') > -1 || ua.indexOf('OPR') > -1) browser = 'Opera';
+        else if (ua.indexOf('Trident') > -1) browser = 'IE';
+        else if (ua.indexOf('Edge') > -1) browser = 'Edge';
+        else if (ua.indexOf('Chrome') > -1) browser = 'Chrome';
+        else if (ua.indexOf('Safari') > -1) browser = 'Safari';
+
+        return { deviceType, browser };
+    };
+
+    const utmParams = getUTMParams();
+    const deviceInfo = getDeviceInfo();
+
     const sendHeartbeat = () => {
         const payload = {
             sessionId: sessionId,
             page: window.location.pathname + window.location.search,
             title: document.title,
-            action: 'view', // Could be extended to click/scroll
+            action: 'view',
             location: userLocation,
+            utm: utmParams,
+            device: deviceInfo.deviceType,
+            browser: deviceInfo.browser,
             ip: null // Server handles IP
         };
 

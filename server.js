@@ -598,6 +598,10 @@ async function initializeDatabase() {
             page_title TEXT,
             last_action TEXT,
             device TEXT,
+            browser TEXT,
+            utm_source TEXT,
+            utm_medium TEXT,
+            utm_campaign TEXT,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             last_active_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
@@ -2399,6 +2403,10 @@ app.get('/api/admin/sessions/active', authenticateToken, async (req, res) => {
                 action: s.last_action,
                 duration: `${minutes} min`,
                 device: s.device,
+                browser: s.browser,
+                utm_source: s.utm_source,
+                utm_medium: s.utm_medium,
+                utm_campaign: s.utm_campaign,
                 lastActive: lastActive.toISOString()
             };
         });
@@ -2412,7 +2420,7 @@ app.get('/api/admin/sessions/active', authenticateToken, async (req, res) => {
 
 // API: Registrar Heartbeat do visitante
 app.post('/api/analytics/heartbeat', async (req, res) => {
-    const { sessionId, page, title, action, ip: clientIp, location } = req.body;
+    const { sessionId, page, title, action, ip: clientIp, location, utm, device, browser } = req.body;
 
     // Extract Real IP (Vercel/Proxy friendly)
     let ip = clientIp;
@@ -2446,21 +2454,28 @@ app.post('/api/analytics/heartbeat', async (req, res) => {
             else db.prepare(updateQ).run(...params);
         } else {
             // Insert
-            // We need location data. Ideally frontend sends it or we lookup IP.
-            // For now, trust frontend location if provided, else defaults.
             const loc = location || { city: 'Desconhecido', region: 'BR', country: 'BR', lat: 0, lon: 0 };
-            const ua = req.headers['user-agent'] || '';
-            const device = /mobile/i.test(ua) ? 'Mobile' : 'Desktop';
+
+            // Use device/browser from frontend (more accurate than server-side UA parsing)
+            const deviceType = device || 'Desktop';
+            const browserType = browser || 'Unknown';
+
+            // Extract UTM params
+            const utmSource = utm?.source || null;
+            const utmMedium = utm?.medium || null;
+            const utmCampaign = utm?.campaign || null;
 
             const insertQ = db.isPostgres ?
-                "INSERT INTO analytics_sessions (session_id, ip, city, region, country, lat, lon, current_page, page_title, last_action, device) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)" :
-                "INSERT INTO analytics_sessions (session_id, ip, city, region, country, lat, lon, current_page, page_title, last_action, device) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "INSERT INTO analytics_sessions (session_id, ip, city, region, country, lat, lon, current_page, page_title, last_action, device, browser, utm_source, utm_medium, utm_campaign) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)" :
+                "INSERT INTO analytics_sessions (session_id, ip, city, region, country, lat, lon, current_page, page_title, last_action, device, browser, utm_source, utm_medium, utm_campaign) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
             const params = [
                 sessionId, ip,
                 loc.city, loc.region, loc.country,
                 loc.lat, loc.lon,
-                page, title, action || 'view', device
+                page, title, action || 'view',
+                deviceType, browserType,
+                utmSource, utmMedium, utmCampaign
             ];
 
             if (db.isPostgres) await db.query(insertQ, params);
