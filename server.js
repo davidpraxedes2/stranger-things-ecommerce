@@ -11,6 +11,38 @@ require('dotenv').config();
 const { seedCollections } = require('./collection-seeder');
 
 const app = express();
+
+// Helper Pushcut Notification
+async function sendPushcutNotification(type, orderDetails) {
+    const urls = {
+        pending: 'https://api.pushcut.io/XPTr5Kloj05Rr37Saz0D1/notifications/Pendente%20delivery',
+        approved: 'https://api.pushcut.io/XPTr5Kloj05Rr37Saz0D1/notifications/Aprovado%20delivery'
+    };
+    const url = urls[type];
+    if (!url) return;
+
+    try {
+        console.log(`🔔 Enviando notificação Pushcut (${type})...`);
+        const itemText = orderDetails.itemName ? `${orderDetails.itemName}` : 'Produto Diversos';
+        const totalVal = parseFloat(orderDetails.total).toFixed(2).replace('.', ',');
+
+        const body = {
+            text: `${itemText} - R$ ${totalVal}`,
+            title: `Pedido ${type === 'pending' ? 'Gerado' : 'Aprovado'} #${orderDetails.id}`
+        };
+
+        if (typeof fetch !== 'undefined') {
+            await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+        }
+        console.log('✅ Pushcut enviado');
+    } catch (e) {
+        console.error('❌ Pushcut Error:', e.message);
+    }
+}
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'stranger-things-secret-key-change-in-production';
 
