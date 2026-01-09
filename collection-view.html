@@ -478,7 +478,11 @@
         // Load collection and products
         async function loadCollectionPage() {
             if (!collectionSlug) {
-                window.location.href = 'index.html';
+                console.error('Sem slug na URL');
+                document.getElementById('collectionTitle').textContent = 'Erro';
+                document.getElementById('collectionDescription').textContent = 'Coleção não especificada.';
+                if (window.hidePageLoader) window.hidePageLoader();
+                // window.location.href = 'index.html';
                 return;
             }
 
@@ -497,7 +501,11 @@
 
                 if (!currentCollection) {
                     console.error('Coleção não encontrada:', collectionSlug);
-                    window.location.href = 'index.html';
+                    document.getElementById('collectionTitle').textContent = 'Coleção não encontrada';
+                    document.getElementById('collectionDescription').textContent = 'A coleção que você procura não existe ou foi removida.';
+                    // Don't redirect to prevent loops
+                    // window.location.href = 'index.html';
+                    if (window.hidePageLoader) window.hidePageLoader();
                     return;
                 }
 
