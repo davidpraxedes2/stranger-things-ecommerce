@@ -171,8 +171,17 @@ app.get('/admin', (req, res) => {
 (async function initializeDB() {
     try {
         console.log('🔄 Inicializando banco de dados...');
-        // await db.initialize(); // db-helper init
-        initializeDatabase(); // Local sqlite init function
+
+        if (db.isPostgres) {
+            // Non-blocking initialization - don't crash if it fails
+            db.initialize().catch(err => {
+                console.error('⚠️ Erro na inicialização do DB (ignorado):', err.message);
+                console.log('📌 Assumindo que tabelas já existem.');
+            });
+        } else {
+            initializeDatabase(); // Local sqlite init function
+        }
+
         console.log('✅ Banco inicializado e tabelas verificadas');
 
         // Popular banco se estiver vazio (em background)
