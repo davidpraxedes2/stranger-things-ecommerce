@@ -320,6 +320,31 @@ function getPostgres(query, params, callback) {
 }
 
 function allPostgres(query, params, callback) {
+    (async () => {
+        let client = null;
+        try {
+            let paramIndex = 1;
+            const convertedQuery = query.replace(/\?/g, () => {
+                const idx = paramIndex++;
+                return `$${idx}`;
+            }).replace(/INTEGER PRIMARY KEY AUTOINCREMENT/g, 'SERIAL PRIMARY KEY')
+                .replace(/DATETIME DEFAULT CURRENT_TIMESTAMP/g, 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP');
+
+            client = await pgPool.connect();
+            const result = await client.query(convertedQuery, params);
+
+            if (callback) {
+                callback(null, result.rows || []);
+            }
+        } catch (error) {
+            console.error('PG All Error:', error);
+            if (callback) {
+                callback(error, []);
+            }
+        } finally {
+            if (client) client.release();
+        }
+    })();
 }
 
 function preparePostgres(query) {
