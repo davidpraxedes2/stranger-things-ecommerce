@@ -2442,1006 +2442,1015 @@ app.get('/api/admin/sessions/active', authenticateToken, (req, res) => {
                     utm_source: s.utm_source,
                     utm_medium: s.utm_medium,
                     utm_campaign: s.utm_campaign,
-                    lastActive: lastActive.toISOString()
-                };
-            });
-        };
+                    app.post('/api/analytics/heartbeat', (req, res) => {
+                        try {
+                            const { session_id, page, pageTitle, action } = req.body;
+                            if (!session_id) return res.status(400).json({ error: 'Missing session_id' });
 
-        if (db.isPostgres) {
-            db.query(query, []).then(result => {
-                res.json(processRows(result.rows));
-            }).catch(err => {
-                console.error('Error active sessions PG:', err);
-                res.status(500).json([]);
-            });
-        } else {
-            db.all(query, [], (err, rows) => {
-                if (err) {
-                    console.error('Error active sessions SQLite:', err);
-                    return res.status(500).json([]);
-                }
-                res.json(processRows(rows));
-            });
-        }
-    } catch (e) {
-        console.error('Error active sessions:', e);
-        res.status(500).json([]);
-    }
-});
+                            const updateQ = db.isPostgres ?
+                                "UPDATE analytics_sessions SET current_page=$1, page_title=$2, last_action=$3, last_active_at=NOW() WHERE session_id=$4" :
+                                "UPDATE analytics_sessions SET current_page=?, page_title=?, last_action=?, last_active_at=datetime('now') WHERE session_id=?";
 
-// API: Registrar Heartbeat do visitante
-app.post('/api/analytics/heartbeat', async (req, res) => {
-    const { sessionId, page, title, action, ip: clientIp, location, utm, device, browser } = req.body;
+                            const params = [page, pageTitle, action, session_id];
 
-    // Extract Real IP (Vercel/Proxy friendly)
-    let ip = clientIp;
-    if (!ip) {
-        const forwarded = req.headers['x-forwarded-for'];
-        ip = forwarded ? forwarded.split(',')[0].trim() : req.socket.remoteAddress;
-    }
-    // Clean up IPv6 prefix if present
-    if (ip && ip.includes('::ffff:')) ip = ip.replace('::ffff:', '');
+                            if (db.isPostgres) {
+                                db.query(updateQ, params).then(result => {
+                                    if (result.rowCount === 0) {
+                                        // Session not found, maybe re-create? For now just ignore
+                                    }
+                                    res.json({ success: true });
+                                }).catch(err => {
+                                    console.error('Error heartbeat PG:', err);
+                                    res.status(500).json({ error: 'DB Error' });
+                                });
+                            } else {
+                                db.run(updateQ, params, (err) => {
+                                    if (err) {
+                                        console.error('Error heartbeat SQLite:', err);
+                                        return res.status(500).json({ error: 'DB Error' });
+                                    }
+                                    res.json({ success: true });
+                                });
+                            }
+                        } catch (e) {
+                            console.error('Error heartbeat:', e);
+                            res.status(500).json({ error: 'Server Error' });
+                        }
+                    });
 
-    if (!sessionId) return res.status(400).json({ error: 'No Session ID' });
+                    // API: Registrar Heartbeat do visitante
+                    app.post('/api/analytics/heartbeat', async (req, res) => {
+                        const { sessionId, page, title, action, ip: clientIp, location, utm, device, browser } = req.body;
 
-    try {
-        // Upsert logic
-        let existing;
-        if (db.isPostgres) {
-            const r = await db.query('SELECT session_id FROM analytics_sessions WHERE session_id = $1', [sessionId]);
-            existing = r.rows[0];
-        } else {
-            existing = db.prepare('SELECT session_id FROM analytics_sessions WHERE session_id = ?').get(sessionId);
-        }
+                        // Extract Real IP (Vercel/Proxy friendly)
+                        let ip = clientIp;
+                        if (!ip) {
+                            const forwarded = req.headers['x-forwarded-for'];
+                            ip = forwarded ? forwarded.split(',')[0].trim() : req.socket.remoteAddress;
+                        }
+                        // Clean up IPv6 prefix if present
+                        if (ip && ip.includes('::ffff:')) ip = ip.replace('::ffff:', '');
 
-        if (existing) {
-            // Update
-            const updateQ = db.isPostgres ?
-                "UPDATE analytics_sessions SET current_page=$1, page_title=$2, last_action=$3, last_active_at=NOW() WHERE session_id=$4" :
-                "UPDATE analytics_sessions SET current_page=?, page_title=?, last_action=?, last_active_at=CURRENT_TIMESTAMP WHERE session_id=?";
+                        if (!sessionId) return res.status(400).json({ error: 'No Session ID' });
 
-            const params = [page, title, action || 'view', sessionId];
-            if (db.isPostgres) await db.query(updateQ, params);
-            else db.prepare(updateQ).run(...params);
-        } else {
-            // Insert
-            const loc = location || { city: 'Desconhecido', region: 'BR', country: 'BR', lat: 0, lon: 0 };
+                        try {
+                            // Upsert logic
+                            let existing;
+                            if (db.isPostgres) {
+                                const r = await db.query('SELECT session_id FROM analytics_sessions WHERE session_id = $1', [sessionId]);
+                                existing = r.rows[0];
+                            } else {
+                                existing = db.prepare('SELECT session_id FROM analytics_sessions WHERE session_id = ?').get(sessionId);
+                            }
 
-            // Use device/browser from frontend (more accurate than server-side UA parsing)
-            const deviceType = device || 'Desktop';
-            const browserType = browser || 'Unknown';
+                            if (existing) {
+                                // Update
+                                const updateQ = db.isPostgres ?
+                                    "UPDATE analytics_sessions SET current_page=$1, page_title=$2, last_action=$3, last_active_at=NOW() WHERE session_id=$4" :
+                                    "UPDATE analytics_sessions SET current_page=?, page_title=?, last_action=?, last_active_at=CURRENT_TIMESTAMP WHERE session_id=?";
 
-            // Extract UTM params
-            const utmSource = utm?.source || null;
-            const utmMedium = utm?.medium || null;
-            const utmCampaign = utm?.campaign || null;
+                                const params = [page, title, action || 'view', sessionId];
+                                if (db.isPostgres) await db.query(updateQ, params);
+                                else db.prepare(updateQ).run(...params);
+                            } else {
+                                // Insert
+                                const loc = location || { city: 'Desconhecido', region: 'BR', country: 'BR', lat: 0, lon: 0 };
 
-            const insertQ = db.isPostgres ?
-                "INSERT INTO analytics_sessions (session_id, ip, city, region, country, lat, lon, current_page, page_title, last_action, device, browser, utm_source, utm_medium, utm_campaign) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)" :
-                "INSERT INTO analytics_sessions (session_id, ip, city, region, country, lat, lon, current_page, page_title, last_action, device, browser, utm_source, utm_medium, utm_campaign) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                                // Use device/browser from frontend (more accurate than server-side UA parsing)
+                                const deviceType = device || 'Desktop';
+                                const browserType = browser || 'Unknown';
 
-            const params = [
-                sessionId, ip,
-                loc.city, loc.region, loc.country,
-                loc.lat, loc.lon,
-                page, title, action || 'view',
-                deviceType, browserType,
-                utmSource, utmMedium, utmCampaign
-            ];
+                                // Extract UTM params
+                                const utmSource = utm?.source || null;
+                                const utmMedium = utm?.medium || null;
+                                const utmCampaign = utm?.campaign || null;
 
-            if (db.isPostgres) await db.query(insertQ, params);
-            else db.prepare(insertQ).run(...params);
-        }
+                                const insertQ = db.isPostgres ?
+                                    "INSERT INTO analytics_sessions (session_id, ip, city, region, country, lat, lon, current_page, page_title, last_action, device, browser, utm_source, utm_medium, utm_campaign) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)" :
+                                    "INSERT INTO analytics_sessions (session_id, ip, city, region, country, lat, lon, current_page, page_title, last_action, device, browser, utm_source, utm_medium, utm_campaign) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        res.json({ success: true });
-    } catch (e) {
-        console.error('Heartbeat Error:', e);
-        res.status(500).json({ error: e.message });
-    }
-});
+                                const params = [
+                                    sessionId, ip,
+                                    loc.city, loc.region, loc.country,
+                                    loc.lat, loc.lon,
+                                    page, title, action || 'view',
+                                    deviceType, browserType,
+                                    utmSource, utmMedium, utmCampaign
+                                ];
 
-// Remove old in-memory tracking endpoint
-// app.post('/api/analytics/track-location', ...
+                                if (db.isPostgres) await db.query(insertQ, params);
+                                else db.prepare(insertQ).run(...params);
+                            }
 
-// ===== ROTAS DE FRETES (ADMIN) =====
+                            res.json({ success: true });
+                        } catch (e) {
+                            console.error('Heartbeat Error:', e);
+                            res.status(500).json({ error: e.message });
+                        }
+                    });
 
-// Listar opções de frete (admin)
-// Listar opções de frete (admin)
-app.get('/api/admin/shipping', authenticateToken, async (req, res) => {
-    console.log('🔍 Rota /api/admin/shipping chamada');
-    try {
-        console.log('🔍 Tentando executar query...');
-        const options = await db.prepare('SELECT * FROM shipping_options ORDER BY sort_order ASC').all();
-        console.log('✅ Query executada com sucesso, registros:', options ? options.length : 0);
-        res.json(options || []);
-    } catch (error) {
-        console.error('❌ Erro ao buscar fretes:', error);
-        console.error('❌ Stack:', error.stack);
-        res.status(500).json({ error: error.message });
-    }
-});
+                    // Remove old in-memory tracking endpoint
+                    // app.post('/api/analytics/track-location', ...
 
-// Criar opção de frete (admin)
-app.post('/api/admin/shipping', authenticateToken, async (req, res) => {
-    const { name, price, delivery_time, active } = req.body;
+                    // ===== ROTAS DE FRETES (ADMIN) =====
 
-    if (!name || price === undefined) {
-        return res.status(400).json({ error: 'Nome e preço são obrigatórios' });
-    }
+                    // Listar opções de frete (admin)
+                    // Listar opções de frete (admin)
+                    app.get('/api/admin/shipping', authenticateToken, async (req, res) => {
+                        console.log('🔍 Rota /api/admin/shipping chamada');
+                        try {
+                            console.log('🔍 Tentando executar query...');
+                            const options = await db.prepare('SELECT * FROM shipping_options ORDER BY sort_order ASC').all();
+                            console.log('✅ Query executada com sucesso, registros:', options ? options.length : 0);
+                            res.json(options || []);
+                        } catch (error) {
+                            console.error('❌ Erro ao buscar fretes:', error);
+                            console.error('❌ Stack:', error.stack);
+                            res.status(500).json({ error: error.message });
+                        }
+                    });
 
-    try {
-        if (db.isPostgres) {
-            // Postgres direct query
-            const result = await db.query(
-                `INSERT INTO shipping_options(name, price, delivery_time, active, sort_order)
+                    // Criar opção de frete (admin)
+                    app.post('/api/admin/shipping', authenticateToken, async (req, res) => {
+                        const { name, price, delivery_time, active } = req.body;
+
+                        if (!name || price === undefined) {
+                            return res.status(400).json({ error: 'Nome e preço são obrigatórios' });
+                        }
+
+                        try {
+                            if (db.isPostgres) {
+                                // Postgres direct query
+                                const result = await db.query(
+                                    `INSERT INTO shipping_options(name, price, delivery_time, active, sort_order)
                  VALUES($1, $2, $3, $4, (SELECT COALESCE(MAX(sort_order), -1) + 1 FROM shipping_options)) RETURNING id`,
-                [name, price, delivery_time || null, active ? 1 : 0]
-            );
-            res.json({ success: true, id: result.rows[0].id, message: 'Frete criado com sucesso' });
-        } else {
-            // SQLite / Wrapper
-            const stmt = db.prepare(`
+                                    [name, price, delivery_time || null, active ? 1 : 0]
+                                );
+                                res.json({ success: true, id: result.rows[0].id, message: 'Frete criado com sucesso' });
+                            } else {
+                                // SQLite / Wrapper
+                                const stmt = db.prepare(`
                 INSERT INTO shipping_options(name, price, delivery_time, active, sort_order)
                 VALUES(?, ?, ?, ?, (SELECT COALESCE(MAX(sort_order), -1) + 1 FROM shipping_options))
             `);
-            const result = await stmt.run(name, price, delivery_time || null, active ? 1 : 0);
-            res.json({ success: true, id: result.lastID, message: 'Frete criado com sucesso' });
-        }
-    } catch (error) {
-        console.error('Erro ao criar frete:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
+                                const result = await stmt.run(name, price, delivery_time || null, active ? 1 : 0);
+                                res.json({ success: true, id: result.lastID, message: 'Frete criado com sucesso' });
+                            }
+                        } catch (error) {
+                            console.error('Erro ao criar frete:', error);
+                            res.status(500).json({ error: error.message });
+                        }
+                    });
 
 
 
-// Atualizar opção de frete (admin)
-app.put('/api/admin/shipping/:id', authenticateToken, (req, res) => {
-    const { id } = req.params;
-    const { name, price, delivery_time, active } = req.body;
+                    // Atualizar opção de frete (admin)
+                    app.put('/api/admin/shipping/:id', authenticateToken, (req, res) => {
+                        const { id } = req.params;
+                        const { name, price, delivery_time, active } = req.body;
 
-    try {
-        const stmt = db.prepare('UPDATE shipping_options SET name = ?, price = ?, delivery_time = ?, active = ? WHERE id = ?');
-        const result = stmt.run(name, price, delivery_time || null, active ? 1 : 0, id);
+                        try {
+                            const stmt = db.prepare('UPDATE shipping_options SET name = ?, price = ?, delivery_time = ?, active = ? WHERE id = ?');
+                            const result = stmt.run(name, price, delivery_time || null, active ? 1 : 0, id);
 
-        if (result.changes === 0) {
-            return res.status(404).json({ error: 'Frete não encontrado' });
-        }
+                            if (result.changes === 0) {
+                                return res.status(404).json({ error: 'Frete não encontrado' });
+                            }
 
-        res.json({ success: true, message: 'Frete atualizado com sucesso' });
-    } catch (error) {
-        console.error('Erro ao atualizar frete:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
+                            res.json({ success: true, message: 'Frete atualizado com sucesso' });
+                        } catch (error) {
+                            console.error('Erro ao atualizar frete:', error);
+                            res.status(500).json({ error: error.message });
+                        }
+                    });
 
-// Deletar opção de frete (admin)
-app.delete('/api/admin/shipping/:id', authenticateToken, (req, res) => {
-    const { id } = req.params;
+                    // Deletar opção de frete (admin)
+                    app.delete('/api/admin/shipping/:id', authenticateToken, (req, res) => {
+                        const { id } = req.params;
 
-    try {
-        const stmt = db.prepare('DELETE FROM shipping_options WHERE id = ?');
-        const result = stmt.run(id);
+                        try {
+                            const stmt = db.prepare('DELETE FROM shipping_options WHERE id = ?');
+                            const result = stmt.run(id);
 
-        if (result.changes === 0) {
-            return res.status(404).json({ error: 'Frete não encontrado' });
-        }
+                            if (result.changes === 0) {
+                                return res.status(404).json({ error: 'Frete não encontrado' });
+                            }
 
-        res.json({ success: true, message: 'Frete deletado com sucesso' });
-    } catch (error) {
-        console.error('Erro ao deletar frete:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
+                            res.json({ success: true, message: 'Frete deletado com sucesso' });
+                        } catch (error) {
+                            console.error('Erro ao deletar frete:', error);
+                            res.status(500).json({ error: error.message });
+                        }
+                    });
 
-// Reordenar opções de frete (admin)
-app.put('/api/admin/shipping/reorder', authenticateToken, (req, res) => {
-    const { order } = req.body; // Array of { id, sort_order }
+                    // Reordenar opções de frete (admin)
+                    app.put('/api/admin/shipping/reorder', authenticateToken, (req, res) => {
+                        const { order } = req.body; // Array of { id, sort_order }
 
-    if (!order || !Array.isArray(order)) {
-        return res.status(400).json({ error: 'Formato inválido' });
-    }
+                        if (!order || !Array.isArray(order)) {
+                            return res.status(400).json({ error: 'Formato inválido' });
+                        }
 
-    try {
-        const updateStmt = db.prepare('UPDATE shipping_options SET sort_order = ? WHERE id = ?');
-        const transaction = db.transaction((items) => {
-            for (const item of items) {
-                updateStmt.run(item.sort_order, item.id);
-            }
-        });
-        transaction(order);
+                        try {
+                            const updateStmt = db.prepare('UPDATE shipping_options SET sort_order = ? WHERE id = ?');
+                            const transaction = db.transaction((items) => {
+                                for (const item of items) {
+                                    updateStmt.run(item.sort_order, item.id);
+                                }
+                            });
+                            transaction(order);
 
-        res.json({ success: true, message: 'Ordem atualizada com sucesso' });
-    } catch (error) {
-        console.error('Erro ao reordenar fretes:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
+                            res.json({ success: true, message: 'Ordem atualizada com sucesso' });
+                        } catch (error) {
+                            console.error('Erro ao reordenar fretes:', error);
+                            res.status(500).json({ error: error.message });
+                        }
+                    });
 
-// ===== ROTA PÚBLICA PARA CHECKOUT BUSCAR FRETES =====
+                    // ===== ROTA PÚBLICA PARA CHECKOUT BUSCAR FRETES =====
 
-// Listar opções de frete ativas (público - para checkout)
-app.get('/api/shipping-options', async (req, res) => {
-    try {
-        if (db.isPostgres) {
-            const result = await db.query('SELECT * FROM shipping_options WHERE active = 1 ORDER BY sort_order ASC', []);
-            res.json(result.rows || []);
-        } else {
-            const options = db.prepare('SELECT * FROM shipping_options WHERE active = 1 ORDER BY sort_order ASC').all();
-            res.json(options || []);
-        }
-    } catch (error) {
-        console.error('Erro ao buscar opções de frete:', error);
-        // Retornar opções padrão se houver erro
-        res.json([
-            { id: 1, name: 'PAC', price: 15.00, delivery_time: '7-12 dias úteis', active: 1 },
-            { id: 2, name: 'SEDEX', price: 25.00, delivery_time: '3-5 dias úteis', active: 1 }
-        ]);
-    }
-});
+                    // Listar opções de frete ativas (público - para checkout)
+                    app.get('/api/shipping-options', async (req, res) => {
+                        try {
+                            if (db.isPostgres) {
+                                const result = await db.query('SELECT * FROM shipping_options WHERE active = 1 ORDER BY sort_order ASC', []);
+                                res.json(result.rows || []);
+                            } else {
+                                const options = db.prepare('SELECT * FROM shipping_options WHERE active = 1 ORDER BY sort_order ASC').all();
+                                res.json(options || []);
+                            }
+                        } catch (error) {
+                            console.error('Erro ao buscar opções de frete:', error);
+                            // Retornar opções padrão se houver erro
+                            res.json([
+                                { id: 1, name: 'PAC', price: 15.00, delivery_time: '7-12 dias úteis', active: 1 },
+                                { id: 2, name: 'SEDEX', price: 25.00, delivery_time: '3-5 dias úteis', active: 1 }
+                            ]);
+                        }
+                    });
 
-// ===== ROTAS DE GATEWAY DE PAGAMENTO =====
+                    // ===== ROTAS DE GATEWAY DE PAGAMENTO =====
 
-// Listar gateways de pagamento (admin)
-app.get('/api/admin/gateways', authenticateToken, async (req, res) => {
-    try {
-        let gateways = [];
-        if (db.isPostgres) {
-            const result = await db.query('SELECT * FROM payment_gateways ORDER BY id ASC', []);
-            gateways = result.rows || [];
-        } else {
-            gateways = await db.prepare('SELECT * FROM payment_gateways ORDER BY id ASC').all(); // FIXED: await added
-            // Se falhar e retornar undefined, garantir array
-            if (!gateways) gateways = [];
-        }
+                    // Listar gateways de pagamento (admin)
+                    app.get('/api/admin/gateways', authenticateToken, async (req, res) => {
+                        try {
+                            let gateways = [];
+                            if (db.isPostgres) {
+                                const result = await db.query('SELECT * FROM payment_gateways ORDER BY id ASC', []);
+                                gateways = result.rows || [];
+                            } else {
+                                gateways = await db.prepare('SELECT * FROM payment_gateways ORDER BY id ASC').all(); // FIXED: await added
+                                // Se falhar e retornar undefined, garantir array
+                                if (!gateways) gateways = [];
+                            }
 
-        // AUTO-SEED: Se não houver gateways, criar o Bestfy automaticamente
-        if (gateways.length === 0) {
-            console.log('⚠️ Nenhum gateway encontrado. Criando Bestfy padrão...');
-            const seedQuery = `
+                            // AUTO-SEED: Se não houver gateways, criar o Bestfy automaticamente
+                            if (gateways.length === 0) {
+                                console.log('⚠️ Nenhum gateway encontrado. Criando Bestfy padrão...');
+                                const seedQuery = `
                 INSERT INTO payment_gateways (name, gateway_type, public_key, secret_key, is_active, settings_json)
                 VALUES ('BESTFY Payment Gateway', 'bestfy', '', '', 0, '{}')
             `;
 
-            if (db.isPostgres) {
-                await db.query(seedQuery);
-                // Buscar novamente
-                const r = await db.query('SELECT * FROM payment_gateways ORDER BY id ASC', []);
-                gateways = r.rows || [];
-            } else {
-                db.prepare(seedQuery).run();
-                gateways = await db.prepare('SELECT * FROM payment_gateways ORDER BY id ASC').all();
-            }
-        }
+                                if (db.isPostgres) {
+                                    await db.query(seedQuery);
+                                    // Buscar novamente
+                                    const r = await db.query('SELECT * FROM payment_gateways ORDER BY id ASC', []);
+                                    gateways = r.rows || [];
+                                } else {
+                                    db.prepare(seedQuery).run();
+                                    gateways = await db.prepare('SELECT * FROM payment_gateways ORDER BY id ASC').all();
+                                }
+                            }
 
-        res.json(gateways);
-    } catch (error) {
-        console.error('Erro ao buscar gateways:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
+                            res.json(gateways);
+                        } catch (error) {
+                            console.error('Erro ao buscar gateways:', error);
+                            res.status(500).json({ error: error.message });
+                        }
+                    });
 
-// Buscar gateway específico (admin)
-app.get('/api/admin/gateways/:id', authenticateToken, async (req, res) => {
-    const { id } = req.params;
+                    // Buscar gateway específico (admin)
+                    app.get('/api/admin/gateways/:id', authenticateToken, async (req, res) => {
+                        const { id } = req.params;
 
-    try {
-        if (db.isPostgres) {
-            const result = await db.query('SELECT * FROM payment_gateways WHERE id = $1', [id]);
-            const gateway = result.rows?.[0];
+                        try {
+                            if (db.isPostgres) {
+                                const result = await db.query('SELECT * FROM payment_gateways WHERE id = $1', [id]);
+                                const gateway = result.rows?.[0];
 
-            if (!gateway) {
-                return res.status(404).json({ error: 'Gateway não encontrado' });
-            }
+                                if (!gateway) {
+                                    return res.status(404).json({ error: 'Gateway não encontrado' });
+                                }
 
-            res.json(gateway);
-        } else {
-            const gateway = db.prepare('SELECT * FROM payment_gateways WHERE id = ?').get(id);
+                                res.json(gateway);
+                            } else {
+                                const gateway = db.prepare('SELECT * FROM payment_gateways WHERE id = ?').get(id);
 
-            if (!gateway) {
-                return res.status(404).json({ error: 'Gateway não encontrado' });
-            }
+                                if (!gateway) {
+                                    return res.status(404).json({ error: 'Gateway não encontrado' });
+                                }
 
-            res.json(gateway);
-        }
-    } catch (error) {
-        console.error('Erro ao buscar gateway:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
+                                res.json(gateway);
+                            }
+                        } catch (error) {
+                            console.error('Erro ao buscar gateway:', error);
+                            res.status(500).json({ error: error.message });
+                        }
+                    });
 
-// Criar ou atualizar gateway (admin)
-app.post('/api/admin/gateways', authenticateToken, async (req, res) => {
-    const { name, gateway_type, public_key, secret_key, is_active, settings_json } = req.body;
+                    // Criar ou atualizar gateway (admin)
+                    app.post('/api/admin/gateways', authenticateToken, async (req, res) => {
+                        const { name, gateway_type, public_key, secret_key, is_active, settings_json } = req.body;
 
-    if (!name || !gateway_type) {
-        return res.status(400).json({ error: 'Nome e tipo do gateway são obrigatórios' });
-    }
+                        if (!name || !gateway_type) {
+                            return res.status(400).json({ error: 'Nome e tipo do gateway são obrigatórios' });
+                        }
 
-    try {
-        if (db.isPostgres) {
-            // Verificar se já existe gateway deste tipo
-            const existingResult = await db.query(
-                'SELECT id FROM payment_gateways WHERE gateway_type = $1',
-                [gateway_type]
-            );
-            const existing = existingResult.rows?.[0];
+                        try {
+                            if (db.isPostgres) {
+                                // Verificar se já existe gateway deste tipo
+                                const existingResult = await db.query(
+                                    'SELECT id FROM payment_gateways WHERE gateway_type = $1',
+                                    [gateway_type]
+                                );
+                                const existing = existingResult.rows?.[0];
 
-            if (existing) {
-                // Atualizar
-                await db.query(
-                    `UPDATE payment_gateways 
+                                if (existing) {
+                                    // Atualizar
+                                    await db.query(
+                                        `UPDATE payment_gateways 
                      SET name = $1, public_key = $2, secret_key = $3, is_active = $4,
     settings_json = $5, updated_at = CURRENT_TIMESTAMP 
                      WHERE id = $6`,
-                    [name, public_key, secret_key, is_active ? 1 : 0, settings_json, existing.id]
-                );
-                res.json({ success: true, id: existing.id, message: 'Gateway atualizado com sucesso' });
-            } else {
-                // Criar
-                const result = await db.query(
-                    `INSERT INTO payment_gateways(name, gateway_type, public_key, secret_key, is_active, settings_json)
+                                        [name, public_key, secret_key, is_active ? 1 : 0, settings_json, existing.id]
+                                    );
+                                    res.json({ success: true, id: existing.id, message: 'Gateway atualizado com sucesso' });
+                                } else {
+                                    // Criar
+                                    const result = await db.query(
+                                        `INSERT INTO payment_gateways(name, gateway_type, public_key, secret_key, is_active, settings_json)
 VALUES($1, $2, $3, $4, $5, $6) RETURNING id`,
-                    [name, gateway_type, public_key, secret_key, is_active ? 1 : 0, settings_json]
-                );
-                res.json({ success: true, id: result.rows[0].id, message: 'Gateway criado com sucesso' });
-            }
-        } else {
-            // SQLite
-            const existing = db.prepare('SELECT id FROM payment_gateways WHERE gateway_type = ?').get(gateway_type);
+                                        [name, gateway_type, public_key, secret_key, is_active ? 1 : 0, settings_json]
+                                    );
+                                    res.json({ success: true, id: result.rows[0].id, message: 'Gateway criado com sucesso' });
+                                }
+                            } else {
+                                // SQLite
+                                const existing = db.prepare('SELECT id FROM payment_gateways WHERE gateway_type = ?').get(gateway_type);
 
-            if (existing) {
-                // Atualizar
-                const stmt = db.prepare(
-                    `UPDATE payment_gateways 
+                                if (existing) {
+                                    // Atualizar
+                                    const stmt = db.prepare(
+                                        `UPDATE payment_gateways 
                      SET name = ?, public_key = ?, secret_key = ?, is_active = ?,
     settings_json = ?, updated_at = CURRENT_TIMESTAMP 
                      WHERE id = ? `
-                );
-                stmt.run(name, public_key, secret_key, is_active ? 1 : 0, settings_json, existing.id);
-                res.json({ success: true, id: existing.id, message: 'Gateway atualizado com sucesso' });
-            } else {
-                // Criar
-                const stmt = db.prepare(
-                    `INSERT INTO payment_gateways(name, gateway_type, public_key, secret_key, is_active, settings_json)
+                                    );
+                                    stmt.run(name, public_key, secret_key, is_active ? 1 : 0, settings_json, existing.id);
+                                    res.json({ success: true, id: existing.id, message: 'Gateway atualizado com sucesso' });
+                                } else {
+                                    // Criar
+                                    const stmt = db.prepare(
+                                        `INSERT INTO payment_gateways(name, gateway_type, public_key, secret_key, is_active, settings_json)
 VALUES(?, ?, ?, ?, ?, ?)`
-                );
-                const result = stmt.run(name, gateway_type, public_key, secret_key, is_active ? 1 : 0, settings_json);
-                res.json({ success: true, id: result.lastInsertRowid, message: 'Gateway criado com sucesso' });
-            }
-        }
-    } catch (error) {
-        console.error('Erro ao salvar gateway:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
+                                    );
+                                    const result = stmt.run(name, gateway_type, public_key, secret_key, is_active ? 1 : 0, settings_json);
+                                    res.json({ success: true, id: result.lastInsertRowid, message: 'Gateway criado com sucesso' });
+                                }
+                            }
+                        } catch (error) {
+                            console.error('Erro ao salvar gateway:', error);
+                            res.status(500).json({ error: error.message });
+                        }
+                    });
 
-// Atualizar gateway (admin)
-app.put('/api/admin/gateways/:id', authenticateToken, async (req, res) => {
-    const { id } = req.params;
-    const { name, public_key, secret_key, is_active, settings_json } = req.body;
+                    // Atualizar gateway (admin)
+                    app.put('/api/admin/gateways/:id', authenticateToken, async (req, res) => {
+                        const { id } = req.params;
+                        const { name, public_key, secret_key, is_active, settings_json } = req.body;
 
-    try {
-        if (db.isPostgres) {
-            await db.query(
-                `UPDATE payment_gateways 
+                        try {
+                            if (db.isPostgres) {
+                                await db.query(
+                                    `UPDATE payment_gateways 
                  SET name = $1, public_key = $2, secret_key = $3, is_active = $4,
     settings_json = $5, updated_at = CURRENT_TIMESTAMP 
                  WHERE id = $6`,
-                [name, public_key, secret_key, is_active ? 1 : 0, settings_json, id]
-            );
-        } else {
-            const stmt = db.prepare(
-                `UPDATE payment_gateways 
+                                    [name, public_key, secret_key, is_active ? 1 : 0, settings_json, id]
+                                );
+                            } else {
+                                const stmt = db.prepare(
+                                    `UPDATE payment_gateways 
                  SET name = ?, public_key = ?, secret_key = ?, is_active = ?,
     settings_json = ?, updated_at = CURRENT_TIMESTAMP 
                  WHERE id = ? `
-            );
-            stmt.run(name, public_key, secret_key, is_active ? 1 : 0, settings_json, id);
-        }
-
-        res.json({ success: true, message: 'Gateway atualizado com sucesso' });
-    } catch (error) {
-        console.error('Erro ao atualizar gateway:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// Deletar gateway (admin)
-app.delete('/api/admin/gateways/:id', authenticateToken, async (req, res) => {
-    const { id } = req.params;
-
-    try {
-        if (db.isPostgres) {
-            await db.query('DELETE FROM payment_gateways WHERE id = $1', [id]);
-        } else {
-            db.prepare('DELETE FROM payment_gateways WHERE id = ?').run(id);
-        }
-
-        res.json({ success: true, message: 'Gateway deletado com sucesso' });
-    } catch (error) {
-        console.error('Erro ao deletar gateway:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// Buscar gateway ativo (público - para checkout)
-app.get('/api/gateway/active', async (req, res) => {
-    try {
-        if (db.isPostgres) {
-            const result = await db.query(
-                'SELECT gateway_type, public_key, settings_json FROM payment_gateways WHERE is_active = 1 LIMIT 1',
-                []
-            );
-            const gateway = result.rows?.[0];
-
-            if (!gateway) {
-                return res.json({ active: false });
-            }
-
-            let settings = {};
-            try {
-                settings = typeof gateway.settings_json === 'string'
-                    ? JSON.parse(gateway.settings_json)
-                    : gateway.settings_json || {};
-            } catch (e) {
-                settings = {};
-            }
-
-            res.json({
-                active: true,
-                type: gateway.gateway_type,
-                publicKey: gateway.public_key,
-                settings: settings
-            });
-        } else {
-            const gateway = db.prepare(
-                'SELECT gateway_type, public_key, settings_json FROM payment_gateways WHERE is_active = 1 LIMIT 1'
-            ).get();
-
-            if (!gateway) {
-                return res.json({ active: false });
-            }
-
-            let settings = {};
-            try {
-                settings = typeof gateway.settings_json === 'string'
-                    ? JSON.parse(gateway.settings_json)
-                    : gateway.settings_json || {};
-            } catch (e) {
-                settings = {};
-            }
-
-            res.json({
-                active: true,
-                type: gateway.gateway_type,
-                publicKey: gateway.public_key,
-                settings: settings
-            });
-        }
-    } catch (error) {
-        console.error('Erro ao buscar gateway ativo:', error);
-        res.json({ active: false });
-    }
-});
-
-// ===== ROTAS DE RASTREAMENTO (META PIXEL) =====
-
-// Buscar configuração do Meta Pixel (público - para carregar no frontend)
-app.get('/api/tracking/meta-pixel', async (req, res) => {
-    try {
-        const settings = await new Promise((resolve, reject) => {
-            db.get("SELECT * FROM tracking_settings WHERE provider = 'meta-pixel' ORDER BY id DESC LIMIT 1", [], (err, row) => {
-                if (err) reject(err);
-                else resolve(row);
-            });
-        });
-
-        if (settings && settings.is_active) {
-            res.json({
-                pixel_id: settings.pixel_id,
-                is_active: settings.is_active
-            });
-        } else {
-            res.json({ pixel_id: null, is_active: 0 });
-        }
-    } catch (error) {
-        console.error('Erro ao buscar configuração do Meta Pixel:', error);
-        res.json({ pixel_id: null, is_active: 0 });
-    }
-});
-
-// Salvar configuração do Meta Pixel (admin)
-app.post('/api/admin/tracking/meta-pixel', authenticateToken, async (req, res) => {
-    const { pixel_id, is_active } = req.body;
-
-    try {
-        // Verificar se já existe configuração
-        const existing = await new Promise((resolve, reject) => {
-            db.get("SELECT * FROM tracking_settings WHERE provider = 'meta-pixel'", [], (err, row) => {
-                if (err) reject(err);
-                else resolve(row);
-            });
-        });
-
-        if (existing) {
-            // Atualizar
-            await new Promise((resolve, reject) => {
-                db.run(
-                    "UPDATE tracking_settings SET pixel_id = ?, is_active = ?, updated_at = CURRENT_TIMESTAMP WHERE provider = 'meta-pixel'",
-                    [pixel_id, is_active ? 1 : 0],
-                    (err) => {
-                        if (err) reject(err);
-                        else resolve();
-                    }
-                );
-            });
-        } else {
-            // Inserir
-            await new Promise((resolve, reject) => {
-                db.run(
-                    "INSERT INTO tracking_settings (provider, pixel_id, is_active) VALUES ('meta-pixel', ?, ?)",
-                    [pixel_id, is_active ? 1 : 0],
-                    (err) => {
-                        if (err) reject(err);
-                        else resolve();
-                    }
-                );
-            });
-        }
-
-        res.json({ success: true, message: 'Configuração salva com sucesso' });
-    } catch (error) {
-        console.error('Erro ao salvar configuração do Meta Pixel:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// Marcar que o código PIX foi copiado (público)
-app.post('/api/orders/:id/pix-copied', async (req, res) => {
-    const { id } = req.params;
-
-    try {
-        await new Promise((resolve, reject) => {
-            db.run(
-                'UPDATE orders SET pix_copied_at = CURRENT_TIMESTAMP WHERE id = ?',
-                [id],
-                (err) => {
-                    if (err) reject(err);
-                    else resolve();
-                }
-            );
-        });
-
-        res.json({ success: true, message: 'PIX copiado registrado' });
-    } catch (error) {
-        console.error('Erro ao registrar PIX copiado:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// Excluir múltiplos pedidos (admin)
-app.delete('/api/admin/orders/bulk', authenticateToken, async (req, res) => {
-    const { order_ids } = req.body;
-
-    if (!order_ids || !Array.isArray(order_ids) || order_ids.length === 0) {
-        return res.status(400).json({ error: 'IDs de pedidos inválidos' });
-    }
-
-    try {
-        const placeholders = order_ids.map(() => '?').join(',');
-
-        // Deletar itens dos pedidos primeiro (foreign key)
-        await new Promise((resolve, reject) => {
-            db.run(
-                `DELETE FROM order_items WHERE order_id IN (${placeholders})`,
-                order_ids,
-                (err) => {
-                    if (err) reject(err);
-                    else resolve();
-                }
-            );
-        });
-
-        // Deletar pedidos
-        await new Promise((resolve, reject) => {
-            db.run(
-                `DELETE FROM orders WHERE id IN (${placeholders})`,
-                order_ids,
-                (err) => {
-                    if (err) reject(err);
-                    else resolve();
-                }
-            );
-        });
-
-        res.json({
-            success: true,
-            message: `${order_ids.length} pedido(s) excluído(s) com sucesso`
-        });
-    } catch (error) {
-        console.error('Erro ao excluir pedidos:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// ===== ROTAS DE PAGAMENTO BESTFY =====
-
-// Criar transação PIX via BESTFY
-app.post('/api/payments/bestfy/pix', async (req, res) => {
-    console.log('🔥 [PIX] Endpoint chamado!');
-    try {
-        if (!req.body) {
-            throw new Error('Corpo da requisição vazio');
-        }
-
-        const { orderId, amount, customer, items, shipping } = req.body;
-        console.log('📦 [PIX] Payload recebido:', { orderId, amount, customerName: customer?.name });
-
-        if (!customer) {
-            throw new Error('Dados do cliente (customer) não fornecidos');
-        }
-
-        // Buscar credenciais do gateway
-        let gateway;
-        if (db.isPostgres) {
-            console.log('🔍 [PIX] Buscando gateway no Postgres...');
-            const result = await db.query(
-                'SELECT * FROM payment_gateways WHERE gateway_type = $1 AND is_active = 1',
-                ['bestfy']
-            );
-            gateway = result.rows?.[0];
-        } else {
-            console.log('🔍 [PIX] Buscando gateway no SQLite...');
-            gateway = db.prepare(
-                'SELECT * FROM payment_gateways WHERE gateway_type = ? AND is_active = 1'
-            ).get('bestfy');
-        }
-
-        if (!gateway || !gateway.secret_key) {
-            return res.status(400).json({
-                error: 'Gateway BESTFY não configurado ou inativo'
-            });
-        }
-
-        // Criar instância do serviço BESTFY
-        const bestfy = new BestfyService(gateway.secret_key, gateway.public_key);
-
-        // Sanitize customer data (Bestfy requires 8 chars zipCode without hyphen)
-        const rawZipCode = customer.address?.zipCode || '';
-        const sanitizedCustomer = {
-            ...customer,
-            address: {
-                ...(customer.address || {}),
-                zipCode: rawZipCode.replace(/\D/g, '')
-            }
-        };
-
-        // Criar transação PIX
-        const transaction = await bestfy.createPixTransaction({
-            amount,
-            customer: sanitizedCustomer,
-            items,
-            shipping,
-            orderId
-        });
-
-        // Atualizar pedido com dados da transação
-        const transactionData = JSON.stringify(transaction);
-        const txnId = transaction.id || transaction.transactionId;
-
-        // Self-healing: Garantir que colunas existem (caso migração inicial tenha falhado)
-        if (db.isPostgres) {
-            try {
-                await db.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS transaction_id TEXT');
-                await db.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS transaction_data TEXT');
-                await db.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_method TEXT');
-            } catch (schemaError) {
-                console.warn('⚠️ Erro ao verificar schema no endpoint PIX:', schemaError.message);
-            }
-
-            await db.query(
-                'UPDATE orders SET transaction_id = $1, transaction_data = $2, payment_method = $3 WHERE id = $4',
-                [txnId, transactionData, 'pix', orderId]
-            );
-        } else {
-            // SQLite fallback (assumes columns exist or don't matter as much in dev)
-            try {
-                db.prepare(
-                    'UPDATE orders SET transaction_id = ?, transaction_data = ?, payment_method = ? WHERE id = ?'
-                ).run(txnId, transactionData, 'pix', orderId);
-            } catch (sqliteErr) {
-                // Try adding columns in SQLite if missing
-                if (sqliteErr.message.includes('no such column')) {
-                    try {
-                        db.prepare('ALTER TABLE orders ADD COLUMN transaction_id TEXT').run();
-                        db.prepare('ALTER TABLE orders ADD COLUMN transaction_data TEXT').run();
-                        db.prepare(
-                            'UPDATE orders SET transaction_id = ?, transaction_data = ?, payment_method = ? WHERE id = ?'
-                        ).run(txnId, transactionData, 'pix', orderId);
-                    } catch (e) { console.error('Failed to auto-migrate SQLite:', e); }
-                } else {
-                    throw sqliteErr;
-                }
-            }
-        }
-
-        res.json({
-            success: true,
-            transaction
-        });
-    } catch (error) {
-        console.error('Erro ao criar transação PIX:', error);
-        res.status(500).json({
-            error: error.message || 'Erro ao processar pagamento PIX', // Prioritize real error message
-            details: error
-        });
-    }
-});
-
-// Criar transação com Cartão via BESTFY
-app.post('/api/payments/bestfy/card', async (req, res) => {
-    const { orderId, amount, customer, items, shipping, card, installments } = req.body;
-
-    try {
-        // Buscar credenciais do gateway
-        let gateway;
-        if (db.isPostgres) {
-            const result = await db.query(
-                'SELECT * FROM payment_gateways WHERE gateway_type = $1 AND is_active = 1',
-                ['bestfy']
-            );
-            gateway = result.rows?.[0];
-        } else {
-            gateway = db.prepare(
-                'SELECT * FROM payment_gateways WHERE gateway_type = ? AND is_active = 1'
-            ).get('bestfy');
-        }
-
-        if (!gateway || !gateway.secret_key) {
-            return res.status(400).json({
-                error: 'Gateway BESTFY não configurado ou inativo'
-            });
-        }
-
-        // Criar instância do serviço BESTFY
-        const bestfy = new BestfyService(gateway.secret_key, gateway.public_key);
-
-        // Criar transação com cartão
-        const transaction = await bestfy.createCreditCardTransaction({
-            amount,
-            customer,
-            items,
-            shipping,
-            card,
-            installments,
-            orderId
-        });
-
-        // Atualizar pedido com dados da transação
-        const transactionData = JSON.stringify(transaction);
-        const transactionId = transaction.id || transaction.transactionId;
-
-        // Determinar status baseado na resposta
-        let orderStatus = 'pending';
-        if (transaction.status === 'approved' || transaction.status === 'paid') {
-            orderStatus = 'paid';
-        } else if (transaction.status === 'refused' || transaction.status === 'declined') {
-            orderStatus = 'failed';
-        }
-
-        if (db.isPostgres) {
-            await db.query(
-                'UPDATE orders SET transaction_id = $1, transaction_data = $2, payment_method = $3, status = $4 WHERE id = $5',
-                [transactionId, transactionData, 'credit_card', orderStatus, orderId]
-            );
-        } else {
-            db.prepare(
-                'UPDATE orders SET transaction_id = ?, transaction_data = ?, payment_method = ?, status = ? WHERE id = ?'
-            ).run(transactionId, transactionData, 'credit_card', orderStatus, orderId);
-        }
-
-        res.json({
-            success: transaction.status === 'approved' || transaction.status === 'paid',
-            transaction,
-            status: orderStatus
-        });
-    } catch (error) {
-        console.error('Erro ao criar transação com cartão:', error);
-        res.status(500).json({
-            error: 'Erro ao processar pagamento com cartão',
-            message: error.message,
-            details: error.error || error
-        });
-    }
-});
-
-// Consultar status de transação
-app.get('/api/payments/bestfy/transaction/:transactionId', async (req, res) => {
-    const { transactionId } = req.params;
-
-    try {
-        // Buscar credenciais do gateway
-        let gateway;
-        if (db.isPostgres) {
-            const result = await db.query(
-                'SELECT * FROM payment_gateways WHERE gateway_type = $1 AND is_active = 1',
-                ['bestfy']
-            );
-            gateway = result.rows?.[0];
-        } else {
-            gateway = db.prepare(
-                'SELECT * FROM payment_gateways WHERE gateway_type = ? AND is_active = 1'
-            ).get('bestfy');
-        }
-
-        if (!gateway || !gateway.secret_key) {
-            return res.status(400).json({
-                error: 'Gateway BESTFY não configurado ou inativo'
-            });
-        }
-
-        // Criar instância do serviço BESTFY
-        const bestfy = new BestfyService(gateway.secret_key, gateway.public_key);
-
-        // Consultar transação
-        const transaction = await bestfy.getTransaction(transactionId);
-
-        // Atualizar status do pedido se necessário
-        if (transaction.status === 'approved' || transaction.status === 'paid') {
-            if (db.isPostgres) {
-                await db.query(
-                    'UPDATE orders SET status = $1, transaction_data = $2 WHERE transaction_id = $3',
-                    ['paid', JSON.stringify(transaction), transactionId]
-                );
-            } else {
-                db.prepare(
-                    'UPDATE orders SET status = ?, transaction_data = ? WHERE transaction_id = ?'
-                ).run('paid', JSON.stringify(transaction), transactionId);
-            }
-
-            // Notify Approved
-            try {
-                // Fetch Order Info (ID and Items)
-                let orderId = null;
-                let itemName = 'Produto';
-                let orderTotal = transaction.amount;
-
-                const queryStr = db.isPostgres ?
-                    'SELECT id, total, payment_method FROM orders WHERE transaction_id = $1' :
-                    'SELECT id, total, payment_method FROM orders WHERE transaction_id = ?';
-
-                const orderRes = db.isPostgres ?
-                    await db.query(queryStr, [transactionId]) :
-                    db.prepare(queryStr).get(transactionId);
-
-                const orderRow = db.isPostgres ? orderRes.rows?.[0] : orderRes;
-
-                if (orderRow) {
-                    orderId = orderRow.id;
-                    orderTotal = orderRow.total;
-
-                    const itemQ = db.isPostgres ?
-                        'SELECT p.name FROM order_items oi JOIN products p ON oi.product_id = p.id WHERE oi.order_id = $1 LIMIT 1' :
-                        'SELECT p.name FROM order_items oi JOIN products p ON oi.product_id = p.id WHERE oi.order_id = ? LIMIT 1';
-
-                    const itemRes = db.isPostgres ?
-                        await db.query(itemQ, [orderId]) :
-                        db.prepare(itemQ).get(orderId);
-
-                    const firstItem = db.isPostgres ? itemRes.rows?.[0] : itemRes;
-                    if (firstItem) itemName = firstItem.name;
-
-                    sendPushcutNotification('approved', {
-                        id: orderId,
-                        itemName: itemName,
-                        total: orderTotal,
-                        paymentMethod: orderRow.payment_method
-                    }).catch(e => console.error('Async Pushcut Fail:', e));
-                }
-            } catch (notifyErr) {
-                console.error('Error preparing approved notification:', notifyErr);
-            }
-        }
-
-        res.json({
-            success: true,
-            transaction
-        });
-    } catch (error) {
-        console.error('Erro ao consultar transação:', error);
-        res.status(500).json({
-            error: 'Erro ao consultar transação',
-            message: error.message
-        });
-    }
-});
-
-// Iniciar servidor (apenas em desenvolvimento local)
-if (require.main === module) {
-    app.listen(PORT, () => {
-        console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
-        console.log(`📦 Admin: http://localhost:${PORT}/admin.html`);
-    });
-}
-
-
-
-// DEBUG ROUTE: Force Seed Collections
-app.post('/api/admin/debug/seed', async (req, res) => {
-    try {
-        console.log('🔄 Manually triggering collection seed...');
-        const { seedCollections } = require('./collection-seeder');
-        const logs = await seedCollections(db, true);
-        res.json({ success: true, logs });
-    } catch (error) {
-        console.error('❌ Error manual seeding:', error);
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-// DEBUG ROUTE: Reset Capinhas Collection (clear and re-seed)
-// DEBUG ROUTE: Reset Specific Collections (Capinhas & Quenchers)
-app.post('/api/admin/debug/reset-collections', async (req, res) => {
-    try {
-        console.log('🔄 Resetting specific collections (Capinhas & Quenchers)...');
-
-        const targetSlugs = ['capinhas-celular', 'quenchers-copos', 'mochilas'];
-        const logs = [];
-
-        for (const slug of targetSlugs) {
-            // Find collection
-            const collection = await new Promise((resolve, reject) => {
-                db.get('SELECT id, name FROM collections WHERE slug = ?', [slug], (err, row) => {
-                    if (err) reject(err);
-                    else resolve(row);
-                });
-            });
-
-            if (collection) {
-                // Clear products
-                await new Promise((resolve, reject) => {
-                    db.run('DELETE FROM collection_products WHERE collection_id = ?', [collection.id], (err) => {
-                        if (err) reject(err);
-                        else resolve();
+                                );
+                                stmt.run(name, public_key, secret_key, is_active ? 1 : 0, settings_json, id);
+                            }
+
+                            res.json({ success: true, message: 'Gateway atualizado com sucesso' });
+                        } catch (error) {
+                            console.error('Erro ao atualizar gateway:', error);
+                            res.status(500).json({ error: error.message });
+                        }
                     });
+
+                    // Deletar gateway (admin)
+                    app.delete('/api/admin/gateways/:id', authenticateToken, async (req, res) => {
+                        const { id } = req.params;
+
+                        try {
+                            if (db.isPostgres) {
+                                await db.query('DELETE FROM payment_gateways WHERE id = $1', [id]);
+                            } else {
+                                db.prepare('DELETE FROM payment_gateways WHERE id = ?').run(id);
+                            }
+
+                            res.json({ success: true, message: 'Gateway deletado com sucesso' });
+                        } catch (error) {
+                            console.error('Erro ao deletar gateway:', error);
+                            res.status(500).json({ error: error.message });
+                        }
+                    });
+
+                    // Buscar gateway ativo (público - para checkout)
+                    app.get('/api/gateway/active', async (req, res) => {
+                        try {
+                            if (db.isPostgres) {
+                                const result = await db.query(
+                                    'SELECT gateway_type, public_key, settings_json FROM payment_gateways WHERE is_active = 1 LIMIT 1',
+                                    []
+                                );
+                                const gateway = result.rows?.[0];
+
+                                if (!gateway) {
+                                    return res.json({ active: false });
+                                }
+
+                                let settings = {};
+                                try {
+                                    settings = typeof gateway.settings_json === 'string'
+                                        ? JSON.parse(gateway.settings_json)
+                                        : gateway.settings_json || {};
+                                } catch (e) {
+                                    settings = {};
+                                }
+
+                                res.json({
+                                    active: true,
+                                    type: gateway.gateway_type,
+                                    publicKey: gateway.public_key,
+                                    settings: settings
+                                });
+                            } else {
+                                const gateway = db.prepare(
+                                    'SELECT gateway_type, public_key, settings_json FROM payment_gateways WHERE is_active = 1 LIMIT 1'
+                                ).get();
+
+                                if (!gateway) {
+                                    return res.json({ active: false });
+                                }
+
+                                let settings = {};
+                                try {
+                                    settings = typeof gateway.settings_json === 'string'
+                                        ? JSON.parse(gateway.settings_json)
+                                        : gateway.settings_json || {};
+                                } catch (e) {
+                                    settings = {};
+                                }
+
+                                res.json({
+                                    active: true,
+                                    type: gateway.gateway_type,
+                                    publicKey: gateway.public_key,
+                                    settings: settings
+                                });
+                            }
+                        } catch (error) {
+                            console.error('Erro ao buscar gateway ativo:', error);
+                            res.json({ active: false });
+                        }
+                    });
+
+                    // ===== ROTAS DE RASTREAMENTO (META PIXEL) =====
+
+                    // Buscar configuração do Meta Pixel (público - para carregar no frontend)
+                    app.get('/api/tracking/meta-pixel', async (req, res) => {
+                        try {
+                            const settings = await new Promise((resolve, reject) => {
+                                db.get("SELECT * FROM tracking_settings WHERE provider = 'meta-pixel' ORDER BY id DESC LIMIT 1", [], (err, row) => {
+                                    if (err) reject(err);
+                                    else resolve(row);
+                                });
+                            });
+
+                            if (settings && settings.is_active) {
+                                res.json({
+                                    pixel_id: settings.pixel_id,
+                                    is_active: settings.is_active
+                                });
+                            } else {
+                                res.json({ pixel_id: null, is_active: 0 });
+                            }
+                        } catch (error) {
+                            console.error('Erro ao buscar configuração do Meta Pixel:', error);
+                            res.json({ pixel_id: null, is_active: 0 });
+                        }
+                    });
+
+                    // Salvar configuração do Meta Pixel (admin)
+                    app.post('/api/admin/tracking/meta-pixel', authenticateToken, async (req, res) => {
+                        const { pixel_id, is_active } = req.body;
+
+                        try {
+                            // Verificar se já existe configuração
+                            const existing = await new Promise((resolve, reject) => {
+                                db.get("SELECT * FROM tracking_settings WHERE provider = 'meta-pixel'", [], (err, row) => {
+                                    if (err) reject(err);
+                                    else resolve(row);
+                                });
+                            });
+
+                            if (existing) {
+                                // Atualizar
+                                await new Promise((resolve, reject) => {
+                                    db.run(
+                                        "UPDATE tracking_settings SET pixel_id = ?, is_active = ?, updated_at = CURRENT_TIMESTAMP WHERE provider = 'meta-pixel'",
+                                        [pixel_id, is_active ? 1 : 0],
+                                        (err) => {
+                                            if (err) reject(err);
+                                            else resolve();
+                                        }
+                                    );
+                                });
+                            } else {
+                                // Inserir
+                                await new Promise((resolve, reject) => {
+                                    db.run(
+                                        "INSERT INTO tracking_settings (provider, pixel_id, is_active) VALUES ('meta-pixel', ?, ?)",
+                                        [pixel_id, is_active ? 1 : 0],
+                                        (err) => {
+                                            if (err) reject(err);
+                                            else resolve();
+                                        }
+                                    );
+                                });
+                            }
+
+                            res.json({ success: true, message: 'Configuração salva com sucesso' });
+                        } catch (error) {
+                            console.error('Erro ao salvar configuração do Meta Pixel:', error);
+                            res.status(500).json({ error: error.message });
+                        }
+                    });
+
+                    // Marcar que o código PIX foi copiado (público)
+                    app.post('/api/orders/:id/pix-copied', async (req, res) => {
+                        const { id } = req.params;
+
+                        try {
+                            await new Promise((resolve, reject) => {
+                                db.run(
+                                    'UPDATE orders SET pix_copied_at = CURRENT_TIMESTAMP WHERE id = ?',
+                                    [id],
+                                    (err) => {
+                                        if (err) reject(err);
+                                        else resolve();
+                                    }
+                                );
+                            });
+
+                            res.json({ success: true, message: 'PIX copiado registrado' });
+                        } catch (error) {
+                            console.error('Erro ao registrar PIX copiado:', error);
+                            res.status(500).json({ error: error.message });
+                        }
+                    });
+
+                    // Excluir múltiplos pedidos (admin)
+                    app.delete('/api/admin/orders/bulk', authenticateToken, async (req, res) => {
+                        const { order_ids } = req.body;
+
+                        if (!order_ids || !Array.isArray(order_ids) || order_ids.length === 0) {
+                            return res.status(400).json({ error: 'IDs de pedidos inválidos' });
+                        }
+
+                        try {
+                            const placeholders = order_ids.map(() => '?').join(',');
+
+                            // Deletar itens dos pedidos primeiro (foreign key)
+                            await new Promise((resolve, reject) => {
+                                db.run(
+                                    `DELETE FROM order_items WHERE order_id IN (${placeholders})`,
+                                    order_ids,
+                                    (err) => {
+                                        if (err) reject(err);
+                                        else resolve();
+                                    }
+                                );
+                            });
+
+                            // Deletar pedidos
+                            await new Promise((resolve, reject) => {
+                                db.run(
+                                    `DELETE FROM orders WHERE id IN (${placeholders})`,
+                                    order_ids,
+                                    (err) => {
+                                        if (err) reject(err);
+                                        else resolve();
+                                    }
+                                );
+                            });
+
+                            res.json({
+                                success: true,
+                                message: `${order_ids.length} pedido(s) excluído(s) com sucesso`
+                            });
+                        } catch (error) {
+                            console.error('Erro ao excluir pedidos:', error);
+                            res.status(500).json({ error: error.message });
+                        }
+                    });
+
+                    // ===== ROTAS DE PAGAMENTO BESTFY =====
+
+                    // Criar transação PIX via BESTFY
+                    app.post('/api/payments/bestfy/pix', async (req, res) => {
+                        console.log('🔥 [PIX] Endpoint chamado!');
+                        try {
+                            if (!req.body) {
+                                throw new Error('Corpo da requisição vazio');
+                            }
+
+                            const { orderId, amount, customer, items, shipping } = req.body;
+                            console.log('📦 [PIX] Payload recebido:', { orderId, amount, customerName: customer?.name });
+
+                            if (!customer) {
+                                throw new Error('Dados do cliente (customer) não fornecidos');
+                            }
+
+                            // Buscar credenciais do gateway
+                            let gateway;
+                            if (db.isPostgres) {
+                                console.log('🔍 [PIX] Buscando gateway no Postgres...');
+                                const result = await db.query(
+                                    'SELECT * FROM payment_gateways WHERE gateway_type = $1 AND is_active = 1',
+                                    ['bestfy']
+                                );
+                                gateway = result.rows?.[0];
+                            } else {
+                                console.log('🔍 [PIX] Buscando gateway no SQLite...');
+                                gateway = db.prepare(
+                                    'SELECT * FROM payment_gateways WHERE gateway_type = ? AND is_active = 1'
+                                ).get('bestfy');
+                            }
+
+                            if (!gateway || !gateway.secret_key) {
+                                return res.status(400).json({
+                                    error: 'Gateway BESTFY não configurado ou inativo'
+                                });
+                            }
+
+                            // Criar instância do serviço BESTFY
+                            const bestfy = new BestfyService(gateway.secret_key, gateway.public_key);
+
+                            // Sanitize customer data (Bestfy requires 8 chars zipCode without hyphen)
+                            const rawZipCode = customer.address?.zipCode || '';
+                            const sanitizedCustomer = {
+                                ...customer,
+                                address: {
+                                    ...(customer.address || {}),
+                                    zipCode: rawZipCode.replace(/\D/g, '')
+                                }
+                            };
+
+                            // Criar transação PIX
+                            const transaction = await bestfy.createPixTransaction({
+                                amount,
+                                customer: sanitizedCustomer,
+                                items,
+                                shipping,
+                                orderId
+                            });
+
+                            // Atualizar pedido com dados da transação
+                            const transactionData = JSON.stringify(transaction);
+                            const txnId = transaction.id || transaction.transactionId;
+
+                            // Self-healing: Garantir que colunas existem (caso migração inicial tenha falhado)
+                            if (db.isPostgres) {
+                                try {
+                                    await db.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS transaction_id TEXT');
+                                    await db.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS transaction_data TEXT');
+                                    await db.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_method TEXT');
+                                } catch (schemaError) {
+                                    console.warn('⚠️ Erro ao verificar schema no endpoint PIX:', schemaError.message);
+                                }
+
+                                await db.query(
+                                    'UPDATE orders SET transaction_id = $1, transaction_data = $2, payment_method = $3 WHERE id = $4',
+                                    [txnId, transactionData, 'pix', orderId]
+                                );
+                            } else {
+                                // SQLite fallback (assumes columns exist or don't matter as much in dev)
+                                try {
+                                    db.prepare(
+                                        'UPDATE orders SET transaction_id = ?, transaction_data = ?, payment_method = ? WHERE id = ?'
+                                    ).run(txnId, transactionData, 'pix', orderId);
+                                } catch (sqliteErr) {
+                                    // Try adding columns in SQLite if missing
+                                    if (sqliteErr.message.includes('no such column')) {
+                                        try {
+                                            db.prepare('ALTER TABLE orders ADD COLUMN transaction_id TEXT').run();
+                                            db.prepare('ALTER TABLE orders ADD COLUMN transaction_data TEXT').run();
+                                            db.prepare(
+                                                'UPDATE orders SET transaction_id = ?, transaction_data = ?, payment_method = ? WHERE id = ?'
+                                            ).run(txnId, transactionData, 'pix', orderId);
+                                        } catch (e) { console.error('Failed to auto-migrate SQLite:', e); }
+                                    } else {
+                                        throw sqliteErr;
+                                    }
+                                }
+                            }
+
+                            res.json({
+                                success: true,
+                                transaction
+                            });
+                        } catch (error) {
+                            console.error('Erro ao criar transação PIX:', error);
+                            res.status(500).json({
+                                error: error.message || 'Erro ao processar pagamento PIX', // Prioritize real error message
+                                details: error
+                            });
+                        }
+                    });
+
+                    // Criar transação com Cartão via BESTFY
+                    app.post('/api/payments/bestfy/card', async (req, res) => {
+                        const { orderId, amount, customer, items, shipping, card, installments } = req.body;
+
+                        try {
+                            // Buscar credenciais do gateway
+                            let gateway;
+                            if (db.isPostgres) {
+                                const result = await db.query(
+                                    'SELECT * FROM payment_gateways WHERE gateway_type = $1 AND is_active = 1',
+                                    ['bestfy']
+                                );
+                                gateway = result.rows?.[0];
+                            } else {
+                                gateway = db.prepare(
+                                    'SELECT * FROM payment_gateways WHERE gateway_type = ? AND is_active = 1'
+                                ).get('bestfy');
+                            }
+
+                            if (!gateway || !gateway.secret_key) {
+                                return res.status(400).json({
+                                    error: 'Gateway BESTFY não configurado ou inativo'
+                                });
+                            }
+
+                            // Criar instância do serviço BESTFY
+                            const bestfy = new BestfyService(gateway.secret_key, gateway.public_key);
+
+                            // Criar transação com cartão
+                            const transaction = await bestfy.createCreditCardTransaction({
+                                amount,
+                                customer,
+                                items,
+                                shipping,
+                                card,
+                                installments,
+                                orderId
+                            });
+
+                            // Atualizar pedido com dados da transação
+                            const transactionData = JSON.stringify(transaction);
+                            const transactionId = transaction.id || transaction.transactionId;
+
+                            // Determinar status baseado na resposta
+                            let orderStatus = 'pending';
+                            if (transaction.status === 'approved' || transaction.status === 'paid') {
+                                orderStatus = 'paid';
+                            } else if (transaction.status === 'refused' || transaction.status === 'declined') {
+                                orderStatus = 'failed';
+                            }
+
+                            if (db.isPostgres) {
+                                await db.query(
+                                    'UPDATE orders SET transaction_id = $1, transaction_data = $2, payment_method = $3, status = $4 WHERE id = $5',
+                                    [transactionId, transactionData, 'credit_card', orderStatus, orderId]
+                                );
+                            } else {
+                                db.prepare(
+                                    'UPDATE orders SET transaction_id = ?, transaction_data = ?, payment_method = ?, status = ? WHERE id = ?'
+                                ).run(transactionId, transactionData, 'credit_card', orderStatus, orderId);
+                            }
+
+                            res.json({
+                                success: transaction.status === 'approved' || transaction.status === 'paid',
+                                transaction,
+                                status: orderStatus
+                            });
+                        } catch (error) {
+                            console.error('Erro ao criar transação com cartão:', error);
+                            res.status(500).json({
+                                error: 'Erro ao processar pagamento com cartão',
+                                message: error.message,
+                                details: error.error || error
+                            });
+                        }
+                    });
+
+                    // Consultar status de transação
+                    app.get('/api/payments/bestfy/transaction/:transactionId', async (req, res) => {
+                        const { transactionId } = req.params;
+
+                        try {
+                            // Buscar credenciais do gateway
+                            let gateway;
+                            if (db.isPostgres) {
+                                const result = await db.query(
+                                    'SELECT * FROM payment_gateways WHERE gateway_type = $1 AND is_active = 1',
+                                    ['bestfy']
+                                );
+                                gateway = result.rows?.[0];
+                            } else {
+                                gateway = db.prepare(
+                                    'SELECT * FROM payment_gateways WHERE gateway_type = ? AND is_active = 1'
+                                ).get('bestfy');
+                            }
+
+                            if (!gateway || !gateway.secret_key) {
+                                return res.status(400).json({
+                                    error: 'Gateway BESTFY não configurado ou inativo'
+                                });
+                            }
+
+                            // Criar instância do serviço BESTFY
+                            const bestfy = new BestfyService(gateway.secret_key, gateway.public_key);
+
+                            // Consultar transação
+                            const transaction = await bestfy.getTransaction(transactionId);
+
+                            // Atualizar status do pedido se necessário
+                            if (transaction.status === 'approved' || transaction.status === 'paid') {
+                                if (db.isPostgres) {
+                                    await db.query(
+                                        'UPDATE orders SET status = $1, transaction_data = $2 WHERE transaction_id = $3',
+                                        ['paid', JSON.stringify(transaction), transactionId]
+                                    );
+                                } else {
+                                    db.prepare(
+                                        'UPDATE orders SET status = ?, transaction_data = ? WHERE transaction_id = ?'
+                                    ).run('paid', JSON.stringify(transaction), transactionId);
+                                }
+
+                                // Notify Approved
+                                try {
+                                    // Fetch Order Info (ID and Items)
+                                    let orderId = null;
+                                    let itemName = 'Produto';
+                                    let orderTotal = transaction.amount;
+
+                                    const queryStr = db.isPostgres ?
+                                        'SELECT id, total, payment_method FROM orders WHERE transaction_id = $1' :
+                                        'SELECT id, total, payment_method FROM orders WHERE transaction_id = ?';
+
+                                    const orderRes = db.isPostgres ?
+                                        await db.query(queryStr, [transactionId]) :
+                                        db.prepare(queryStr).get(transactionId);
+
+                                    const orderRow = db.isPostgres ? orderRes.rows?.[0] : orderRes;
+
+                                    if (orderRow) {
+                                        orderId = orderRow.id;
+                                        orderTotal = orderRow.total;
+
+                                        const itemQ = db.isPostgres ?
+                                            'SELECT p.name FROM order_items oi JOIN products p ON oi.product_id = p.id WHERE oi.order_id = $1 LIMIT 1' :
+                                            'SELECT p.name FROM order_items oi JOIN products p ON oi.product_id = p.id WHERE oi.order_id = ? LIMIT 1';
+
+                                        const itemRes = db.isPostgres ?
+                                            await db.query(itemQ, [orderId]) :
+                                            db.prepare(itemQ).get(orderId);
+
+                                        const firstItem = db.isPostgres ? itemRes.rows?.[0] : itemRes;
+                                        if (firstItem) itemName = firstItem.name;
+
+                                        sendPushcutNotification('approved', {
+                                            id: orderId,
+                                            itemName: itemName,
+                                            total: orderTotal,
+                                            paymentMethod: orderRow.payment_method
+                                        }).catch(e => console.error('Async Pushcut Fail:', e));
+                                    }
+                                } catch (notifyErr) {
+                                    console.error('Error preparing approved notification:', notifyErr);
+                                }
+                            }
+
+                            res.json({
+                                success: true,
+                                transaction
+                            });
+                        } catch (error) {
+                            console.error('Erro ao consultar transação:', error);
+                            res.status(500).json({
+                                error: 'Erro ao consultar transação',
+                                message: error.message
+                            });
+                        }
+                    });
+
+                    // Iniciar servidor (apenas em desenvolvimento local)
+                    if(require.main === module) {
+                app.listen(PORT, () => {
+                    console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
+                    console.log(`📦 Admin: http://localhost:${PORT}/admin.html`);
                 });
-                logs.push(`✅ Cleared products from ${collection.name}`);
-            } else {
-                logs.push(`⚠️ Collection ${slug} not found`);
             }
-        }
 
-        // Seed Stranger Cases (ensure products exist with variants)
-        try {
-            const { seedStrangerCases } = require('./phone-cases-seeder');
-            await seedStrangerCases(db);
-            logs.push('✅ Phone cases created/updated with variants');
-        } catch (e) {
-            console.error('Error seeding phone cases:', e);
-            logs.push(`❌ Error seeding cases: ${e.message}`);
-        }
 
-        // Re-seed (will re-populate empty collections with strict rules)
-        const { seedCollections } = require('./collection-seeder');
-        const seedLogs = await seedCollections(db, true);
 
-        res.json({ success: true, message: 'Collections reset and re-seeded', logs: [...logs, ...seedLogs] });
-    } catch (error) {
-        console.error('❌ Error resetting Capinhas:', error);
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
+            // DEBUG ROUTE: Force Seed Collections
+            app.post('/api/admin/debug/seed', async (req, res) => {
+                try {
+                    console.log('🔄 Manually triggering collection seed...');
+                    const { seedCollections } = require('./collection-seeder');
+                    const logs = await seedCollections(db, true);
+                    res.json({ success: true, logs });
+                } catch (error) {
+                    console.error('❌ Error manual seeding:', error);
+                    res.status(500).json({ success: false, error: error.message });
+                }
+            });
 
-// Error handler global (deve ser o último middleware)
-app.use((err, req, res, next) => {
-    console.error('❌ Erro:', err.message);
-    res.status(err.status || 500).json({
-        error: 'Erro interno do servidor',
-        message: err.message || 'Erro desconhecido'
-    });
-});
+            // DEBUG ROUTE: Reset Capinhas Collection (clear and re-seed)
+            // DEBUG ROUTE: Reset Specific Collections (Capinhas & Quenchers)
+            app.post('/api/admin/debug/reset-collections', async (req, res) => {
+                try {
+                    console.log('🔄 Resetting specific collections (Capinhas & Quenchers)...');
 
-// Exportar app para Vercel
-module.exports = app;
+                    const targetSlugs = ['capinhas-celular', 'quenchers-copos', 'mochilas'];
+                    const logs = [];
+
+                    for (const slug of targetSlugs) {
+                        // Find collection
+                        const collection = await new Promise((resolve, reject) => {
+                            db.get('SELECT id, name FROM collections WHERE slug = ?', [slug], (err, row) => {
+                                if (err) reject(err);
+                                else resolve(row);
+                            });
+                        });
+
+                        if (collection) {
+                            // Clear products
+                            await new Promise((resolve, reject) => {
+                                db.run('DELETE FROM collection_products WHERE collection_id = ?', [collection.id], (err) => {
+                                    if (err) reject(err);
+                                    else resolve();
+                                });
+                            });
+                            logs.push(`✅ Cleared products from ${collection.name}`);
+                        } else {
+                            logs.push(`⚠️ Collection ${slug} not found`);
+                        }
+                    }
+
+                    // Seed Stranger Cases (ensure products exist with variants)
+                    try {
+                        const { seedStrangerCases } = require('./phone-cases-seeder');
+                        await seedStrangerCases(db);
+                        logs.push('✅ Phone cases created/updated with variants');
+                    } catch (e) {
+                        console.error('Error seeding phone cases:', e);
+                        logs.push(`❌ Error seeding cases: ${e.message}`);
+                    }
+
+                    // Re-seed (will re-populate empty collections with strict rules)
+                    const { seedCollections } = require('./collection-seeder');
+                    const seedLogs = await seedCollections(db, true);
+
+                    res.json({ success: true, message: 'Collections reset and re-seeded', logs: [...logs, ...seedLogs] });
+                } catch (error) {
+                    console.error('❌ Error resetting Capinhas:', error);
+                    res.status(500).json({ success: false, error: error.message });
+                }
+            });
+
+            // Error handler global (deve ser o último middleware)
+            app.use((err, req, res, next) => {
+                console.error('❌ Erro:', err.message);
+                res.status(err.status || 500).json({
+                    error: 'Erro interno do servidor',
+                    message: err.message || 'Erro desconhecido'
+                });
+            });
+
+            // Exportar app para Vercel
+            module.exports = app;
 

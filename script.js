@@ -1106,6 +1106,14 @@ function renderProducts(container = productsGrid, limit = null) {
     }).join('');
 }
 
+// Helper to get cart headers
+window.getCartHeaders = function () {
+    const headers = { 'Content-Type': 'application/json' };
+    const sessionId = sessionStorage.getItem('analytics_session_id');
+    if (sessionId) headers['X-Session-ID'] = sessionId;
+    return headers;
+};
+
 // Load Cart from API
 async function loadCartFromAPI() {
     try {
