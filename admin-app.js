@@ -2966,9 +2966,10 @@ async function loadGateways() {
         showToast('Erro ao conectar com servidor', 'error');
         paymentGateways = [];
     }
+}
 
-    async function renderTracking(container) {
-        container.innerHTML = `
+async function renderTracking(container) {
+    container.innerHTML = `
         <div class="page-header">
             <div>
                 <h1>Rastreamento & Analytics</h1>
@@ -3046,67 +3047,67 @@ async function loadGateways() {
         </div>
     `;
 
-        // Load current settings
-        try {
-            const response = await fetch(`${API_URL}/tracking/meta-pixel`);
-            const data = await response.json();
+    // Load current settings
+    try {
+        const response = await fetch(`${API_URL}/tracking/meta-pixel`);
+        const data = await response.json();
 
-            if (data && data.pixel_id) {
-                document.getElementById('metaPixelId').value = data.pixel_id;
-                document.getElementById('metaPixelActive').checked = !!data.is_active;
-            }
-        } catch (error) {
-            console.error('Erro ao carregar configurações de tracking:', error);
-            // Não mostrar erro ao usuário, apenas logar, pois pode não ter config ainda
+        if (data && data.pixel_id) {
+            document.getElementById('metaPixelId').value = data.pixel_id;
+            document.getElementById('metaPixelActive').checked = !!data.is_active;
         }
-
-        // Define global save function
-        window.saveTrackingSettings = async function () {
-            const pixelId = document.getElementById('metaPixelId').value.trim();
-            const isActive = document.getElementById('metaPixelActive').checked;
-
-            if (isActive && !pixelId) {
-                showToast('Por favor, informe o Pixel ID para ativar', 'error');
-                return;
-            }
-
-            // Validate just numbers
-            if (pixelId && !/^\d+$/.test(pixelId)) {
-                showToast('Pixel ID deve conter apenas números', 'error');
-                return;
-            }
-
-            try {
-                const response = await fetch(`${API_URL}/admin/tracking/meta-pixel`, {
-                    method: 'POST',
-                    headers: getHeaders(),
-                    body: JSON.stringify({
-                        pixel_id: pixelId,
-                        is_active: isActive
-                    })
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    showToast('Configurações salvas com sucesso!', 'success');
-                } else {
-                    showToast(result.error || 'Erro ao salvar configurações', 'error');
-                }
-            } catch (error) {
-                console.error('Erro ao salvar tracking:', error);
-                showToast('Erro de conexão ao salvar', 'error');
-            }
-        };
+    } catch (error) {
+        console.error('Erro ao carregar configurações de tracking:', error);
+        // Não mostrar erro ao usuário, apenas logar, pois pode não ter config ainda
     }
 
+    // Define global save function
+    window.saveTrackingSettings = async function () {
+        const pixelId = document.getElementById('metaPixelId').value.trim();
+        const isActive = document.getElementById('metaPixelActive').checked;
 
-    async function renderGateways(container) {
-        await loadGateways();
+        if (isActive && !pixelId) {
+            showToast('Por favor, informe o Pixel ID para ativar', 'error');
+            return;
+        }
 
-        const bestfyGateway = paymentGateways.find(g => g.gateway_type === 'bestfy');
+        // Validate just numbers
+        if (pixelId && !/^\d+$/.test(pixelId)) {
+            showToast('Pixel ID deve conter apenas números', 'error');
+            return;
+        }
 
-        container.innerHTML = `
+        try {
+            const response = await fetch(`${API_URL}/admin/tracking/meta-pixel`, {
+                method: 'POST',
+                headers: getHeaders(),
+                body: JSON.stringify({
+                    pixel_id: pixelId,
+                    is_active: isActive
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                showToast('Configurações salvas com sucesso!', 'success');
+            } else {
+                showToast(result.error || 'Erro ao salvar configurações', 'error');
+            }
+        } catch (error) {
+            console.error('Erro ao salvar tracking:', error);
+            showToast('Erro de conexão ao salvar', 'error');
+        }
+    };
+}
+
+
+async function renderGateways(container) {
+    await loadGateways();
+
+    const bestfyGateway = paymentGateways.find(g => g.gateway_type === 'bestfy');
+
+    container.innerHTML = `
         <div class="page-header">
             <div>
                 <h1>Gateways de Pagamento</h1>
@@ -3308,110 +3309,110 @@ async function loadGateways() {
             </div>
         </div>
     `;
+}
+
+async function saveBestfyGateway(event) {
+    event.preventDefault();
+
+    const form = event.target;
+    const formData = new FormData(form);
+
+    const data = {
+        name: formData.get('name'),
+        gateway_type: 'bestfy',
+        public_key: formData.get('public_key'),
+        secret_key: formData.get('secret_key'),
+        is_active: formData.get('is_active') ? 1 : 0
+    };
+
+    showLoading();
+
+    try {
+        const response = await fetch(`${API_URL}/gateways`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+            },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            showToast('Configurações salvas com sucesso!', 'success');
+            await loadGateways();
+            loadPage('gateways');
+        } else {
+            showToast(result.error || 'Erro ao salvar configurações', 'error');
+        }
+    } catch (error) {
+        console.error('Erro ao salvar gateway:', error);
+        showToast('Erro ao conectar com servidor', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+async function testBestfyConnection() {
+    showLoading();
+    showToast('Testando conexão com BESTFY...', 'info');
+
+    try {
+        const response = await fetch(`${API_BASE}/api/gateway/active`);
+        const data = await response.json();
+
+        if (data.active && data.type === 'bestfy') {
+            showToast('✓ Conexão com BESTFY estabelecida com sucesso!', 'success');
+        } else {
+            showToast('Gateway não está ativo ou configurado', 'warning');
+        }
+    } catch (error) {
+        console.error('Erro ao testar conexão:', error);
+        showToast('Erro ao testar conexão com BESTFY', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+// Continue na próxima parte com modais, notificações e utilitários...
+// =====================================================
+// MODALS - PARTE 4 (FINAL)
+// =====================================================
+
+function createModalContainers() {
+    if (!document.getElementById('modalContainer')) {
+        const modalContainer = document.createElement('div');
+        modalContainer.id = 'modalContainer';
+        document.body.appendChild(modalContainer);
     }
 
-    async function saveBestfyGateway(event) {
-        event.preventDefault();
+    // Create generic modal if it doesn't exist
+    if (!document.getElementById('genericModal')) {
+        const genericModal = document.createElement('div');
+        genericModal.id = 'genericModal';
+        genericModal.style.cssText = 'display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; align-items: center; justify-content: center;';
+        document.body.appendChild(genericModal);
+    }
+}
 
-        const form = event.target;
-        const formData = new FormData(form);
+async function openProductModal(productId = null) {
+    const product = productId ? AppState.products.find(p => p.id === productId) : null;
+    const isEdit = !!product;
 
-        const data = {
-            name: formData.get('name'),
-            gateway_type: 'bestfy',
-            public_key: formData.get('public_key'),
-            secret_key: formData.get('secret_key'),
-            is_active: formData.get('is_active') ? 1 : 0
-        };
-
-        showLoading();
-
+    let existingImages = '';
+    if (product && product.images_json) {
         try {
-            const response = await fetch(`${API_URL}/gateways`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
-                },
-                body: JSON.stringify(data)
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-                showToast('Configurações salvas com sucesso!', 'success');
-                await loadGateways();
-                loadPage('gateways');
-            } else {
-                showToast(result.error || 'Erro ao salvar configurações', 'error');
+            const parsed = JSON.parse(product.images_json);
+            if (Array.isArray(parsed)) {
+                existingImages = parsed.join('\n');
             }
-        } catch (error) {
-            console.error('Erro ao salvar gateway:', error);
-            showToast('Erro ao conectar com servidor', 'error');
-        } finally {
-            hideLoading();
+        } catch (e) {
+            console.error('Error parsing images_json', e);
         }
     }
 
-    async function testBestfyConnection() {
-        showLoading();
-        showToast('Testando conexão com BESTFY...', 'info');
-
-        try {
-            const response = await fetch(`${API_BASE}/api/gateway/active`);
-            const data = await response.json();
-
-            if (data.active && data.type === 'bestfy') {
-                showToast('✓ Conexão com BESTFY estabelecida com sucesso!', 'success');
-            } else {
-                showToast('Gateway não está ativo ou configurado', 'warning');
-            }
-        } catch (error) {
-            console.error('Erro ao testar conexão:', error);
-            showToast('Erro ao testar conexão com BESTFY', 'error');
-        } finally {
-            hideLoading();
-        }
-    }
-
-    // Continue na próxima parte com modais, notificações e utilitários...
-    // =====================================================
-    // MODALS - PARTE 4 (FINAL)
-    // =====================================================
-
-    function createModalContainers() {
-        if (!document.getElementById('modalContainer')) {
-            const modalContainer = document.createElement('div');
-            modalContainer.id = 'modalContainer';
-            document.body.appendChild(modalContainer);
-        }
-
-        // Create generic modal if it doesn't exist
-        if (!document.getElementById('genericModal')) {
-            const genericModal = document.createElement('div');
-            genericModal.id = 'genericModal';
-            genericModal.style.cssText = 'display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; align-items: center; justify-content: center;';
-            document.body.appendChild(genericModal);
-        }
-    }
-
-    async function openProductModal(productId = null) {
-        const product = productId ? AppState.products.find(p => p.id === productId) : null;
-        const isEdit = !!product;
-
-        let existingImages = '';
-        if (product && product.images_json) {
-            try {
-                const parsed = JSON.parse(product.images_json);
-                if (Array.isArray(parsed)) {
-                    existingImages = parsed.join('\n');
-                }
-            } catch (e) {
-                console.error('Error parsing images_json', e);
-            }
-        }
-
-        const modalHTML = `
+    const modalHTML = `
         <div class="modal-overlay" onclick="closeModal()">
             <div class="modal-dialog" onclick="event.stopPropagation()">
                 <div class="modal-header">
@@ -3494,85 +3495,85 @@ async function loadGateways() {
         </div>
     `;
 
-        document.getElementById('modalContainer').innerHTML = modalHTML;
+    document.getElementById('modalContainer').innerHTML = modalHTML;
 
-        document.getElementById('productForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            saveProduct(productId);
+    document.getElementById('productForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        saveProduct(productId);
+    });
+}
+
+async function saveProduct(productId) {
+    const form = document.getElementById('productForm');
+    const formData = new FormData(form);
+
+    const additionalImagesRaw = formData.get('additional_images');
+    if (additionalImagesRaw) {
+        const imagesArray = additionalImagesRaw.split('\n')
+            .map(url => url.trim())
+            .filter(url => url.length > 0);
+        formData.append('images_json', JSON.stringify(imagesArray));
+        formData.delete('additional_images');
+    } else {
+        formData.append('images_json', '[]');
+    }
+
+    showLoading(productId ? 'Atualizando produto...' : 'Criando produto...');
+
+    try {
+        const url = productId ? `${API_URL}/products/${productId}` : `${API_URL}/products`;
+        const method = productId ? 'PUT' : 'POST';
+
+        const response = await fetch(url, {
+            method,
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+            },
+            body: formData
         });
-    }
 
-    async function saveProduct(productId) {
-        const form = document.getElementById('productForm');
-        const formData = new FormData(form);
-
-        const additionalImagesRaw = formData.get('additional_images');
-        if (additionalImagesRaw) {
-            const imagesArray = additionalImagesRaw.split('\n')
-                .map(url => url.trim())
-                .filter(url => url.length > 0);
-            formData.append('images_json', JSON.stringify(imagesArray));
-            formData.delete('additional_images');
+        if (response.ok) {
+            showToast(`Produto ${productId ? 'atualizado' : 'criado'} com sucesso!`, 'success');
+            closeModal();
+            loadPage('products');
         } else {
-            formData.append('images_json', '[]');
+            const error = await response.json();
+            showToast(error.error || 'Erro ao salvar produto', 'error');
         }
+    } catch (error) {
+        console.error('Erro ao salvar produto:', error);
+        showToast('Erro ao salvar produto', 'error');
+    } finally {
+        hideLoading();
+    }
+}
 
-        showLoading(productId ? 'Atualizando produto...' : 'Criando produto...');
+async function openCollectionModal(collectionId = null) {
+    const collection = collectionId ? AppState.collections.find(c => c.id === collectionId) : null;
+    const isEdit = !!collection;
 
+    let allProducts = AppState.products;
+    if (allProducts.length === 0) {
         try {
-            const url = productId ? `${API_URL}/products/${productId}` : `${API_URL}/products`;
-            const method = productId ? 'PUT' : 'POST';
-
-            const response = await fetch(url, {
-                method,
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
-                },
-                body: formData
-            });
-
-            if (response.ok) {
-                showToast(`Produto ${productId ? 'atualizado' : 'criado'} com sucesso!`, 'success');
-                closeModal();
-                loadPage('products');
-            } else {
-                const error = await response.json();
-                showToast(error.error || 'Erro ao salvar produto', 'error');
-            }
-        } catch (error) {
-            console.error('Erro ao salvar produto:', error);
-            showToast('Erro ao salvar produto', 'error');
-        } finally {
-            hideLoading();
-        }
+            const res = await fetch(`${API_BASE}/api/products`);
+            if (res.ok) allProducts = await res.json();
+        } catch (e) { console.error(e); }
     }
 
-    async function openCollectionModal(collectionId = null) {
-        const collection = collectionId ? AppState.collections.find(c => c.id === collectionId) : null;
-        const isEdit = !!collection;
+    let associatedIds = new Set();
+    if (isEdit) {
+        try {
+            const res = await fetch(`${API_URL}/collections/${collectionId}/products`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
+            });
+            if (res.ok) {
+                const ids = await res.json();
+                associatedIds = new Set(ids);
+            }
+        } catch (e) { console.error(e); }
+    }
 
-        let allProducts = AppState.products;
-        if (allProducts.length === 0) {
-            try {
-                const res = await fetch(`${API_BASE}/api/products`);
-                if (res.ok) allProducts = await res.json();
-            } catch (e) { console.error(e); }
-        }
-
-        let associatedIds = new Set();
-        if (isEdit) {
-            try {
-                const res = await fetch(`${API_URL}/collections/${collectionId}/products`, {
-                    headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
-                });
-                if (res.ok) {
-                    const ids = await res.json();
-                    associatedIds = new Set(ids);
-                }
-            } catch (e) { console.error(e); }
-        }
-
-        const modalHTML = `
+    const modalHTML = `
         <div class="modal-overlay" onclick="closeModal()">
             <div class="modal-dialog" onclick="event.stopPropagation()">
                 <div class="modal-header">
@@ -3670,121 +3671,121 @@ async function loadGateways() {
         </div>
     `;
 
-        document.getElementById('modalContainer').innerHTML = modalHTML;
+    document.getElementById('modalContainer').innerHTML = modalHTML;
 
-        window.switchTab = (btn, tabId) => {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
-            btn.classList.add('active');
-            document.getElementById(tabId).style.display = 'block';
-        };
+    window.switchTab = (btn, tabId) => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+        btn.classList.add('active');
+        document.getElementById(tabId).style.display = 'block';
+    };
 
-        window.filterCollectionProducts = (input) => {
-            const term = input.value.toLowerCase();
-            document.querySelectorAll('.product-selection-item').forEach(item => {
-                const name = item.querySelector('.prod-name').innerText.toLowerCase();
-                item.style.display = name.includes(term) ? 'flex' : 'none';
-            });
-        };
-
-        document.getElementById('collectionForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            saveCollection(collectionId);
+    window.filterCollectionProducts = (input) => {
+        const term = input.value.toLowerCase();
+        document.querySelectorAll('.product-selection-item').forEach(item => {
+            const name = item.querySelector('.prod-name').innerText.toLowerCase();
+            item.style.display = name.includes(term) ? 'flex' : 'none';
         });
+    };
 
-        if (!isEdit) {
-            const nameInput = document.querySelector('[name="name"]');
-            const slugInput = document.querySelector('[name="slug"]');
-            nameInput.addEventListener('input', () => {
-                slugInput.value = nameInput.value
-                    .toLowerCase()
-                    .normalize('NFD')
-                    .replace(/[\u0300-\u036f]/g, '')
-                    .replace(/[^a-z0-9]+/g, '-')
-                    .replace(/^-+|-+$/g, '');
-            });
-        }
+    document.getElementById('collectionForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        saveCollection(collectionId);
+    });
+
+    if (!isEdit) {
+        const nameInput = document.querySelector('[name="name"]');
+        const slugInput = document.querySelector('[name="slug"]');
+        nameInput.addEventListener('input', () => {
+            slugInput.value = nameInput.value
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-+|-+$/g, '');
+        });
     }
+}
 
-    async function saveCollection(collectionId) {
-        const form = document.getElementById('collectionForm');
-        const formData = new FormData(form);
+async function saveCollection(collectionId) {
+    const form = document.getElementById('collectionForm');
+    const formData = new FormData(form);
 
-        const selectedProducts = [];
-        form.querySelectorAll('input[name="product_ids"]:checked').forEach(cb => {
-            selectedProducts.push(parseInt(cb.value));
+    const selectedProducts = [];
+    form.querySelectorAll('input[name="product_ids"]:checked').forEach(cb => {
+        selectedProducts.push(parseInt(cb.value));
+    });
+
+    const data = {
+        name: formData.get('name'),
+        slug: formData.get('slug'),
+        description: formData.get('description') || '',
+        is_active: formData.get('is_active') === 'on',
+        default_view: formData.get('default_view') || 'grid'
+    };
+
+    showLoading(collectionId ? 'Atualizando coleção...' : 'Criando coleção...');
+
+    try {
+        const url = collectionId ? `${API_URL}/collections/${collectionId}` : `${API_URL}/collections`;
+        const method = collectionId ? 'PUT' : 'POST';
+
+        const response = await fetch(url, {
+            method,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+            },
+            body: JSON.stringify(data)
         });
 
-        const data = {
-            name: formData.get('name'),
-            slug: formData.get('slug'),
-            description: formData.get('description') || '',
-            is_active: formData.get('is_active') === 'on',
-            default_view: formData.get('default_view') || 'grid'
-        };
+        if (response.ok) {
+            const result = await response.json();
+            const targetId = collectionId || result.id;
 
-        showLoading(collectionId ? 'Atualizando coleção...' : 'Criando coleção...');
-
-        try {
-            const url = collectionId ? `${API_URL}/collections/${collectionId}` : `${API_URL}/collections`;
-            const method = collectionId ? 'PUT' : 'POST';
-
-            const response = await fetch(url, {
-                method,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
-                },
-                body: JSON.stringify(data)
-            });
-
-            if (response.ok) {
-                const result = await response.json();
-                const targetId = collectionId || result.id;
-
-                if (targetId) {
-                    await fetch(`${API_URL}/collections/${targetId}/products`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
-                        },
-                        body: JSON.stringify({ product_ids: selectedProducts })
-                    });
-                }
-
-                showToast(`Coleção ${collectionId ? 'atualizada' : 'criada'} com sucesso!`, 'success');
-                closeModal();
-                loadPage('collections');
-            } else {
-                const error = await response.json();
-                showToast(error.error || 'Erro ao salvar coleção', 'error');
+            if (targetId) {
+                await fetch(`${API_URL}/collections/${targetId}/products`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+                    },
+                    body: JSON.stringify({ product_ids: selectedProducts })
+                });
             }
-        } catch (error) {
-            console.error('Erro ao salvar coleção:', error);
-            showToast('Erro ao salvar coleção', 'error');
-        } finally {
-            hideLoading();
+
+            showToast(`Coleção ${collectionId ? 'atualizada' : 'criada'} com sucesso!`, 'success');
+            closeModal();
+            loadPage('collections');
+        } else {
+            const error = await response.json();
+            showToast(error.error || 'Erro ao salvar coleção', 'error');
         }
+    } catch (error) {
+        console.error('Erro ao salvar coleção:', error);
+        showToast('Erro ao salvar coleção', 'error');
+    } finally {
+        hideLoading();
     }
+}
 
-    async function manageCollectionProducts(collectionId) {
-        showLoading('Carregando produtos...');
-        try {
-            const collectionsResp = await fetch(`${API_URL}/collections`, {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
-            });
-            const allCollections = await collectionsResp.json();
-            const collection = allCollections.find(c => c.id === collectionId);
+async function manageCollectionProducts(collectionId) {
+    showLoading('Carregando produtos...');
+    try {
+        const collectionsResp = await fetch(`${API_URL}/collections`, {
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
+        });
+        const allCollections = await collectionsResp.json();
+        const collection = allCollections.find(c => c.id === collectionId);
 
-            const productsResp = await fetch(`${API_BASE}/api/products`);
-            let allProducts = await productsResp.json();
+        const productsResp = await fetch(`${API_BASE}/api/products`);
+        let allProducts = await productsResp.json();
 
-            const inCollectionIds = new Set((collection.products || []).map(p => p.id));
-            const productsIn = collection.products || [];
-            const productsOut = allProducts.filter(p => !inCollectionIds.has(p.id));
+        const inCollectionIds = new Set((collection.products || []).map(p => p.id));
+        const productsIn = collection.products || [];
+        const productsOut = allProducts.filter(p => !inCollectionIds.has(p.id));
 
-            const modalHtml = `
+        const modalHtml = `
             <div class="modal-overlay" onclick="closeModal()">
                 <div class="modal-dialog" style="max-width: 1000px; max-height: 85vh;" onclick="event.stopPropagation()">
                     <div class="modal-header">
@@ -3818,25 +3819,25 @@ async function loadGateways() {
             </div>
         `;
 
-            document.getElementById('modalContainer').innerHTML = modalHtml;
+        document.getElementById('modalContainer').innerHTML = modalHtml;
 
-            if (typeof Sortable !== 'undefined') {
-                Sortable.create(document.getElementById('inCollectionList'), {
-                    animation: 150,
-                    onEnd: () => saveCollectionProductOrder(collectionId)
-                });
-            }
-
-        } catch (e) {
-            console.error(e);
-            showToast('Erro ao carregar dados', 'error');
-        } finally {
-            hideLoading();
+        if (typeof Sortable !== 'undefined') {
+            Sortable.create(document.getElementById('inCollectionList'), {
+                animation: 150,
+                onEnd: () => saveCollectionProductOrder(collectionId)
+            });
         }
-    }
 
-    function renderManageProductItem(product, isIn, collectionId) {
-        return `
+    } catch (e) {
+        console.error(e);
+        showToast('Erro ao carregar dados', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+function renderManageProductItem(product, isIn, collectionId) {
+    return `
         <div class="pm-item" data-id="${product.id}" style="background: var(--bg-card); padding: 10px; border-radius: 6px; border: 1px solid var(--border); display: flex; align-items: center; gap: 10px; cursor: ${isIn ? 'move' : 'default'}; transition: all 0.2s;">
             <img src="${product.image_url || 'https://via.placeholder.com/40'}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
             <div style="flex: 1; min-width: 0;">
@@ -3846,133 +3847,133 @@ async function loadGateways() {
             <button class="btn-icon ${isIn ? 'danger' : 'success'}" style="flex-shrink: 0;"
                 onclick="${isIn ? `removeProductFromCollection(${collectionId}, ${product.id})` : `addProductToCollection(${collectionId}, ${product.id})`}">
                 ${isIn ?
-                '<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>' :
-                '<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>'}
+            '<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>' :
+            '<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>'}
             </button>
         </div>
     `;
-    }
+}
 
-    async function addProductToCollection(collectionId, productId) {
-        try {
-            const response = await fetch(`${API_URL}/collections/${collectionId}/products`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
-                },
-                body: JSON.stringify({ product_id: productId })
-            });
-            if (response.ok) {
-                manageCollectionProducts(collectionId);
-            } else {
-                const data = await response.json();
-                showToast(data.error || 'Erro ao adicionar', 'error');
-            }
-        } catch (e) {
-            console.error(e);
-            showToast('Erro de conexão', 'error');
-        }
-    }
-
-    async function removeProductFromCollection(collectionId, productId) {
-        if (!confirm('Remover produto da coleção?')) return;
-        try {
-            const response = await fetch(`${API_URL}/collections/${collectionId}/products/${productId}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
-            });
-            if (response.ok) {
-                manageCollectionProducts(collectionId);
-            } else {
-                showToast('Erro ao remover', 'error');
-            }
-        } catch (e) {
-            console.error(e);
-            showToast('Erro de conexão', 'error');
-        }
-    }
-
-    async function saveCollectionProductOrder(collectionId) {
-        const items = document.querySelectorAll('#inCollectionList .pm-item');
-        const order = Array.from(items).map((item, index) => ({
-            product_id: parseInt(item.dataset.id),
-            sort_order: index
-        }));
-
-        try {
-            await fetch(`${API_URL}/collections/${collectionId}/reorder-products`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
-                },
-                body: JSON.stringify({ order })
-            });
-        } catch (e) {
-            console.error('Erro ao salvar ordem', e);
-        }
-    }
-
-    function filterPMList(input) {
-        const term = input.value.toLowerCase();
-        const items = document.querySelectorAll('#outCollectionList .pm-item');
-        items.forEach(item => {
-            const text = item.innerText.toLowerCase();
-            item.style.display = text.includes(term) ? 'flex' : 'none';
+async function addProductToCollection(collectionId, productId) {
+    try {
+        const response = await fetch(`${API_URL}/collections/${collectionId}/products`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+            },
+            body: JSON.stringify({ product_id: productId })
         });
+        if (response.ok) {
+            manageCollectionProducts(collectionId);
+        } else {
+            const data = await response.json();
+            showToast(data.error || 'Erro ao adicionar', 'error');
+        }
+    } catch (e) {
+        console.error(e);
+        showToast('Erro de conexão', 'error');
+    }
+}
+
+async function removeProductFromCollection(collectionId, productId) {
+    if (!confirm('Remover produto da coleção?')) return;
+    try {
+        const response = await fetch(`${API_URL}/collections/${collectionId}/products/${productId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
+        });
+        if (response.ok) {
+            manageCollectionProducts(collectionId);
+        } else {
+            showToast('Erro ao remover', 'error');
+        }
+    } catch (e) {
+        console.error(e);
+        showToast('Erro de conexão', 'error');
+    }
+}
+
+async function saveCollectionProductOrder(collectionId) {
+    const items = document.querySelectorAll('#inCollectionList .pm-item');
+    const order = Array.from(items).map((item, index) => ({
+        product_id: parseInt(item.dataset.id),
+        sort_order: index
+    }));
+
+    try {
+        await fetch(`${API_URL}/collections/${collectionId}/reorder-products`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+            },
+            body: JSON.stringify({ order })
+        });
+    } catch (e) {
+        console.error('Erro ao salvar ordem', e);
+    }
+}
+
+function filterPMList(input) {
+    const term = input.value.toLowerCase();
+    const items = document.querySelectorAll('#outCollectionList .pm-item');
+    items.forEach(item => {
+        const text = item.innerText.toLowerCase();
+        item.style.display = text.includes(term) ? 'flex' : 'none';
+    });
+}
+
+// Selecionar visualização padrão no modal de coleção
+function selectDefaultView(btn, view) {
+    // Atualizar botões ativos
+    const container = btn.parentElement;
+    container.querySelectorAll('.view-toggle-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    // Atualizar campo hidden
+    const form = btn.closest('form');
+    const hiddenInput = form.querySelector('input[name="default_view"]');
+    if (hiddenInput) {
+        hiddenInput.value = view;
+    }
+}
+
+// Tornar função global
+window.selectDefaultView = selectDefaultView;
+
+function closeModal() {
+    const modalContainer = document.getElementById('modalContainer');
+    if (modalContainer) {
+        modalContainer.innerHTML = '';
     }
 
-    // Selecionar visualização padrão no modal de coleção
-    function selectDefaultView(btn, view) {
-        // Atualizar botões ativos
-        const container = btn.parentElement;
-        container.querySelectorAll('.view-toggle-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-
-        // Atualizar campo hidden
-        const form = btn.closest('form');
-        const hiddenInput = form.querySelector('input[name="default_view"]');
-        if (hiddenInput) {
-            hiddenInput.value = view;
-        }
+    // Also close generic modal
+    const genericModal = document.getElementById('genericModal');
+    if (genericModal) {
+        genericModal.style.display = 'none';
+        genericModal.innerHTML = '';
     }
+}
 
-    // Tornar função global
-    window.selectDefaultView = selectDefaultView;
+// =====================================================
+// NOTIFICATIONS & TOASTS
+// =====================================================
 
-    function closeModal() {
-        const modalContainer = document.getElementById('modalContainer');
-        if (modalContainer) {
-            modalContainer.innerHTML = '';
-        }
+function showToast(message, type = 'info') {
+    const container = document.getElementById('toastContainer') || createToastContainer();
 
-        // Also close generic modal
-        const genericModal = document.getElementById('genericModal');
-        if (genericModal) {
-            genericModal.style.display = 'none';
-            genericModal.innerHTML = '';
-        }
-    }
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
 
-    // =====================================================
-    // NOTIFICATIONS & TOASTS
-    // =====================================================
+    const icons = {
+        success: '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>',
+        error: '<circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line>',
+        warning: '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line>',
+        info: '<circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line>'
+    };
 
-    function showToast(message, type = 'info') {
-        const container = document.getElementById('toastContainer') || createToastContainer();
-
-        const toast = document.createElement('div');
-        toast.className = `toast toast-${type}`;
-
-        const icons = {
-            success: '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>',
-            error: '<circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line>',
-            warning: '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line>',
-            info: '<circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line>'
-        };
-
-        toast.innerHTML = `
+    toast.innerHTML = `
         <div class="toast-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 ${icons[type]}
@@ -3987,47 +3988,47 @@ async function loadGateways() {
         </button>
     `;
 
-        container.appendChild(toast);
+    container.appendChild(toast);
 
-        setTimeout(() => toast.classList.add('toast-exit'), 4000);
-        setTimeout(() => toast.remove(), 4300);
+    setTimeout(() => toast.classList.add('toast-exit'), 4000);
+    setTimeout(() => toast.remove(), 4300);
+}
+
+function createToastContainer() {
+    const container = document.createElement('div');
+    container.id = 'toastContainer';
+    container.className = 'toast-container';
+    document.body.appendChild(container);
+    return container;
+}
+
+function showLoading(message = 'Carregando...') {
+    let loader = document.getElementById('globalLoader');
+    if (!loader) {
+        loader = document.createElement('div');
+        loader.id = 'globalLoader';
+        loader.className = 'global-loader';
+        document.body.appendChild(loader);
     }
 
-    function createToastContainer() {
-        const container = document.createElement('div');
-        container.id = 'toastContainer';
-        container.className = 'toast-container';
-        document.body.appendChild(container);
-        return container;
-    }
-
-    function showLoading(message = 'Carregando...') {
-        let loader = document.getElementById('globalLoader');
-        if (!loader) {
-            loader = document.createElement('div');
-            loader.id = 'globalLoader';
-            loader.className = 'global-loader';
-            document.body.appendChild(loader);
-        }
-
-        loader.innerHTML = `
+    loader.innerHTML = `
         <div class="loader-content">
             <div class="loader-spinner"></div>
             <div class="loader-text">${message}</div>
         </div>
     `;
-        loader.classList.add('active');
-    }
+    loader.classList.add('active');
+}
 
-    function hideLoading() {
-        const loader = document.getElementById('globalLoader');
-        if (loader) {
-            loader.classList.remove('active');
-        }
+function hideLoading() {
+    const loader = document.getElementById('globalLoader');
+    if (loader) {
+        loader.classList.remove('active');
     }
+}
 
-    function showNotificationsPanel() {
-        const modal = `
+function showNotificationsPanel() {
+    const modal = `
         <div class="modal-overlay" onclick="closeModal()">
             <div class="modal-dialog" style="max-width: 500px;" onclick="event.stopPropagation()">
                 <div class="modal-header">
@@ -4085,72 +4086,72 @@ async function loadGateways() {
         </div>
     `;
 
-        document.getElementById('modalContainer').innerHTML = modal;
+    document.getElementById('modalContainer').innerHTML = modal;
+}
+
+// =====================================================
+// UTILITY FUNCTIONS
+// =====================================================
+
+function formatDate(dateString) {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+    });
+}
+
+function formatCurrency(value) {
+    if (typeof value === 'number') {
+        return value.toFixed(2).replace('.', ',');
+    }
+    return parseFloat(value || 0).toFixed(2).replace('.', ',');
+}
+
+function formatDateTime(dateString) {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    return date.toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+// =====================================================
+// BULK DISCOUNT MODAL
+// =====================================================
+
+function openBulkDiscountModal() {
+    const selectedProducts = Array.from(AppState.selected.products).map(id =>
+        AppState.products.find(p => p.id === id)
+    ).filter(Boolean);
+
+    if (selectedProducts.length === 0) {
+        showToast('Selecione produtos para aplicar desconto', 'warning');
+        return;
     }
 
-    // =====================================================
-    // UTILITY FUNCTIONS
-    // =====================================================
-
-    function formatDate(dateString) {
-        if (!dateString) return '-';
-        const date = new Date(dateString);
-        return date.toLocaleDateString('pt-BR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-        });
+    const modal = document.getElementById('genericModal');
+    if (!modal) {
+        console.error('Modal container not found');
+        return;
     }
 
-    function formatCurrency(value) {
-        if (typeof value === 'number') {
-            return value.toFixed(2).replace('.', ',');
+    modal.style.display = 'flex';
+
+    // Add click event to close modal when clicking overlay
+    modal.onclick = (e) => {
+        if (e.target === modal) {
+            closeModal();
         }
-        return parseFloat(value || 0).toFixed(2).replace('.', ',');
-    }
+    };
 
-    function formatDateTime(dateString) {
-        if (!dateString) return '-';
-        const date = new Date(dateString);
-        return date.toLocaleString('pt-BR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    }
-
-    // =====================================================
-    // BULK DISCOUNT MODAL
-    // =====================================================
-
-    function openBulkDiscountModal() {
-        const selectedProducts = Array.from(AppState.selected.products).map(id =>
-            AppState.products.find(p => p.id === id)
-        ).filter(Boolean);
-
-        if (selectedProducts.length === 0) {
-            showToast('Selecione produtos para aplicar desconto', 'warning');
-            return;
-        }
-
-        const modal = document.getElementById('genericModal');
-        if (!modal) {
-            console.error('Modal container not found');
-            return;
-        }
-
-        modal.style.display = 'flex';
-
-        // Add click event to close modal when clicking overlay
-        modal.onclick = (e) => {
-            if (e.target === modal) {
-                closeModal();
-            }
-        };
-
-        modal.innerHTML = `
+    modal.innerHTML = `
         <div class="modal-content" style="max-width: 700px; background: var(--bg-card); border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); animation: modalSlideIn 0.3s ease; overflow: hidden;">
             <div class="modal-header" style="padding: 24px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
                 <h2 style="margin: 0; color: var(--text-primary); font-size: 1.5rem;">💰 Desconto em Massa</h2>
@@ -4251,17 +4252,17 @@ async function loadGateways() {
         </style>
     `;
 
-        // Store selected products in modal data
-        modal.dataset.selectedProducts = JSON.stringify(selectedProducts.map(p => ({ id: p.id, price: p.price })));
-    }
+    // Store selected products in modal data
+    modal.dataset.selectedProducts = JSON.stringify(selectedProducts.map(p => ({ id: p.id, price: p.price })));
+}
 
-    function renderDiscountPreview(products, discountPercent) {
-        return products.map(product => {
-            const originalPrice = parseFloat(product.price);
-            const newPrice = originalPrice * (1 - discountPercent / 100);
-            const saving = originalPrice - newPrice;
+function renderDiscountPreview(products, discountPercent) {
+    return products.map(product => {
+        const originalPrice = parseFloat(product.price);
+        const newPrice = originalPrice * (1 - discountPercent / 100);
+        const saving = originalPrice - newPrice;
 
-            return `
+        return `
             <div style="display: flex; align-items: center; padding: 12px; background: var(--bg-secondary); border-radius: 6px; margin-bottom: 8px; border-left: 3px solid var(--primary);">
                 <div style="flex: 1; min-width: 0;">
                     <div style="font-weight: 600; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
@@ -4284,131 +4285,131 @@ async function loadGateways() {
                 </div>
             </div>
         `;
-        }).join('');
+    }).join('');
+}
+
+function updateDiscountPreview(discountPercent) {
+    document.getElementById('discountValue').textContent = discountPercent;
+
+    // Update slider background gradient
+    const slider = document.getElementById('discountSlider');
+    const percentage = ((discountPercent - 10) / 70) * 100;
+    slider.style.background = `linear-gradient(90deg, #52c77a 0%, #52c77a ${percentage}%, #E50914 ${percentage}%, #E50914 100%)`;
+
+    const modal = document.getElementById('genericModal');
+    const productsData = JSON.parse(modal.dataset.selectedProducts || '[]');
+    const products = productsData.map(pd => AppState.products.find(p => p.id === pd.id)).filter(Boolean);
+
+    document.getElementById('discountPreviewList').innerHTML = renderDiscountPreview(products, discountPercent);
+}
+
+async function applyBulkDiscount() {
+    const discountPercent = parseInt(document.getElementById('discountSlider').value);
+    const modal = document.getElementById('genericModal');
+    const productsData = JSON.parse(modal.dataset.selectedProducts || '[]');
+
+    if (productsData.length === 0) {
+        showToast('Nenhum produto selecionado', 'error');
+        return;
     }
 
-    function updateDiscountPreview(discountPercent) {
-        document.getElementById('discountValue').textContent = discountPercent;
-
-        // Update slider background gradient
-        const slider = document.getElementById('discountSlider');
-        const percentage = ((discountPercent - 10) / 70) * 100;
-        slider.style.background = `linear-gradient(90deg, #52c77a 0%, #52c77a ${percentage}%, #E50914 ${percentage}%, #E50914 100%)`;
-
-        const modal = document.getElementById('genericModal');
-        const productsData = JSON.parse(modal.dataset.selectedProducts || '[]');
-        const products = productsData.map(pd => AppState.products.find(p => p.id === pd.id)).filter(Boolean);
-
-        document.getElementById('discountPreviewList').innerHTML = renderDiscountPreview(products, discountPercent);
+    if (!confirm(`Tem certeza que deseja aplicar ${discountPercent}% de desconto em ${productsData.length} produtos?\n\nEsta ação irá atualizar os preços permanentemente.`)) {
+        return;
     }
 
-    async function applyBulkDiscount() {
-        const discountPercent = parseInt(document.getElementById('discountSlider').value);
-        const modal = document.getElementById('genericModal');
-        const productsData = JSON.parse(modal.dataset.selectedProducts || '[]');
+    showLoading('Aplicando descontos...');
 
-        if (productsData.length === 0) {
-            showToast('Nenhum produto selecionado', 'error');
-            return;
-        }
+    try {
+        const response = await fetch(`${API_URL}/products/bulk-discount`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+            },
+            body: JSON.stringify({
+                productIds: productsData.map(p => p.id),
+                discountPercent: discountPercent
+            })
+        });
 
-        if (!confirm(`Tem certeza que deseja aplicar ${discountPercent}% de desconto em ${productsData.length} produtos?\n\nEsta ação irá atualizar os preços permanentemente.`)) {
-            return;
-        }
-
-        showLoading('Aplicando descontos...');
-
-        try {
-            const response = await fetch(`${API_URL}/products/bulk-discount`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
-                },
-                body: JSON.stringify({
-                    productIds: productsData.map(p => p.id),
-                    discountPercent: discountPercent
-                })
-            });
-
-            if (response.ok) {
-                hideLoading();
-                showToast(`${productsData.length} produtos atualizados com sucesso!`, 'success');
-                closeModal();
-                await loadProducts(); // Reload table
-                renderProducts(document.getElementById('mainContent')); // Re-render products after loading
-                AppState.selected.products.clear(); // Clear selection after successful update
-            } else {
-                const data = await response.json();
-                throw new Error(data.error || 'Erro ao aplicar descontos');
-            }
-
-        } catch (error) {
+        if (response.ok) {
             hideLoading();
-            console.error('Erro ao aplicar desconto em massa:', error);
-            showToast('Erro ao aplicar descontos: ' + error.message, 'error');
+            showToast(`${productsData.length} produtos atualizados com sucesso!`, 'success');
+            closeModal();
+            await loadProducts(); // Reload table
+            renderProducts(document.getElementById('mainContent')); // Re-render products after loading
+            AppState.selected.products.clear(); // Clear selection after successful update
+        } else {
+            const data = await response.json();
+            throw new Error(data.error || 'Erro ao aplicar descontos');
         }
+
+    } catch (error) {
+        hideLoading();
+        console.error('Erro ao aplicar desconto em massa:', error);
+        showToast('Erro ao aplicar descontos: ' + error.message, 'error');
     }
+}
 
-    // =====================================================
-    // GLOBAL EXPORTS
-    // =====================================================
+// =====================================================
+// GLOBAL EXPORTS
+// =====================================================
 
-    window.openProductModal = openProductModal;
-    window.openCollectionModal = openCollectionModal;
-    window.openCustomerModal = openCustomerModal;
-    window.editProduct = editProduct;
-    window.deleteProduct = deleteProduct;
-    window.deleteCollection = deleteCollection;
-    window.toggleProductSelection = toggleProductSelection;
-    window.toggleSelectAllProducts = toggleSelectAllProducts;
-    window.bulkEditProducts = bulkEditProducts;
-    window.bulkDeleteProducts = bulkDeleteProducts;
-    window.openBulkDiscountModal = openBulkDiscountModal;
-    window.updateDiscountPreview = updateDiscountPreview;
-    window.applyBulkDiscount = applyBulkDiscount;
-    window.importProductsCSV = importProductsCSV;
-    window.previewProduct = previewProduct;
-    window.filterProductsTable = filterProductsTable;
-    window.filterOrdersTable = filterOrdersTable;
-    window.filterCustomersTable = filterCustomersTable;
-    window.manageCollectionProducts = manageCollectionProducts;
-    window.addProductToCollection = addProductToCollection;
-    window.removeProductFromCollection = removeProductFromCollection;
-    window.saveCollectionProductOrder = saveCollectionProductOrder;
-    window.filterPMList = filterPMList;
-    window.updateOrderStatus = updateOrderStatus;
-    window.viewOrderDetails = viewOrderDetails;
-    window.viewCustomerDetails = viewCustomerDetails;
-    window.printInvoice = printInvoice;
-    window.exportOrders = exportOrders;
-    window.adjustInventory = adjustInventory;
-    window.adjustStockModal = adjustStockModal;
-    window.previousProductsPage = previousProductsPage;
-    window.nextProductsPage = nextProductsPage;
-    window.closeModal = closeModal;
-    window.showToast = showToast;
-    window.showLoading = showLoading;
-    window.hideLoading = hideLoading;
-    window.loadPage = loadPage;
+window.openProductModal = openProductModal;
+window.openCollectionModal = openCollectionModal;
+window.openCustomerModal = openCustomerModal;
+window.editProduct = editProduct;
+window.deleteProduct = deleteProduct;
+window.deleteCollection = deleteCollection;
+window.toggleProductSelection = toggleProductSelection;
+window.toggleSelectAllProducts = toggleSelectAllProducts;
+window.bulkEditProducts = bulkEditProducts;
+window.bulkDeleteProducts = bulkDeleteProducts;
+window.openBulkDiscountModal = openBulkDiscountModal;
+window.updateDiscountPreview = updateDiscountPreview;
+window.applyBulkDiscount = applyBulkDiscount;
+window.importProductsCSV = importProductsCSV;
+window.previewProduct = previewProduct;
+window.filterProductsTable = filterProductsTable;
+window.filterOrdersTable = filterOrdersTable;
+window.filterCustomersTable = filterCustomersTable;
+window.manageCollectionProducts = manageCollectionProducts;
+window.addProductToCollection = addProductToCollection;
+window.removeProductFromCollection = removeProductFromCollection;
+window.saveCollectionProductOrder = saveCollectionProductOrder;
+window.filterPMList = filterPMList;
+window.updateOrderStatus = updateOrderStatus;
+window.viewOrderDetails = viewOrderDetails;
+window.viewCustomerDetails = viewCustomerDetails;
+window.printInvoice = printInvoice;
+window.exportOrders = exportOrders;
+window.adjustInventory = adjustInventory;
+window.adjustStockModal = adjustStockModal;
+window.previousProductsPage = previousProductsPage;
+window.nextProductsPage = nextProductsPage;
+window.closeModal = closeModal;
+window.showToast = showToast;
+window.showLoading = showLoading;
+window.hideLoading = hideLoading;
+window.loadPage = loadPage;
 
-    console.log('%c🎬 Stranger Things Admin Dashboard PRO v2.0', 'background: #E50914; color: white; font-size: 16px; font-weight: bold; padding: 10px;');
-    console.log('%cSistema carregado com sucesso! ✨', 'color: #10B981; font-size: 14px;');
-    // =====================================================
-    // GATEWAYS PAGE
-    // =====================================================
+console.log('%c🎬 Stranger Things Admin Dashboard PRO v2.0', 'background: #E50914; color: white; font-size: 16px; font-weight: bold; padding: 10px;');
+console.log('%cSistema carregado com sucesso! ✨', 'color: #10B981; font-size: 14px;');
+// =====================================================
+// GATEWAYS PAGE
+// =====================================================
 
-    async function renderGateways(container) {
-        showLoading('Carregando gateways...');
+async function renderGateways(container) {
+    showLoading('Carregando gateways...');
 
-        try {
-            const response = await fetch(`${API_URL}/gateways`, {
-                headers: getAuthHeaders()
-            });
+    try {
+        const response = await fetch(`${API_URL}/gateways`, {
+            headers: getAuthHeaders()
+        });
 
-            const gateways = await response.json();
+        const gateways = await response.json();
 
-            container.innerHTML = `
+        container.innerHTML = `
             <div class="page-header">
                 <h2>Gateways de Pagamento</h2>
                 <p>Configure as credenciais dos gateways de pagamento</p>
@@ -4580,28 +4581,28 @@ async function loadGateways() {
                 }
             </style>
         `;
-        } catch (error) {
-            console.error('Erro ao carregar gateways:', error);
-            showToast('Erro ao carregar gateways', 'error');
-        } finally {
-            hideLoading();
-        }
+    } catch (error) {
+        console.error('Erro ao carregar gateways:', error);
+        showToast('Erro ao carregar gateways', 'error');
+    } finally {
+        hideLoading();
     }
+}
 
-    function editGateway(id) {
-        showLoading('Carregando configurações...');
+function editGateway(id) {
+    showLoading('Carregando configurações...');
 
-        fetch(`${API_URL}/gateways/${id}`, {
-            headers: getAuthHeaders()
-        })
-            .then(res => res.json())
-            .then(gateway => {
-                hideLoading();
+    fetch(`${API_URL}/gateways/${id}`, {
+        headers: getAuthHeaders()
+    })
+        .then(res => res.json())
+        .then(gateway => {
+            hideLoading();
 
-                const settings = gateway.settings_json ? JSON.parse(gateway.settings_json) : {};
+            const settings = gateway.settings_json ? JSON.parse(gateway.settings_json) : {};
 
-                const modal = document.getElementById('modalContainer');
-                modal.innerHTML = `
+            const modal = document.getElementById('modalContainer');
+            modal.innerHTML = `
             <div class="modal-overlay" onclick="closeModal()"></div>
             <div class="modal" style="max-width: 600px;">
                 <div class="modal-header">
@@ -4659,124 +4660,124 @@ async function loadGateways() {
                 </div>
             </div>
         `;
-            })
-            .catch(error => {
-                hideLoading();
-                console.error('Erro:', error);
-                showToast('Erro ao carregar gateway', 'error');
-            });
-    }
-
-    async function saveGateway(event, id) {
-        event.preventDefault();
-        showLoading('Salvando...');
-
-        const formData = new FormData(event.target);
-
-        // settings_json logic
-        const settings = {
-            enable_pix: formData.get('enable_pix') ? true : false,
-            enable_credit_card: formData.get('enable_credit_card') ? true : false
-        };
-
-        const data = {
-            name: 'Bestfy Payments', // Mantém o nome
-            public_key: formData.get('public_key'),
-            secret_key: formData.get('secret_key'),
-            is_active: formData.get('is_active') ? 1 : 0,
-            settings_json: JSON.stringify(settings)
-        };
-
-        try {
-            const response = await fetch(`${API_URL}/gateways/${id}`, {
-                method: 'PUT',
-                headers: getAuthHeaders(),
-                body: JSON.stringify(data)
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-                showToast('Gateway salvo com sucesso!', 'success');
-                closeModal();
-                // Recarregar a página atual se for gateways
-                const hash = window.location.hash.substring(1);
-                if (hash === 'gateways') {
-                    loadPage('gateways');
-                }
-            } else {
-                showToast(result.error || 'Erro ao salvar', 'error');
-            }
-        } catch (error) {
+        })
+        .catch(error => {
+            hideLoading();
             console.error('Erro:', error);
-            showToast('Erro ao salvar gateway', 'error');
-        } finally {
-            hideLoading();
-        }
-    }
-
-    // =====================================================
-    // BULK ACTIONS & HELPERS
-    // =====================================================
-
-    window.toggleSelectAllOrders = function (source) {
-        const checkboxes = document.querySelectorAll('.order-checkbox');
-        checkboxes.forEach(chk => {
-            chk.checked = source.checked;
+            showToast('Erro ao carregar gateway', 'error');
         });
-        updateBulkSelection();
-    }
+}
 
-    window.updateBulkSelection = function () {
-        const checkboxes = document.querySelectorAll('.order-checkbox:checked');
-        const count = checkboxes.length;
-        const btnDelete = document.getElementById('btnDeleteSelected');
-        const countSpan = document.getElementById('selectedCount');
+async function saveGateway(event, id) {
+    event.preventDefault();
+    showLoading('Salvando...');
 
-        if (btnDelete && countSpan) {
-            countSpan.textContent = count;
-            btnDelete.style.display = count > 0 ? 'inline-flex' : 'none';
-        }
-    }
+    const formData = new FormData(event.target);
 
-    window.deleteSelectedOrders = async function () {
-        const checkboxes = document.querySelectorAll('.order-checkbox:checked');
-        const ids = Array.from(checkboxes).map(cb => cb.value);
+    // settings_json logic
+    const settings = {
+        enable_pix: formData.get('enable_pix') ? true : false,
+        enable_credit_card: formData.get('enable_credit_card') ? true : false
+    };
 
-        if (ids.length === 0) return;
+    const data = {
+        name: 'Bestfy Payments', // Mantém o nome
+        public_key: formData.get('public_key'),
+        secret_key: formData.get('secret_key'),
+        is_active: formData.get('is_active') ? 1 : 0,
+        settings_json: JSON.stringify(settings)
+    };
 
-        if (!confirm(`Tem certeza que deseja excluir ${ids.length} pedido(s)? Esta ação não pode ser desfeita.`)) {
-            return;
-        }
+    try {
+        const response = await fetch(`${API_URL}/gateways/${id}`, {
+            method: 'PUT',
+            headers: getAuthHeaders(),
+            body: JSON.stringify(data)
+        });
 
-        showLoading('Excluindo pedidos...');
+        const result = await response.json();
 
-        try {
-            const response = await fetch(`${API_URL}/orders/bulk`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
-                },
-                body: JSON.stringify({ order_ids: ids })
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-                showToast(result.message || 'Pedidos excluídos com sucesso', 'success');
-                loadPage('orders'); // Recarrega a lista
-            } else {
-                showToast(result.error || 'Erro ao excluir pedidos', 'error');
+        if (response.ok) {
+            showToast('Gateway salvo com sucesso!', 'success');
+            closeModal();
+            // Recarregar a página atual se for gateways
+            const hash = window.location.hash.substring(1);
+            if (hash === 'gateways') {
+                loadPage('gateways');
             }
-        } catch (error) {
-            console.error('Erro ao excluir pedidos:', error);
-            showToast('Erro ao conectar com o servidor', 'error');
-        } finally {
-            hideLoading();
+        } else {
+            showToast(result.error || 'Erro ao salvar', 'error');
         }
+    } catch (error) {
+        console.error('Erro:', error);
+        showToast('Erro ao salvar gateway', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+// =====================================================
+// BULK ACTIONS & HELPERS
+// =====================================================
+
+window.toggleSelectAllOrders = function (source) {
+    const checkboxes = document.querySelectorAll('.order-checkbox');
+    checkboxes.forEach(chk => {
+        chk.checked = source.checked;
+    });
+    updateBulkSelection();
+}
+
+window.updateBulkSelection = function () {
+    const checkboxes = document.querySelectorAll('.order-checkbox:checked');
+    const count = checkboxes.length;
+    const btnDelete = document.getElementById('btnDeleteSelected');
+    const countSpan = document.getElementById('selectedCount');
+
+    if (btnDelete && countSpan) {
+        countSpan.textContent = count;
+        btnDelete.style.display = count > 0 ? 'inline-flex' : 'none';
+    }
+}
+
+window.deleteSelectedOrders = async function () {
+    const checkboxes = document.querySelectorAll('.order-checkbox:checked');
+    const ids = Array.from(checkboxes).map(cb => cb.value);
+
+    if (ids.length === 0) return;
+
+    if (!confirm(`Tem certeza que deseja excluir ${ids.length} pedido(s)? Esta ação não pode ser desfeita.`)) {
+        return;
     }
 
+    showLoading('Excluindo pedidos...');
+
+    try {
+        const response = await fetch(`${API_URL}/orders/bulk`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+            },
+            body: JSON.stringify({ order_ids: ids })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            showToast(result.message || 'Pedidos excluídos com sucesso', 'success');
+            loadPage('orders'); // Recarrega a lista
+        } else {
+            showToast(result.error || 'Erro ao excluir pedidos', 'error');
+        }
+    } catch (error) {
+        console.error('Erro ao excluir pedidos:', error);
+        showToast('Erro ao conectar com o servidor', 'error');
+    } finally {
+        hideLoading();
+    }
+}
 
 
-});
+
+
