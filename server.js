@@ -1406,7 +1406,12 @@ app.post('/api/payments/process', async (req, res) => {
             const result = await db.query("SELECT * FROM payment_gateways WHERE gateway_type = 'bestfy' AND is_active = 1", []);
             gateway = result.rows?.[0];
         } else {
-            gateway = db.prepare("SELECT * FROM payment_gateways WHERE gateway_type = 'bestfy' AND is_active = 1").get();
+            gateway = await new Promise((resolve, reject) => {
+                db.get("SELECT * FROM payment_gateways WHERE gateway_type = 'bestfy' AND is_active = 1", [], (err, row) => {
+                    if (err) reject(err);
+                    else resolve(row);
+                });
+            });
         }
 
         const secretKey = gateway?.secret_key || process.env.BESTFY_SECRET_KEY;
@@ -1427,26 +1432,19 @@ app.post('/api/payments/process', async (req, res) => {
         const bestfyService = new BestfyService(secretKey, publicKey);
 
         // 2. Buscar dados do pedido
-        const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(order_id);
+        const order = await new Promise((resolve, reject) => {
+            db.get('SELECT * FROM orders WHERE id = ?', [order_id], (err, row) => {
+                if (err) reject(err);
+                else resolve(row);
+            });
+        });
+
         if (!order) {
             console.error(`❌ Pedido ${order_id} não encontrado no banco.`);
             return res.status(404).json({ error: 'Pedido não encontrado' });
         }
 
         // 3. Preparar transactionData
-        // Sanitizar CPF
-        const customerPhone = order.customer_phone ? order.customer_phone.replace(/\D/g, '') : '';
-        // Tentar extrair CPF se não tiver campo separado (assumindo que pode estar no phone ou precisar de fallback)
-        // No checkout.js estamos enviando 'cpf' no customer mas aqui estamos lendo do 'orders' table.
-        // O checkout.js salvou customer_phone e customer_name etc. mas não salvou CPF explicitamente na tabela orders nas colunas padrão (verificar schema).
-        // Se a tabela orders não tem coluna CPF, vamos usar um dummy ou tentar extrair.
-        // CORREÇÃO: O checkout.js manda 'customer' com 'cpf' para a rota /api/orders, mas o server.js /api/orders NÃO SALVA CPF na tabela!
-        // SOLUÇÃO: Vamos receber o CPF no body deste request também, se possível. 
-        // Mas o checkout.js atual não manda customer full aqui.
-        // HACK: Usar um CPF de teste se não tiver, ou pedir para o checkout mandar.
-        // O checkout.js manda: card: { ... } e amount e order_id.
-        // Vou adicionar um log de aviso.
-
         const transactionData = {
             orderId: order_id,
             amount: amount,
@@ -1481,8 +1479,12 @@ app.post('/api/payments/process', async (req, res) => {
 
         // 5. Atualizar DB
         const status = transaction.status === 'APPROVED' ? 'paid' : 'failed';
-        db.prepare('UPDATE orders SET status = ?, transaction_id = ? WHERE id = ?')
-            .run(status, transaction.id, order_id);
+        await new Promise((resolve, reject) => {
+            db.run('UPDATE orders SET status = ?, transaction_id = ? WHERE id = ?', [status, transaction.id, order_id], (err) => {
+                if (err) reject(err);
+                else resolve();
+            });
+        });
 
         if (status === 'paid') {
             res.json({
