@@ -84,10 +84,20 @@ async function loadCollectionPage() {
         renderViewToggle();
         renderCollectionProducts();
 
+        // 🟢 FIX: Hide loader after successful render
+        if (window.hidePageLoader) {
+            window.hidePageLoader();
+        }
+
     } catch (error) {
         console.error('Erro ao carregar coleção:', error);
         document.getElementById('collectionTitle').textContent = 'Erro ao carregar coleção';
         document.getElementById('collectionDescription').textContent = 'Não foi possível carregar os produtos desta coleção.';
+
+        // 🟢 FIX: Hide loader even on error so user is not stuck
+        if (window.hidePageLoader) {
+            window.hidePageLoader();
+        }
     }
 }
 
