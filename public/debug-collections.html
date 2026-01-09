@@ -51,6 +51,8 @@
     <p>Use este botão para forçar a criação das coleções no banco de dados.</p>
 
     <button onclick="runSeed()" id="btnAction">Rodar Correção Agora</button>
+    <button onclick="runReset()" id="btnReset" style="background-color: #ff9800; margin-left: 10px;">RESETAR Capas e
+        Copos</button>
     <br><br>
 
     <div id="status"></div>
@@ -59,8 +61,21 @@
     <script>
         async function runSeed() {
             const btn = document.getElementById('btnAction');
+            // ... (keep existing function logic but refactor if needed, I will duplicate for safety/speed)
+            // Actually, let's keep runSeed and add runReset
+            await executeAction('/api/admin/debug/seed', btn);
+        }
+
+        async function runReset() {
+            const btn = document.getElementById('btnReset');
+            if (!confirm('Isso vai limpar e recriar as coleções de Capas e Copos. Continuar?')) return;
+            await executeAction('/api/admin/debug/reset-collections', btn);
+        }
+
+        async function executeAction(url, btn) {
             const output = document.getElementById('output');
             const status = document.getElementById('status');
+            const originalText = btn.innerText;
 
             btn.disabled = true;
             btn.innerText = 'Rodando...';
@@ -69,12 +84,12 @@
             status.innerText = '';
 
             try {
-                const response = await fetch('/api/admin/debug/seed', { method: 'POST' });
+                const response = await fetch(url, { method: 'POST' });
                 const data = await response.json();
 
                 if (data.success) {
-                    status.innerHTML = '<h3 class="success">✅ Sucesso! Coleções verificadas. Recarregue o Admin.</h3>';
-                    output.innerText = data.logs.join('\n');
+                    status.innerHTML = '<h3 class="success">✅ Sucesso! Operação concluída.</h3>';
+                    output.innerText = data.logs ? data.logs.join('\\n') : (data.message || 'Feito');
                 } else {
                     status.innerHTML = '<h3 class="error">❌ Erro ao rodar script.</h3>';
                     output.innerText = data.error || 'Erro desconhecido';
@@ -84,7 +99,7 @@
                 output.innerText = err.message;
             } finally {
                 btn.disabled = false;
-                btn.innerText = 'Rodar Novamente';
+                btn.innerText = originalText;
             }
         }
     </script>

@@ -36,7 +36,10 @@ async function seedCollections(db, returnLogs = false) {
         {
             title: 'Quenchers & Copos',
             slug: 'quenchers-copos',
-            keywords: ['quencher', 'copo', 'garrafa', 'caneca', 'tumbler', 'stanley']
+            keywords: ['quencher', 'copo', 'garrafa', 'caneca', 'tumbler', 'stanley'],
+            namePattern: /quencher|copo|garrafa|caneca|tumbler|stanley/i,
+            strictMatch: true,
+            priceOverride: 59.90
         },
         {
             title: 'Mochilas',

@@ -3126,37 +3126,42 @@ app.post('/api/admin/debug/seed', async (req, res) => {
 });
 
 // DEBUG ROUTE: Reset Capinhas Collection (clear and re-seed)
-app.post('/api/admin/debug/reset-capinhas', async (req, res) => {
+// DEBUG ROUTE: Reset Specific Collections (Capinhas & Quenchers)
+app.post('/api/admin/debug/reset-collections', async (req, res) => {
     try {
-        console.log('🔄 Resetting Capinhas de Celular collection...');
+        console.log('🔄 Resetting specific collections (Capinhas & Quenchers)...');
 
-        // Find Capinhas collection
-        const collection = await new Promise((resolve, reject) => {
-            db.get('SELECT id FROM collections WHERE slug = ?', ['capinhas-celular'], (err, row) => {
-                if (err) reject(err);
-                else resolve(row);
+        const targetSlugs = ['capinhas-celular', 'quenchers-copos'];
+        const logs = [];
+
+        for (const slug of targetSlugs) {
+            // Find collection
+            const collection = await new Promise((resolve, reject) => {
+                db.get('SELECT id, name FROM collections WHERE slug = ?', [slug], (err, row) => {
+                    if (err) reject(err);
+                    else resolve(row);
+                });
             });
-        });
 
-        if (!collection) {
-            return res.json({ success: false, message: 'Collection not found' });
+            if (collection) {
+                // Clear products
+                await new Promise((resolve, reject) => {
+                    db.run('DELETE FROM collection_products WHERE collection_id = ?', [collection.id], (err) => {
+                        if (err) reject(err);
+                        else resolve();
+                    });
+                });
+                logs.push(`✅ Cleared products from ${collection.name}`);
+            } else {
+                logs.push(`⚠️ Collection ${slug} not found`);
+            }
         }
 
-        // Clear all products from this collection
-        await new Promise((resolve, reject) => {
-            db.run('DELETE FROM collection_products WHERE collection_id = ?', [collection.id], (err) => {
-                if (err) reject(err);
-                else resolve();
-            });
-        });
-
-        console.log('✅ Cleared all products from Capinhas collection');
-
-        // Re-seed
+        // Re-seed (will re-populate empty collections with strict rules)
         const { seedCollections } = require('./collection-seeder');
-        const logs = await seedCollections(db, true);
+        const seedLogs = await seedCollections(db, true);
 
-        res.json({ success: true, message: 'Capinhas collection reset', logs });
+        res.json({ success: true, message: 'Collections reset and re-seeded', logs: [...logs, ...seedLogs] });
     } catch (error) {
         console.error('❌ Error resetting Capinhas:', error);
         res.status(500).json({ success: false, error: error.message });
