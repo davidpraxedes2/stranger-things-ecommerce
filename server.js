@@ -178,6 +178,10 @@ app.get('/product.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'product.html'));
 });
 
+app.get('/collection.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'collection.html'));
+});
+
 app.get('/checkout.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'checkout.html'));
 });

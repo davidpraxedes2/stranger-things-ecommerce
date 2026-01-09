@@ -1185,7 +1185,7 @@ async function renderProducts(container) {
     const selectedCount = AppState.selected.products.size;
 
     container.innerHTML = `
-                < div class="page-header" >
+                <div class="page-header">
             <div>
                 <h1>Produtos (${AppState.products.length})</h1>
                 <p class="page-subtitle">Gerenciamento completo do catálogo</p>
@@ -1234,7 +1234,7 @@ async function renderProducts(container) {
             </div>
         </div >
 
-        < !--Filters -->
+        <!--Filters -->
         <div class="filters-bar">
             <input 
                 type="text" 
@@ -1316,7 +1316,7 @@ async function renderProducts(container) {
 function renderProductRows() {
     if (!AppState.products || AppState.products.length === 0) {
         return `
-                < tr >
+                <tr>
                 <td colspan="8" style="text-align: center; padding: 60px 20px;">
                     <div style="color: var(--text-muted);">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -1339,7 +1339,7 @@ function renderProductRows() {
         const statusClass = product.active ? 'success' : 'danger';
 
         return `
-                < tr data - product - id="${product.id}" class="${isSelected ? 'selected-row' : ''}" >
+                <tr data-product-id="${product.id}" class="${isSelected ? 'selected-row' : ''}">
                 <td>
                     <input type="checkbox" 
                            ${isSelected ? 'checked' : ''} 
@@ -1496,7 +1496,7 @@ function previewProduct(id) {
     if (!product) return;
 
     const modal = `
-                < div class="modal-overlay" onclick = "closeModal()" >
+                <div class="modal-overlay" onclick="closeModal()">
                     <div class="modal-dialog" onclick="event.stopPropagation()" style="max-width: 800px;">
                         <div class="modal-header">
                             <h2>Pré-visualização: ${product.name}</h2>
@@ -1602,7 +1602,7 @@ async function renderCollections(container) {
     await loadCollections();
 
     container.innerHTML = `
-                < div class="page-header" >
+                <div class="page-header">
             <div>
                 <h1>Coleções (${AppState.collections.length})</h1>
                 <p class="page-subtitle">Organize produtos em coleções temáticas</p>
@@ -1617,7 +1617,7 @@ async function renderCollections(container) {
             </button>
         </div >
 
-        < !--Collections Grid-- >
+        <!--Collections Grid-->
                 <div id="collectionsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; margin-bottom: 32px;">
                     ${AppState.collections.map(col => `
                 <div class="collection-card" data-id="${col.id}" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; transition: all 0.2s; overflow: hidden;">
@@ -4954,7 +4954,7 @@ window.deleteSelectedOrders = async function () {
 
 
 // Debug Helper globally available
-window.forceProductionSeed = async function() {
+window.forceProductionSeed = async function () {
     console.log('🚀 Forçando seed manual...');
     try {
         const res = await fetch(`${API_BASE}/api/admin/force-db-reset`, {
@@ -4964,7 +4964,7 @@ window.forceProductionSeed = async function() {
         const data = await res.json();
         console.log('Seed Result:', data);
         alert('Seed executado: ' + (data.success ? 'Sucesso' : 'Falha'));
-    } catch(e) {
+    } catch (e) {
         console.error(e);
         alert('Erro ao executar seed');
     }
