@@ -1566,24 +1566,29 @@ function getSessionId(req) {
 }
 
 // Buscar carrinho
-app.get('/api/cart', (req, res) => {
+app.get('/api/cart', async (req, res) => {
     const sessionId = getSessionId(req);
 
-    db.all(`
+    try {
+        const rows = await new Promise((resolve, reject) => {
+            db.all(`
         SELECT ci.*, p.name, p.image_url, p.sku 
         FROM cart_items ci
         JOIN products p ON ci.product_id = p.id
         WHERE ci.session_id = ?
             ORDER BY ci.created_at DESC
                 `, [sessionId], (err, rows) => {
-        if (err) {
-            res.status(500).json({ error: err.message });
-            return;
-        }
+                if (err) reject(err);
+                else resolve(rows || []);
+            });
+        });
 
         const total = rows.reduce((sum, item) => sum + (item.price * item.quantity), 0);
         res.json({ items: rows, total: total });
-    });
+    } catch (err) {
+        console.error('Erro ao buscar carrinho:', err);
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // Adicionar item ao carrinho
