@@ -28,8 +28,8 @@ if (connectionString) {
     pgPool = new Pool({
         connectionString,
         max: 10, // Limit max connections to prevent exhaustion (Neon/Vercel limit is usually 10-20)
-        idleTimeoutMillis: 30000,
-        connectionTimeoutMillis: 5000, // Fail fast if DB is unreachable
+        idleTimeoutMillis: 2000, // Aggressively close idle connections (was 30s)
+        connectionTimeoutMillis: 2000, // Fail fast if DB is unreachable
     });
 
     pgPool.on('error', (err, client) => {
