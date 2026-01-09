@@ -2689,11 +2689,12 @@ app.post('/api/payments/bestfy/pix', async (req, res) => {
         const bestfy = new BestfyService(gateway.secret_key, gateway.public_key);
 
         // Sanitize customer data (Bestfy requires 8 chars zipCode without hyphen)
+        const rawZipCode = customer.address?.zipCode || '';
         const sanitizedCustomer = {
             ...customer,
             address: {
-                ...customer.address,
-                zipCode: customer.address.zipCode.replace(/\D/g, '')
+                ...(customer.address || {}),
+                zipCode: rawZipCode.replace(/\D/g, '')
             }
         };
 
