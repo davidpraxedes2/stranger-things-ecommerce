@@ -3125,6 +3125,44 @@ app.post('/api/admin/debug/seed', async (req, res) => {
     }
 });
 
+// DEBUG ROUTE: Reset Capinhas Collection (clear and re-seed)
+app.post('/api/admin/debug/reset-capinhas', async (req, res) => {
+    try {
+        console.log('🔄 Resetting Capinhas de Celular collection...');
+
+        // Find Capinhas collection
+        const collection = await new Promise((resolve, reject) => {
+            db.get('SELECT id FROM collections WHERE slug = ?', ['capinhas-celular'], (err, row) => {
+                if (err) reject(err);
+                else resolve(row);
+            });
+        });
+
+        if (!collection) {
+            return res.json({ success: false, message: 'Collection not found' });
+        }
+
+        // Clear all products from this collection
+        await new Promise((resolve, reject) => {
+            db.run('DELETE FROM collection_products WHERE collection_id = ?', [collection.id], (err) => {
+                if (err) reject(err);
+                else resolve();
+            });
+        });
+
+        console.log('✅ Cleared all products from Capinhas collection');
+
+        // Re-seed
+        const { seedCollections } = require('./collection-seeder');
+        const logs = await seedCollections(db, true);
+
+        res.json({ success: true, message: 'Capinhas collection reset', logs });
+    } catch (error) {
+        console.error('❌ Error resetting Capinhas:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 // Error handler global (deve ser o último middleware)
 app.use((err, req, res, next) => {
     console.error('❌ Erro:', err.message);
