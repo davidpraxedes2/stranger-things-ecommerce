@@ -593,6 +593,13 @@ async function initializePostgres() {
             WHERE NOT EXISTS(SELECT 1 FROM users WHERE username = 'admin')
             `, [defaultPassword]);
 
+        // Seed Bestfy Gateway if doesn't exist
+        await client.query(`
+            INSERT INTO payment_gateways (name, gateway_type, public_key, secret_key, is_active, settings_json)
+            SELECT 'BESTFY Payment Gateway', 'bestfy', '', '', 0, '{}'
+            WHERE NOT EXISTS (SELECT 1 FROM payment_gateways WHERE gateway_type = 'bestfy')
+        `);
+
         await client.end();
         console.log('✅ Tabelas PostgreSQL criadas com sucesso');
     } catch (error) {
