@@ -73,9 +73,9 @@ async function initRealTimeTracking() {
 
 
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initAnalytics);
+    document.addEventListener('DOMContentLoaded', initRealTimeTracking);
 } else {
-    initAnalytics();
+    initRealTimeTracking();
 }
 
 // Meta Pixel: Track PageView on home page
