@@ -989,8 +989,47 @@ async function renderActiveSessions() {
                 // Safe content generation with enhanced page title
                 const city = session.city === 'Desconhecido' ? 'Detectando...' : session.city;
                 const pageUrl = session.page || '/';
-                const device = session.device || 'Desktop';
                 const duration = session.duration || '0m';
+
+                // Device & Browser with icons
+                const device = session.device || 'Desktop';
+                const browser = session.browser || 'Unknown';
+
+                const deviceIcons = {
+                    'Mobile': '📱',
+                    'Tablet': '📲',
+                    'Desktop': '💻'
+                };
+                const deviceIcon = deviceIcons[device] || '💻';
+
+                // UTM Source detection with icons
+                let utmDisplay = null;
+                let utmIcon = '🌐';
+                if (session.utm_source) {
+                    const source = session.utm_source.toLowerCase();
+                    if (source.includes('instagram') || source.includes('ig')) {
+                        utmIcon = '📸';
+                        utmDisplay = 'Instagram';
+                    } else if (source.includes('facebook') || source.includes('fb')) {
+                        utmIcon = '👥';
+                        utmDisplay = 'Facebook';
+                    } else if (source.includes('google')) {
+                        utmIcon = '🔍';
+                        utmDisplay = 'Google';
+                    } else if (source.includes('tiktok')) {
+                        utmIcon = '🎵';
+                        utmDisplay = 'TikTok';
+                    } else if (source.includes('whatsapp')) {
+                        utmIcon = '💬';
+                        utmDisplay = 'WhatsApp';
+                    } else {
+                        utmDisplay = session.utm_source;
+                    }
+
+                    if (session.utm_campaign) {
+                        utmDisplay += ` • ${session.utm_campaign}`;
+                    }
+                }
 
                 // Extract meaningful page title from URL
                 let displayTitle = session.pageTitle || 'Navegando...';
@@ -1024,13 +1063,29 @@ async function renderActiveSessions() {
                             <div style="width: 10px; height: 10px; background: var(--success); border-radius: 50%; box-shadow: 0 0 8px var(--success);"></div>
                             <div>
                                 <div style="font-weight: 700; color: var(--text-primary); font-size: 14px;">${city}, ${session.state || ''}</div>
-                                <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">${session.ip} • ${device}</div>
+                                <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px; display: flex; align-items: center; gap: 6px;">
+                                    <span>${session.ip}</span>
+                                    <span style="opacity: 0.5;">•</span>
+                                    <span>${deviceIcon} ${device}</span>
+                                    <span style="opacity: 0.5;">•</span>
+                                    <span>${browser}</span>
+                                </div>
                             </div>
                         </div>
                         <div style="text-align: right;">
                             <div style="font-size: 11px; color: var(--text-secondary); background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px;">${duration}</div>
                         </div>
                     </div>
+                    
+                    ${utmDisplay ? `
+                    <div style="background: linear-gradient(135deg, rgba(229, 9, 20, 0.15), rgba(229, 9, 20, 0.05)); border: 1px solid rgba(229, 9, 20, 0.3); border-radius: 6px; padding: 6px 10px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 14px;">${utmIcon}</span>
+                        <div style="flex: 1;">
+                            <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Origem do Tráfego</div>
+                            <div style="font-size: 12px; font-weight: 600; color: var(--primary);">${utmDisplay}</div>
+                        </div>
+                    </div>
+                    ` : ''}
                     
                     <div style="background: rgba(0,0,0,0.2); border-left: 2px solid var(--primary); border-radius: 4px; padding: 8px 12px; display: flex; align-items: center; gap: 10px;">
                         <div style="color: var(--text-secondary); font-size: 16px;">
