@@ -571,6 +571,16 @@ async function initializeDatabase() {
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
 
+        // Tracking Settings
+        await runQuery(`CREATE TABLE IF NOT EXISTS tracking_settings (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            provider TEXT UNIQUE NOT NULL,
+            pixel_id TEXT,
+            is_active INTEGER DEFAULT 0,
+            settings_json TEXT,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
+
         // Admin User
         const defaultPassword = bcrypt.hashSync('admin123', 10);
         await runQuery(`INSERT OR IGNORE INTO users (username, email, password, role) 
