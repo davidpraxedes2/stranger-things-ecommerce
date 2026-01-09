@@ -1,10 +1,9 @@
-// API Base URL - usar window para evitar conflitos com outros scripts
 if (typeof window.API_BASE === 'undefined') {
     window.API_BASE = window.location.origin;
     window.API_URL = `${window.API_BASE}/api`;
 }
-const API_BASE = window.API_BASE;
-const API_URL = window.API_URL;
+var API_BASE = window.API_BASE;
+var API_URL = window.API_URL;
 
 // Products Data (loaded from API)
 let products = [];

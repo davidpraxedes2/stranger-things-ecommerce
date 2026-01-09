@@ -1,9 +1,10 @@
 // Product Page Script
 // Expose API_BASE and API_URL on window for use in other scripts
-window.API_BASE = window.location.origin;
-window.API_URL = `${window.API_BASE}/api`;
-const API_BASE = window.API_BASE;
-const API_URL = window.API_URL;
+if (!window.API_BASE) window.API_BASE = window.location.origin;
+if (!window.API_URL) window.API_URL = `${window.API_BASE}/api`;
+
+var API_BASE = window.API_BASE;
+var API_URL = window.API_URL;
 
 // Get product ID from URL
 const urlParams = new URLSearchParams(window.location.search);

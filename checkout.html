@@ -317,7 +317,28 @@
     <div id="toast-container"></div>
 
     <!-- Core Scripts -->
-    <script src="pixel-loader.js?v=2"></script>
+    <script>
+        (async function () {
+            try {
+                const r = await fetch('/api/tracking/meta-pixel');
+                if (!r.ok) return;
+                const d = await r.json();
+                if (d.pixel_id && d.is_active) {
+                    console.log('🔹 Pixel Init:', d.pixel_id);
+                    !function (f, b, e, v, n, t, s) { if (f.fbq) return; n = f.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments) }; if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0'; n.queue = []; t = b.createElement(e); t.async = !0; t.src = v; s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s) }(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+                    fbq('init', d.pixel_id);
+                    fbq('track', 'PageView');
+                    window.metaPixel = {
+                        trackPurchase: (oid, val, items) => { fbq('track', 'Purchase', { currency: 'BRL', value: val, content_type: 'product', order_id: oid, content_ids: items ? items.map(i => i.id) : [] }); },
+                        trackInitiateCheckout: (val, items) => { fbq('track', 'InitiateCheckout', { currency: 'BRL', value: val, content_type: 'product', content_ids: items ? items.map(i => i.id) : [] }); },
+                        trackAddToCart: (item) => { fbq('track', 'AddToCart', { currency: 'BRL', value: item.price, content_type: 'product', content_ids: [item.id], content_name: item.name }); },
+                        trackViewContent: (p) => { fbq('track', 'ViewContent', { currency: 'BRL', value: p.price, content_type: 'product', content_ids: [p.id], content_name: p.name }); }
+                    };
+                    window.dispatchEvent(new Event('metaPixelReady'));
+                }
+            } catch (e) { console.warn('Pixel Error:', e); }
+        })();
+    </script>
     <script src="checkout.js"></script>
     <script>
         // Meta Pixel: Track InitiateCheckout when page loads
