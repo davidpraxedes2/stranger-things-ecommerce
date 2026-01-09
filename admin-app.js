@@ -953,7 +953,7 @@ async function renderActiveSessions() {
     if (!sessionsContainer) return;
 
     try {
-        const response = await fetch(`${API_URL}/admin/sessions/active`, {
+        const response = await fetch(`${API_URL}/sessions/active`, {
             headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
         });
 
