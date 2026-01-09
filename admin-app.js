@@ -942,21 +942,6 @@ async function renderActiveSessions() {
                     </div>
                 </div>
             `).join('');
-                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" style="width: 14px; height: 14px;">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                            <polyline points="14 2 14 8 20 8"></polyline>
-                        </svg>
-                        <span style="font-size: 13px; color: var(--text-primary); font-weight: 600;">${session.page}</span>
-                    </div>
-                    <div style="display: flex; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border);">
-                        <span class="badge info" style="font-size: 10px;">${session.device}</span>
-                        <span class="badge ${session.isNewUser ? 'success' : 'warning'}" style="font-size: 10px;">
-                            ${session.isNewUser ? 'Novo' : 'Retorno'}
-                        </span>
-                    </div>
-                </div >
-                `).join('');
         }
     } catch (error) {
         console.log('Sem sessões ativas disponíveis');
@@ -970,8 +955,8 @@ function startLiveUpdates() {
 
     AppState.liveUpdateInterval = setInterval(async () => {
         try {
-            const response = await fetch(`${ API_URL } /analytics/online - count`, {
-                headers: { 'Authorization': `Bearer ${ localStorage.getItem('admin_token') } ` },
+            const response = await fetch(`${API_URL} /analytics/online - count`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')} ` },
                 signal: AbortSignal.timeout(2000)
             });
 
@@ -1225,7 +1210,7 @@ function renderProductRows() {
 
 async function loadProducts() {
     try {
-        const response = await fetch(`${ API_BASE } /api/products`);
+        const response = await fetch(`${API_BASE} /api/products`);
         if (response.ok) {
             AppState.products = await response.json();
         }
@@ -1289,14 +1274,14 @@ function toggleProductSelection(productId, isChecked) {
 function bulkEditProducts() {
     if (AppState.selected.products.size === 0) return;
 
-    showToast(`Editando ${ AppState.selected.products.size } produtos...`, 'info');
+    showToast(`Editando ${AppState.selected.products.size} produtos...`, 'info');
 }
 
 function bulkDeleteProducts() {
     if (AppState.selected.products.size === 0) return;
 
-    if (confirm(`Tem certeza que deseja excluir ${ AppState.selected.products.size } produtos ? `)) {
-        showToast(`${ AppState.selected.products.size } produtos excluídos`, 'success');
+    if (confirm(`Tem certeza que deseja excluir ${AppState.selected.products.size} produtos ? `)) {
+        showToast(`${AppState.selected.products.size} produtos excluídos`, 'success');
         AppState.selected.products.clear();
         loadPage('products');
     }
@@ -1309,7 +1294,7 @@ function importProductsCSV() {
     input.onchange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            showToast(`Importando ${ file.name }...`, 'info');
+            showToast(`Importando ${file.name}...`, 'info');
             setTimeout(() => {
                 showToast('Produtos importados com sucesso!', 'success');
                 loadPage('products');
@@ -1391,9 +1376,9 @@ async function deleteProduct(id) {
     showLoading('Excluindo produto...');
 
     try {
-        const response = await fetch(`${ API_URL } /products/${ id } `, {
+        const response = await fetch(`${API_URL} /products/${id} `, {
             method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${ localStorage.getItem('admin_token') } ` }
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')} ` }
         });
 
         if (response.ok) {
@@ -1566,7 +1551,7 @@ function getRandomGradient() {
 
 async function loadCollections() {
     try {
-        const response = await fetch(`${ API_URL }/collections`, {
+        const response = await fetch(`${API_URL}/collections`, {
             headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
         });
         if (response.ok) {

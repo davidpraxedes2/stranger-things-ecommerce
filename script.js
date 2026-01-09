@@ -9,9 +9,68 @@ var API_URL = window.API_URL;
 let products = [];
 let collections = [];
 
-        // Geolocalização falhou - não é crítico
+// ===== SISTEMA DE ANALYTICS - TEMPO REAL (HEARTBEAT) =====
+
+async function initRealTimeTracking() {
+    let sessionId = sessionStorage.getItem('analytics_session_id');
+    if (!sessionId) {
+        sessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        sessionStorage.setItem('analytics_session_id', sessionId);
     }
+
+    let userLocation = JSON.parse(localStorage.getItem('user_location_cache') || 'null');
+
+    // Fetch Location if missing
+    if (!userLocation) {
+        try {
+            const res = await fetch('https://ipapi.co/json/');
+            if (res.ok) {
+                const data = await res.json();
+                userLocation = {
+                    city: data.city,
+                    region: data.region_code,
+                    country: data.country_code,
+                    lat: data.latitude,
+                    lon: data.longitude
+                };
+                localStorage.setItem('user_location_cache', JSON.stringify(userLocation));
+            }
+        } catch (e) { console.warn('Loc Fail', e); }
+    }
+
+    const sendHeartbeat = () => {
+        const payload = {
+            sessionId: sessionId,
+            page: window.location.pathname + window.location.search,
+            title: document.title,
+            action: 'view', // Could be extended to click/scroll
+            location: userLocation,
+            ip: null // Server handles IP
+        };
+
+        if (navigator.sendBeacon) {
+            const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+            navigator.sendBeacon(`${API_URL || '/api'}/analytics/heartbeat`, blob);
+        } else {
+            fetch(`${API_URL || '/api'}/analytics/heartbeat`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).catch(() => { }); // Silent fail
+        }
+    };
+
+    // Initial Ping
+    sendHeartbeat();
+    // Loop Ping (every 10s)
+    setInterval(sendHeartbeat, 10000);
+
+    // Ping on visibility change
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') sendHeartbeat();
+    });
 }
+
 
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initAnalytics);

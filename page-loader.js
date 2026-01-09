@@ -3,7 +3,7 @@
     // Page Loader Logic
 
     const loader = document.getElementById('pageLoader');
-    const MIN_LOADING_TIME = 400; // Minimum time to show loader
+    const MIN_LOADING_TIME = 0; // Minimum time to show loader
     const MAX_LOADING_TIME = 5000; // Safety timeout
     const startTime = Date.now();
     let hidden = false;
