@@ -53,11 +53,7 @@ async function loadCollectionPage() {
 
         // Filter products by collection - com validação robusta
         collectionProducts = allProducts.filter(p => {
-            // Verificar se p.collections existe e é array
-            if (!p.collections) return false;
-
-            // Se for string, tentar fazer parse
-            let collections = p.collections;
+            let collections = p.collections || [];
             if (typeof collections === 'string') {
                 try {
                     collections = JSON.parse(collections);
@@ -72,7 +68,15 @@ async function loadCollectionPage() {
                 collections = [collections];
             }
 
-            return collections.includes(currentCollection.name);
+            // Check explicit collection name match
+            if (collections.includes(currentCollection.name)) return true;
+
+            // Check category match (fallback for seeded products)
+            // funko-seeder uses category = 'stranger-things-funkos' (slug)
+            if (p.category === collectionSlug) return true;
+            if (p.category === currentCollection.name) return true;
+
+            return false;
         });
 
         // Render page

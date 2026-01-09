@@ -166,9 +166,8 @@ async function renderCollectionsSections() {
 
     try {
         const container = document.getElementById('collectionsContainer');
-
         if (!container) {
-            console.error('❌❌❌ Container #collectionsContainer NÃO ENCONTRADO!');
+            console.log('ℹ️ Container #collectionsContainer não encontrado (provavelmente não é a Home).');
             return;
         }
 
