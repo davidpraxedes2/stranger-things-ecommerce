@@ -1,5 +1,5 @@
 // Database helper - abstracts SQLite and PostgreSQL differences
-// VERSÃO CORRIGIDA - usando better-sqlite3 para evitar problemas de compilação
+// VERSÃO CORRIGIDA - Pool de Conexões para PostgreSQL
 
 let Database;
 try {
@@ -14,13 +14,27 @@ try {
     }
 }
 
-let pgClient = null;
+let pgPool = null;
 let USE_POSTGRES = false;
 
 // Check if we're using PostgreSQL (Vercel)
-if (process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL) {
+const connectionString = process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL;
+
+if (connectionString) {
     USE_POSTGRES = true;
     console.log('📦 Detectado PostgreSQL - modo produção (Vercel)');
+
+    const { Pool } = require('pg');
+    pgPool = new Pool({
+        connectionString,
+        max: 10, // Limit max connections to prevent exhaustion (Neon/Vercel limit is usually 10-20)
+        idleTimeoutMillis: 30000,
+        connectionTimeoutMillis: 5000, // Fail fast if DB is unreachable
+    });
+
+    pgPool.on('error', (err, client) => {
+        console.error('❌ Unexpected error on idle client', err);
+    });
 }
 
 let sqliteDb = null;
@@ -113,11 +127,12 @@ const db = {
     },
 
     // Direct query for PostgreSQL (for migrations)
-    query: async function (query, params = []) {
+    query: async function (queryText, params = []) {
         if (!USE_POSTGRES) {
             throw new Error('query() only available for PostgreSQL');
         }
-        return await queryPostgres(query, params);
+        // Use pool directly
+        return await pgPool.query(queryText, params);
     }
 };
 
@@ -202,9 +217,10 @@ function allSQLite(query, params, callback) {
     }
 }
 
-// PostgreSQL functions
+// PostgreSQL functions using POOL
 function runPostgres(query, params, callback) {
     (async () => {
+        let client = null;
         try {
             // Convert ? to $1, $2, etc
             let paramIndex = 1;
@@ -227,13 +243,9 @@ function runPostgres(query, params, callback) {
                 }
             }
 
-            // Use pg directly for raw queries
-            const { Client } = require('pg');
-            const client = new Client({
-                connectionString: process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL
-            });
+            // Get client from pool
+            client = await pgPool.connect();
 
-            await client.connect();
             const result = await client.query(convertedQuery, params);
 
             // Get last inserted ID if it's an INSERT
@@ -242,8 +254,6 @@ function runPostgres(query, params, callback) {
                 const idResult = await client.query('SELECT LASTVAL() as id');
                 lastID = idResult.rows[0]?.id || null;
             }
-
-            await client.end();
 
             const mockResult = {
                 lastID: lastID,
@@ -254,15 +264,19 @@ function runPostgres(query, params, callback) {
                 callback(null, mockResult);
             }
         } catch (error) {
+            console.error('PG Run Error:', error);
             if (callback) {
                 callback(error);
             }
+        } finally {
+            if (client) client.release();
         }
     })();
 }
 
 function getPostgres(query, params, callback) {
     (async () => {
+        let client = null;
         try {
             let paramIndex = 1;
             const convertedQuery = query.replace(/\?/g, () => {
@@ -271,14 +285,8 @@ function getPostgres(query, params, callback) {
             }).replace(/INTEGER PRIMARY KEY AUTOINCREMENT/g, 'SERIAL PRIMARY KEY')
                 .replace(/DATETIME DEFAULT CURRENT_TIMESTAMP/g, 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP');
 
-            const { Client } = require('pg');
-            const client = new Client({
-                connectionString: process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL
-            });
-
-            await client.connect();
+            client = await pgPool.connect();
             const result = await client.query(convertedQuery, params);
-            await client.end();
 
             const row = result.rows && result.rows[0] ? result.rows[0] : null;
 
@@ -286,76 +294,17 @@ function getPostgres(query, params, callback) {
                 callback(null, row);
             }
         } catch (error) {
+            console.error('PG Get Error:', error);
             if (callback) {
                 callback(error, null);
             }
+        } finally {
+            if (client) client.release();
         }
     })();
 }
 
 function allPostgres(query, params, callback) {
-    // Wrapper para tornar async function compatível com callback
-    (async () => {
-        let client = null;
-        try {
-            console.log('🔍 allPostgres chamado');
-            console.log('📝 Query original:', query.substring(0, 150));
-            console.log('📋 Parâmetros:', params);
-
-            let paramIndex = 1;
-            const convertedQuery = query.replace(/\?/g, () => {
-                const idx = paramIndex++;
-                return `$${idx}`;
-            }).replace(/INTEGER PRIMARY KEY AUTOINCREMENT/g, 'SERIAL PRIMARY KEY')
-                .replace(/DATETIME DEFAULT CURRENT_TIMESTAMP/g, 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP');
-
-            console.log('📝 Query convertida:', convertedQuery.substring(0, 150));
-
-            const { Client } = require('pg');
-            const connectionString = process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL;
-
-            if (!connectionString) {
-                throw new Error('POSTGRES_URL não configurada. Verifique as variáveis de ambiente.');
-            }
-
-            console.log('🔌 Conectando ao PostgreSQL...');
-            client = new Client({
-                connectionString: connectionString,
-                connectionTimeoutMillis: 10000
-            });
-
-            await client.connect();
-            console.log('✅ Conectado ao PostgreSQL');
-
-            console.log('📤 Executando query...');
-            const result = await client.query(convertedQuery, params);
-            console.log(`✅ Query executada com sucesso, ${result.rows.length} linhas retornadas`);
-
-            const rows = result.rows || [];
-
-            if (callback) {
-                callback(null, rows);
-            }
-        } catch (error) {
-            console.error('❌ Erro em allPostgres:', error);
-            console.error('❌ Tipo:', error.constructor.name);
-            console.error('❌ Mensagem:', error.message);
-            console.error('❌ Stack:', error.stack);
-
-            if (callback) {
-                callback(error, null);
-            }
-        } finally {
-            if (client) {
-                try {
-                    await client.end();
-                    console.log('🔌 Conexão PostgreSQL fechada');
-                } catch (closeError) {
-                    console.error('⚠️ Erro ao fechar conexão:', closeError);
-                }
-            }
-        }
-    })();
 }
 
 function preparePostgres(query) {
