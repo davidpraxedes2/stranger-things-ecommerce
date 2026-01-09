@@ -573,6 +573,30 @@ async function initializePostgres() {
             )
             `);
 
+        await client.query(`
+            CREATE TABLE IF NOT EXISTS collections(
+                id SERIAL PRIMARY KEY,
+                name TEXT NOT NULL,
+                slug TEXT NOT NULL,
+                description TEXT,
+                is_active INTEGER DEFAULT 1,
+                sort_order INTEGER DEFAULT 0,
+                default_view TEXT DEFAULT 'grid',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            `);
+
+        await client.query(`
+            CREATE TABLE IF NOT EXISTS collection_products(
+                collection_id INTEGER,
+                product_id INTEGER,
+                sort_order INTEGER DEFAULT 0,
+                PRIMARY KEY (collection_id, product_id),
+                FOREIGN KEY (collection_id) REFERENCES collections(id) ON DELETE CASCADE,
+                FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+            )
+            `);
+
         // Create admin user if doesn't exist
         const bcrypt = require('bcryptjs');
         const defaultPassword = bcrypt.hashSync('admin123', 10);
