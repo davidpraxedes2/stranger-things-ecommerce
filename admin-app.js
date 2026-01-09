@@ -3049,7 +3049,8 @@ async function renderTracking(container) {
 
     // Load current settings
     try {
-        const response = await fetch(`${API_URL}/tracking/meta-pixel`);
+        // GET rota pública (sem /admin prefixo duplicado)
+        const response = await fetch(`${API_BASE}/api/tracking/meta-pixel`);
         const data = await response.json();
 
         if (data && data.pixel_id) {
@@ -3078,9 +3079,14 @@ async function renderTracking(container) {
         }
 
         try {
-            const response = await fetch(`${API_URL}/admin/tracking/meta-pixel`, {
+            const token = localStorage.getItem('admin_token');
+            // POST rota admin (já tem /api/admin em API_URL, remover extra /admin)
+            const response = await fetch(`${API_URL}/tracking/meta-pixel`, {
                 method: 'POST',
-                headers: getHeaders(),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify({
                     pixel_id: pixelId,
                     is_active: isActive
