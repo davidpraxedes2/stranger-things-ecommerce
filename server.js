@@ -1212,35 +1212,7 @@ app.put('/api/admin/collections/:id/reorder-products', authenticateToken, (req, 
 });
 
 // Admin: Listar todos os pedidos
-app.get('/api/admin/orders', authenticateToken, (req, res) => {
-    try {
-        const orders = db.prepare(`
-            SELECT o.*, 
-                   COUNT(oi.id) as item_count
-            FROM orders o
-            LEFT JOIN order_items oi ON o.id = oi.order_id
-            GROUP BY o.id
-            ORDER BY o.created_at DESC
-        `).all();
-
-        // Buscar itens de cada pedido
-        orders.forEach(order => {
-            const items = db.prepare(`
-                SELECT oi.*, p.name as product_name, p.image_url
-                FROM order_items oi
-                JOIN products p ON oi.product_id = p.id
-                WHERE oi.order_id = ?
-            `).all(order.id);
-
-            order.items = items;
-        });
-
-        res.json(orders);
-    } catch (error) {
-        console.error('Erro ao buscar pedidos:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
+// Admin orders route moved to line 2054+ (consolidated, no duplicate)
 
 // Admin: Atualizar status do pedido
 app.put('/api/admin/orders/:id/status', authenticateToken, (req, res) => {
@@ -2051,8 +2023,10 @@ app.delete('/api/admin/products/:id', authenticateToken, (req, res) => {
 });
 
 // Listar pedidos (admin)
-app.get('/api/admin/orders', authenticateToken, (req, res) => {
-    db.all(`
+app.get('/api/admin/orders', authenticateToken, async (req, res) => {
+    try {
+        const orders = await new Promise((resolve, reject) => {
+            db.all(`
         SELECT
         o.*,
             COUNT(oi.id) as items_count
@@ -2061,12 +2035,16 @@ app.get('/api/admin/orders', authenticateToken, (req, res) => {
         GROUP BY o.id
         ORDER BY o.created_at DESC
             `, (err, rows) => {
-        if (err) {
-            res.status(500).json({ error: err.message });
-            return;
-        }
-        res.json(rows);
-    });
+                if (err) reject(err);
+                else resolve(rows || []);
+            });
+        });
+
+        res.json(orders);
+    } catch (error) {
+        console.error('Erro ao buscar pedidos (admin):', error);
+        res.status(500).json({ error: error.message });
+    }
 });
 
 // Atualizar status do pedido (admin)
