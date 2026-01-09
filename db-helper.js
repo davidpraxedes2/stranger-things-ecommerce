@@ -616,6 +616,11 @@ async function initializePostgres() {
             await client.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS customer_cpf TEXT');
             await client.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS customer_phone TEXT');
             await client.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS customer_address TEXT');
+
+            // Fix: Adicionar colunas de transação que estavam faltando e causando erro 500 no PIX
+            await client.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS transaction_id TEXT');
+            await client.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS transaction_data TEXT');
+
             console.log('✅ Migrações de schema aplicadas com sucesso');
         } catch (migError) {
             console.warn('⚠️ Nota sobre migração (pode ser ignorado se colunas já existirem):', migError.message);
