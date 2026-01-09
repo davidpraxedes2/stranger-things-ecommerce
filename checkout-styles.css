@@ -129,13 +129,13 @@ body:has(.announcement-bar:not(.hidden)).checkout-page {
         grid-template-columns: 1fr 480px;
         gap: 48px;
     }
-    
+
     /* Forçar order-summary para a coluna da DIREITA */
     .order-summary {
         order: 2;
         grid-column: 2;
     }
-    
+
     /* Formulário fica na coluna da ESQUERDA */
     .checkout-section:not(.order-summary) {
         order: 1;
@@ -186,10 +186,10 @@ body:has(.announcement-bar:not(.hidden)).checkout-page {
 .form-label {
     display: block;
     font-family: var(--font-teko);
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 500;
-    color: rgba(255, 255, 255, 0.8);
-    margin-bottom: 8px;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 10px;
     letter-spacing: 1px;
     text-transform: uppercase;
 }
@@ -198,13 +198,15 @@ body:has(.announcement-bar:not(.hidden)).checkout-page {
 .form-input select,
 select.form-input {
     width: 100%;
-    padding: 14px 16px;
+    padding: 16px;
+    height: 56px;
     background: #ffffff;
-    border: 1px solid rgba(128, 128, 128, 0.3);
-    border-radius: 2px;
+    border: 2px solid rgba(128, 128, 128, 0.3);
+    border-radius: 4px;
     color: #1a1a1a;
     font-family: var(--font-teko);
-    font-size: 14px;
+    font-size: 18px;
+    letter-spacing: 0.5px;
     transition: all 0.2s ease;
     box-sizing: border-box;
 }
@@ -218,7 +220,69 @@ select.form-input:focus {
     outline: none;
     border-color: #E50914;
     background: #fff;
-    box-shadow: 0 0 0 2px rgba(229, 9, 20, 0.1);
+    box-shadow: 0 0 0 4px rgba(229, 9, 20, 0.15);
+}
+
+/* Validation Styles */
+.form-input.input-error {
+    border-color: #E50914 !important;
+    background-color: #fff0f0;
+    animation: shake 0.4s ease-in-out;
+}
+
+.error-message {
+    color: #ff4d4d;
+    font-family: var(--font-teko);
+    font-size: 15px;
+    margin-top: 6px;
+    display: none;
+    animation: fadeIn 0.3s ease;
+    letter-spacing: 0.5px;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.form-group.has-error .error-message {
+    display: block;
+}
+
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-4px);
+    }
+
+    75% {
+        transform: translateX(4px);
+    }
+}
+
+/* Card Input Wrapper */
+.card-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.card-brand-icon {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: auto;
+    opacity: 0;
+    transition: all 0.3s ease;
+    pointer-events: none;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.card-brand-icon.visible {
+    opacity: 1;
 }
 
 .form-row {
@@ -1068,6 +1132,7 @@ select.form-input:focus {
         font-size: 11px;
     }
 }
+
 /* Shipping Options */
 .shipping-options {
     display: flex;
@@ -1218,6 +1283,7 @@ select.form-input:focus {
         opacity: 0;
         transform: translateY(-10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -1232,4 +1298,139 @@ select.form-input:focus {
     box-shadow: 0 6px 30px rgba(70, 211, 105, 0.4);
     transform: translateY(-2px);
     transition: all 0.3s ease;
+}
+
+/* ===== PAYMENT MODAL ===== */
+.payment-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(5px);
+    z-index: 9999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.payment-modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.payment-modal {
+    background: #141414;
+    border: 1px solid rgba(229, 9, 20, 0.3);
+    border-radius: 8px;
+    padding: 2rem;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(229, 9, 20, 0.2);
+    transform: scale(0.9);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.payment-modal-overlay.active .payment-modal {
+    transform: scale(1);
+}
+
+.payment-modal-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.payment-modal-content.hidden {
+    display: none;
+}
+
+.modal-title {
+    font-size: 1.8rem;
+    color: #fff;
+    margin: 0;
+}
+
+.modal-text {
+    color: #ccc;
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+}
+
+/* Spinner */
+.modal-spinner {
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(229, 9, 20, 0.1);
+    border-top-color: #E50914;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+/* Success Icon */
+.icon-success {
+    width: 60px;
+    height: 60px;
+    background: #46d369;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    color: #fff;
+    margin-bottom: 1rem;
+    box-shadow: 0 0 20px rgba(70, 211, 105, 0.4);
+}
+
+/* Error Icon */
+.icon-error {
+    width: 60px;
+    height: 60px;
+    background: transparent;
+    border: 2px solid #E50914;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    color: #E50914;
+    margin-bottom: 1rem;
+    box-shadow: 0 0 20px rgba(229, 9, 20, 0.2);
+}
+
+.btn-retry,
+.btn-close-modal {
+    background: #E50914;
+    color: white;
+    border: none;
+    padding: 0.8rem 2rem;
+    font-family: 'Teko', sans-serif;
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 1rem;
+    transition: all 0.2s;
+}
+
+.btn-retry:hover,
+.btn-close-modal:hover {
+    background: #f40612;
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(229, 9, 20, 0.4);
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
 }

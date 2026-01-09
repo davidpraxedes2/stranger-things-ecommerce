@@ -77,10 +77,22 @@ async function migratePostgres(db) {
                 customer_phone TEXT,
                 total REAL NOT NULL,
                 status TEXT DEFAULT 'pending',
+                payment_method TEXT,
+                transaction_id TEXT,
+                transaction_data TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `);
         console.log('  ✅ Tabela orders criada');
+        
+        // Adicionar colunas novas se não existirem
+        try {
+            await db.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_method TEXT');
+            await db.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS transaction_id TEXT');
+            await db.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS transaction_data TEXT');
+        } catch (e) {
+            // Colunas já existem
+        }
 
         // Tabela de itens do pedido
         await db.query(`
@@ -151,6 +163,22 @@ async function migratePostgres(db) {
             )
         `);
         console.log('  ✅ Tabela shipping_options criada');
+
+        // Tabela de configurações de gateway de pagamento
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS payment_gateways (
+                id SERIAL PRIMARY KEY,
+                name TEXT NOT NULL,
+                gateway_type TEXT NOT NULL,
+                public_key TEXT,
+                secret_key TEXT,
+                is_active INTEGER DEFAULT 0,
+                settings_json TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        console.log('  ✅ Tabela payment_gateways criada');
         
         // Verificar se há fretes cadastrados
         const shippingCount = await dbGet('SELECT COUNT(*) as count FROM shipping_options');

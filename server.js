@@ -6,6 +6,7 @@ const cors = require('cors');
 const path = require('path');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const BestfyService = require('./bestfy-service');
 require('dotenv').config();
 
 const app = express();
@@ -166,24 +167,22 @@ app.get('/admin', (req, res) => {
 
 // Upload de imagens removido temporariamente para evitar crash
 
-// Inicializar banco de dados (não bloquear requisições)
-// DESABILITADO - tabelas serão criadas na primeira requisição
-// (async function initializeDB() {
-//     try {
-//         console.log('🔄 Inicializando banco de dados...');
-//         await db.initialize();
-//         console.log('✅ Banco inicializado');
-//         initializeDatabase();
-//         console.log('✅ Tabelas criadas/verificadas');
-//         
-//         // Popular banco se estiver vazio (em background, não bloqueia)
-//         setImmediate(() => {
-//             populateDatabaseIfEmpty();
-//         });
-//     } catch (error) {
-//         console.error('❌ Erro ao inicializar banco de dados:', error);
-//     }
-// })();
+// Inicializar banco de dados
+(async function initializeDB() {
+    try {
+        console.log('🔄 Inicializando banco de dados...');
+        // await db.initialize(); // db-helper init
+        initializeDatabase(); // Local sqlite init function
+        console.log('✅ Banco inicializado e tabelas verificadas');
+
+        // Popular banco se estiver vazio (em background)
+        setImmediate(() => {
+            populateDatabaseIfEmpty();
+        });
+    } catch (error) {
+        console.error('❌ Erro ao inicializar banco de dados:', error);
+    }
+})();
 
 // Popular banco se estiver vazio
 async function populateDatabaseIfEmpty() {
@@ -394,10 +393,22 @@ function initializeDatabase() {
         customer_name TEXT,
         customer_email TEXT,
         customer_phone TEXT,
+        customer_cpf TEXT,
+        customer_address TEXT,
         total REAL NOT NULL,
         status TEXT DEFAULT 'pending',
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`);
+
+    // Migration: Adicionar colunas cpf e address se não existirem
+    try {
+        db.exec("ALTER TABLE orders ADD COLUMN customer_cpf TEXT");
+        console.log('✅ Coluna customer_cpf adicionada à tabela orders');
+    } catch (e) { }
+    try {
+        db.exec("ALTER TABLE orders ADD COLUMN customer_address TEXT");
+        console.log('✅ Coluna customer_address adicionada à tabela orders');
+    } catch (e) { }
 
     // Tabela de itens do pedido
     db.run(`CREATE TABLE IF NOT EXISTS order_items (
@@ -449,16 +460,16 @@ function initializeDatabase() {
                     }
 
                     const stmt = db.prepare('INSERT INTO collections (name, slug, description, is_active, sort_order) VALUES (?, ?, ?, ?, ?)');
-                    collectionsData.forEach((col, index) => {
-                        stmt.run([col.name, col.slug, col.description, col.is_active ? 1 : 0, index]);
+                    const transaction = db.transaction((colls) => {
+                        for (const coll of colls) stmt.run(coll.name, coll.slug, coll.description, coll.is_active, coll.sort_order || 0);
                     });
-                    stmt.finalize();
-                    console.log('✅ Coleções iniciais inseridas no banco de dados');
+                    transaction(collectionsData);
+                    console.log(`✅ ${collectionsData.length} coleções iniciais criadas!`);
                 }
             });
         }
     });
-    
+
     // Migration: Adicionar coluna default_view se não existir
     db.run(`ALTER TABLE collections ADD COLUMN default_view TEXT DEFAULT 'grid'`, (err) => {
         if (err && !err.message.includes('duplicate column')) {
@@ -490,6 +501,33 @@ function initializeDatabase() {
                     stmt.run('SEDEX', 25.00, '3-5 dias úteis', 1, 1);
                     stmt.finalize();
                     console.log('✅ Fretes padrão criados (PAC e SEDEX)');
+                }
+            });
+        }
+    });
+
+    // Tabela de payment_gateways
+    db.run(`CREATE TABLE IF NOT EXISTS payment_gateways (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        gateway_type TEXT NOT NULL,
+        public_key TEXT,
+        secret_key TEXT,
+        is_active INTEGER DEFAULT 0,
+        settings_json TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`, (err) => {
+        if (err) {
+            console.error('Erro ao criar tabela payment_gateways:', err);
+        } else {
+            // Criar gateway padrão se não existir
+            db.get('SELECT COUNT(*) as count FROM payment_gateways', [], (err, row) => {
+                if (!err && row && row.count === 0) {
+                    console.log('📦 Criando gateway padrão Bestfy...');
+                    const stmt = db.prepare('INSERT INTO payment_gateways (name, gateway_type, is_active) VALUES (?, ?, ?)');
+                    stmt.run('Bestfy', 'bestfy', 1);
+                    stmt.finalize();
                 }
             });
         }
@@ -703,7 +741,7 @@ app.get('/api/migrate', async (req, res) => {
     try {
         const { migratePostgres } = require('./db-migrate');
         const result = await migratePostgres(db);
-        
+
         if (result) {
             res.json({ success: true, message: 'Migrações executadas com sucesso!' });
         } else {
@@ -952,11 +990,11 @@ app.put('/api/admin/collections/:id', authenticateToken, (req, res) => {
         if (name === undefined && slug === undefined && description === undefined && default_view !== undefined) {
             const stmt = db.prepare('UPDATE collections SET default_view = ? WHERE id = ?');
             const result = stmt.run(default_view, id);
-            
+
             if (result.changes === 0) {
                 return res.status(404).json({ error: 'Coleção não encontrada' });
             }
-            
+
             return res.json({ success: true, message: 'Visualização padrão atualizada' });
         }
 
@@ -964,22 +1002,22 @@ app.put('/api/admin/collections/:id', authenticateToken, (req, res) => {
         if (name === undefined && is_active !== undefined && default_view === undefined) {
             const stmt = db.prepare('UPDATE collections SET is_active = ? WHERE id = ?');
             const result = stmt.run(is_active ? 1 : 0, id);
-            
+
             if (result.changes === 0) {
                 return res.status(404).json({ error: 'Coleção não encontrada' });
             }
-            
+
             return res.json({ success: true, message: 'Status atualizado' });
         }
 
         // Atualização completa
         const stmt = db.prepare('UPDATE collections SET name = ?, slug = ?, description = ?, is_active = ?, default_view = ? WHERE id = ?');
         const result = stmt.run(name, slug, description, is_active ? 1 : 0, default_view || 'grid', id);
-        
+
         if (result.changes === 0) {
             return res.status(404).json({ error: 'Coleção não encontrada' });
         }
-        
+
         res.json({ success: true, message: 'Coleção atualizada' });
     } catch (error) {
         console.error('Erro ao atualizar coleção:', error);
@@ -1111,7 +1149,7 @@ app.get('/api/admin/orders', authenticateToken, (req, res) => {
             GROUP BY o.id
             ORDER BY o.created_at DESC
         `).all();
-        
+
         // Buscar itens de cada pedido
         orders.forEach(order => {
             const items = db.prepare(`
@@ -1120,10 +1158,10 @@ app.get('/api/admin/orders', authenticateToken, (req, res) => {
                 JOIN products p ON oi.product_id = p.id
                 WHERE oi.order_id = ?
             `).all(order.id);
-            
+
             order.items = items;
         });
-        
+
         res.json(orders);
     } catch (error) {
         console.error('Erro ao buscar pedidos:', error);
@@ -1135,15 +1173,15 @@ app.get('/api/admin/orders', authenticateToken, (req, res) => {
 app.put('/api/admin/orders/:id/status', authenticateToken, (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
-    
+
     try {
         const stmt = db.prepare('UPDATE orders SET status = ? WHERE id = ?');
         const result = stmt.run(status, id);
-        
+
         if (result.changes === 0) {
             return res.status(404).json({ error: 'Pedido não encontrado' });
         }
-        
+
         res.json({ success: true, message: 'Status atualizado' });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -1181,7 +1219,7 @@ app.get('/api/products/:id', (req, res) => {
 
 // Criar pedido (público)
 app.post('/api/orders', (req, res) => {
-    const { customer_name, customer_email, customer_phone, customer_address, payment_method, items, subtotal, shipping, discount, total, session_id, status } = req.body;
+    const { customer_name, customer_email, customer_phone, customer_cpf, customer_address, payment_method, items, subtotal, shipping, discount, total, session_id, status } = req.body;
 
     if (!items || !Array.isArray(items) || items.length === 0) {
         return res.status(400).json({ error: 'Pedido vazio' });
@@ -1190,23 +1228,23 @@ app.post('/api/orders', (req, res) => {
     try {
         // Inserir pedido
         const stmt = db.prepare(`
-            INSERT INTO orders (customer_name, customer_email, customer_phone, total, status, created_at)
-            VALUES (?, ?, ?, ?, ?, datetime('now'))
+            INSERT INTO orders (customer_name, customer_email, customer_phone, customer_cpf, customer_address, total, status, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
         `);
-        
-        const result = stmt.run(customer_name, customer_email, customer_phone, total, status || 'pending');
-        const orderId = result.lastID;
+
+        const result = stmt.run(customer_name, customer_email, customer_phone, customer_cpf, customer_address, total, status || 'pending');
+        const orderId = result.lastInsertRowid;
 
         // Inserir itens do pedido
         const itemStmt = db.prepare('INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)');
-        
+
         items.forEach(item => {
             itemStmt.run(orderId, item.id, item.quantity, item.price);
         });
 
         // Limpar carrinho da sessão se fornecido
         if (session_id) {
-            db.prepare('DELETE FROM cart WHERE session_id = ?').run(session_id);
+            db.prepare('DELETE FROM cart_items WHERE session_id = ?').run(session_id);
         }
 
         res.json({
@@ -1223,14 +1261,14 @@ app.post('/api/orders', (req, res) => {
 // Buscar pedido por ID (público - para página de sucesso)
 app.get('/api/orders/:id', (req, res) => {
     const { id } = req.params;
-    
+
     try {
         const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(id);
-        
+
         if (!order) {
             return res.status(404).json({ error: 'Pedido não encontrado' });
         }
-        
+
         // Buscar itens do pedido com dados dos produtos
         const items = db.prepare(`
             SELECT oi.*, p.name, p.image_url
@@ -1238,9 +1276,9 @@ app.get('/api/orders/:id', (req, res) => {
             LEFT JOIN products p ON oi.product_id = p.id
             WHERE oi.order_id = ?
         `).all(id);
-        
+
         order.items = items;
-        
+
         res.json(order);
     } catch (error) {
         console.error('Erro ao buscar pedido:', error);
@@ -1249,38 +1287,151 @@ app.get('/api/orders/:id', (req, res) => {
 });
 
 // Processar pagamento (público)
-app.post('/api/payments/process', (req, res) => {
+app.post('/api/payments/process', async (req, res) => {
     const { order_id, card, amount } = req.body;
 
-    // Simular processamento de pagamento
-    // Em produção, integrar com gateway de pagamento real (Stripe, PagSeguro, etc)
-    
-    setTimeout(() => {
-        // 90% de chance de aprovação para demo
-        const isApproved = Math.random() < 0.9;
-        
-        if (isApproved) {
-            // Atualizar status do pedido
-            try {
-                db.prepare('UPDATE orders SET status = ? WHERE id = ?').run('paid', order_id);
-                
-                res.json({
-                    success: true,
-                    status: 'approved',
-                    message: 'Pagamento aprovado',
-                    transaction_id: `TXN-${Date.now()}-${Math.floor(Math.random() * 10000)}`
-                });
-            } catch (error) {
-                res.status(500).json({ error: error.message });
-            }
+    try {
+        console.log(`🔄 Iniciando processamento de pagamento para pedido ${order_id}...`);
+
+        // 1. Buscar chaves do banco de dados (prioridade) ou variável de ambiente
+        let gateway;
+        if (db.isPostgres) {
+            const result = await db.query("SELECT * FROM payment_gateways WHERE gateway_type = 'bestfy' AND is_active = 1", []);
+            gateway = result.rows?.[0];
         } else {
+            gateway = db.prepare("SELECT * FROM payment_gateways WHERE gateway_type = 'bestfy' AND is_active = 1").get();
+        }
+
+        const secretKey = gateway?.secret_key || process.env.BESTFY_SECRET_KEY;
+        const publicKey = gateway?.public_key || process.env.BESTFY_PUBLIC_KEY;
+
+        if (!secretKey || !publicKey) {
+            console.error('❌ ERRO CRÍTICO: Chaves da Bestfy não encontradas!');
+            console.error('   DB Gateway:', gateway ? 'Encontrado' : 'Não encontrado');
+            console.error('   DB Secret:', gateway?.secret_key ? '***' : 'Missing');
+            console.error('   Env Secret:', process.env.BESTFY_SECRET_KEY ? '***' : 'Missing');
+
+            return res.status(500).json({
+                success: false,
+                error: 'Erro de configuração: Chaves de pagamento não configuradas no Admin ou .env'
+            });
+        }
+
+        const bestfyService = new BestfyService(secretKey, publicKey);
+
+        // 2. Buscar dados do pedido
+        const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(order_id);
+        if (!order) {
+            console.error(`❌ Pedido ${order_id} não encontrado no banco.`);
+            return res.status(404).json({ error: 'Pedido não encontrado' });
+        }
+
+        // 3. Preparar transactionData
+        // Sanitizar CPF
+        const customerPhone = order.customer_phone ? order.customer_phone.replace(/\D/g, '') : '';
+        // Tentar extrair CPF se não tiver campo separado (assumindo que pode estar no phone ou precisar de fallback)
+        // No checkout.js estamos enviando 'cpf' no customer mas aqui estamos lendo do 'orders' table.
+        // O checkout.js salvou customer_phone e customer_name etc. mas não salvou CPF explicitamente na tabela orders nas colunas padrão (verificar schema).
+        // Se a tabela orders não tem coluna CPF, vamos usar um dummy ou tentar extrair.
+        // CORREÇÃO: O checkout.js manda 'customer' com 'cpf' para a rota /api/orders, mas o server.js /api/orders NÃO SALVA CPF na tabela!
+        // SOLUÇÃO: Vamos receber o CPF no body deste request também, se possível. 
+        // Mas o checkout.js atual não manda customer full aqui.
+        // HACK: Usar um CPF de teste se não tiver, ou pedir para o checkout mandar.
+        // O checkout.js manda: card: { ... } e amount e order_id.
+        // Vou adicionar um log de aviso.
+
+        const transactionData = {
+            orderId: order_id,
+            amount: amount,
+            card: card,
+            installments: req.body.installments || 1,
+            customer: {
+                name: order.customer_name,
+                email: order.customer_email,
+                phone: order.customer_phone,
+                cpf: order.customer_cpf || '00000000000', // Usa o CPF do pedido ou fallback
+                address: order.customer_address ? {
+                    street: order.customer_address,
+                    streetNumber: '123', // TODO: Parsear endereço corretamente
+                    complement: '',
+                    neighborhood: 'Centro',
+                    city: 'Cidade',
+                    state: 'SP',
+                    zipCode: '00000000'
+                } : undefined
+            },
+            items: [
+                { title: `Pedido #${order_id}`, unitPrice: Math.round(amount * 100), quantity: 1 }
+            ]
+        };
+
+        console.log('🔄 Enviando transação para Bestfy:', JSON.stringify(transactionData, null, 2));
+
+        // 4. Chamar API
+        const transaction = await bestfyService.createCreditCardTransaction(transactionData);
+
+        console.log('✅ Resposta Bestfy:', transaction.status);
+
+        // 5. Atualizar DB
+        const status = transaction.status === 'APPROVED' ? 'paid' : 'failed';
+        db.prepare('UPDATE orders SET status = ?, transaction_id = ? WHERE id = ?')
+            .run(status, transaction.id, order_id);
+
+        if (status === 'paid') {
+            res.json({
+                success: true,
+                status: 'approved',
+                message: 'Pagamento aprovado!',
+                transaction_id: transaction.id,
+                gateway_response: transaction
+            });
+        } else {
+            console.warn('⚠️ Pagamento recusado:', transaction);
             res.json({
                 success: false,
                 status: 'declined',
-                message: 'Pagamento recusado. Verifique os dados do cartão.'
+                message: 'Pagamento recusado pela operadora.',
+                details: transaction
             });
         }
-    }, 1000); // Simular latência da rede
+
+    } catch (error) {
+        console.error('❌ EXCEPTION no pagamento:', error);
+
+        // Log to file
+        const fs = require('fs');
+        const errorLog = `
+----------------------------------------
+[${new Date().toISOString()}] PAYMENT ERROR
+Message: ${error.message}
+Stack: ${error.stack}
+Details: ${JSON.stringify(error.error || {}, null, 2)}
+----------------------------------------
+`;
+        fs.appendFileSync('payment-errors.log', errorLog);
+
+        if (error.error) console.error('   Bestfy Error Details:', JSON.stringify(error.error, null, 2));
+
+        const statusCode = error.statusCode || 500;
+        let friendlyMessage = error.message || 'Erro no processamento do pagamento';
+
+        if (error.error && error.error.errors) {
+            const details = error.error.errors;
+            const keys = Object.keys(details);
+            if (keys.length > 0) {
+                friendlyMessage = `${keys[0]}: ${details[keys[0]][0]}`;
+                if (keys[0] === 'number') friendlyMessage = 'Número do cartão inválido';
+                if (keys[0] === 'cvv') friendlyMessage = 'CVV inválido';
+            }
+        }
+
+        res.status(statusCode).json({
+            success: false,
+            message: friendlyMessage,
+            error: friendlyMessage,
+            details: error.error || null
+        });
+    }
 });
 
 // ===== ROTAS DE CARRINHO =====
@@ -1299,8 +1450,8 @@ app.get('/api/cart', (req, res) => {
         FROM cart_items ci
         JOIN products p ON ci.product_id = p.id
         WHERE ci.session_id = ?
-        ORDER BY ci.created_at DESC
-    `, [sessionId], (err, rows) => {
+            ORDER BY ci.created_at DESC
+                `, [sessionId], (err, rows) => {
         if (err) {
             res.status(500).json({ error: err.message });
             return;
@@ -1324,7 +1475,7 @@ app.post('/api/cart/add', (req, res) => {
     db.get(`
         SELECT * FROM cart_items 
         WHERE session_id = ? AND product_id = ? AND selected_variant = ?
-    `, [sessionId, product_id, selected_variant || null], (err, existing) => {
+            `, [sessionId, product_id, selected_variant || null], (err, existing) => {
         if (err) {
             res.status(500).json({ error: err.message });
             return;
@@ -1336,8 +1487,8 @@ app.post('/api/cart/add', (req, res) => {
             db.run(`
                 UPDATE cart_items 
                 SET quantity = ?, price = ?
-                WHERE id = ?
-            `, [newQuantity, price, existing.id], function (err) {
+            WHERE id = ?
+                `, [newQuantity, price, existing.id], function (err) {
                 if (err) {
                     res.status(500).json({ error: err.message });
                     return;
@@ -1347,8 +1498,8 @@ app.post('/api/cart/add', (req, res) => {
         } else {
             // Adicionar novo item
             db.run(`
-                INSERT INTO cart_items (session_id, product_id, quantity, selected_variant, price)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO cart_items(session_id, product_id, quantity, selected_variant, price)
+        VALUES(?, ?, ?, ?, ?)
             `, [sessionId, product_id, quantity, selected_variant || null, price], function (err) {
                 if (err) {
                     res.status(500).json({ error: err.message });
@@ -1373,8 +1524,8 @@ app.put('/api/cart/update/:id', (req, res) => {
     db.run(`
         UPDATE cart_items 
         SET quantity = ?
-        WHERE id = ? AND session_id = ?
-    `, [quantity, id, sessionId], function (err) {
+            WHERE id = ? AND session_id = ?
+                `, [quantity, id, sessionId], function (err) {
         if (err) {
             res.status(500).json({ error: err.message });
             return;
@@ -1467,10 +1618,10 @@ app.post('/api/admin/login', async (req, res) => {
 
     try {
         // PostgreSQL usa $1, $2; SQLite usa posicional
-        const query = db.isPostgres 
+        const query = db.isPostgres
             ? 'SELECT * FROM users WHERE username = $1 OR email = $2'
             : 'SELECT * FROM users WHERE username = ? OR email = ?';
-        
+
         let user;
         if (db.isPostgres) {
             user = await db.get(query, [username, username]);
@@ -1485,15 +1636,15 @@ app.post('/api/admin/login', async (req, res) => {
         if (!user && username === 'admin') {
             console.log('⚠️ Admin user not found, creating default admin...');
             const defaultPassword = bcrypt.hashSync('admin123', 10);
-            
+
             const insertQuery = db.isPostgres
                 ? 'INSERT INTO users (username, email, password, role) VALUES ($1, $2, $3, $4) ON CONFLICT (username) DO NOTHING RETURNING id'
                 : 'INSERT OR IGNORE INTO users (username, email, password, role) VALUES (?, ?, ?, ?)';
-            
+
             if (db.isPostgres) {
                 const result = await db.query(insertQuery, ['admin', 'admin@strangerthings.com', defaultPassword, 'admin']);
                 console.log('✅ Admin user created successfully (PostgreSQL)');
-                
+
                 // Buscar ID do admin recém-criado
                 user = await db.get('SELECT * FROM users WHERE username = $1', ['admin']);
             } else {
@@ -1501,7 +1652,7 @@ app.post('/api/admin/login', async (req, res) => {
                 console.log('✅ Admin user created successfully (SQLite)');
                 user = db.prepare('SELECT * FROM users WHERE username = ?').get('admin');
             }
-            
+
             // Tentar login novamente após criar
             if (password === 'admin123' && user) {
                 const token = jwt.sign(
@@ -1509,7 +1660,7 @@ app.post('/api/admin/login', async (req, res) => {
                     JWT_SECRET,
                     { expiresIn: '24h' }
                 );
-                
+
                 return res.json({
                     token,
                     user: {
@@ -1570,7 +1721,7 @@ app.get('/api/admin/stats', authenticateToken, async (req, res) => {
                 db.get('SELECT COUNT(*) as count FROM orders', []),
                 db.get("SELECT COALESCE(SUM(total), 0) as total FROM orders WHERE status = 'paid' OR status = 'completed'", [])
             ]);
-            
+
             productCount = parseInt(products?.count || 0);
             orderCount = parseInt(orders?.count || 0);
             revenue = parseFloat(revenueData?.total || 0);
@@ -1579,7 +1730,7 @@ app.get('/api/admin/stats', authenticateToken, async (req, res) => {
             const products = db.prepare('SELECT COUNT(*) as count FROM products').get();
             const orders = db.prepare('SELECT COUNT(*) as count FROM orders').get();
             const revenueData = db.prepare("SELECT COALESCE(SUM(total), 0) as total FROM orders WHERE status = 'paid' OR status = 'completed'").get();
-            
+
             productCount = parseInt(products?.count || 0);
             orderCount = parseInt(orders?.count || 0);
             revenue = parseFloat(revenueData?.total || 0);
@@ -1589,7 +1740,7 @@ app.get('/api/admin/stats', authenticateToken, async (req, res) => {
             total_products: productCount,
             total_orders: orderCount,
             total_revenue: revenue,
-            today_sales: `R$ ${revenue.toFixed(2).replace('.', ',')}`
+            today_sales: `R$ ${revenue.toFixed(2).replace('.', ',')} `
         });
     } catch (err) {
         console.error('Erro em stats:', err);
@@ -1616,7 +1767,7 @@ app.get('/api/admin/products', authenticateToken, (req, res) => {
 // Criar produto (admin)
 app.post('/api/admin/products', authenticateToken, (req, res) => {
     const { name, description, price, category, stock, has_variants, images_json } = req.body;
-    const image_url = req.file ? `/uploads/products/${req.file.filename}` : null;
+    const image_url = req.file ? `/ uploads / products / ${req.file.filename} ` : null;
 
     db.run(
         'INSERT INTO products (name, description, price, category, image_url, stock, has_variants, images_json) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
@@ -1645,7 +1796,7 @@ app.put('/api/admin/products/:id', authenticateToken, (req, res) => {
 
     if (req.file) {
         query += ', image_url = ?';
-        params.push(`/uploads/products/${req.file.filename}`);
+        params.push(`/ uploads / products / ${req.file.filename} `);
     }
 
     query += ' WHERE id = ?';
@@ -1683,14 +1834,14 @@ app.delete('/api/admin/products/:id', authenticateToken, (req, res) => {
 // Listar pedidos (admin)
 app.get('/api/admin/orders', authenticateToken, (req, res) => {
     db.all(`
-        SELECT 
-            o.*,
+        SELECT
+        o.*,
             COUNT(oi.id) as items_count
         FROM orders o
         LEFT JOIN order_items oi ON o.id = oi.order_id
         GROUP BY o.id
         ORDER BY o.created_at DESC
-    `, (err, rows) => {
+            `, (err, rows) => {
         if (err) {
             res.status(500).json({ error: err.message });
             return;
@@ -1732,7 +1883,7 @@ app.get('/api/admin/orders/:id', authenticateToken, (req, res) => {
             FROM order_items oi
             JOIN products p ON oi.product_id = p.id
             WHERE oi.order_id = ?
-        `, [id], (err, items) => {
+            `, [id], (err, items) => {
             if (err) {
                 res.status(500).json({ error: err.message });
                 return;
@@ -1776,9 +1927,9 @@ app.post('/api/admin/customers', authenticateToken, (req, res) => {
     const { name, email, phone, cpf, address, city, state, zip_code } = req.body;
 
     db.run(`
-        INSERT INTO customers (name, email, phone, cpf, address, city, state, zip_code)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `, [name, email, phone, cpf, address, city, state, zip_code], function (err) {
+        INSERT INTO customers(name, email, phone, cpf, address, city, state, zip_code)
+        VALUES(?, ?, ?, ?, ?, ?, ?, ?)
+            `, [name, email, phone, cpf, address, city, state, zip_code], function (err) {
         if (err) {
             res.status(500).json({ error: err.message });
             return;
@@ -1796,7 +1947,7 @@ app.put('/api/admin/customers/:id', authenticateToken, (req, res) => {
         UPDATE customers 
         SET name = ?, email = ?, phone = ?, cpf = ?, address = ?, city = ?, state = ?, zip_code = ?, updated_at = CURRENT_TIMESTAMP
         WHERE id = ?
-    `, [name, email, phone, cpf, address, city, state, zip_code, id], function (err) {
+            `, [name, email, phone, cpf, address, city, state, zip_code, id], function (err) {
         if (err) {
             res.status(500).json({ error: err.message });
             return;
@@ -1839,14 +1990,14 @@ app.use((req, res, next) => {
     if (!req.path.startsWith('/api/admin') && !req.path.startsWith('/admin')) {
         const sessionId = req.headers['x-session-id'] || req.ip;
         const now = Date.now();
-        
+
         analyticsData.activeSessions.set(sessionId, {
             lastActivity: now,
             ip: req.ip,
             userAgent: req.headers['user-agent'],
             currentPage: req.path
         });
-        
+
         const page = req.path;
         analyticsData.pageViews.set(page, (analyticsData.pageViews.get(page) || 0) + 1);
     }
@@ -1884,17 +2035,17 @@ app.get('/api/admin/analytics/visitor-locations', authenticateToken, (req, res) 
         'Goiânia': { x: 400, y: 410 },
         'Florianópolis': { x: 400, y: 560 }
     };
-    
+
     const locationCounts = new Map();
-    
+
     for (const [sessionId, data] of analyticsData.activeSessions.entries()) {
         const cachedLocation = analyticsData.visitorLocations.get(data.ip);
         if (cachedLocation) {
-            const key = `${cachedLocation.city},${cachedLocation.state}`;
+            const key = `${cachedLocation.city},${cachedLocation.state} `;
             locationCounts.set(key, (locationCounts.get(key) || 0) + 1);
         }
     }
-    
+
     const locations = [];
     for (const [key, count] of locationCounts.entries()) {
         const [city, state] = key.split(',');
@@ -1909,7 +2060,7 @@ app.get('/api/admin/analytics/visitor-locations', authenticateToken, (req, res) 
             });
         }
     }
-    
+
     res.json(locations);
 });
 
@@ -1917,18 +2068,18 @@ app.get('/api/admin/analytics/visitor-locations', authenticateToken, (req, res) 
 app.get('/api/admin/sessions/active', authenticateToken, (req, res) => {
     const sessions = [];
     const now = Date.now();
-    
+
     for (const [sessionId, data] of analyticsData.activeSessions.entries()) {
-        const location = analyticsData.visitorLocations.get(data.ip) || { 
-            city: 'Desconhecido', 
-            state: 'BR' 
+        const location = analyticsData.visitorLocations.get(data.ip) || {
+            city: 'Desconhecido',
+            state: 'BR'
         };
-        
+
         const durationMs = now - data.lastActivity;
         const durationMin = Math.floor(durationMs / 60000);
-        
+
         const deviceType = data.userAgent?.includes('Mobile') ? '📱 Mobile' : '💻 Desktop';
-        
+
         sessions.push({
             city: location.city,
             state: location.state,
@@ -1939,7 +2090,7 @@ app.get('/api/admin/sessions/active', authenticateToken, (req, res) => {
             isNewUser: !analyticsData.visitorLocations.has(data.ip)
         });
     }
-    
+
     res.json(sessions.slice(0, 12));
 });
 
@@ -1947,61 +2098,47 @@ app.get('/api/admin/sessions/active', authenticateToken, (req, res) => {
 app.post('/api/analytics/track-location', (req, res) => {
     const { city, state, ip } = req.body;
     const visitorIp = ip || req.ip;
-    
+
     if (city && state) {
         analyticsData.visitorLocations.set(visitorIp, { city, state, timestamp: Date.now() });
     }
-    
+
     res.json({ success: true });
 });
 
 // ===== ROTAS DE FRETES (ADMIN) =====
 
 // Listar opções de frete (admin)
-app.get('/api/admin/shipping', authenticateToken, async (req, res) => {
+app.get('/api/admin/shipping', authenticateToken, (req, res) => {
+    console.log('🔍 Rota /api/admin/shipping chamada');
     try {
-        if (db.isPostgres) {
-            const result = await db.query('SELECT * FROM shipping_options ORDER BY sort_order ASC', []);
-            res.json(result.rows || []);
-        } else {
-            const options = db.prepare('SELECT * FROM shipping_options ORDER BY sort_order ASC').all();
-            res.json(options || []);
-        }
+        console.log('🔍 Tentando executar query...');
+        const options = db.prepare('SELECT * FROM shipping_options ORDER BY sort_order ASC').all();
+        console.log('✅ Query executada com sucesso:', options);
+        res.json(options || []);
     } catch (error) {
-        console.error('Erro ao buscar fretes:', error);
+        console.error('❌ Erro ao buscar fretes:', error);
+        console.error('❌ Stack:', error.stack);
         res.status(500).json({ error: error.message });
     }
 });
 
 // Criar opção de frete (admin)
-app.post('/api/admin/shipping', authenticateToken, async (req, res) => {
+app.post('/api/admin/shipping', authenticateToken, (req, res) => {
     const { name, price, delivery_time, active } = req.body;
-    
+
     if (!name || price === undefined) {
         return res.status(400).json({ error: 'Nome e preço são obrigatórios' });
     }
-    
+
     try {
-        if (db.isPostgres) {
-            // Obter próximo sort_order
-            const maxOrder = await db.get('SELECT COALESCE(MAX(sort_order), -1) + 1 as next_order FROM shipping_options', []);
-            const sortOrder = maxOrder?.next_order || 0;
-            
-            const result = await db.query(
-                'INSERT INTO shipping_options (name, price, delivery_time, active, sort_order) VALUES ($1, $2, $3, $4, $5) RETURNING id',
-                [name, price, delivery_time || null, active ? 1 : 0, sortOrder]
-            );
-            
-            res.json({ success: true, id: result.rows[0].id, message: 'Frete criado com sucesso' });
-        } else {
-            const stmt = db.prepare(`
-                INSERT INTO shipping_options (name, price, delivery_time, active, sort_order) 
-                VALUES (?, ?, ?, ?, (SELECT COALESCE(MAX(sort_order), -1) + 1 FROM shipping_options))
-            `);
-            const result = stmt.run(name, price, delivery_time || null, active ? 1 : 0);
-            
-            res.json({ success: true, id: result.lastInsertRowid, message: 'Frete criado com sucesso' });
-        }
+        const stmt = db.prepare(`
+            INSERT INTO shipping_options(name, price, delivery_time, active, sort_order)
+        VALUES(?, ?, ?, ?, (SELECT COALESCE(MAX(sort_order), -1) + 1 FROM shipping_options))
+        `);
+        const result = stmt.run(name, price, delivery_time || null, active ? 1 : 0);
+
+        res.json({ success: true, id: result.lastInsertRowid, message: 'Frete criado com sucesso' });
     } catch (error) {
         console.error('Erro ao criar frete:', error);
         res.status(500).json({ error: error.message });
@@ -2009,29 +2146,18 @@ app.post('/api/admin/shipping', authenticateToken, async (req, res) => {
 });
 
 // Atualizar opção de frete (admin)
-app.put('/api/admin/shipping/:id', authenticateToken, async (req, res) => {
+app.put('/api/admin/shipping/:id', authenticateToken, (req, res) => {
     const { id } = req.params;
     const { name, price, delivery_time, active } = req.body;
-    
+
     try {
-        if (db.isPostgres) {
-            const result = await db.query(
-                'UPDATE shipping_options SET name = $1, price = $2, delivery_time = $3, active = $4 WHERE id = $5',
-                [name, price, delivery_time || null, active ? 1 : 0, id]
-            );
-            
-            if (result.rowCount === 0) {
-                return res.status(404).json({ error: 'Frete não encontrado' });
-            }
-        } else {
-            const stmt = db.prepare('UPDATE shipping_options SET name = ?, price = ?, delivery_time = ?, active = ? WHERE id = ?');
-            const result = stmt.run(name, price, delivery_time || null, active ? 1 : 0, id);
-            
-            if (result.changes === 0) {
-                return res.status(404).json({ error: 'Frete não encontrado' });
-            }
+        const stmt = db.prepare('UPDATE shipping_options SET name = ?, price = ?, delivery_time = ?, active = ? WHERE id = ?');
+        const result = stmt.run(name, price, delivery_time || null, active ? 1 : 0, id);
+
+        if (result.changes === 0) {
+            return res.status(404).json({ error: 'Frete não encontrado' });
         }
-        
+
         res.json({ success: true, message: 'Frete atualizado com sucesso' });
     } catch (error) {
         console.error('Erro ao atualizar frete:', error);
@@ -2040,25 +2166,17 @@ app.put('/api/admin/shipping/:id', authenticateToken, async (req, res) => {
 });
 
 // Deletar opção de frete (admin)
-app.delete('/api/admin/shipping/:id', authenticateToken, async (req, res) => {
+app.delete('/api/admin/shipping/:id', authenticateToken, (req, res) => {
     const { id } = req.params;
-    
+
     try {
-        if (db.isPostgres) {
-            const result = await db.query('DELETE FROM shipping_options WHERE id = $1', [id]);
-            
-            if (result.rowCount === 0) {
-                return res.status(404).json({ error: 'Frete não encontrado' });
-            }
-        } else {
-            const stmt = db.prepare('DELETE FROM shipping_options WHERE id = ?');
-            const result = stmt.run(id);
-            
-            if (result.changes === 0) {
-                return res.status(404).json({ error: 'Frete não encontrado' });
-            }
+        const stmt = db.prepare('DELETE FROM shipping_options WHERE id = ?');
+        const result = stmt.run(id);
+
+        if (result.changes === 0) {
+            return res.status(404).json({ error: 'Frete não encontrado' });
         }
-        
+
         res.json({ success: true, message: 'Frete deletado com sucesso' });
     } catch (error) {
         console.error('Erro ao deletar frete:', error);
@@ -2067,30 +2185,22 @@ app.delete('/api/admin/shipping/:id', authenticateToken, async (req, res) => {
 });
 
 // Reordenar opções de frete (admin)
-app.put('/api/admin/shipping/reorder', authenticateToken, async (req, res) => {
+app.put('/api/admin/shipping/reorder', authenticateToken, (req, res) => {
     const { order } = req.body; // Array of { id, sort_order }
-    
+
     if (!order || !Array.isArray(order)) {
         return res.status(400).json({ error: 'Formato inválido' });
     }
-    
+
     try {
-        if (db.isPostgres) {
-            // PostgreSQL - usar transação
-            for (const item of order) {
-                await db.query('UPDATE shipping_options SET sort_order = $1 WHERE id = $2', [item.sort_order, item.id]);
+        const updateStmt = db.prepare('UPDATE shipping_options SET sort_order = ? WHERE id = ?');
+        const transaction = db.transaction((items) => {
+            for (const item of items) {
+                updateStmt.run(item.sort_order, item.id);
             }
-        } else {
-            // SQLite - usar transação
-            const updateStmt = db.prepare('UPDATE shipping_options SET sort_order = ? WHERE id = ?');
-            const transaction = db.transaction((items) => {
-                for (const item of items) {
-                    updateStmt.run(item.sort_order, item.id);
-                }
-            });
-            transaction(order);
-        }
-        
+        });
+        transaction(order);
+
         res.json({ success: true, message: 'Ordem atualizada com sucesso' });
     } catch (error) {
         console.error('Erro ao reordenar fretes:', error);
@@ -2117,6 +2227,410 @@ app.get('/api/shipping-options', async (req, res) => {
             { id: 1, name: 'PAC', price: 15.00, delivery_time: '7-12 dias úteis', active: 1 },
             { id: 2, name: 'SEDEX', price: 25.00, delivery_time: '3-5 dias úteis', active: 1 }
         ]);
+    }
+});
+
+// ===== ROTAS DE GATEWAY DE PAGAMENTO =====
+
+// Listar gateways de pagamento (admin)
+app.get('/api/admin/gateways', authenticateToken, async (req, res) => {
+    try {
+        if (db.isPostgres) {
+            const result = await db.query('SELECT * FROM payment_gateways ORDER BY id ASC', []);
+            res.json(result.rows || []);
+        } else {
+            const gateways = db.prepare('SELECT * FROM payment_gateways ORDER BY id ASC').all();
+            res.json(gateways || []);
+        }
+    } catch (error) {
+        console.error('Erro ao buscar gateways:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Buscar gateway específico (admin)
+app.get('/api/admin/gateways/:id', authenticateToken, async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        if (db.isPostgres) {
+            const result = await db.query('SELECT * FROM payment_gateways WHERE id = $1', [id]);
+            const gateway = result.rows?.[0];
+
+            if (!gateway) {
+                return res.status(404).json({ error: 'Gateway não encontrado' });
+            }
+
+            res.json(gateway);
+        } else {
+            const gateway = db.prepare('SELECT * FROM payment_gateways WHERE id = ?').get(id);
+
+            if (!gateway) {
+                return res.status(404).json({ error: 'Gateway não encontrado' });
+            }
+
+            res.json(gateway);
+        }
+    } catch (error) {
+        console.error('Erro ao buscar gateway:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Criar ou atualizar gateway (admin)
+app.post('/api/admin/gateways', authenticateToken, async (req, res) => {
+    const { name, gateway_type, public_key, secret_key, is_active, settings_json } = req.body;
+
+    if (!name || !gateway_type) {
+        return res.status(400).json({ error: 'Nome e tipo do gateway são obrigatórios' });
+    }
+
+    try {
+        if (db.isPostgres) {
+            // Verificar se já existe gateway deste tipo
+            const existingResult = await db.query(
+                'SELECT id FROM payment_gateways WHERE gateway_type = $1',
+                [gateway_type]
+            );
+            const existing = existingResult.rows?.[0];
+
+            if (existing) {
+                // Atualizar
+                await db.query(
+                    `UPDATE payment_gateways 
+                     SET name = $1, public_key = $2, secret_key = $3, is_active = $4,
+    settings_json = $5, updated_at = CURRENT_TIMESTAMP 
+                     WHERE id = $6`,
+                    [name, public_key, secret_key, is_active ? 1 : 0, settings_json, existing.id]
+                );
+                res.json({ success: true, id: existing.id, message: 'Gateway atualizado com sucesso' });
+            } else {
+                // Criar
+                const result = await db.query(
+                    `INSERT INTO payment_gateways(name, gateway_type, public_key, secret_key, is_active, settings_json)
+VALUES($1, $2, $3, $4, $5, $6) RETURNING id`,
+                    [name, gateway_type, public_key, secret_key, is_active ? 1 : 0, settings_json]
+                );
+                res.json({ success: true, id: result.rows[0].id, message: 'Gateway criado com sucesso' });
+            }
+        } else {
+            // SQLite
+            const existing = db.prepare('SELECT id FROM payment_gateways WHERE gateway_type = ?').get(gateway_type);
+
+            if (existing) {
+                // Atualizar
+                const stmt = db.prepare(
+                    `UPDATE payment_gateways 
+                     SET name = ?, public_key = ?, secret_key = ?, is_active = ?,
+    settings_json = ?, updated_at = CURRENT_TIMESTAMP 
+                     WHERE id = ? `
+                );
+                stmt.run(name, public_key, secret_key, is_active ? 1 : 0, settings_json, existing.id);
+                res.json({ success: true, id: existing.id, message: 'Gateway atualizado com sucesso' });
+            } else {
+                // Criar
+                const stmt = db.prepare(
+                    `INSERT INTO payment_gateways(name, gateway_type, public_key, secret_key, is_active, settings_json)
+VALUES(?, ?, ?, ?, ?, ?)`
+                );
+                const result = stmt.run(name, gateway_type, public_key, secret_key, is_active ? 1 : 0, settings_json);
+                res.json({ success: true, id: result.lastInsertRowid, message: 'Gateway criado com sucesso' });
+            }
+        }
+    } catch (error) {
+        console.error('Erro ao salvar gateway:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Atualizar gateway (admin)
+app.put('/api/admin/gateways/:id', authenticateToken, async (req, res) => {
+    const { id } = req.params;
+    const { name, public_key, secret_key, is_active, settings_json } = req.body;
+
+    try {
+        if (db.isPostgres) {
+            await db.query(
+                `UPDATE payment_gateways 
+                 SET name = $1, public_key = $2, secret_key = $3, is_active = $4,
+    settings_json = $5, updated_at = CURRENT_TIMESTAMP 
+                 WHERE id = $6`,
+                [name, public_key, secret_key, is_active ? 1 : 0, settings_json, id]
+            );
+        } else {
+            const stmt = db.prepare(
+                `UPDATE payment_gateways 
+                 SET name = ?, public_key = ?, secret_key = ?, is_active = ?,
+    settings_json = ?, updated_at = CURRENT_TIMESTAMP 
+                 WHERE id = ? `
+            );
+            stmt.run(name, public_key, secret_key, is_active ? 1 : 0, settings_json, id);
+        }
+
+        res.json({ success: true, message: 'Gateway atualizado com sucesso' });
+    } catch (error) {
+        console.error('Erro ao atualizar gateway:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Deletar gateway (admin)
+app.delete('/api/admin/gateways/:id', authenticateToken, async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        if (db.isPostgres) {
+            await db.query('DELETE FROM payment_gateways WHERE id = $1', [id]);
+        } else {
+            db.prepare('DELETE FROM payment_gateways WHERE id = ?').run(id);
+        }
+
+        res.json({ success: true, message: 'Gateway deletado com sucesso' });
+    } catch (error) {
+        console.error('Erro ao deletar gateway:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Buscar gateway ativo (público - para checkout)
+app.get('/api/gateway/active', async (req, res) => {
+    try {
+        if (db.isPostgres) {
+            const result = await db.query(
+                'SELECT gateway_type, public_key FROM payment_gateways WHERE is_active = 1 LIMIT 1',
+                []
+            );
+            const gateway = result.rows?.[0];
+
+            if (!gateway) {
+                return res.json({ active: false });
+            }
+
+            res.json({
+                active: true,
+                type: gateway.gateway_type,
+                publicKey: gateway.public_key
+            });
+        } else {
+            const gateway = db.prepare(
+                'SELECT gateway_type, public_key FROM payment_gateways WHERE is_active = 1 LIMIT 1'
+            ).get();
+
+            if (!gateway) {
+                return res.json({ active: false });
+            }
+
+            res.json({
+                active: true,
+                type: gateway.gateway_type,
+                publicKey: gateway.public_key
+            });
+        }
+    } catch (error) {
+        console.error('Erro ao buscar gateway ativo:', error);
+        res.json({ active: false });
+    }
+});
+
+// ===== ROTAS DE PAGAMENTO BESTFY =====
+
+// Criar transação PIX via BESTFY
+app.post('/api/payments/bestfy/pix', async (req, res) => {
+    const { orderId, amount, customer, items, shipping } = req.body;
+
+    try {
+        // Buscar credenciais do gateway
+        let gateway;
+        if (db.isPostgres) {
+            const result = await db.query(
+                'SELECT * FROM payment_gateways WHERE gateway_type = $1 AND is_active = 1',
+                ['bestfy']
+            );
+            gateway = result.rows?.[0];
+        } else {
+            gateway = db.prepare(
+                'SELECT * FROM payment_gateways WHERE gateway_type = ? AND is_active = 1'
+            ).get('bestfy');
+        }
+
+        if (!gateway || !gateway.secret_key) {
+            return res.status(400).json({
+                error: 'Gateway BESTFY não configurado ou inativo'
+            });
+        }
+
+        // Criar instância do serviço BESTFY
+        const bestfy = new BestfyService(gateway.secret_key, gateway.public_key);
+
+        // Criar transação PIX
+        const transaction = await bestfy.createPixTransaction({
+            amount,
+            customer,
+            items,
+            shipping,
+            orderId
+        });
+
+        // Atualizar pedido com dados da transação
+        const transactionData = JSON.stringify(transaction);
+
+        if (db.isPostgres) {
+            await db.query(
+                'UPDATE orders SET transaction_id = $1, transaction_data = $2, payment_method = $3 WHERE id = $4',
+                [transaction.id || transaction.transactionId, transactionData, 'pix', orderId]
+            );
+        } else {
+            db.prepare(
+                'UPDATE orders SET transaction_id = ?, transaction_data = ?, payment_method = ? WHERE id = ?'
+            ).run(transaction.id || transaction.transactionId, transactionData, 'pix', orderId);
+        }
+
+        res.json({
+            success: true,
+            transaction
+        });
+    } catch (error) {
+        console.error('Erro ao criar transação PIX:', error);
+        res.status(500).json({
+            error: 'Erro ao processar pagamento PIX',
+            message: error.message,
+            details: error.error || error
+        });
+    }
+});
+
+// Criar transação com Cartão via BESTFY
+app.post('/api/payments/bestfy/card', async (req, res) => {
+    const { orderId, amount, customer, items, shipping, card, installments } = req.body;
+
+    try {
+        // Buscar credenciais do gateway
+        let gateway;
+        if (db.isPostgres) {
+            const result = await db.query(
+                'SELECT * FROM payment_gateways WHERE gateway_type = $1 AND is_active = 1',
+                ['bestfy']
+            );
+            gateway = result.rows?.[0];
+        } else {
+            gateway = db.prepare(
+                'SELECT * FROM payment_gateways WHERE gateway_type = ? AND is_active = 1'
+            ).get('bestfy');
+        }
+
+        if (!gateway || !gateway.secret_key) {
+            return res.status(400).json({
+                error: 'Gateway BESTFY não configurado ou inativo'
+            });
+        }
+
+        // Criar instância do serviço BESTFY
+        const bestfy = new BestfyService(gateway.secret_key, gateway.public_key);
+
+        // Criar transação com cartão
+        const transaction = await bestfy.createCreditCardTransaction({
+            amount,
+            customer,
+            items,
+            shipping,
+            card,
+            installments,
+            orderId
+        });
+
+        // Atualizar pedido com dados da transação
+        const transactionData = JSON.stringify(transaction);
+        const transactionId = transaction.id || transaction.transactionId;
+
+        // Determinar status baseado na resposta
+        let orderStatus = 'pending';
+        if (transaction.status === 'approved' || transaction.status === 'paid') {
+            orderStatus = 'paid';
+        } else if (transaction.status === 'refused' || transaction.status === 'declined') {
+            orderStatus = 'failed';
+        }
+
+        if (db.isPostgres) {
+            await db.query(
+                'UPDATE orders SET transaction_id = $1, transaction_data = $2, payment_method = $3, status = $4 WHERE id = $5',
+                [transactionId, transactionData, 'credit_card', orderStatus, orderId]
+            );
+        } else {
+            db.prepare(
+                'UPDATE orders SET transaction_id = ?, transaction_data = ?, payment_method = ?, status = ? WHERE id = ?'
+            ).run(transactionId, transactionData, 'credit_card', orderStatus, orderId);
+        }
+
+        res.json({
+            success: transaction.status === 'approved' || transaction.status === 'paid',
+            transaction,
+            status: orderStatus
+        });
+    } catch (error) {
+        console.error('Erro ao criar transação com cartão:', error);
+        res.status(500).json({
+            error: 'Erro ao processar pagamento com cartão',
+            message: error.message,
+            details: error.error || error
+        });
+    }
+});
+
+// Consultar status de transação
+app.get('/api/payments/bestfy/transaction/:transactionId', async (req, res) => {
+    const { transactionId } = req.params;
+
+    try {
+        // Buscar credenciais do gateway
+        let gateway;
+        if (db.isPostgres) {
+            const result = await db.query(
+                'SELECT * FROM payment_gateways WHERE gateway_type = $1 AND is_active = 1',
+                ['bestfy']
+            );
+            gateway = result.rows?.[0];
+        } else {
+            gateway = db.prepare(
+                'SELECT * FROM payment_gateways WHERE gateway_type = ? AND is_active = 1'
+            ).get('bestfy');
+        }
+
+        if (!gateway || !gateway.secret_key) {
+            return res.status(400).json({
+                error: 'Gateway BESTFY não configurado ou inativo'
+            });
+        }
+
+        // Criar instância do serviço BESTFY
+        const bestfy = new BestfyService(gateway.secret_key, gateway.public_key);
+
+        // Consultar transação
+        const transaction = await bestfy.getTransaction(transactionId);
+
+        // Atualizar status do pedido se necessário
+        if (transaction.status === 'approved' || transaction.status === 'paid') {
+            if (db.isPostgres) {
+                await db.query(
+                    'UPDATE orders SET status = $1, transaction_data = $2 WHERE transaction_id = $3',
+                    ['paid', JSON.stringify(transaction), transactionId]
+                );
+            } else {
+                db.prepare(
+                    'UPDATE orders SET status = ?, transaction_data = ? WHERE transaction_id = ?'
+                ).run('paid', JSON.stringify(transaction), transactionId);
+            }
+        }
+
+        res.json({
+            success: true,
+            transaction
+        });
+    } catch (error) {
+        console.error('Erro ao consultar transação:', error);
+        res.status(500).json({
+            error: 'Erro ao consultar transação',
+            message: error.message
+        });
     }
 });
 

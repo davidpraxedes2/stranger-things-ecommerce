@@ -9,9 +9,7 @@
     <link rel="stylesheet" href="checkout-styles.css?v=18">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Teko:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Teko:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         /* CSS CRÍTICO INLINE - FORÇAR desde o início */
         body:has(.announcement-bar:not(.hidden)),
@@ -34,7 +32,7 @@
             z-index: 1004 !important;
             height: 48px !important;
         }
-        
+
         /* Loading Screen Inicial */
         #checkoutPageLoader {
             position: fixed;
@@ -50,12 +48,12 @@
             opacity: 1;
             transition: opacity 0.4s ease-out;
         }
-        
+
         #checkoutPageLoader.hidden {
             opacity: 0;
             pointer-events: none;
         }
-        
+
         .loader-content {
             text-align: center;
             padding: 2rem;
@@ -64,14 +62,14 @@
             align-items: center;
             justify-content: center;
         }
-        
+
         .loader-spinner {
             position: relative;
             width: 100px;
             height: 100px;
             margin: 0 auto 2rem;
         }
-        
+
         .loader-spinner::before,
         .loader-spinner::after {
             content: '';
@@ -80,13 +78,13 @@
             left: 0;
             border-radius: 50%;
         }
-        
+
         .loader-spinner::before {
             width: 100%;
             height: 100%;
             border: 4px solid rgba(229, 9, 20, 0.1);
         }
-        
+
         .loader-spinner::after {
             width: 100%;
             height: 100%;
@@ -94,7 +92,7 @@
             border-top-color: #E50914;
             animation: loaderSpin 1s cubic-bezier(0.5, 0, 0.5, 1) infinite;
         }
-        
+
         .loader-text {
             font-family: 'Teko', sans-serif;
             font-size: 2rem;
@@ -106,7 +104,7 @@
             margin: 0;
             text-align: center;
         }
-        
+
         .loader-subtext {
             color: rgba(255, 255, 255, 0.6);
             font-size: 0.9rem;
@@ -114,20 +112,25 @@
             letter-spacing: 1px;
             text-align: center;
         }
-        
+
         @keyframes loaderSpin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
-        
+
         @keyframes loaderGlow {
-            0%, 100% { 
+
+            0%,
+            100% {
                 text-shadow: 0 0 20px rgba(229, 9, 20, 0.5), 0 0 40px rgba(229, 9, 20, 0.3);
             }
-            50% { 
+
+            50% {
                 text-shadow: 0 0 30px rgba(229, 9, 20, 0.8), 0 0 60px rgba(229, 9, 20, 0.5);
             }
         }
-        
+
         /* Esconder conteúdo da página enquanto carrega */
         body.loading .checkout-container,
         body.loading .header,
@@ -254,27 +257,27 @@
                 document.querySelector('.announcement-bar').classList.add('hidden');
             });
         }
-        
+
         // Hide page loader quando DOMContentLoaded (não esperar imagens)
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Remover classe loading do body
             document.body.classList.remove('loading');
-            
+
             // Esconder loader após um delay mínimo
-            setTimeout(function() {
+            setTimeout(function () {
                 const loader = document.getElementById('checkoutPageLoader');
                 if (loader) {
                     loader.classList.add('hidden');
                     // Remove loader do DOM após animação
-                    setTimeout(function() {
+                    setTimeout(function () {
                         loader.remove();
                     }, 400);
                 }
             }, 200); // Delay mínimo de 200ms para garantir transição suave
         });
-        
+
         // Fallback: esconder loader após 2 segundos se DOMContentLoaded não disparar
-        setTimeout(function() {
+        setTimeout(function () {
             document.body.classList.remove('loading');
             const loader = document.getElementById('checkoutPageLoader');
             if (loader && !loader.classList.contains('hidden')) {
@@ -282,6 +285,35 @@
             }
         }, 2000);
     </script>
+    <!-- Payment Processing Modal -->
+    <div id="paymentModal" class="payment-modal-overlay">
+        <div class="payment-modal">
+            <!-- Loading State -->
+            <div id="modalLoading" class="payment-modal-content">
+                <div class="modal-spinner"></div>
+                <h3 class="modal-title">Processando Pagamento...</h3>
+                <p class="modal-text">Por favor, aguarde enquanto validamos sua transação com a operadora.</p>
+                <p class="modal-text"><small>Não feche esta janela.</small></p>
+            </div>
+
+            <!-- Success State -->
+            <div id="modalSuccess" class="payment-modal-content hidden">
+                <div class="icon-success">✓</div>
+                <h3 class="modal-title">Pagamento Aprovado!</h3>
+                <p class="modal-text">Sua compra foi confirmada com sucesso.</p>
+                <p class="modal-text">Redirecionando...</p>
+            </div>
+
+            <!-- Error State -->
+            <div id="modalError" class="payment-modal-content hidden">
+                <div class="icon-error">!</div>
+                <h3 class="modal-title">Pagamento Recusado</h3>
+                <p id="paymentErrorMessage" class="modal-text">Ocorreu um erro ao processar o pagamento.</p>
+                <button id="btnRetryPayment" class="btn-retry">TENTAR NOVAMENTE</button>
+            </div>
+        </div>
+    </div>
+
     <script src="checkout.js"></script>
 </body>
 

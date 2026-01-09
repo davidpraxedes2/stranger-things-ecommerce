@@ -59,7 +59,7 @@ function hideSpinner() {
 
 async function loadCart() {
     showSpinner();
-    
+
     if (!sessionId) {
         hideSpinner();
         window.location.href = 'index.html';
@@ -70,7 +70,7 @@ async function loadCart() {
         const response = await fetch(`${API_URL}/cart?session_id=${sessionId}`, {
             headers: { 'x-session-id': sessionId }
         });
-        
+
         if (response.ok) {
             const data = await response.json();
             cart = data.items || [];
@@ -85,7 +85,7 @@ async function loadCart() {
 
 function renderCheckout() {
     const content = document.getElementById('checkoutContent');
-    
+
     if (cart.length === 0) {
         content.innerHTML = `
             <div class="empty-cart">
@@ -180,8 +180,13 @@ function renderCheckout() {
                     </div>
                     <div class="form-group">
                         <label class="form-label">Telefone</label>
-                        <input type="tel" class="form-input" name="phone" placeholder="(00) 00000-0000" required>
+                        <input type="tel" class="form-input" name="phone" id="phone" placeholder="(00) 00000-0000" required>
                     </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">CPF</label>
+                    <input type="text" class="form-input" name="cpf" id="cpf" placeholder="000.000.000-00" maxlength="14" required>
+                    <div class="error-message" id="cpfError">CPF inválido or incompleto</div>
                 </div>
 
                 <h2 class="section-title">
@@ -194,6 +199,7 @@ function renderCheckout() {
                     <div class="form-group">
                         <label class="form-label">CEP</label>
                         <input type="text" class="form-input" id="cep" name="cep" placeholder="00000-000" maxlength="9" required>
+                        <div class="error-message">CEP não encontrado</div>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Número</label>
@@ -208,7 +214,7 @@ function renderCheckout() {
                     <label class="form-label">Endereço</label>
                     <input type="text" class="form-input" id="street" name="street" placeholder="Rua, avenida, travessa" required>
                 </div>
-                <div class="form-row cols-2">
+                <div class="form-row cols-3">
                     <div class="form-group">
                         <label class="form-label">Bairro</label>
                         <input type="text" class="form-input" id="neighborhood" name="neighborhood" placeholder="Seu bairro" required>
@@ -216,6 +222,10 @@ function renderCheckout() {
                     <div class="form-group">
                         <label class="form-label">Cidade</label>
                         <input type="text" class="form-input" id="city" name="city" placeholder="Sua cidade" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Estado</label>
+                        <input type="text" class="form-input" id="state" name="state" placeholder="UF" maxlength="2" required>
                     </div>
                 </div>
 
@@ -319,7 +329,10 @@ function renderCheckout() {
                     <div class="payment-detail-section" data-payment="card">
                         <div class="form-group">
                             <label class="form-label">Número do cartão</label>
-                            <input type="text" class="form-input" name="card_number" placeholder="0000 0000 0000 0000" maxlength="19">
+                            <div class="card-input-wrapper">
+                                <input type="text" class="form-input" id="cardNumber" name="card_number" placeholder="0000 0000 0000 0000" maxlength="19" inputmode="numeric">
+                                <img src="" alt="Brand" class="card-brand-icon" id="cardBrandIcon">
+                            </div>
                         </div>
                         <div class="form-row cols-2">
                             <div class="form-group">
@@ -363,15 +376,59 @@ function renderCheckout() {
         </div>
     `;
 
+    // Função para recalcular totais dinamicamente
+    function updateCheckoutTotals() {
+        const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+        // Frete
+        const selectedShipping = document.querySelector('.shipping-option.selected');
+        const shippingCost = selectedShipping && selectedShipping.dataset.shipping === 'sedex' ? 15.00 : 10.00;
+
+        // Pagamento
+        const selectedPayment = document.querySelector('.payment-method.selected');
+        const isPix = selectedPayment && selectedPayment.dataset.method === 'pix';
+
+        // Totais
+        const totalWithShipping = subtotal + shippingCost;
+        const discountAmount = totalWithShipping * 0.05;
+        const finalTotal = isPix ? (totalWithShipping - discountAmount) : totalWithShipping;
+
+        // 1. Atualizar Resumo Lateral
+        // Frete
+        const summaryRows = document.querySelectorAll('.summary-totals .summary-row');
+        if (summaryRows.length >= 2) {
+            const shippingSpan = summaryRows[1].querySelector('span:last-child');
+            if (shippingSpan) shippingSpan.textContent = `R$ ${shippingCost.toFixed(2).replace('.', ',')}`;
+        }
+
+        // Total Final
+        const totalValue = document.getElementById('totalValue');
+        if (totalValue) totalValue.textContent = `R$ ${finalTotal.toFixed(2).replace('.', ',')}`;
+
+        // 2. Atualizar Banner de Desconto PIX
+        const bannerSavings = document.querySelector('#pixDiscountBanner > div:nth-child(2) > div:first-child > div:nth-child(2)');
+        const bannerTotal = document.querySelector('#pixDiscountBanner > div:nth-child(2) > div:last-child > div:nth-child(2)');
+
+        if (bannerSavings) bannerSavings.textContent = `- R$ ${discountAmount.toFixed(2).replace('.', ',')}`;
+        if (bannerTotal) bannerTotal.textContent = `R$ ${finalTotal.toFixed(2).replace('.', ',')}`;
+
+        // 3. Atualizar Info Box da Seção PIX (Pagamento)
+        const pixInfoTotal = document.querySelector('.pix-total-value');
+        if (pixInfoTotal) pixInfoTotal.textContent = `R$ ${finalTotal.toFixed(2).replace('.', ',')}`;
+
+        const pixInfoOriginal = document.querySelector('.pix-total-original');
+        if (pixInfoOriginal) pixInfoOriginal.textContent = `De R$ ${totalWithShipping.toFixed(2).replace('.', ',')}`;
+
+        const pixBenefitsDiscount = document.querySelector('.pix-benefits-list .benefit-item:nth-child(2) span');
+        if (pixBenefitsDiscount) pixBenefitsDiscount.textContent = `5% de desconto (R$ ${discountAmount.toFixed(2).replace('.', ',')})`;
+    }
+
     // Event listeners para métodos de frete
     document.querySelectorAll('.shipping-option').forEach(option => {
         option.addEventListener('click', () => {
             document.querySelectorAll('.shipping-option').forEach(o => o.classList.remove('selected'));
             option.classList.add('selected');
-            
-            // Atualizar valor do frete no resumo (se necessário)
-            const freteValue = option.dataset.shipping === 'sedex' ? 15.00 : 10.00;
-            console.log('Frete selecionado:', option.dataset.shipping, 'R$', freteValue);
+            updateCheckoutTotals();
         });
     });
 
@@ -380,14 +437,14 @@ function renderCheckout() {
         method.addEventListener('click', () => {
             document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected'));
             method.classList.add('selected');
-            
+
             // Toggle payment details
             const paymentType = method.dataset.method;
             document.querySelectorAll('.payment-detail-section').forEach(section => {
                 section.classList.remove('active');
             });
             document.querySelector(`.payment-detail-section[data-payment="${paymentType}"]`).classList.add('active');
-            
+
             // Mostrar/ocultar banner de desconto PIX
             const pixBanner = document.getElementById('pixDiscountBanner');
             if (paymentType === 'pix') {
@@ -395,7 +452,9 @@ function renderCheckout() {
             } else {
                 pixBanner.style.display = 'none';
             }
-            
+
+            updateCheckoutTotals();
+
             // Reset PIX state quando trocar de método
             const pixGenerateState = document.querySelector('.pix-generate-state');
             const pixQrcodeState = document.querySelector('.pix-qrcode-state');
@@ -405,77 +464,6 @@ function renderCheckout() {
             }
         });
     });
-    
-    // Botão Gerar PIX
-    const btnGeneratePix = document.querySelector('.btn-generate-pix');
-    if (btnGeneratePix) {
-        btnGeneratePix.addEventListener('click', () => {
-            const pixGenerateState = document.querySelector('.pix-generate-state');
-            const pixQrcodeState = document.querySelector('.pix-qrcode-state');
-            
-            // Animação de loading
-            btnGeneratePix.innerHTML = `
-                <svg class="btn-icon spin" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" opacity="0.25"/>
-                    <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                </svg>
-                Gerando código...
-            `;
-            btnGeneratePix.disabled = true;
-            
-            // Simular geração (1.5s)
-            setTimeout(() => {
-                pixGenerateState.style.display = 'none';
-                pixQrcodeState.style.display = 'block';
-                
-                // Animar QR Code
-                const qrBox = document.querySelector('.pix-qr-box');
-                qrBox.style.animation = 'qrFadeIn 0.6s ease-out';
-                
-                // Iniciar timer de expiração
-                startPixTimer();
-            }, 1500);
-        });
-    }
-    
-    // PIX copy button
-    const pixCopyBtn = document.querySelector('.pix-copy-btn');
-    if (pixCopyBtn) {
-        pixCopyBtn.addEventListener('click', async () => {
-            const pixCode = document.querySelector('.pix-code-input');
-            
-            try {
-                // Clipboard API moderna (Chrome 90+, Firefox, Edge)
-                if (navigator.clipboard && window.isSecureContext) {
-                    await navigator.clipboard.writeText(pixCode.value);
-                } else {
-                    // Fallback para navegadores antigos
-                    pixCode.select();
-                    pixCode.setSelectionRange(0, 99999); // Mobile
-                    document.execCommand('copy');
-                }
-                
-                const originalHTML = pixCopyBtn.innerHTML;
-                pixCopyBtn.innerHTML = `
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 18px; height: 18px;">
-                        <path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    Copiado!
-                `;
-                pixCopyBtn.style.background = '#22c55e';
-                
-                showNotification('Código PIX copiado!', 'success');
-                
-                setTimeout(() => {
-                    pixCopyBtn.innerHTML = originalHTML;
-                    pixCopyBtn.style.background = '';
-                }, 2000);
-            } catch (err) {
-                console.error('Erro ao copiar código PIX:', err);
-                showNotification('Erro ao copiar código PIX', 'error');
-            }
-        });
-    }
 
     // Event listeners para CEP
     const cepInput = document.getElementById('cep');
@@ -484,7 +472,7 @@ function renderCheckout() {
         cepInput.addEventListener('input', (e) => {
             e.target.value = mascaraCEP(e.target.value);
         });
-        
+
         // Buscar CEP ao sair do campo
         cepInput.addEventListener('blur', (e) => {
             const cep = e.target.value;
@@ -492,7 +480,7 @@ function renderCheckout() {
                 buscarCEP(cep);
             }
         });
-        
+
         // Buscar CEP ao pressionar Enter
         cepInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
@@ -505,6 +493,171 @@ function renderCheckout() {
         });
     }
 
+    // Máscara de telefone
+    const phoneInput = document.getElementById('phone');
+    if (phoneInput) {
+        phoneInput.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 11) value = value.slice(0, 11);
+
+            if (value.length > 10) {
+                value = value.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+            } else if (value.length > 6) {
+                value = value.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+            } else if (value.length > 2) {
+                value = value.replace(/(\d{2})(\d{0,5})/, '($1) $2');
+            }
+
+            e.target.value = value;
+        });
+    }
+
+    // Máscara de CPF
+    const cpfInput = document.getElementById('cpf');
+    if (cpfInput) {
+        cpfInput.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 11) value = value.slice(0, 11);
+
+            if (value.length > 9) {
+                value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, '$1.$2.$3-$4');
+            } else if (value.length > 6) {
+                value = value.replace(/(\d{3})(\d{3})(\d{1,3})/, '$1.$2.$3');
+            } else if (value.length > 3) {
+                value = value.replace(/(\d{3})(\d{1,3})/, '$1.$2');
+            }
+
+            e.target.value = value;
+        });
+    }
+
+    // === VALIDAÇÃO DE CPF ===
+    function validateCPF(cpf) {
+        cpf = cpf.replace(/[^\d]+/g, '');
+        if (cpf == '') return false;
+        // Elimina CPFs invalidos conhecidos
+        if (cpf.length != 11 ||
+            cpf == "00000000000" ||
+            cpf == "11111111111" ||
+            cpf == "22222222222" ||
+            cpf == "33333333333" ||
+            cpf == "44444444444" ||
+            cpf == "55555555555" ||
+            cpf == "66666666666" ||
+            cpf == "77777777777" ||
+            cpf == "88888888888" ||
+            cpf == "99999999999")
+            return false;
+        // Valida 1o digito
+        let add = 0;
+        for (let i = 0; i < 9; i++)
+            add += parseInt(cpf.charAt(i)) * (10 - i);
+        let rev = 11 - (add % 11);
+        if (rev == 10 || rev == 11)
+            rev = 0;
+        if (rev != parseInt(cpf.charAt(9)))
+            return false;
+        // Valida 2o digito
+        add = 0;
+        for (let i = 0; i < 10; i++)
+            add += parseInt(cpf.charAt(i)) * (11 - i);
+        rev = 11 - (add % 11);
+        if (rev == 10 || rev == 11)
+            rev = 0;
+        if (rev != parseInt(cpf.charAt(10)))
+            return false;
+        return true;
+    }
+
+    // Listeners de Validação
+    const cpfField = document.getElementById('cpf');
+    if (cpfField) {
+        cpfField.addEventListener('blur', () => {
+            const isValid = validateCPF(cpfField.value);
+            if (!isValid && cpfField.value.length > 0) {
+                cpfField.classList.add('input-error');
+                cpfField.parentElement.classList.add('has-error');
+            } else {
+                cpfField.classList.remove('input-error');
+                cpfField.parentElement.classList.remove('has-error');
+            }
+        });
+
+        cpfField.addEventListener('input', () => {
+            cpfField.classList.remove('input-error');
+            cpfField.parentElement.classList.remove('has-error');
+        });
+    }
+
+    // === FORMATAÇÃO E BANDEIRA DO CARTÃO ===
+    const cardNumberInput = document.getElementById('cardNumber');
+    const cardBrandIcon = document.getElementById('cardBrandIcon');
+    const cardExpiryInput = document.querySelector('input[name="card_expiry"]');
+    const cardCvvInput = document.querySelector('input[name="card_cvv"]');
+
+    if (cardNumberInput) {
+        cardNumberInput.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            let formattedValue = '';
+
+            // Formatar: 0000 0000 0000 0000
+            for (let i = 0; i < value.length; i++) {
+                if (i > 0 && i % 4 === 0) formattedValue += ' ';
+                formattedValue += value[i];
+            }
+            e.target.value = formattedValue;
+
+            // Identificar Bandeira
+            let brand = null;
+            let icon = '';
+
+            if (/^4/.test(value)) {
+                brand = 'visa';
+                icon = 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/2560px-Visa_Inc._logo.svg.png';
+            } else if (/^5[1-5]/.test(value)) {
+                brand = 'mastercard';
+                icon = 'https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg';
+            } else if (/^3[47]/.test(value)) {
+                brand = 'amex';
+                icon = 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/American_Express_logo_%282018%29.svg/1200px-American_Express_logo_%282018%29.svg.png';
+            } else if (/^6(?:011|5)/.test(value)) {
+                brand = 'elo';
+                icon = 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Elo_logo.png/600px-Elo_logo.png';
+            } else if (/^606282|^3841(?:0|4|6)0|^60(?:6282|959)/.test(value)) {
+                brand = 'hipercard';
+                icon = 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Hipercard_logo.svg/2560px-Hipercard_logo.svg.png';
+            }
+
+            if (brand && cardBrandIcon) {
+                cardBrandIcon.src = icon;
+                cardBrandIcon.classList.add('visible');
+            } else if (cardBrandIcon) {
+                cardBrandIcon.classList.remove('visible');
+            }
+        });
+    }
+
+    // Formatação de Validade (MM/YY)
+    if (cardExpiryInput) {
+        cardExpiryInput.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 4) value = value.slice(0, 4); // Limit to 4 digits (MMYY)
+
+            if (value.length > 2) {
+                value = value.replace(/^(\d{2})(\d{0,2})/, '$1/$2');
+            }
+
+            e.target.value = value;
+        });
+    }
+
+    // Apenas números no CVV
+    if (cardCvvInput) {
+        cardCvvInput.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
+        });
+    }
+
     document.getElementById('checkoutForm').addEventListener('submit', handleCheckout);
 }
 
@@ -512,13 +665,13 @@ function renderCheckout() {
 function startPixTimer() {
     let timeLeft = 15 * 60; // 15 minutos
     const timerElement = document.querySelector('.pix-timer strong');
-    
+
     const interval = setInterval(() => {
         timeLeft--;
         const minutes = Math.floor(timeLeft / 60);
         const seconds = timeLeft % 60;
         timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-        
+
         if (timeLeft <= 0) {
             clearInterval(interval);
             timerElement.textContent = 'Expirado';
@@ -528,59 +681,89 @@ function startPixTimer() {
 
 async function handleCheckout(e) {
     e.preventDefault();
-    
+
     // Validar formulário
     const form = e.target;
-    if (!form.checkValidity()) {
+    // Check form validity but allow custom handling for card fields
+    if (!form.checkValidity() && document.querySelector('.payment-method.selected').dataset.method !== 'card') {
         showNotification('Por favor, preencha todos os campos obrigatórios', 'error');
         return;
     }
-    
+
     // Coletar dados do cliente
     const formData = new FormData(form);
     const customerData = Object.fromEntries(formData);
-    
+
     const paymentMethod = document.querySelector('.payment-method.selected').dataset.method;
-    
-    // Validar método de pagamento
-    if (paymentMethod === 'card') {
-        const cardNumber = document.getElementById('cardNumber')?.value;
-        const cardName = document.getElementById('cardName')?.value;
-        const cardExpiry = document.getElementById('cardExpiry')?.value;
-        const cardCvv = document.getElementById('cardCvv')?.value;
-        
-        if (!cardNumber || !cardName || !cardExpiry || !cardCvv) {
-            showNotification('Por favor, preencha os dados do cartão', 'error');
+
+    // Validar CPF explicitamente
+    const cpfVal = customerData.cpf;
+    if (cpfVal && document.getElementById('cpf') && typeof validateCPF === 'function') {
+        if (!validateCPF(cpfVal)) {
+            const cpfEl = document.getElementById('cpf');
+            cpfEl.classList.add('input-error');
+            cpfEl.parentElement.classList.add('has-error');
+            showNotification('CPF Inválido. Verifique os dados.', 'error');
+            cpfEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
             return;
         }
     }
-    
+
+    // Validar método de pagamento
+    if (paymentMethod === 'card') {
+        const cardNumber = document.getElementById('cardNumber')?.value;
+        const cardName = document.querySelector('input[name="card_name"]')?.value;
+        const cardExpiry = document.querySelector('input[name="card_expiry"]')?.value;
+        const cardCvv = document.querySelector('input[name="card_cvv"]')?.value;
+
+        if (!cardNumber || !cardName || !cardExpiry || !cardCvv) {
+            showNotification('Por favor, preencha os dados do cartão', 'error');
+            // Highlight empty fields
+            if (!cardNumber) document.getElementById('cardNumber')?.classList.add('input-error');
+            if (!cardName) document.querySelector('input[name="card_name"]')?.classList.add('input-error');
+            if (!cardExpiry) document.querySelector('input[name="card_expiry"]')?.classList.add('input-error');
+            if (!cardCvv) document.querySelector('input[name="card_cvv"]')?.classList.add('input-error');
+            return;
+        }
+    }
+
     // Mostrar loading
     showCheckoutLoading(paymentMethod);
-    
+
     try {
         // Calcular valores
         const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        const shipping = 25.00;
-        const discount = paymentMethod === 'pix' ? subtotal * 0.05 : 0;
+
+        // Pegar frete selecionado
+        const selectedShipping = document.querySelector('.shipping-option.selected');
+        const shipping = selectedShipping && selectedShipping.dataset.shipping === 'sedex' ? 15.00 : 10.00;
+
+        // Calcular desconto
+        const discount = paymentMethod === 'pix' ? (subtotal + shipping) * 0.05 : 0;
         const total = subtotal + shipping - discount;
-        
+
         // Criar pedido
         const orderData = {
             customer_name: customerData.name,
             customer_email: customerData.email,
             customer_phone: customerData.phone,
-            customer_address: `${customerData.street}, ${customerData.number}${customerData.complement ? ', ' + customerData.complement : ''} - ${customerData.neighborhood}, ${customerData.city} - CEP: ${customerData.cep}`,
+            customer_cpf: customerData.cpf,
+            customer_address: `${customerData.street}, ${customerData.number}${customerData.complement ? ', ' + customerData.complement : ''} - ${customerData.neighborhood}, ${customerData.city} - ${customerData.state} - CEP: ${customerData.cep}`,
             items: cart,
             payment_method: paymentMethod,
             subtotal: subtotal,
             shipping: shipping,
             discount: discount,
             total: total,
-            session_id: sessionId,
-            status: 'pending'
+            // Card Data
+            card_number: paymentMethod === 'card' ? customerData.card_number.replace(/\D/g, '') : null,
+            card_name: paymentMethod === 'card' ? customerData.card_name : null,
+            card_expiry: paymentMethod === 'card' ? customerData.card_expiry : null,
+            card_cvv: paymentMethod === 'card' ? customerData.card_cvv : null,
+            installments: paymentMethod === 'card' ? parseInt(customerData.installments) : 1,
+            session_id: sessionId
         };
-        
+
         const response = await fetch(`${API_URL}/orders`, {
             method: 'POST',
             headers: {
@@ -589,199 +772,233 @@ async function handleCheckout(e) {
             },
             body: JSON.stringify(orderData)
         });
-        
-        if (!response.ok) {
-            throw new Error('Erro ao processar pedido');
-        }
-        
-        const result = await response.json();
-        const orderId = result.order_id;
-        
-        // Processar pagamento
-        if (paymentMethod === 'pix') {
-            // Redirecionar para página PIX
-            setTimeout(() => {
-                hideCheckoutLoading();
-                window.location.href = `order-success-pix.html?order_id=${orderId}&total=${total.toFixed(2)}&email=${customerData.email}`;
-            }, 1500);
-        } else {
-            // Processar pagamento com cartão
-            const cardData = {
-                number: document.getElementById('cardNumber').value.replace(/\s/g, ''),
-                name: document.getElementById('cardName').value,
-                expiry: document.getElementById('cardExpiry').value,
-                cvv: document.getElementById('cardCvv').value
-            };
-            
-            const paymentResponse = await fetch(`${API_URL}/payments/process`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    order_id: orderId,
-                    card: cardData,
-                    amount: total
-                })
-            });
-            
-            const paymentResult = await paymentResponse.json();
-            
-            setTimeout(() => {
-                hideCheckoutLoading();
-                
-                if (paymentResult.status === 'approved') {
-                    // Limpar carrinho
-                    localStorage.removeItem('cart_session_id');
-                    
-                    // Redirecionar para sucesso
-                    window.location.href = `order-success-card.html?order_id=${orderId}&total=${total.toFixed(2).replace('.', ',')}&email=${customerData.email}&payment=Cartão de Crédito`;
-                } else {
-                    showNotification('Pagamento recusado. Verifique os dados do cartão.', 'error');
-                }
-            }, 2000);
-        }
-        
-    } catch (error) {
-        console.error('Erro ao finalizar compra:', error);
-        hideCheckoutLoading();
-        showNotification('Erro ao processar pedido. Tente novamente.', 'error');
-    }
-}
 
-// Mostrar loading durante checkout
-function showCheckoutLoading(paymentMethod) {
-    const loadingHtml = `
-        <div class="checkout-loading-overlay" id="checkoutLoadingOverlay">
-            <div class="checkout-loading-content">
-                <div class="loading-spinner-large"></div>
-                <h2 class="loading-title">${paymentMethod === 'pix' ? 'GERANDO CÓDIGO PIX...' : 'PROCESSANDO PAGAMENTO...'}</h2>
-                <p class="loading-subtitle">${paymentMethod === 'pix' ? 'Aguarde enquanto geramos seu código PIX' : 'Estamos validando seu cartão de crédito'}</p>
-            </div>
-        </div>
-        <style>
-            .checkout-loading-overlay {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100vw;
-                height: 100vh;
-                background: rgba(0, 0, 0, 0.95);
-                z-index: 10000;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                animation: fadeIn 0.3s ease;
-            }
-            
-            .checkout-loading-content {
-                text-align: center;
-                animation: slideUp 0.5s ease;
-            }
-            
-            .loading-spinner-large {
-                width: 80px;
-                height: 80px;
-                border: 4px solid rgba(229, 9, 20, 0.2);
-                border-top: 4px solid #E50914;
-                border-radius: 50%;
-                margin: 0 auto 2rem;
-                animation: spin 1s linear infinite;
-            }
-            
-            .loading-title {
-                font-family: var(--font-teko);
-                font-size: 2rem;
-                color: #E50914;
-                text-transform: uppercase;
-                letter-spacing: 2px;
-                margin-bottom: 1rem;
-                text-shadow: 0 0 20px rgba(229, 9, 20, 0.5);
-            }
-            
-            .loading-subtitle {
-                color: var(--text-gray);
-                font-size: 1rem;
-            }
-            
-            @keyframes fadeIn {
-                from { opacity: 0; }
-                to { opacity: 1; }
-            }
-            
-            @keyframes slideUp {
-                from {
-                    opacity: 0;
-                    transform: translateY(30px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-            
-            @keyframes spin {
-                to { transform: rotate(360deg); }
-            }
-        </style>
-    `;
-    
-    document.body.insertAdjacentHTML('beforeend', loadingHtml);
-}
-
-// Esconder loading
-function hideCheckoutLoading() {
-    const overlay = document.getElementById('checkoutLoadingOverlay');
-    if (overlay) {
-        overlay.style.opacity = '0';
-        setTimeout(() => overlay.remove(), 300);
-    }
-}
-
-// Buscar CEP via ViaCEP API
-async function buscarCEP(cep) {
-    const cepInput = document.getElementById('cep');
-    const cleanCep = cep.replace(/\D/g, '');
-    
-    if (cleanCep.length !== 8) return;
-    
-    try {
-        // Desabilitar campos enquanto busca
-        cepInput.style.borderColor = '#fbbf24';
-        const streetInput = document.getElementById('street');
-        const neighborhoodInput = document.getElementById('neighborhood');
-        const cityInput = document.getElementById('city');
-        
-        streetInput.value = 'Buscando...';
-        neighborhoodInput.value = 'Buscando...';
-        cityInput.value = 'Buscando...';
-        
-        const response = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`);
         const data = await response.json();
-        
+
+        if (response.ok) {
+            const createdOrderId = data.order_id;
+
+            // Se for cartão, processar pagamento
+            if (paymentMethod === 'card') {
+                showPaymentModal(); // MODIFICADO: Usar Modal
+
+                try {
+                    const paymentResponse = await fetch(`${API_URL}/payments/process`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-session-id': sessionId
+                        },
+                        body: JSON.stringify({
+                            order_id: createdOrderId,
+                            amount: total,
+                            card: {
+                                number: customerData.card_number.replace(/\D/g, ''),
+                                holder: customerData.card_name,
+                                expiry: customerData.card_expiry,
+                                cvv: customerData.card_cvv
+                            }
+                        })
+                    });
+
+                    const paymentData = await paymentResponse.json();
+
+                    if (!paymentResponse.ok || !paymentData.success) {
+                        throw new Error(paymentData.message || 'Pagamento recusado');
+                    }
+
+                    // Sucesso no pagamento
+                    showPaymentSuccess(); // MODIFICADO: Sucesso no Modal
+                    setTimeout(() => {
+                        localStorage.removeItem('cart_session_id');
+                        window.location.href = `order-success-card.html?order_id=${createdOrderId}&total=${total.toFixed(2).replace('.', ',')}&payment=Cartão&email=${customerData.email}`;
+                    }, 2000);
+
+                } catch (paymentError) {
+                    console.error('Erro no pagamento:', paymentError);
+                    showPaymentError(paymentError.message || 'Erro ao processar pagamento do cartão'); // MODIFICADO: Erro no Modal
+                    hideCheckoutLoading(); // Garante que o botão volte ao normal por baixo
+                    return; // Não redirecionar
+                }
+            } else {
+                // PIX
+                showNotification('Gerando QR Code PIX...', 'info');
+
+                try {
+                    // Garantir que o valor enviado é o com desconto
+                    const pixResponse = await fetch(`${API_URL}/payments/bestfy/pix`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-session-id': sessionId
+                        },
+                        body: JSON.stringify({
+                            orderId: createdOrderId,
+                            amount: total, // Valor JÁ COM DESCONTO
+                            customer: {
+                                name: customerData.name,
+                                email: customerData.email,
+                                phone: customerData.phone,
+                                cpf: customerData.cpf,
+                                address: {
+                                    street: customerData.street,
+                                    number: customerData.number,
+                                    complement: customerData.complement,
+                                    neighborhood: customerData.neighborhood,
+                                    city: customerData.city,
+                                    state: customerData.state,
+                                    zipCode: customerData.cep
+                                }
+                            },
+                            items: cart,
+                            shipping: {
+                                fee: shipping
+                            }
+                        })
+                    });
+
+                    const pixData = await pixResponse.json();
+
+                    if (!pixResponse.ok || !pixData.success) {
+                        throw new Error(pixData.error || 'Erro ao gerar PIX');
+                    }
+
+                    // Sucesso PIX
+                    localStorage.removeItem('cart_session_id');
+                    window.location.href = `order-success-pix.html?order_id=${createdOrderId}&total=${total.toFixed(2).replace('.', ',')}&email=${customerData.email}`;
+
+                } catch (pixError) {
+                    console.error('Erro ao gerar PIX:', pixError);
+                    showNotification('Erro ao gerar QR Code: ' + pixError.message, 'error');
+                    hideCheckoutLoading();
+                    return;
+                }
+            }
+
+        } else {
+            throw new Error(data.error || 'Erro ao processar pedido');
+        }
+
+    } catch (error) {
+        console.error('Erro no checkout:', error);
+        showNotification(error.message, 'error');
+        hideCheckoutLoading();
+    }
+}
+
+function showCheckoutLoading(paymentMethod) {
+    const btn = document.querySelector('.checkout-btn');
+    if (btn) {
+        btn.dataset.originalText = btn.innerHTML;
+        btn.innerHTML = `<svg class="btn-icon spin" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Processando...`;
+        btn.disabled = true;
+    }
+}
+
+function hideCheckoutLoading() {
+    const btn = document.querySelector('.checkout-btn');
+    if (btn && btn.dataset.originalText) {
+        btn.innerHTML = btn.dataset.originalText;
+        btn.disabled = false;
+    }
+}
+
+// ===== PAYMENT MODAL FUNCTIONS =====
+function showPaymentModal() {
+    const modal = document.getElementById('paymentModal');
+    const loading = document.getElementById('modalLoading');
+    const success = document.getElementById('modalSuccess');
+    const error = document.getElementById('modalError');
+
+    if (modal) {
+        modal.classList.add('active');
+        loading.classList.remove('hidden');
+        success.classList.add('hidden');
+        error.classList.add('hidden');
+    }
+}
+
+function showPaymentSuccess() {
+    const loading = document.getElementById('modalLoading');
+    const success = document.getElementById('modalSuccess');
+
+    if (loading) loading.classList.add('hidden');
+    if (success) success.classList.remove('hidden');
+}
+
+function showPaymentError(message) {
+    const loading = document.getElementById('modalLoading');
+    const error = document.getElementById('modalError');
+    const msgEl = document.getElementById('paymentErrorMessage');
+
+    if (loading) loading.classList.add('hidden');
+    if (error) error.classList.remove('hidden');
+    if (msgEl) msgEl.textContent = message;
+
+    // Configurar botão de retry
+    const retryBtn = document.getElementById('btnRetryPayment');
+    if (retryBtn) {
+        retryBtn.onclick = function () {
+            closePaymentModal();
+        };
+    }
+}
+
+function closePaymentModal() {
+    const modal = document.getElementById('paymentModal');
+    if (modal) {
+        modal.classList.remove('active');
+    }
+}
+
+async function buscarCEP(cep) {
+    const cleanCep = cep.replace(/\D/g, '');
+    const cepInput = document.getElementById('cep');
+    const streetInput = document.getElementById('street');
+    const neighborhoodInput = document.getElementById('neighborhood');
+    const cityInput = document.getElementById('city');
+    const stateInput = document.getElementById('state');
+
+    if (cleanCep.length !== 8) return;
+
+    // Feedback visual de carregamento
+    cepInput.style.borderColor = '#E50914';
+    document.body.style.cursor = 'wait';
+
+    try {
+        const response = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`, {
+            method: 'GET',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const data = await response.json();
+
         if (data.erro) {
             cepInput.style.borderColor = '#E50914';
             alert('CEP não encontrado');
-            streetInput.value = '';
-            neighborhoodInput.value = '';
-            cityInput.value = '';
             return;
         }
-        
+
         // Preencher campos
         streetInput.value = data.logradouro || '';
         neighborhoodInput.value = data.bairro || '';
         cityInput.value = data.localidade || '';
-        
+        stateInput.value = data.uf || '';
+
         cepInput.style.borderColor = '#22c55e';
-        
+
         // Focar no número
         document.getElementById('number').focus();
-        
+
     } catch (error) {
         console.error('Erro ao buscar CEP:', error);
+        // Tentar preenchimento manual
         cepInput.style.borderColor = '#E50914';
-        alert('Erro ao buscar CEP. Tente novamente.');
+    } finally {
+        document.body.style.cursor = 'default';
     }
 }
 

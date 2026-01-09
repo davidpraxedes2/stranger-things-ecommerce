@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,24 +26,24 @@
             opacity: 1;
             transition: opacity 0.4s ease-out;
         }
-        
+
         #pageLoader.hidden {
             opacity: 0;
             pointer-events: none;
         }
-        
+
         .loader-content {
             text-align: center;
             padding: 2rem;
         }
-        
+
         .loader-spinner {
             position: relative;
             width: 100px;
             height: 100px;
             margin: 0 auto 2rem;
         }
-        
+
         .loader-spinner::before,
         .loader-spinner::after {
             content: '';
@@ -51,13 +52,13 @@
             left: 0;
             border-radius: 50%;
         }
-        
+
         .loader-spinner::before {
             width: 100%;
             height: 100%;
             border: 4px solid rgba(0, 209, 193, 0.1);
         }
-        
+
         .loader-spinner::after {
             width: 100%;
             height: 100%;
@@ -65,7 +66,7 @@
             border-top-color: #00D1C1;
             animation: loaderSpin 1s cubic-bezier(0.5, 0, 0.5, 1) infinite;
         }
-        
+
         .loader-text {
             font-family: 'Teko', sans-serif;
             font-size: 2rem;
@@ -76,21 +77,21 @@
             animation: loaderGlow 2s ease-in-out infinite;
             margin: 0;
         }
-        
+
         .loader-subtext {
             color: rgba(255, 255, 255, 0.6);
             font-size: 0.9rem;
             margin-top: 0.5rem;
             letter-spacing: 1px;
         }
-        
+
         /* Esconder conteúdo enquanto carrega */
         body.loading .pix-page,
         body.loading .header {
             opacity: 0;
             visibility: hidden;
         }
-        
+
         body {
             padding-top: 70px !important;
         }
@@ -116,6 +117,7 @@
                 opacity: 0;
                 transform: translateY(30px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -150,10 +152,13 @@
         }
 
         @keyframes pulse {
-            0%, 100% {
+
+            0%,
+            100% {
                 box-shadow: 0 0 40px rgba(0, 209, 193, 0.6), 0 10px 30px rgba(0, 0, 0, 0.3);
                 transform: scale(1);
             }
+
             50% {
                 box-shadow: 0 0 60px rgba(0, 209, 193, 0.9), 0 15px 40px rgba(0, 0, 0, 0.4);
                 transform: scale(1.05);
@@ -450,15 +455,14 @@
             display: inline-block;
             animation: spin 1s linear infinite;
         }
-        
-        /* Mobile QR Code Toggle */
-        .qr-toggle-mobile {
-            display: none;
+
+        /* QR Code Toggle */
+        .qr-toggle-btn {
             width: 100%;
             padding: 1rem;
-            background: var(--medium-gray);
-            border: 2px solid #00D1C1;
-            border-radius: 12px;
+            background: rgba(0, 209, 193, 0.1);
+            border: 1px dashed #00D1C1;
+            border-radius: 8px;
             color: #00D1C1;
             font-family: var(--font-teko);
             font-size: 1.25rem;
@@ -466,38 +470,41 @@
             cursor: pointer;
             margin-bottom: 1rem;
             transition: all 0.3s ease;
-            justify-content: space-between;
+            display: flex;
+            justify-content: center;
             align-items: center;
+            gap: 0.5rem;
         }
-        
-        .qr-toggle-mobile svg {
+
+        .qr-toggle-btn:hover {
+            background: rgba(0, 209, 193, 0.2);
+        }
+
+        .qr-toggle-btn svg {
             transition: transform 0.3s ease;
             width: 24px;
             height: 24px;
         }
-        
-        .qr-toggle-mobile.active svg {
+
+        .qr-toggle-btn.active svg {
             transform: rotate(180deg);
         }
-        
+
         .qr-collapsible {
-            max-height: 2000px;
-            transition: max-height 0.4s ease, opacity 0.3s ease;
+            max-height: 500px;
+            transition: max-height 0.4s ease, opacity 0.3s ease, margin 0.3s ease;
             overflow: hidden;
+            opacity: 1;
         }
-        
+
         .qr-collapsible.collapsed {
             max-height: 0;
             opacity: 0;
-        }
-        
-        @media (max-width: 768px) {
-            .qr-toggle-mobile {
-                display: flex;
-            }
+            margin: 0;
         }
     </style>
 </head>
+
 <body class="loading">
     <!-- Page Loader -->
     <div id="pageLoader">
@@ -531,7 +538,8 @@
                 <div class="pix-icon">
                     <!-- Logo PIX Oficial -->
                     <svg viewBox="0 0 512 512" fill="white" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M242.4 292.5C247.8 287.1 257.1 287.1 262.5 292.5L339.5 369.5C353.7 383.7 372.6 391.5 392.6 391.5H407.7L310.6 488.6C280.3 518.1 231.1 518.1 200.8 488.6L103.3 391.5H112.6C132.6 391.5 151.5 383.7 165.7 369.5L242.4 292.5zM262.5 218.9C257.1 224.3 247.8 224.3 242.4 218.9L165.7 142.1C151.5 127.9 132.6 120.1 112.6 120.1H103.3L200.7 22.76C231.1-7.586 280.3-7.586 310.6 22.76L407.8 120.1H392.6C372.6 120.1 353.7 127.9 339.5 142.1L262.5 218.9zM112.6 142.1C126.4 142.1 139.1 148.3 149.7 158.1L226.4 236.1C239.1 248.8 251.5 255.1 252.5 255.1C253.4 255.1 265.8 248.8 278.5 236.1L355.5 158.1C365.3 148.3 378.8 142.1 392.6 142.1H430.3L488.6 200.7C518.9 231 518.9 280.3 488.6 310.6L430.3 368.9H392.6C378.8 368.9 365.3 362.7 355.5 352.9L278.5 275.9C265.8 263.2 253.5 256.9 252.5 256.9C251.5 256.9 239.1 263.2 226.4 275.9L149.7 352.9C139.1 362.7 126.4 368.9 112.6 368.9H80.78L22.76 310.6C-7.586 280.3-7.586 231 22.76 200.7L80.78 142.1H112.6z"/>
+                        <path
+                            d="M242.4 292.5C247.8 287.1 257.1 287.1 262.5 292.5L339.5 369.5C353.7 383.7 372.6 391.5 392.6 391.5H407.7L310.6 488.6C280.3 518.1 231.1 518.1 200.8 488.6L103.3 391.5H112.6C132.6 391.5 151.5 383.7 165.7 369.5L242.4 292.5zM262.5 218.9C257.1 224.3 247.8 224.3 242.4 218.9L165.7 142.1C151.5 127.9 132.6 120.1 112.6 120.1H103.3L200.7 22.76C231.1-7.586 280.3-7.586 310.6 22.76L407.8 120.1H392.6C372.6 120.1 353.7 127.9 339.5 142.1L262.5 218.9zM112.6 142.1C126.4 142.1 139.1 148.3 149.7 158.1L226.4 236.1C239.1 248.8 251.5 255.1 252.5 255.1C253.4 255.1 265.8 248.8 278.5 236.1L355.5 158.1C365.3 148.3 378.8 142.1 392.6 142.1H430.3L488.6 200.7C518.9 231 518.9 280.3 488.6 310.6L430.3 368.9H392.6C378.8 368.9 365.3 362.7 355.5 352.9L278.5 275.9C265.8 263.2 253.5 256.9 252.5 256.9C251.5 256.9 239.1 263.2 226.4 275.9L149.7 352.9C139.1 362.7 126.4 368.9 112.6 368.9H80.78L22.76 310.6C-7.586 280.3-7.586 231 22.76 200.7L80.78 142.1H112.6z" />
                     </svg>
                 </div>
                 <h1 class="pix-title">Pagamento via PIX</h1>
@@ -545,69 +553,40 @@
                 <div class="timer-warning">O código PIX expira em 15 minutos</div>
             </div>
 
-            <!-- Order Summary -->
-            <div class="order-summary">
-                <h2 class="summary-title">Resumo do Pedido</h2>
-                <div class="summary-row">
-                    <span class="summary-label">Pedido</span>
-                    <span class="summary-value" id="orderNumber">#000000</span>
-                </div>
-                
-                <!-- Products List -->
-                <div id="productsList" style="margin: 1.5rem 0; padding: 1rem 0; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">
-                    <div style="font-size: 0.875rem; color: var(--text-gray); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 1px;">Produtos</div>
-                    <div id="productsContainer" style="display: flex; flex-direction: column; gap: 0.75rem;">
-                        <!-- Products will be loaded here -->
-                    </div>
-                </div>
-                
-                <div class="summary-row">
-                    <span class="summary-label">Subtotal</span>
-                    <span class="summary-value" id="subtotal">R$ 0,00</span>
-                </div>
-                <div class="summary-row">
-                    <span class="summary-label">Frete</span>
-                    <span class="summary-value" id="shipping">R$ 0,00</span>
-                </div>
-                <div class="summary-row">
-                    <span class="summary-label">Desconto PIX <span class="discount-badge">-5%</span></span>
-                    <span class="summary-value" style="color: #10B981;" id="discount">- R$ 0,00</span>
-                </div>
-                <div class="summary-row">
-                    <span class="summary-label"><strong>Total a Pagar</strong></span>
-                    <span class="summary-value total" id="totalAmount">R$ 0,00</span>
-                </div>
-            </div>
-
             <!-- Content Grid -->
-            <div class="content-grid">
+            <div class="content-grid" style="margin-bottom: 2rem;">
                 <!-- QR Code Section -->
                 <div class="qr-section">
-                    <!-- Mobile Toggle Button -->
-                    <button class="qr-toggle-mobile" id="qrToggle">
-                        <span>VER QR CODE PIX</span>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="6 9 12 15 18 9"></polyline>
-                        </svg>
-                    </button>
-                    
-                    <!-- Collapsible QR Content -->
-                    <div class="qr-collapsible" id="qrContent">
-                        <div class="qr-label">Escaneie o QR Code com seu app de banco</div>
-                        <div class="qr-wrapper">
-                            <div id="qrcode"></div>
-                        </div>
-                    <div class="pix-code-section">
-                        <div class="pix-code-label">Ou copie o código PIX</div>
-                        <div class="pix-code-box" id="pixCode">00020126580014br.gov.bcb.pix0136a1b2c3d4-e5f6-7890-abcd-ef1234567890520400005303986540510.005802BR5925STRANGER THINGS STORE6014BELO HORIZONTE62070503***6304ABCD</div>
+                    <!-- Copia e Cola (Sempre visível) -->
+                    <div class="pix-code-section" style="margin-top: 0; margin-bottom: 2rem;">
+                        <div class="pix-code-label"
+                            style="font-size: 1.1rem; color: var(--text-white); margin-bottom: 0.5rem;">Copie o código
+                            PIX abaixo:</div>
+                        <div class="pix-code-box" id="pixCode" style="font-size: 0.9rem; padding: 1rem;">...</div>
                         <button class="copy-btn" id="copyBtn">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                style="width: 24px; height: 24px;">
                                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                             </svg>
                             <span id="copyBtnText">COPIAR CÓDIGO PIX</span>
                         </button>
                     </div>
+
+                    <!-- Toggle QR Code -->
+                    <button class="qr-toggle-btn" id="qrToggle">
+                        <span>Mostrar QR Code para Escanear</span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+
+                    <!-- Collapsible QR Content (Escondido por padrão) -->
+                    <div class="qr-collapsible collapsed" id="qrContent">
+                        <div class="qr-wrapper">
+                            <div id="qrcode"></div>
+                        </div>
+                        <div class="qr-label">Abra o app do seu banco e escaneie a imagem acima</div>
                     </div>
                 </div>
 
@@ -629,17 +608,56 @@
                     <div class="step">
                         <div class="step-number">3</div>
                         <div class="step-content">
-                            <div class="step-text">Escaneie o QR Code acima ou cole o código copiado</div>
+                            <div class="step-text">Cole o código copiado ou escaneie o QR Code se preferir</div>
                         </div>
                     </div>
                     <div class="step">
                         <div class="step-number">4</div>
                         <div class="step-content">
-                            <div class="step-text">Confirme o pagamento e aguarde a aprovação automática</div>
+                            <div class="step-text">Confirme o pagamento. A aprovação é instantânea!</div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Order Summary -->
+            <div class="order-summary">
+                <h2 class="summary-title">Resumo do Pedido</h2>
+                <div class="summary-row">
+                    <span class="summary-label">Pedido</span>
+                    <span class="summary-value" id="orderNumber">#000000</span>
+                </div>
+
+                <!-- Products List -->
+                <div id="productsList"
+                    style="margin: 1.5rem 0; padding: 1rem 0; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">
+                    <div
+                        style="font-size: 0.875rem; color: var(--text-gray); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 1px;">
+                        Produtos</div>
+                    <div id="productsContainer" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <!-- Products will be loaded here -->
+                    </div>
+                </div>
+
+                <div class="summary-row">
+                    <span class="summary-label">Subtotal</span>
+                    <span class="summary-value" id="subtotal">R$ 0,00</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Frete</span>
+                    <span class="summary-value" id="shipping">R$ 0,00</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Desconto PIX <span class="discount-badge">-5%</span></span>
+                    <span class="summary-value" style="color: #10B981;" id="discount">- R$ 0,00</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label"><strong>Total a Pagar</strong></span>
+                    <span class="summary-value total" id="totalAmount">R$ 0,00</span>
+                </div>
+            </div>
+
+
 
             <!-- Info Box -->
             <div class="info-box">
@@ -649,13 +667,15 @@
                     <line x1="12" y1="8" x2="12.01" y2="8"></line>
                 </svg>
                 <div class="info-text">
-                    <strong>Pagamento instantâneo:</strong> Assim que o pagamento for confirmado, você será redirecionado automaticamente para a página de confirmação. Não feche esta página!
+                    <strong>Pagamento instantâneo:</strong> Assim que o pagamento for confirmado, você será
+                    redirecionado automaticamente para a página de confirmação. Não feche esta página!
                 </div>
             </div>
 
             <!-- Back Button -->
             <a href="checkout.html" class="btn btn-secondary back-btn">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    style="width: 20px; height: 20px;">
                     <polyline points="15 18 9 12 15 6"></polyline>
                 </svg>
                 VOLTAR PARA CHECKOUT
@@ -665,22 +685,22 @@
 
     <script>
         // Hide page loader quando DOMContentLoaded
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             document.body.classList.remove('loading');
-            
-            setTimeout(function() {
+
+            setTimeout(function () {
                 const loader = document.getElementById('pageLoader');
                 if (loader) {
                     loader.classList.add('hidden');
-                    setTimeout(function() {
+                    setTimeout(function () {
                         loader.remove();
                     }, 400);
                 }
             }, 200);
         });
-        
+
         // Fallback
-        setTimeout(function() {
+        setTimeout(function () {
             document.body.classList.remove('loading');
             const loader = document.getElementById('pageLoader');
             if (loader && !loader.classList.contains('hidden')) {
@@ -690,7 +710,7 @@
     </script>
     <script>
         const API_URL = `${window.location.origin}/api`;
-        
+
         // Get order data from URL
         const urlParams = new URLSearchParams(window.location.search);
         const orderId = urlParams.get('order_id') || Math.floor(100000 + Math.random() * 900000);
@@ -713,7 +733,7 @@
                 const response = await fetch(`${API_URL}/orders/${orderId}`);
                 if (response.ok) {
                     const order = await response.json();
-                    
+
                     // Render products
                     const productsContainer = document.getElementById('productsContainer');
                     if (order.items && order.items.length > 0) {
@@ -736,32 +756,109 @@
                 // Manter valores da URL se API falhar
             }
         }
-        
+
         // Load order details
         loadOrderDetails();
-        // Generate PIX code (simulated)
-        const pixCode = `00020126580014br.gov.bcb.pix0136${orderId}-${Date.now()}5204000053039865406${finalTotal.toFixed(2)}5802BR5925STRANGER THINGS STORE6014BELO HORIZONTE62070503***6304${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
-        document.getElementById('pixCode').textContent = pixCode;
 
-        // Generate QR Code
-        new QRCode(document.getElementById('qrcode'), {
-            text: pixCode,
-            width: 200,
-            height: 200,
-            colorDark: '#000000',
-            colorLight: '#ffffff',
-            correctLevel: QRCode.CorrectLevel.H
-        });
+        // Verificar se é transação Bestfy
+        const isBestfy = urlParams.get('bestfy') === 'true';
+        let pixTransaction = null;
+
+        // Tentar recuperar dados da transação do localStorage
+        try {
+            const stored = localStorage.getItem('pix_transaction');
+            if (stored) {
+                pixTransaction = JSON.parse(stored);
+                console.log('Transação Bestfy carregada do localStorage:', pixTransaction);
+                // Limpar após uso
+                localStorage.removeItem('pix_transaction');
+            }
+        } catch (e) {
+            console.error('Erro ao recuperar transação do localStorage:', e);
+        }
+
+        // Função para atualizar QR Code e código PIX
+        function updatePixDisplay(transaction) {
+            const pixCodeElement = document.getElementById('pixCode');
+            const qrcodeElement = document.getElementById('qrcode');
+
+            if (transaction && transaction.pix) {
+                console.log('Usando dados reais da Bestfy:', transaction.pix);
+
+                // Bestfy retorna em transaction.pix.qrcode (lowercase)
+                const realPixCode = transaction.pix.qrcode || transaction.pix.code || transaction.pix.qrCode || transaction.pixCode;
+
+                if (realPixCode) {
+                    pixCodeElement.textContent = realPixCode;
+
+                    // Gerar QR Code com o código real
+                    qrcodeElement.innerHTML = ''; // Limpar
+
+                    // Se Bestfy retornar QR Code como imagem base64
+                    if (transaction.pix.qrCodeImage) {
+                        qrcodeElement.innerHTML = `<img src="${transaction.pix.qrCodeImage}" alt="QR Code PIX" style="width: 200px; height: 200px; border-radius: 8px;">`;
+                    } else {
+                        // Gerar QR Code a partir do código
+                        new QRCode(qrcodeElement, {
+                            text: realPixCode,
+                            width: 200,
+                            height: 200,
+                            colorDark: '#000000',
+                            colorLight: '#ffffff',
+                            correctLevel: QRCode.CorrectLevel.H
+                        });
+                    }
+                    return true;
+                }
+            }
+
+            // Fallback: código simulado (modo de desenvolvimento)
+            console.warn('Usando código PIX simulado - transação Bestfy não encontrada');
+            const pixCode = `00020101021226880014br.gov.bcb.pix0136${orderId}-${Date.now()}5204000053039865406${finalTotal.toFixed(2)}5802BR5925STRANGER THINGS STORE6014BELO HORIZONTE62070503***6304${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+            pixCodeElement.textContent = pixCode;
+
+            new QRCode(qrcodeElement, {
+                text: pixCode,
+                width: 200,
+                height: 200,
+                colorDark: '#000000',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.H
+            });
+            return false;
+        }
+
+        // Tentar atualizar com dados do localStorage primeiro
+        let pixLoaded = updatePixDisplay(pixTransaction);
+
+        // Se não encontrou no localStorage e é Bestfy, buscar da API
+        if (!pixLoaded && isBestfy && orderId) {
+            fetch(`${API_URL}/orders/${orderId}`)
+                .then(res => res.json())
+                .then(order => {
+                    if (order.transaction_data) {
+                        try {
+                            const txData = JSON.parse(order.transaction_data);
+                            console.log('Transação carregada da API:', txData);
+                            updatePixDisplay(txData);
+                        } catch (e) {
+                            console.error('Erro ao parsear transaction_data:', e);
+                        }
+                    }
+                })
+                .catch(err => console.error('Erro ao buscar pedido:', err));
+        }
 
         // Copy to clipboard
         const copyBtn = document.getElementById('copyBtn');
         const copyBtnText = document.getElementById('copyBtnText');
 
         copyBtn.addEventListener('click', () => {
-            navigator.clipboard.writeText(pixCode).then(() => {
+            const pixCodeText = document.getElementById('pixCode').textContent;
+            navigator.clipboard.writeText(pixCodeText).then(() => {
                 copyBtn.classList.add('copied');
                 copyBtnText.textContent = '✓ CÓDIGO COPIADO!';
-                
+
                 setTimeout(() => {
                     copyBtn.classList.remove('copied');
                     copyBtnText.textContent = 'COPIAR CÓDIGO PIX';
@@ -793,50 +890,50 @@
 
         const timerInterval = setInterval(updateTimer, 1000);
         updateTimer();
-        
+
         // QR Code Toggle (Mobile)
         const qrToggle = document.getElementById('qrToggle');
         const qrContent = document.getElementById('qrContent');
-        
+
         if (qrToggle && qrContent) {
             qrToggle.addEventListener('click', () => {
                 qrToggle.classList.toggle('active');
                 qrContent.classList.toggle('collapsed');
-                
+
                 if (qrToggle.classList.contains('active')) {
-                    qrToggle.querySelector('span').textContent = 'OCULTAR QR CODE';
+                    qrToggle.querySelector('span').textContent = 'Ocultar QR Code';
                 } else {
-                    qrToggle.querySelector('span').textContent = 'VER QR CODE PIX';
+                    qrToggle.querySelector('span').textContent = 'Mostrar QR Code para Escanear';
                 }
             });
-            
-            // Start collapsed on mobile
-            if (window.innerWidth <= 768) {
-                qrContent.classList.add('collapsed');
-            }
         }
 
-        // Simulate payment check every 3 seconds
-        let checkCount = 0;
-        const maxChecks = 100; // 5 minutes max
+        // Verificar status do pagamento periodicamente
+        const checkPaymentStatus = async () => {
+            if (!orderId || !isBestfy) return;
 
-        const paymentCheckInterval = setInterval(() => {
-            checkCount++;
-            
-            // Simulate random payment success (10% chance per check for demo)
-            // In production, this would be an API call to check payment status
-            const isPaymentApproved = Math.random() < 0.02; // 2% chance per check
-            
-            if (isPaymentApproved || checkCount >= maxChecks) {
-                clearInterval(paymentCheckInterval);
-                clearInterval(timerInterval);
-                
-                if (isPaymentApproved) {
-                    // Redirect to success page
-                    window.location.href = `order-success-card.html?order_id=${orderId}&total=${finalTotal.toFixed(2).replace('.', ',')}&payment=PIX&email=${urlParams.get('email') || 'seu@email.com'}`;
+            try {
+                const response = await fetch(`${API_URL}/orders/${orderId}`);
+                if (response.ok) {
+                    const order = await response.json();
+
+                    // Se estiver pago (status 'paid' ou 'approved')
+                    if (order.status === 'paid' || order.status === 'approved') {
+                        clearInterval(paymentCheckInterval);
+                        clearInterval(timerInterval);
+
+                        // Redirecionar para sucesso
+                        window.location.href = `order-success-card.html?order_id=${orderId}&total=${finalTotal.toFixed(2).replace('.', ',')}&payment=PIX&email=${urlParams.get('email') || 'seu@email.com'}`;
+                    }
                 }
+            } catch (error) {
+                console.error('Erro ao verificar status:', error);
             }
-        }, 3000);
+        };
+
+        // Verificar a cada 5 segundos
+        const paymentCheckInterval = setInterval(checkPaymentStatus, 5000);
     </script>
 </body>
+
 </html>

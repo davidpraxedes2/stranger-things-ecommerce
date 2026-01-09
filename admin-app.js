@@ -21,21 +21,21 @@ const AppState = {
     inventory: [],
     settings: {},
     charts: {},
-    
+
     // Filters & Search
     filters: {
         products: { search: '', collection: '', status: '', priceRange: null },
         orders: { search: '', status: '', dateRange: null },
         customers: { search: '', segment: '', tags: [] }
     },
-    
+
     // Pagination
     pagination: {
         products: { page: 1, limit: 20, total: 0 },
         orders: { page: 1, limit: 20, total: 0 },
         customers: { page: 1, limit: 20, total: 0 }
     },
-    
+
     // Selection (for bulk actions)
     selected: {
         products: new Set(),
@@ -80,12 +80,12 @@ function checkAuth() {
     if (token) {
         AppState.currentUser = { username: 'admin' };
         showDashboard();
-        
+
         // Restaurar página do hash ou localStorage
         const hashPage = window.location.hash.substring(1);
         const savedPage = localStorage.getItem('admin_current_page');
         const pageToLoad = hashPage || savedPage || 'dashboard';
-        
+
         loadPage(pageToLoad);
     } else {
         showLogin();
@@ -250,6 +250,11 @@ async function loadPage(pageName) {
                 subtitle: 'Gerenciamento de opções de frete',
                 render: renderShipping
             },
+            gateways: {
+                title: 'Gateways de Pagamento',
+                subtitle: 'Configuração de meios de pagamento',
+                render: renderGateways
+            },
             settings: {
                 title: 'Configurações',
                 subtitle: 'Configurações gerais da loja',
@@ -258,18 +263,18 @@ async function loadPage(pageName) {
         };
 
         const config = pageConfigs[pageName] || pageConfigs.dashboard;
-        
+
         pageTitle.textContent = config.title;
         pageSubtitle.textContent = config.subtitle;
-        
+
         // Salvar página atual
         localStorage.setItem('admin_current_page', pageName);
-        
+
         // Atualizar hash na URL (sem recarregar)
         if (window.location.hash !== '#' + pageName) {
             history.replaceState(null, null, '#' + pageName);
         }
-        
+
         // Atualizar menu ativo
         document.querySelectorAll('[data-page]').forEach(link => {
             if (link.dataset.page === pageName) {
@@ -278,7 +283,7 @@ async function loadPage(pageName) {
                 link.classList.remove('active');
             }
         });
-        
+
         await config.render(contentArea);
     } catch (error) {
         console.error('Erro ao carregar página:', error);
@@ -547,14 +552,14 @@ function generateMockSalesData(days) {
     const labels = [];
     const values = [];
     const today = new Date();
-    
+
     for (let i = days - 1; i >= 0; i--) {
         const date = new Date(today);
         date.setDate(date.getDate() - i);
         labels.push(date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }));
         values.push(Math.floor(Math.random() * 5000) + 1000);
     }
-    
+
     return { labels, values };
 }
 
@@ -577,11 +582,11 @@ async function loadStats() {
         }
     } catch (error) {
         console.warn('Erro ao carregar estatísticas:', error);
-        AppState.stats = { 
-            today_sales: 'R$ 0,00', 
-            total_orders: 0, 
-            total_products: 0, 
-            total_revenue: 0 
+        AppState.stats = {
+            today_sales: 'R$ 0,00',
+            total_orders: 0,
+            total_products: 0,
+            total_revenue: 0
         };
     }
 }
@@ -647,13 +652,13 @@ function loadRecentActivityUI() {
 
 async function renderAnalytics(container) {
     let onlineUsers = 0;
-    
+
     try {
         const response = await fetch(`${API_URL}/analytics/online-count`, {
             headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` },
             signal: AbortSignal.timeout(3000)
         });
-        
+
         if (response.ok) {
             const data = await response.json();
             onlineUsers = data.count || 0;
@@ -661,7 +666,7 @@ async function renderAnalytics(container) {
     } catch (error) {
         console.log('Dados de visitantes online não disponíveis');
     }
-    
+
     container.innerHTML = `
         <div class="page-header">
             <div>
@@ -790,39 +795,39 @@ async function renderBrazilMap() {
                 signal: AbortSignal.timeout(3000)
             }).catch(() => null)
         ]);
-        
+
         const svgText = await svgResponse.text();
         const parser = new DOMParser();
         const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
         const svgElement = svgDoc.querySelector('svg');
-        
+
         if (svgElement) {
             svgElement.setAttribute('viewBox', '0 0 612 639');
             svgElement.setAttribute('preserveAspectRatio', 'xMidYMid meet');
             svgElement.style.width = '100%';
             svgElement.style.height = '100%';
             svgElement.style.maxHeight = '400px';
-            
+
             const paths = svgElement.querySelectorAll('path');
             paths.forEach(path => {
                 path.setAttribute('fill', 'rgba(229, 9, 20, 0.15)');
                 path.setAttribute('stroke', 'rgba(229, 9, 20, 0.5)');
                 path.setAttribute('stroke-width', '1');
                 path.style.transition = 'all 0.3s';
-                
-                path.addEventListener('mouseenter', function() {
+
+                path.addEventListener('mouseenter', function () {
                     this.setAttribute('fill', 'rgba(229, 9, 20, 0.4)');
                     this.setAttribute('stroke', 'rgba(229, 9, 20, 1)');
                     this.setAttribute('stroke-width', '2');
                 });
-                
-                path.addEventListener('mouseleave', function() {
+
+                path.addEventListener('mouseleave', function () {
                     this.setAttribute('fill', 'rgba(229, 9, 20, 0.15)');
                     this.setAttribute('stroke', 'rgba(229, 9, 20, 0.5)');
                     this.setAttribute('stroke-width', '1');
                 });
             });
-            
+
             let locations = [];
             if (visitorData && visitorData.ok) {
                 const data = await visitorData.json();
@@ -830,11 +835,11 @@ async function renderBrazilMap() {
                     locations = data;
                 }
             }
-            
+
             if (locations.length > 0) {
                 locations.forEach((location, index) => {
                     const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-                    
+
                     const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
                     circle.setAttribute('cx', location.x);
                     circle.setAttribute('cy', location.y);
@@ -842,11 +847,11 @@ async function renderBrazilMap() {
                     circle.setAttribute('fill', '#10B981');
                     circle.setAttribute('opacity', '0.8');
                     circle.style.animation = `pulse-dot ${1.5 + (index * 0.3)}s infinite`;
-                    
+
                     const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
                     title.textContent = `${location.city} - ${location.count} visitante${location.count > 1 ? 's' : ''}`;
                     circle.appendChild(title);
-                    
+
                     const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
                     text.setAttribute('x', location.x);
                     text.setAttribute('y', location.y - 16);
@@ -856,21 +861,21 @@ async function renderBrazilMap() {
                     text.setAttribute('font-weight', '700');
                     text.style.textShadow = '0 2px 4px rgba(0,0,0,0.8)';
                     text.textContent = location.count;
-                    
+
                     group.appendChild(circle);
                     group.appendChild(text);
-                    
+
                     svgElement.appendChild(group);
                 });
             }
-            
+
             mapContainer.innerHTML = '';
-            
+
             const wrapper = document.createElement('div');
             wrapper.style.cssText = 'width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 20px;';
             wrapper.appendChild(svgElement);
             mapContainer.appendChild(wrapper);
-            
+
             const legend = document.createElement('div');
             legend.style.cssText = 'position: absolute; bottom: 20px; left: 20px; background: rgba(0,0,0,0.9); padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border); z-index: 10;';
             legend.innerHTML = `
@@ -905,26 +910,26 @@ async function renderActiveSessions() {
     if (!sessionsContainer) return;
 
     sessionsContainer.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-secondary);">Sem sessões ativas no momento</div>';
-    
+
     try {
         const response = await fetch(`${API_URL}/sessions/active`, {
             headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` },
             signal: AbortSignal.timeout(3000)
         });
-        
+
         if (response.ok) {
             const sessions = await response.json();
-            
+
             if (!sessions || sessions.length === 0) {
                 return;
             }
-            
+
             const uniqueCities = new Set(sessions.map(s => s.city)).size;
             const locationsCountEl = document.getElementById('locationsCount');
             if (locationsCountEl) {
                 locationsCountEl.textContent = uniqueCities;
             }
-            
+
             sessionsContainer.innerHTML = sessions.map(session => `
                 <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 12px; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--border)'">
                     <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
@@ -964,20 +969,20 @@ function startLiveUpdates() {
     if (AppState.liveUpdateInterval) {
         clearInterval(AppState.liveUpdateInterval);
     }
-    
+
     AppState.liveUpdateInterval = setInterval(async () => {
         try {
             const response = await fetch(`${API_URL}/analytics/online-count`, {
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` },
                 signal: AbortSignal.timeout(2000)
             });
-            
+
             if (response.ok) {
                 const data = await response.json();
                 const onlineCountEl = document.getElementById('onlineCount');
                 if (onlineCountEl && data.count !== undefined) {
                     onlineCountEl.textContent = data.count;
-                    
+
                     onlineCountEl.style.transform = 'scale(1.1)';
                     setTimeout(() => {
                         onlineCountEl.style.transform = 'scale(1)';
@@ -992,7 +997,7 @@ function startLiveUpdates() {
 
 // Limpar interval ao sair da página
 const originalLoadPage = loadPage;
-loadPage = async function(pageName) {
+loadPage = async function (pageName) {
     if (AppState.liveUpdateInterval && pageName !== 'analytics') {
         clearInterval(AppState.liveUpdateInterval);
         AppState.liveUpdateInterval = null;
@@ -1164,7 +1169,7 @@ function renderProductRows() {
         const isSelected = AppState.selected.products.has(product.id);
         const stockClass = product.stock > 10 ? 'success' : (product.stock > 0 ? 'warning' : 'danger');
         const statusClass = product.active ? 'success' : 'danger';
-        
+
         return `
             <tr data-product-id="${product.id}" class="${isSelected ? 'selected-row' : ''}">
                 <td>
@@ -1175,14 +1180,14 @@ function renderProductRows() {
                 </td>
                 <td>
                     <div class="product-thumb">
-                        ${product.image_url ? 
-                            `<img src="${product.image_url}" alt="${product.name}" loading="lazy">` :
-                            `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        ${product.image_url ?
+                `<img src="${product.image_url}" alt="${product.name}" loading="lazy">` :
+                `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                                 <circle cx="8.5" cy="8.5" r="1.5"></circle>
                                 <polyline points="21 15 16 10 5 21"></polyline>
                             </svg>`
-                        }
+            }
                     </div>
                 </td>
                 <td>
@@ -1251,7 +1256,7 @@ function filterProductsTable() {
 
         const nameMatch = product.name.toLowerCase().includes(search);
         const statusMatch = !status || (status === 'active' && product.active) || (status === 'inactive' && !product.active);
-        const stockMatch = !stock || 
+        const stockMatch = !stock ||
             (stock === 'low' && product.stock > 0 && product.stock < 10) ||
             (stock === 'out' && product.stock === 0) ||
             (stock === 'ok' && product.stock >= 10);
@@ -1263,15 +1268,15 @@ function filterProductsTable() {
 function toggleSelectAllProducts(checkbox) {
     const isChecked = checkbox.checked;
     AppState.selected.products.clear();
-    
+
     if (isChecked) {
         AppState.products.forEach(p => AppState.selected.products.add(p.id));
     }
-    
+
     document.querySelectorAll('#productsTable tbody input[type="checkbox"]').forEach(cb => {
         cb.checked = isChecked;
     });
-    
+
     loadPage('products');
 }
 
@@ -1285,13 +1290,13 @@ function toggleProductSelection(productId, isChecked) {
 
 function bulkEditProducts() {
     if (AppState.selected.products.size === 0) return;
-    
+
     showToast(`Editando ${AppState.selected.products.size} produtos...`, 'info');
 }
 
 function bulkDeleteProducts() {
     if (AppState.selected.products.size === 0) return;
-    
+
     if (confirm(`Tem certeza que deseja excluir ${AppState.selected.products.size} produtos?`)) {
         showToast(`${AppState.selected.products.size} produtos excluídos`, 'success');
         AppState.selected.products.clear();
@@ -1596,7 +1601,7 @@ function initCollectionGridSortable() {
             invertSwap: true,
             direction: 'vertical',
             preventOnFilter: false,
-            onStart: function(evt) {
+            onStart: function (evt) {
                 evt.item.style.opacity = '0.8';
                 evt.item.style.transform = 'scale(1.05) rotate(2deg)';
                 evt.item.style.zIndex = '9999';
@@ -1849,18 +1854,18 @@ async function renderOrders(container) {
 
 async function loadOrders() {
     AppState.orders = [];
-    
+
     try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 3000);
-        
-        const response = await fetch(`${API_URL}/admin/orders`, {
+
+        const response = await fetch(`${API_URL}/orders`, {
             headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` },
             signal: controller.signal
         });
-        
+
         clearTimeout(timeoutId);
-        
+
         if (response.ok) {
             const realOrders = await response.json();
             if (realOrders && Array.isArray(realOrders)) {
@@ -1884,11 +1889,11 @@ function filterOrdersTable() {
         const order = AppState.orders.find(o => o.id == orderId);
         if (!order) return;
 
-        const searchMatch = 
+        const searchMatch =
             order.id.toString().includes(search) ||
             (order.customer_name?.toLowerCase().includes(search)) ||
             (order.customer_email?.toLowerCase().includes(search));
-        
+
         const statusMatch = !status || order.status === status;
 
         row.style.display = (searchMatch && statusMatch) ? '' : 'none';
@@ -2116,18 +2121,18 @@ function renderCustomersRows() {
 
 async function loadCustomers() {
     AppState.customers = [];
-    
+
     try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 3000);
-        
+
         const response = await fetch(`${API_URL}/customers`, {
             headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` },
             signal: controller.signal
         });
-        
+
         clearTimeout(timeoutId);
-        
+
         if (response.ok) {
             const realCustomers = await response.json();
             if (realCustomers && Array.isArray(realCustomers)) {
@@ -2151,10 +2156,10 @@ function filterCustomersTable() {
         const customer = AppState.customers.find(c => c.id == customerId);
         if (!customer) return;
 
-        const searchMatch = 
+        const searchMatch =
             customer.name?.toLowerCase().includes(search) ||
             customer.email?.toLowerCase().includes(search);
-        
+
         const segmentMatch = !segment || customer.segment === segment;
 
         row.style.display = (searchMatch && segmentMatch) ? '' : 'none';
@@ -2339,18 +2344,27 @@ let shippingOptions = [];
 
 async function loadShippingOptions() {
     try {
+        console.log('🔍 Carregando shipping options...');
+        console.log('🔍 API_URL:', API_URL);
+        console.log('🔍 Token:', localStorage.getItem('admin_token') ? 'Presente' : 'Ausente');
+
         const response = await fetch(`${API_URL}/shipping`, {
             headers: getAuthHeaders()
         });
-        
+
+        console.log('🔍 Response status:', response.status);
+
         if (response.ok) {
             shippingOptions = await response.json();
+            console.log('✅ Shipping options carregadas:', shippingOptions);
         } else {
-            showToast('Erro ao carregar opções de frete', 'error');
+            const errorData = await response.json();
+            console.error('❌ Erro na resposta:', response.status, errorData);
+            showToast(`Erro ao carregar fretes: ${errorData.error || 'Erro desconhecido'}`, 'error');
             shippingOptions = [];
         }
     } catch (error) {
-        console.error('Erro ao carregar fretes:', error);
+        console.error('❌ Erro ao carregar fretes:', error);
         showToast('Erro ao conectar com servidor', 'error');
         shippingOptions = [];
     }
@@ -2358,7 +2372,7 @@ async function loadShippingOptions() {
 
 async function renderShipping(container) {
     await loadShippingOptions();
-    
+
     container.innerHTML = `
         <div class="page-header">
             <div>
@@ -2434,7 +2448,7 @@ function renderShippingRows() {
             </tr>
         `;
     }
-    
+
     return shippingOptions
         .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
         .map(option => `
@@ -2524,7 +2538,7 @@ function openAddShippingModal() {
 function editShipping(id) {
     const shipping = shippingOptions.find(s => s.id === id);
     if (!shipping) return;
-    
+
     const modal = document.getElementById('modalContainer');
     modal.innerHTML = `
         <div class="modal-overlay" onclick="closeModal()"></div>
@@ -2566,7 +2580,7 @@ function editShipping(id) {
 async function saveShipping(event) {
     event.preventDefault();
     showLoading('Salvando...');
-    
+
     const formData = new FormData(event.target);
     const data = {
         name: formData.get('name'),
@@ -2574,16 +2588,16 @@ async function saveShipping(event) {
         delivery_time: formData.get('delivery_time') || null,
         active: formData.get('active') ? 1 : 0
     };
-    
+
     try {
         const response = await fetch(`${API_URL}/shipping`, {
             method: 'POST',
             headers: getAuthHeaders(),
             body: JSON.stringify(data)
         });
-        
+
         const result = await response.json();
-        
+
         if (response.ok) {
             showToast('Frete adicionado com sucesso!', 'success');
             closeModal();
@@ -2602,7 +2616,7 @@ async function saveShipping(event) {
 async function updateShipping(event, id) {
     event.preventDefault();
     showLoading('Atualizando...');
-    
+
     const formData = new FormData(event.target);
     const data = {
         name: formData.get('name'),
@@ -2610,16 +2624,16 @@ async function updateShipping(event, id) {
         delivery_time: formData.get('delivery_time') || null,
         active: formData.get('active') ? 1 : 0
     };
-    
+
     try {
         const response = await fetch(`${API_URL}/shipping/${id}`, {
             method: 'PUT',
             headers: getAuthHeaders(),
             body: JSON.stringify(data)
         });
-        
+
         const result = await response.json();
-        
+
         if (response.ok) {
             showToast('Frete atualizado com sucesso!', 'success');
             closeModal();
@@ -2637,17 +2651,17 @@ async function updateShipping(event, id) {
 
 async function deleteShipping(id) {
     if (!confirm('Tem certeza que deseja deletar esta opção de frete?')) return;
-    
+
     showLoading('Deletando...');
-    
+
     try {
         const response = await fetch(`${API_URL}/shipping/${id}`, {
             method: 'DELETE',
             headers: getAuthHeaders()
         });
-        
+
         const result = await response.json();
-        
+
         if (response.ok) {
             showToast('Frete deletado com sucesso!', 'success');
             await loadPage('shipping');
@@ -2665,16 +2679,16 @@ async function deleteShipping(id) {
 async function toggleShippingStatus(id) {
     const shipping = shippingOptions.find(s => s.id === id);
     if (!shipping) return;
-    
+
     const newStatus = shipping.active ? 0 : 1;
-    
+
     try {
         const response = await fetch(`${API_URL}/shipping/${id}`, {
             method: 'PUT',
             headers: getAuthHeaders(),
             body: JSON.stringify({ active: newStatus })
         });
-        
+
         if (response.ok) {
             shipping.active = newStatus;
             showToast(`Frete ${newStatus ? 'ativado' : 'desativado'} com sucesso!`, 'success');
@@ -2701,27 +2715,27 @@ async function moveShippingDown(id) {
 async function reorderShipping(id, direction) {
     const currentIndex = shippingOptions.findIndex(s => s.id === id);
     if (currentIndex === -1) return;
-    
+
     const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
     if (newIndex < 0 || newIndex >= shippingOptions.length) return;
-    
+
     // Swap sort_order
     const temp = shippingOptions[currentIndex].sort_order;
     shippingOptions[currentIndex].sort_order = shippingOptions[newIndex].sort_order;
     shippingOptions[newIndex].sort_order = temp;
-    
+
     try {
         const updates = [
             { id: shippingOptions[currentIndex].id, sort_order: shippingOptions[currentIndex].sort_order },
             { id: shippingOptions[newIndex].id, sort_order: shippingOptions[newIndex].sort_order }
         ];
-        
+
         const response = await fetch(`${API_URL}/shipping/reorder`, {
             method: 'PUT',
             headers: getAuthHeaders(),
             body: JSON.stringify({ order: updates })
         });
-        
+
         if (response.ok) {
             await loadPage('shipping');
         } else {
@@ -2813,6 +2827,306 @@ async function renderSettings(container) {
     `;
 }
 
+// =====================================================
+// GATEWAYS PAGE
+// =====================================================
+
+let paymentGateways = [];
+
+async function loadGateways() {
+    try {
+        const response = await fetch(`${API_URL}/gateways`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+            }
+        });
+
+        if (response.ok) {
+            paymentGateways = await response.json();
+        } else {
+            showToast('Erro ao carregar gateways', 'error');
+            paymentGateways = [];
+        }
+    } catch (error) {
+        console.error('Erro ao carregar gateways:', error);
+        showToast('Erro ao conectar com servidor', 'error');
+        paymentGateways = [];
+    }
+}
+
+async function renderGateways(container) {
+    await loadGateways();
+
+    const bestfyGateway = paymentGateways.find(g => g.gateway_type === 'bestfy');
+
+    container.innerHTML = `
+        <div class="page-header">
+            <div>
+                <h1>Gateways de Pagamento</h1>
+                <p class="page-subtitle">Configure os métodos de pagamento da sua loja</p>
+            </div>
+        </div>
+
+        <!-- Gateway Stats -->
+        <div class="stats-grid" style="margin-bottom: 32px;">
+            <div class="stat-card">
+                <div class="stat-label">Total de Gateways</div>
+                <div class="stat-value">${paymentGateways.length}</div>
+                <div class="stat-change">Configurados</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Gateway Ativo</div>
+                <div class="stat-value" style="color: var(--success);">${paymentGateways.filter(g => g.is_active).length > 0 ? 'Sim' : 'Não'}</div>
+                <div class="stat-change">${bestfyGateway && bestfyGateway.is_active ? 'BESTFY Ativo' : 'Nenhum ativo'}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Métodos Disponíveis</div>
+                <div class="stat-value">${bestfyGateway && bestfyGateway.is_active ? '2' : '0'}</div>
+                <div class="stat-change">PIX e Cartão</div>
+            </div>
+        </div>
+
+        <!-- BESTFY Gateway -->
+        <div class="table-container">
+            <div class="table-header">
+                <h3 class="table-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px; margin-right: 8px;">
+                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                        <line x1="1" y1="10" x2="23" y2="10"></line>
+                    </svg>
+                    Gateway BESTFY
+                </h3>
+                <p style="color: var(--text-secondary); font-size: 13px; margin-top: 4px;">
+                    Aceite pagamentos via PIX e Cartão de Crédito
+                </p>
+            </div>
+            <div style="padding: 24px;">
+                <form id="bestfyForm" onsubmit="saveBestfyGateway(event)">
+                    <div class="form-group">
+                        <label>
+                            Nome do Gateway
+                            <span style="color: var(--danger);">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            name="name" 
+                            class="search-input" 
+                            value="${bestfyGateway?.name || 'BESTFY Payment Gateway'}" 
+                            required
+                            placeholder="Nome para identificação interna"
+                        >
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>
+                                Public Key (Chave Pública)
+                                <span style="color: var(--danger);">*</span>
+                            </label>
+                            <input 
+                                type="text" 
+                                name="public_key" 
+                                class="search-input" 
+                                value="${bestfyGateway?.public_key || ''}" 
+                                required
+                                placeholder="pk_live_..."
+                                style="font-family: monospace; font-size: 13px;"
+                            >
+                            <small style="color: var(--text-secondary); display: block; margin-top: 4px;">
+                                Chave pública para uso no frontend
+                            </small>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>
+                                Secret Key (Chave Secreta)
+                                <span style="color: var(--danger);">*</span>
+                            </label>
+                            <input 
+                                type="password" 
+                                name="secret_key" 
+                                class="search-input" 
+                                value="${bestfyGateway?.secret_key || ''}" 
+                                required
+                                placeholder="sk_live_..."
+                                style="font-family: monospace; font-size: 13px;"
+                            >
+                            <small style="color: var(--text-secondary); display: block; margin-top: 4px;">
+                                Chave secreta (será armazenada de forma segura)
+                            </small>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border-color);">
+                        <label class="checkbox-label">
+                            <input 
+                                type="checkbox" 
+                                name="is_active" 
+                                ${bestfyGateway?.is_active ? 'checked' : ''}
+                                style="width: 20px; height: 20px;"
+                            >
+                            <span style="font-size: 15px; font-weight: 500;">
+                                Ativar gateway BESTFY
+                                <small style="display: block; font-weight: 400; color: var(--text-secondary); margin-top: 4px;">
+                                    Ao ativar, o checkout usará este gateway para processar pagamentos
+                                </small>
+                            </span>
+                        </label>
+                    </div>
+                    
+                    <div style="margin-top: 32px; display: flex; gap: 12px; align-items: center;">
+                        <button type="submit" class="btn btn-primary" style="min-width: 180px;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px;">
+                                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                                <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                                <polyline points="7 3 7 8 15 8"></polyline>
+                            </svg>
+                            Salvar Configurações
+                        </button>
+                        
+                        ${bestfyGateway ? `
+                            <button type="button" class="btn btn-secondary" onclick="testBestfyConnection()">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px;">
+                                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                                </svg>
+                                Testar Conexão
+                            </button>
+                        ` : ''}
+                        
+                        <a href="https://bestfy.readme.io/reference/introducao" target="_blank" class="btn btn-secondary" style="margin-left: auto;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px;">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                            Documentação
+                        </a>
+                    </div>
+                </form>
+                
+                ${bestfyGateway && bestfyGateway.is_active ? `
+                    <div style="margin-top: 32px; padding: 16px; background: var(--success-bg); border-left: 4px solid var(--success); border-radius: 6px;">
+                        <div style="display: flex; align-items: start; gap: 12px;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2" style="width: 24px; height: 24px; flex-shrink: 0;">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                            <div>
+                                <strong style="color: var(--success); display: block; margin-bottom: 4px;">Gateway BESTFY Ativo</strong>
+                                <p style="color: var(--text-secondary); font-size: 13px; margin: 0;">
+                                    Sua loja está aceitando pagamentos via PIX e Cartão de Crédito através do BESTFY.
+                                    <br>As transações serão processadas automaticamente no checkout.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                ` : ''}
+            </div>
+        </div>
+        
+        <!-- Info Cards -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-top: 24px;">
+            <div style="padding: 20px; background: var(--bg-secondary); border-radius: 8px; border: 1px solid var(--border-color);">
+                <h4 style="margin: 0 0 12px 0; display: flex; align-items: center; gap: 8px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px;">
+                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                        <line x1="1" y1="10" x2="23" y2="10"></line>
+                    </svg>
+                    Pagamento com PIX
+                </h4>
+                <ul style="margin: 0; padding-left: 20px; color: var(--text-secondary); font-size: 13px;">
+                    <li>Aprovação instantânea</li>
+                    <li>QR Code gerado automaticamente</li>
+                    <li>Desconto de 5% no checkout</li>
+                    <li>Webhook de confirmação</li>
+                </ul>
+            </div>
+            
+            <div style="padding: 20px; background: var(--bg-secondary); border-radius: 8px; border: 1px solid var(--border-color);">
+                <h4 style="margin: 0 0 12px 0; display: flex; align-items: center; gap: 8px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px;">
+                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                        <line x1="1" y1="10" x2="23" y2="10"></line>
+                    </svg>
+                    Cartão de Crédito
+                </h4>
+                <ul style="margin: 0; padding-left: 20px; color: var(--text-secondary); font-size: 13px;">
+                    <li>Parcelamento em até 12x</li>
+                    <li>Antifraude integrado</li>
+                    <li>Bandeiras principais aceitas</li>
+                    <li>Processamento seguro</li>
+                </ul>
+            </div>
+        </div>
+    `;
+}
+
+async function saveBestfyGateway(event) {
+    event.preventDefault();
+
+    const form = event.target;
+    const formData = new FormData(form);
+
+    const data = {
+        name: formData.get('name'),
+        gateway_type: 'bestfy',
+        public_key: formData.get('public_key'),
+        secret_key: formData.get('secret_key'),
+        is_active: formData.get('is_active') ? 1 : 0
+    };
+
+    showLoading();
+
+    try {
+        const response = await fetch(`${API_URL}/gateways`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+            },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            showToast('Configurações salvas com sucesso!', 'success');
+            await loadGateways();
+            loadPage('gateways');
+        } else {
+            showToast(result.error || 'Erro ao salvar configurações', 'error');
+        }
+    } catch (error) {
+        console.error('Erro ao salvar gateway:', error);
+        showToast('Erro ao conectar com servidor', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+async function testBestfyConnection() {
+    showLoading();
+    showToast('Testando conexão com BESTFY...', 'info');
+
+    try {
+        const response = await fetch(`${API_BASE}/api/gateway/active`);
+        const data = await response.json();
+
+        if (data.active && data.type === 'bestfy') {
+            showToast('✓ Conexão com BESTFY estabelecida com sucesso!', 'success');
+        } else {
+            showToast('Gateway não está ativo ou configurado', 'warning');
+        }
+    } catch (error) {
+        console.error('Erro ao testar conexão:', error);
+        showToast('Erro ao testar conexão com BESTFY', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
 // Continue na próxima parte com modais, notificações e utilitários...
 // =====================================================
 // MODALS - PARTE 4 (FINAL)
@@ -2824,7 +3138,7 @@ function createModalContainers() {
         modalContainer.id = 'modalContainer';
         document.body.appendChild(modalContainer);
     }
-    
+
     // Create generic modal if it doesn't exist
     if (!document.getElementById('genericModal')) {
         const genericModal = document.createElement('div');
@@ -3210,8 +3524,8 @@ async function saveCollection(collectionId) {
 async function manageCollectionProducts(collectionId) {
     showLoading('Carregando produtos...');
     try {
-        const collectionsResp = await fetch(`${API_URL}/collections`, { 
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` } 
+        const collectionsResp = await fetch(`${API_URL}/collections`, {
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
         });
         const allCollections = await collectionsResp.json();
         const collection = allCollections.find(c => c.id === collectionId);
@@ -3285,8 +3599,8 @@ function renderManageProductItem(product, isIn, collectionId) {
             <button class="btn-icon ${isIn ? 'danger' : 'success'}" style="flex-shrink: 0;"
                 onclick="${isIn ? `removeProductFromCollection(${collectionId}, ${product.id})` : `addProductToCollection(${collectionId}, ${product.id})`}">
                 ${isIn ?
-                    '<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>' :
-                    '<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>'}
+            '<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>' :
+            '<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>'}
             </button>
         </div>
     `;
@@ -3308,9 +3622,9 @@ async function addProductToCollection(collectionId, productId) {
             const data = await response.json();
             showToast(data.error || 'Erro ao adicionar', 'error');
         }
-    } catch (e) { 
-        console.error(e); 
-        showToast('Erro de conexão', 'error'); 
+    } catch (e) {
+        console.error(e);
+        showToast('Erro de conexão', 'error');
     }
 }
 
@@ -3326,9 +3640,9 @@ async function removeProductFromCollection(collectionId, productId) {
         } else {
             showToast('Erro ao remover', 'error');
         }
-    } catch (e) { 
-        console.error(e); 
-        showToast('Erro de conexão', 'error'); 
+    } catch (e) {
+        console.error(e);
+        showToast('Erro de conexão', 'error');
     }
 }
 
@@ -3348,8 +3662,8 @@ async function saveCollectionProductOrder(collectionId) {
             },
             body: JSON.stringify({ order })
         });
-    } catch (e) { 
-        console.error('Erro ao salvar ordem', e); 
+    } catch (e) {
+        console.error('Erro ao salvar ordem', e);
     }
 }
 
@@ -3368,7 +3682,7 @@ function selectDefaultView(btn, view) {
     const container = btn.parentElement;
     container.querySelectorAll('.view-toggle-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    
+
     // Atualizar campo hidden
     const form = btn.closest('form');
     const hiddenInput = form.querySelector('input[name="default_view"]');
@@ -3385,7 +3699,7 @@ function closeModal() {
     if (modalContainer) {
         modalContainer.innerHTML = '';
     }
-    
+
     // Also close generic modal
     const genericModal = document.getElementById('genericModal');
     if (genericModal) {
@@ -3400,7 +3714,7 @@ function closeModal() {
 
 function showToast(message, type = 'info') {
     const container = document.getElementById('toastContainer') || createToastContainer();
-    
+
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
 
@@ -3534,10 +3848,10 @@ function showNotificationsPanel() {
 function formatDate(dateString) {
     if (!dateString) return '-';
     const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR', { 
-        day: '2-digit', 
-        month: '2-digit', 
-        year: 'numeric' 
+    return date.toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
     });
 }
 
@@ -3551,9 +3865,9 @@ function formatCurrency(value) {
 function formatDateTime(dateString) {
     if (!dateString) return '-';
     const date = new Date(dateString);
-    return date.toLocaleString('pt-BR', { 
-        day: '2-digit', 
-        month: '2-digit', 
+    return date.toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
         year: 'numeric',
         hour: '2-digit',
         minute: '2-digit'
@@ -3565,7 +3879,7 @@ function formatDateTime(dateString) {
 // =====================================================
 
 function openBulkDiscountModal() {
-    const selectedProducts = Array.from(AppState.selected.products).map(id => 
+    const selectedProducts = Array.from(AppState.selected.products).map(id =>
         AppState.products.find(p => p.id === id)
     ).filter(Boolean);
 
@@ -3579,16 +3893,16 @@ function openBulkDiscountModal() {
         console.error('Modal container not found');
         return;
     }
-    
+
     modal.style.display = 'flex';
-    
+
     // Add click event to close modal when clicking overlay
     modal.onclick = (e) => {
         if (e.target === modal) {
             closeModal();
         }
     };
-    
+
     modal.innerHTML = `
         <div class="modal-content" style="max-width: 700px; background: var(--bg-card); border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); animation: modalSlideIn 0.3s ease; overflow: hidden;">
             <div class="modal-header" style="padding: 24px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
@@ -3699,7 +4013,7 @@ function renderDiscountPreview(products, discountPercent) {
         const originalPrice = parseFloat(product.price);
         const newPrice = originalPrice * (1 - discountPercent / 100);
         const saving = originalPrice - newPrice;
-        
+
         return `
             <div style="display: flex; align-items: center; padding: 12px; background: var(--bg-secondary); border-radius: 6px; margin-bottom: 8px; border-left: 3px solid var(--primary);">
                 <div style="flex: 1; min-width: 0;">
@@ -3728,16 +4042,16 @@ function renderDiscountPreview(products, discountPercent) {
 
 function updateDiscountPreview(discountPercent) {
     document.getElementById('discountValue').textContent = discountPercent;
-    
+
     // Update slider background gradient
     const slider = document.getElementById('discountSlider');
     const percentage = ((discountPercent - 10) / 70) * 100;
     slider.style.background = `linear-gradient(90deg, #52c77a 0%, #52c77a ${percentage}%, #E50914 ${percentage}%, #E50914 100%)`;
-    
+
     const modal = document.getElementById('genericModal');
     const productsData = JSON.parse(modal.dataset.selectedProducts || '[]');
     const products = productsData.map(pd => AppState.products.find(p => p.id === pd.id)).filter(Boolean);
-    
+
     document.getElementById('discountPreviewList').innerHTML = renderDiscountPreview(products, discountPercent);
 }
 
@@ -3745,7 +4059,7 @@ async function applyBulkDiscount() {
     const discountPercent = parseInt(document.getElementById('discountSlider').value);
     const modal = document.getElementById('genericModal');
     const productsData = JSON.parse(modal.dataset.selectedProducts || '[]');
-    
+
     if (productsData.length === 0) {
         showToast('Nenhum produto selecionado', 'error');
         return;
@@ -3756,7 +4070,7 @@ async function applyBulkDiscount() {
     }
 
     showLoading('Aplicando descontos...');
-    
+
     try {
         let successCount = 0;
         let errorCount = 0;
@@ -3764,7 +4078,7 @@ async function applyBulkDiscount() {
         for (const productData of productsData) {
             const originalPrice = parseFloat(productData.price);
             const newPrice = originalPrice * (1 - discountPercent / 100);
-            
+
             try {
                 const response = await fetch(`${API_URL}/products/${productData.id}`, {
                     method: 'PUT',
@@ -3793,21 +4107,21 @@ async function applyBulkDiscount() {
 
         hideLoading();
         closeModal();
-        
+
         if (successCount > 0) {
             showToast(`✅ Desconto aplicado em ${successCount} produtos!`, 'success');
             // Refresh products view
             await loadProducts();
             renderProducts(document.getElementById('mainContent'));
         }
-        
+
         if (errorCount > 0) {
             showToast(`⚠️ ${errorCount} produtos falharam`, 'warning');
         }
 
         // Clear selection
         AppState.selected.products.clear();
-        
+
     } catch (error) {
         hideLoading();
         console.error('Erro ao aplicar desconto em massa:', error);
@@ -3859,3 +4173,295 @@ window.loadPage = loadPage;
 
 console.log('%c🎬 Stranger Things Admin Dashboard PRO v2.0', 'background: #E50914; color: white; font-size: 16px; font-weight: bold; padding: 10px;');
 console.log('%cSistema carregado com sucesso! ✨', 'color: #10B981; font-size: 14px;');
+// =====================================================
+// GATEWAYS PAGE
+// =====================================================
+
+async function renderGateways(container) {
+    showLoading('Carregando gateways...');
+
+    try {
+        const response = await fetch(`${API_URL}/gateways`, {
+            headers: getAuthHeaders()
+        });
+
+        const gateways = await response.json();
+
+        container.innerHTML = `
+            <div class="page-header">
+                <h2>Gateways de Pagamento</h2>
+                <p>Configure as credenciais dos gateways de pagamento</p>
+            </div>
+
+            <div class="gateways-grid">
+                ${gateways.map(gateway => `
+                    <div class="gateway-card ${gateway.is_active ? 'active' : ''}">
+                        <div class="gateway-header">
+                            <div class="gateway-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+                                    <line x1="2" y1="10" x2="22" y2="10"></line>
+                                </svg>
+                            </div>
+                            <div class="gateway-info">
+                                <h3>${gateway.name}</h3>
+                                <span class="gateway-type">${gateway.gateway_type.toUpperCase()}</span>
+                            </div>
+                            <div class="gateway-status">
+                                <span class="status-badge ${gateway.is_active ? 'active' : 'inactive'}">
+                                    ${gateway.is_active ? '✓ Ativo' : '○ Inativo'}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="gateway-body">
+                            <div class="gateway-field">
+                                <label>Public Key</label>
+                                <div class="key-display">
+                                    ${gateway.public_key ? '••••••••' + gateway.public_key.slice(-8) : 'Não configurado'}
+                                </div>
+                            </div>
+                            <div class="gateway-field">
+                                <label>Secret Key</label>
+                                <div class="key-display">
+                                    ${gateway.secret_key ? '••••••••' + gateway.secret_key.slice(-8) : 'Não configurado'}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="gateway-actions">
+                            <button class="btn btn-primary" onclick="editGateway(${gateway.id})">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px;">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                </svg>
+                                Configurar
+                            </button>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+
+            <style>
+                .gateways-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+                    gap: 24px;
+                    margin-top: 24px;
+                }
+
+                .gateway-card {
+                    background: var(--card-bg);
+                    border: 1px solid var(--border);
+                    border-radius: 12px;
+                    padding: 24px;
+                    transition: all 0.3s ease;
+                }
+
+                .gateway-card.active {
+                    border-color: var(--success);
+                    box-shadow: 0 0 0 1px var(--success);
+                }
+
+                .gateway-header {
+                    display: flex;
+                    align-items: center;
+                    gap: 16px;
+                    margin-bottom: 20px;
+                }
+
+                .gateway-icon {
+                    width: 48px;
+                    height: 48px;
+                    background: linear-gradient(135deg, rgba(229, 9, 20, 0.1), rgba(229, 9, 20, 0.05));
+                    border-radius: 12px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                .gateway-icon svg {
+                    width: 24px;
+                    height: 24px;
+                    color: var(--netflix-red);
+                }
+
+                .gateway-info {
+                    flex: 1;
+                }
+
+                .gateway-info h3 {
+                    margin: 0 0 4px 0;
+                    font-size: 18px;
+                    font-weight: 600;
+                }
+
+                .gateway-type {
+                    font-size: 12px;
+                    color: var(--text-secondary);
+                    font-weight: 500;
+                }
+
+                .gateway-status .status-badge {
+                    padding: 4px 12px;
+                    border-radius: 12px;
+                    font-size: 12px;
+                    font-weight: 500;
+                }
+
+                .gateway-status .status-badge.active {
+                    background: rgba(16, 185, 129, 0.1);
+                    color: var(--success);
+                }
+
+                .gateway-status .status-badge.inactive {
+                    background: rgba(156, 163, 175, 0.1);
+                    color: var(--text-secondary);
+                }
+
+                .gateway-body {
+                    margin-bottom: 20px;
+                }
+
+                .gateway-field {
+                    margin-bottom: 16px;
+                }
+
+                .gateway-field label {
+                    display: block;
+                    font-size: 13px;
+                    font-weight: 500;
+                    color: var(--text-secondary);
+                    margin-bottom: 6px;
+                }
+
+                .key-display {
+                    font-family: 'Courier New', monospace;
+                    font-size: 14px;
+                    padding: 8px 12px;
+                    background: var(--bg);
+                    border: 1px solid var(--border);
+                    border-radius: 6px;
+                    color: var(--text-primary);
+                }
+
+                .gateway-actions {
+                    display: flex;
+                    gap: 12px;
+                }
+
+                .gateway-actions .btn {
+                    flex: 1;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+                }
+            </style>
+        `;
+    } catch (error) {
+        console.error('Erro ao carregar gateways:', error);
+        showToast('Erro ao carregar gateways', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+function editGateway(id) {
+    showLoading('Carregando configurações...');
+
+    fetch(`${API_URL}/gateways/${id}`, {
+        headers: getAuthHeaders()
+    })
+        .then(res => res.json())
+        .then(gateway => {
+            hideLoading();
+
+            const modal = document.getElementById('modalContainer');
+            modal.innerHTML = `
+            <div class="modal-overlay" onclick="closeModal()"></div>
+            <div class="modal" style="max-width: 600px;">
+                <div class="modal-header">
+                    <h2>Configurar ${gateway.name}</h2>
+                    <button class="modal-close" onclick="closeModal()">×</button>
+                </div>
+                <div class="modal-body">
+                    <form id="editGatewayForm" onsubmit="saveGateway(event, ${id})">
+                        <div class="form-group">
+                            <label>Public Key *</label>
+                            <input type="text" name="public_key" class="search-input" 
+                                   value="${gateway.public_key || ''}" 
+                                   placeholder="pk_..." required>
+                            <small style="color: var(--text-secondary); font-size: 12px;">
+                                Chave pública fornecida pela Bestfy
+                            </small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Secret Key *</label>
+                            <input type="password" name="secret_key" class="search-input" 
+                                   value="${gateway.secret_key || ''}" 
+                                   placeholder="sk_..." required>
+                            <small style="color: var(--text-secondary); font-size: 12px;">
+                                Chave secreta fornecida pela Bestfy (nunca compartilhe)
+                            </small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="is_active" ${gateway.is_active ? 'checked' : ''}>
+                                <span>Ativar gateway (permitir pagamentos)</span>
+                            </label>
+                        </div>
+                        
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Salvar Configurações</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+        })
+        .catch(error => {
+            hideLoading();
+            console.error('Erro:', error);
+            showToast('Erro ao carregar gateway', 'error');
+        });
+}
+
+async function saveGateway(event, id) {
+    event.preventDefault();
+    showLoading('Salvando...');
+
+    const formData = new FormData(event.target);
+    const data = {
+        name: 'Bestfy Payments', // Mantém o nome
+        public_key: formData.get('public_key'),
+        secret_key: formData.get('secret_key'),
+        is_active: formData.get('is_active') ? 1 : 0
+    };
+
+    try {
+        const response = await fetch(`${API_URL}/gateways/${id}`, {
+            method: 'PUT',
+            headers: getAuthHeaders(),
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            showToast('Gateway configurado com sucesso!', 'success');
+            closeModal();
+            await loadPage('gateways');
+        } else {
+            showToast(result.error || 'Erro ao salvar gateway', 'error');
+        }
+    } catch (error) {
+        console.error('Erro:', error);
+        showToast('Erro ao salvar gateway', 'error');
+    } finally {
+        hideLoading();
+    }
+}
