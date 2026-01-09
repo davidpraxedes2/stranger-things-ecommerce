@@ -51,10 +51,18 @@ if (!USE_POSTGRES && !process.env.VERCEL) {
 const db = {
     // Flag to check if using PostgreSQL
     isPostgres: USE_POSTGRES,
-    
+
     // Run query (INSERT, UPDATE, DELETE)
     run: function (query, params = [], callback) {
         if (USE_POSTGRES) {
+            if (!callback && typeof params !== 'function') {
+                return new Promise((resolve, reject) => {
+                    runPostgres(query, params, (err, res) => {
+                        if (err) reject(err);
+                        else resolve(res);
+                    });
+                });
+            }
             return runPostgres(query, params, callback);
         } else {
             return runSQLite(query, params, callback);
@@ -64,6 +72,14 @@ const db = {
     // Get single row
     get: function (query, params = [], callback) {
         if (USE_POSTGRES) {
+            if (!callback && typeof params !== 'function') {
+                return new Promise((resolve, reject) => {
+                    getPostgres(query, params, (err, row) => {
+                        if (err) reject(err);
+                        else resolve(row);
+                    });
+                });
+            }
             return getPostgres(query, params, callback);
         } else {
             return getSQLite(query, params, callback);
@@ -73,6 +89,14 @@ const db = {
     // Get all rows
     all: function (query, params = [], callback) {
         if (USE_POSTGRES) {
+            if (!callback && typeof params !== 'function') {
+                return new Promise((resolve, reject) => {
+                    allPostgres(query, params, (err, rows) => {
+                        if (err) reject(err);
+                        else resolve(rows);
+                    });
+                });
+            }
             return allPostgres(query, params, callback);
         } else {
             return allSQLite(query, params, callback);
@@ -87,7 +111,7 @@ const db = {
             return sqliteDb.prepare(query);
         }
     },
-    
+
     // Direct query for PostgreSQL (for migrations)
     query: async function (query, params = []) {
         if (!USE_POSTGRES) {
@@ -376,7 +400,7 @@ async function queryPostgres(query, params = []) {
     await client.connect();
     const result = await client.query(query, params);
     await client.end();
-    
+
     return result;
 }
 
