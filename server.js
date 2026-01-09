@@ -2688,10 +2688,19 @@ app.post('/api/payments/bestfy/pix', async (req, res) => {
         // Criar instância do serviço BESTFY
         const bestfy = new BestfyService(gateway.secret_key, gateway.public_key);
 
+        // Sanitize customer data (Bestfy requires 8 chars zipCode without hyphen)
+        const sanitizedCustomer = {
+            ...customer,
+            address: {
+                ...customer.address,
+                zipCode: customer.address.zipCode.replace(/\D/g, '')
+            }
+        };
+
         // Criar transação PIX
         const transaction = await bestfy.createPixTransaction({
             amount,
-            customer,
+            customer: sanitizedCustomer,
             items,
             shipping,
             orderId
