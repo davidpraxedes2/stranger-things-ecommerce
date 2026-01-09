@@ -95,6 +95,13 @@ async function loadCart() {
         if (response.ok) {
             const data = await response.json(); // Fix missing await on response.json() if it was missing before, but assuming original was correct.
             cart = data.items || [];
+
+            // Meta Pixel: Track InitiateCheckout
+            if (typeof window.metaPixel !== 'undefined') {
+                const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                window.metaPixel.trackInitiateCheckout(cartTotal, cart);
+            }
+
             renderCheckout();
             hideSpinner();
         }
