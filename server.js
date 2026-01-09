@@ -2390,6 +2390,7 @@ app.get('/api/admin/sessions/active', authenticateToken, async (req, res) => {
             const minutes = Math.floor(durationMs / 60000);
 
             return {
+                session_id: s.session_id,
                 city: s.city || 'Desconhecido',
                 state: s.region || '',
                 ip: s.ip,
@@ -2412,7 +2413,15 @@ app.get('/api/admin/sessions/active', authenticateToken, async (req, res) => {
 // API: Registrar Heartbeat do visitante
 app.post('/api/analytics/heartbeat', async (req, res) => {
     const { sessionId, page, title, action, ip: clientIp, location } = req.body;
-    const ip = clientIp || req.ip; // Fallback to connection IP if not provided
+
+    // Extract Real IP (Vercel/Proxy friendly)
+    let ip = clientIp;
+    if (!ip) {
+        const forwarded = req.headers['x-forwarded-for'];
+        ip = forwarded ? forwarded.split(',')[0].trim() : req.socket.remoteAddress;
+    }
+    // Clean up IPv6 prefix if present
+    if (ip && ip.includes('::ffff:')) ip = ip.replace('::ffff:', '');
 
     if (!sessionId) return res.status(400).json({ error: 'No Session ID' });
 

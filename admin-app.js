@@ -800,12 +800,18 @@ function initLeafletMap() {
     // Clear loading text
     mapContainer.innerHTML = '';
 
-    // Init Map centered on Brazil
+    // Init Map centered on Brazil with constraints
     liveMap = L.map('brazilMap', {
         center: [-14.2350, -51.9253],
-        zoom: 4,
+        zoom: 4, // Zoom inicial
+        minZoom: 4, // Não deixa afastar muito
         zoomControl: false,
-        attributionControl: false
+        attributionControl: false,
+        maxBounds: [ // Restringe a visão ao Brasil (aproximadamente)
+            [5.2, -74.0], // Noroeste
+            [-34.0, -34.0] // Sudeste
+        ],
+        maxBoundsViscosity: 1.0 // Força o mapa a ficar nos limites
     });
 
     // Dark Tile Layer (CartoDB Dark Matter)
@@ -912,8 +918,20 @@ async function renderActiveSessions() {
                 locationsCountEl.textContent = uniqueCities;
             }
 
-            sessionsContainer.innerHTML = sessions.map(session => `
-                <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 12px; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--border)'">
+            // RENDERIZAÇÃO INTELIGENTE (SEM PISCAR)
+            // 1. Criar mapa dos elementos atuais
+            const currentElements = new Map();
+            sessionsContainer.querySelectorAll('[data-session-id]').forEach(el => {
+                currentElements.set(el.dataset.sessionId, el);
+            });
+
+            // 2. Renderizar novos ou atualizar existentes
+            sessions.forEach(session => {
+                const existingEl = currentElements.get(session.session_id || session.ip); // Fallback ID
+                const isNew = !existingEl;
+
+                // HTML do card
+                const cardHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
                         <div style="display: flex; align-items: center; gap: 12px;">
                             <div style="width: 10px; height: 10px; background: var(--success); border-radius: 50%; animation: pulse-dot 2s infinite;"></div>
@@ -940,8 +958,31 @@ async function renderActiveSessions() {
                             <div style="font-size: 11px; color: var(--text-muted); font-family: monospace;">${session.page}</div>
                         </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+
+                if (existingEl) {
+                    // Atualizar conteúdo apenas se mudou (para evitar repaint desnecessário)
+                    if (existingEl.innerHTML !== cardHTML) {
+                        existingEl.innerHTML = cardHTML;
+                    }
+                    // Marcar como mantido (remover do map para saber quem sobrou pra deletar)
+                    currentElements.delete(session.session_id || session.ip);
+                } else {
+                    // Criar novo elemento
+                    const newEl = document.createElement('div');
+                    newEl.dataset.sessionId = session.session_id || session.ip;
+                    newEl.style.cssText = "background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 12px; transition: all 0.2s;";
+                    newEl.onmouseover = function () { this.style.borderColor = 'var(--primary)'; };
+                    newEl.onmouseout = function () { this.style.borderColor = 'var(--border)'; };
+                    newEl.className = 'session-card animate-entry'; // Add animation class
+                    newEl.innerHTML = cardHTML;
+                    sessionsContainer.appendChild(newEl); // Adicionar ao final (ou prepend se preferir)
+                }
+            });
+
+            // 3. Remover sessões que não existem mais
+            currentElements.forEach(el => el.remove());
+
         }
     } catch (error) {
         console.log('Sem sessões ativas disponíveis');
