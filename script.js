@@ -120,10 +120,10 @@ if (document.readyState === 'loading') {
     initRealTimeTracking();
 }
 
-// Meta Pixel: Track PageView on home page
-if (typeof window.metaPixel !== 'undefined') {
-    window.metaPixel.trackPageView();
-}
+// Meta Pixel: Track PageView handled in index.html inline script
+// if (typeof window.metaPixel !== 'undefined') {
+//     window.metaPixel.trackPageView();
+// }
 
 
 // Debounce helper para otimizar eventos
@@ -1226,17 +1226,22 @@ async function updateQuantity(cartItemId, quantity) {
 function updateCartUI() {
     const cart = window.cart || [];
     const totalItems = cart.reduce((sum, item) => sum + (item.quantity || 0), 0);
-    if (cartCount) {
-        cartCount.textContent = totalItems;
-        cartCount.style.display = totalItems > 0 ? 'flex' : 'none';
+
+    const cartCountEl = document.getElementById('cartCount');
+    if (cartCountEl) {
+        cartCountEl.textContent = totalItems;
+        cartCountEl.style.display = totalItems > 0 ? 'flex' : 'none';
     }
 
     const total = cart.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 0)), 0);
-    if (cartTotal) {
-        cartTotal.textContent = total.toFixed(2).replace('.', ',');
+
+    const cartTotalEl = document.getElementById('cartTotal');
+    if (cartTotalEl) {
+        cartTotalEl.textContent = total.toFixed(2).replace('.', ',');
     }
 
-    if (cartItems) {
+    const cartItemsEl = document.getElementById('cartItems');
+    if (cartItemsEl) {
         if (cart.length === 0) {
             cartItems.innerHTML = `
                 <div class="empty-cart">
