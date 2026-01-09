@@ -12,6 +12,13 @@ if (typeof window.API_BASE === 'undefined') {
 // Get collection slug from URL
 const urlParams = new URLSearchParams(window.location.search);
 const collectionSlug = urlParams.get('slug');
+console.log('🔹 Collection Page: Slug detected:', collectionSlug);
+
+// Safety Timeout to ensure loader goes away even if script hangs
+setTimeout(() => {
+    console.warn('⚠️ Safety Timeout: Forcing loader hide after 5s');
+    if (window.hidePageLoader) window.hidePageLoader();
+}, 5000);
 
 let currentCollection = null;
 let collectionProducts = [];
@@ -26,11 +33,13 @@ async function loadCollectionPage() {
 
     try {
         // Load all collections
+        console.log('🔹 Collection Page: Fetching collections...');
         const collectionsResponse = await fetch(`${window.API_URL}/collections`);
         if (!collectionsResponse.ok) {
             throw new Error('Erro ao carregar coleções');
         }
         const collections = await collectionsResponse.json();
+        console.log('🔹 Collection Page: Collections loaded:', collections.length);
 
         // Find the collection by slug
         currentCollection = collections.find(c => c.slug === collectionSlug);
@@ -45,11 +54,13 @@ async function loadCollectionPage() {
         currentView = currentCollection.default_view || 'grid';
 
         // Load all products
+        console.log('🔹 Collection Page: Fetching products...');
         const productsResponse = await fetch(`${window.API_URL}/products`);
         if (!productsResponse.ok) {
             throw new Error('Erro ao carregar produtos');
         }
         const allProducts = await productsResponse.json();
+        console.log('🔹 Collection Page: Products loaded:', allProducts.length);
 
         // Filter products by collection - com validação robusta
         collectionProducts = allProducts.filter(p => {
@@ -80,17 +91,19 @@ async function loadCollectionPage() {
         });
 
         // Render page
+        console.log('🔹 Collection Page: Rendering...');
         renderCollectionHeader();
         renderViewToggle();
         renderCollectionProducts();
 
+        console.log('🔹 Collection Page: Render complete. Hiding loader.');
         // 🟢 FIX: Hide loader after successful render
         if (window.hidePageLoader) {
             window.hidePageLoader();
         }
 
     } catch (error) {
-        console.error('Erro ao carregar coleção:', error);
+        console.error('❌ Collection Page Error:', error);
         document.getElementById('collectionTitle').textContent = 'Erro ao carregar coleção';
         document.getElementById('collectionDescription').textContent = 'Não foi possível carregar os produtos desta coleção.';
 
