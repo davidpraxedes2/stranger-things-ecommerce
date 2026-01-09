@@ -563,7 +563,33 @@ const authenticateToken = (req, res, next) => {
     });
 };
 
-// ===== ROTAS PÚBLICAS =====
+// DB Debug Endpoint
+app.get('/api/debug/db', async (req, res) => {
+    try {
+        let result;
+        if (db.isPostgres) {
+            result = await db.query('SELECT 1 as status', []);
+            result = result.rows[0];
+        } else {
+            result = db.prepare('SELECT 1 as status').get();
+        }
+        res.json({
+            success: true,
+            message: 'Database connection healthy',
+            result,
+            timestamp: new Date().toISOString(),
+            dbType: db.isPostgres ? 'Postgres' : 'SQLite'
+        });
+    } catch (error) {
+        console.error('DB DEBUG ERROR:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message,
+            stack: error.stack,
+            dbType: db.isPostgres ? 'Postgres' : 'SQLite'
+        });
+    }
+});
 
 // Health check
 app.get('/api/health', async (req, res) => {
