@@ -1140,8 +1140,8 @@ function startLiveUpdates() {
 
     AppState.liveUpdateInterval = setInterval(async () => {
         try {
-            const response = await fetch(`${API_URL} /analytics/online - count`, {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')} ` },
+            const response = await fetch(`${API_URL}/analytics/online-count`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` },
                 signal: AbortSignal.timeout(2000)
             });
 
@@ -1395,7 +1395,9 @@ function renderProductRows() {
 
 async function loadProducts() {
     try {
-        const response = await fetch(`${API_BASE} /api/products`);
+        const response = await fetch(`${API_URL}/products`, {
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
+        });
         if (response.ok) {
             AppState.products = await response.json();
         }
@@ -1561,9 +1563,9 @@ async function deleteProduct(id) {
     showLoading('Excluindo produto...');
 
     try {
-        const response = await fetch(`${API_URL} /products/${id} `, {
+        const response = await fetch(`${API_URL}/products/${id}`, {
             method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')} ` }
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
         });
 
         if (response.ok) {
