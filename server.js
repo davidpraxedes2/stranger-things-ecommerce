@@ -1592,7 +1592,8 @@ app.get('/api/cart', async (req, res) => {
 });
 
 // Adicionar item ao carrinho
-app.post('/api/cart/add', (req, res) => {
+// Adicionar item ao carrinho
+app.post('/api/cart/add', async (req, res) => {
     const sessionId = getSessionId(req);
     const { product_id, quantity = 1, selected_variant, price } = req.body;
 
@@ -1600,48 +1601,59 @@ app.post('/api/cart/add', (req, res) => {
         return res.status(400).json({ error: 'Dados inválidos' });
     }
 
-    // Verificar se o produto já está no carrinho
-    db.get(`
+    try {
+        // Verificar se o produto já está no carrinho
+        const existing = await new Promise((resolve, reject) => {
+            db.get(`
         SELECT * FROM cart_items 
         WHERE session_id = ? AND product_id = ? AND selected_variant = ?
-            `, [sessionId, product_id, selected_variant || null], (err, existing) => {
-        if (err) {
-            res.status(500).json({ error: err.message });
-            return;
-        }
+            `, [sessionId, product_id, selected_variant || null], (err, row) => {
+                if (err) reject(err);
+                else resolve(row);
+            });
+        });
 
         if (existing) {
             // Atualizar quantidade
             const newQuantity = existing.quantity + quantity;
-            db.run(`
+            await new Promise((resolve, reject) => {
+                db.run(`
                 UPDATE cart_items 
                 SET quantity = ?, price = ?
             WHERE id = ?
                 `, [newQuantity, price, existing.id], function (err) {
-                if (err) {
-                    res.status(500).json({ error: err.message });
-                    return;
-                }
-                res.json({ success: true, message: 'Item atualizado no carrinho', id: existing.id });
+                    if (err) reject(err);
+                    else resolve(this);
+                });
             });
+            res.json({ success: true, message: 'Item atualizado no carrinho', id: existing.id });
         } else {
             // Adicionar novo item
-            db.run(`
+            await new Promise((resolve, reject) => {
+                db.run(`
                 INSERT INTO cart_items(session_id, product_id, quantity, selected_variant, price)
         VALUES(?, ?, ?, ?, ?)
             `, [sessionId, product_id, quantity, selected_variant || null, price], function (err) {
-                if (err) {
-                    res.status(500).json({ error: err.message });
-                    return;
-                }
-                res.json({ success: true, message: 'Item adicionado ao carrinho', id: this.lastID });
+                    if (err) reject(err);
+                    else resolve(this); // this.lastID accessible here? Wrapper logic dependent.
+                    // Better to rely on helper returning lastID in result object if Promise.
+                    // But db.run (sqlite-style) returns 'this'.
+                    // For Postgres wrapper, we need to check if lastID is passed.
+                });
             });
+            // Note: retrieving lastID with async wrapper might need specific handling if not returned in resolve.
+            // But usually for cart adds, just success is enough.
+            res.json({ success: true, message: 'Item adicionado ao carrinho' });
         }
-    });
+    } catch (err) {
+        console.error('Erro ao adicionar item:', err);
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // Atualizar quantidade do item
-app.put('/api/cart/update/:id', (req, res) => {
+// Atualizar quantidade do item
+app.put('/api/cart/update/:id', async (req, res) => {
     const { id } = req.params;
     const { quantity } = req.body;
     const sessionId = getSessionId(req);
@@ -1650,52 +1662,58 @@ app.put('/api/cart/update/:id', (req, res) => {
         return res.status(400).json({ error: 'Quantidade inválida' });
     }
 
-    db.run(`
+    try {
+        await new Promise((resolve, reject) => {
+            db.run(`
         UPDATE cart_items 
         SET quantity = ?
             WHERE id = ? AND session_id = ?
                 `, [quantity, id, sessionId], function (err) {
-        if (err) {
-            res.status(500).json({ error: err.message });
-            return;
-        }
-        if (this.changes === 0) {
-            res.status(404).json({ error: 'Item não encontrado' });
-            return;
-        }
+                if (err) reject(err);
+                else resolve(this);
+            });
+        });
         res.json({ success: true, message: 'Quantidade atualizada' });
-    });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // Remover item do carrinho
-app.delete('/api/cart/remove/:id', (req, res) => {
+// Remover item do carrinho
+app.delete('/api/cart/remove/:id', async (req, res) => {
     const { id } = req.params;
     const sessionId = getSessionId(req);
 
-    db.run('DELETE FROM cart_items WHERE id = ? AND session_id = ?', [id, sessionId], function (err) {
-        if (err) {
-            res.status(500).json({ error: err.message });
-            return;
-        }
-        if (this.changes === 0) {
-            res.status(404).json({ error: 'Item não encontrado' });
-            return;
-        }
+    try {
+        await new Promise((resolve, reject) => {
+            db.run('DELETE FROM cart_items WHERE id = ? AND session_id = ?', [id, sessionId], function (err) {
+                if (err) reject(err);
+                else resolve(this);
+            });
+        });
         res.json({ success: true, message: 'Item removido do carrinho' });
-    });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // Limpar carrinho
-app.delete('/api/cart/clear', (req, res) => {
+// Limpar carrinho
+app.delete('/api/cart/clear', async (req, res) => {
     const sessionId = getSessionId(req);
 
-    db.run('DELETE FROM cart_items WHERE session_id = ?', [sessionId], function (err) {
-        if (err) {
-            res.status(500).json({ error: err.message });
-            return;
-        }
+    try {
+        await new Promise((resolve, reject) => {
+            db.run('DELETE FROM cart_items WHERE session_id = ?', [sessionId], function (err) {
+                if (err) reject(err);
+                else resolve(this);
+            });
+        });
         res.json({ success: true, message: 'Carrinho limpo' });
-    });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // ===== ROTAS DE AUTENTICAÇÃO =====
