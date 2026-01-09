@@ -994,7 +994,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Load products from API on page load
-    loadProductsFromAPI();
+    // Load products from API on page load - ONLY IF ON HOME OR PRODUCT PAGE (to avoid conflict with specific page logic)
+    // Collection page has its own loader
+    if (!window.location.pathname.includes('collection.html')) {
+        loadProductsFromAPI();
+    } else {
+        console.log('ℹ️ script.js: Skipping loadProductsFromAPI on collection page.');
+    }
     updateCartUI();
 });
 
