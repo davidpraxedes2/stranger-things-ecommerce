@@ -1262,13 +1262,33 @@ app.put('/api/admin/orders/:id/status', authenticateToken, (req, res) => {
 });
 
 // Buscar produto por ID (público)
-            }
-        } else {
-    row.images = row.image_url ? [row.image_url] : [];
-}
+app.get('/api/products/:id', async (req, res) => {
+    const { id } = req.params;
 
-res.json(row);
-    });
+    try {
+        const product = await new Promise((resolve, reject) => {
+            db.get('SELECT * FROM products WHERE id = ? AND active = 1', [id], (err, row) => {
+                if (err) reject(err);
+                else resolve(row);
+            });
+        });
+
+        if (!product) {
+            return res.status(404).json({ error: 'Produto não encontrado' });
+        }
+
+        // Parse JSON fields if necessary
+        if (product.images_json) {
+            try { product.images = JSON.parse(product.images_json); } catch (e) { }
+        } else {
+            product.images = product.image_url ? [product.image_url] : [];
+        }
+
+        res.json(product);
+    } catch (error) {
+        console.error('Erro ao buscar produto:', error);
+        res.status(500).json({ error: error.message });
+    }
 });
 
 // Criar pedido (público)
