@@ -2759,16 +2759,42 @@ app.post('/api/payments/bestfy/pix', async (req, res) => {
 
         // Atualizar pedido com dados da transação
         const transactionData = JSON.stringify(transaction);
+        const txnId = transaction.id || transaction.transactionId;
 
+        // Self-healing: Garantir que colunas existem (caso migração inicial tenha falhado)
         if (db.isPostgres) {
+            try {
+                await db.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS transaction_id TEXT');
+                await db.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS transaction_data TEXT');
+                await db.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_method TEXT');
+            } catch (schemaError) {
+                console.warn('⚠️ Erro ao verificar schema no endpoint PIX:', schemaError.message);
+            }
+
             await db.query(
                 'UPDATE orders SET transaction_id = $1, transaction_data = $2, payment_method = $3 WHERE id = $4',
-                [transaction.id || transaction.transactionId, transactionData, 'pix', orderId]
+                [txnId, transactionData, 'pix', orderId]
             );
         } else {
-            db.prepare(
-                'UPDATE orders SET transaction_id = ?, transaction_data = ?, payment_method = ? WHERE id = ?'
-            ).run(transaction.id || transaction.transactionId, transactionData, 'pix', orderId);
+            // SQLite fallback (assumes columns exist or don't matter as much in dev)
+            try {
+                db.prepare(
+                    'UPDATE orders SET transaction_id = ?, transaction_data = ?, payment_method = ? WHERE id = ?'
+                ).run(txnId, transactionData, 'pix', orderId);
+            } catch (sqliteErr) {
+                // Try adding columns in SQLite if missing
+                if (sqliteErr.message.includes('no such column')) {
+                    try {
+                        db.prepare('ALTER TABLE orders ADD COLUMN transaction_id TEXT').run();
+                        db.prepare('ALTER TABLE orders ADD COLUMN transaction_data TEXT').run();
+                        db.prepare(
+                            'UPDATE orders SET transaction_id = ?, transaction_data = ?, payment_method = ? WHERE id = ?'
+                        ).run(txnId, transactionData, 'pix', orderId);
+                    } catch (e) { console.error('Failed to auto-migrate SQLite:', e); }
+                } else {
+                    throw sqliteErr;
+                }
+            }
         }
 
         res.json({
@@ -2778,9 +2804,8 @@ app.post('/api/payments/bestfy/pix', async (req, res) => {
     } catch (error) {
         console.error('Erro ao criar transação PIX:', error);
         res.status(500).json({
-            error: 'Erro ao processar pagamento PIX',
-            message: error.message,
-            details: error.error || error
+            error: error.message || 'Erro ao processar pagamento PIX', // Prioritize real error message
+            details: error
         });
     }
 });
