@@ -1262,31 +1262,12 @@ app.put('/api/admin/orders/:id/status', authenticateToken, (req, res) => {
 });
 
 // Buscar produto por ID (público)
-app.get('/api/products/:id', (req, res) => {
-    // ...
-    const { id } = req.params;
-    db.get('SELECT * FROM products WHERE id = ? AND active = 1', [id], (err, row) => {
-        if (err) {
-            res.status(500).json({ error: err.message });
-            return;
-        }
-        if (!row) {
-            res.status(404).json({ error: 'Produto não encontrado' });
-            return;
-        }
-
-        // Parse images_json if exists
-        if (row.images_json) {
-            try {
-                row.images = JSON.parse(row.images_json);
-            } catch (e) {
-                row.images = [];
             }
         } else {
-            row.images = row.image_url ? [row.image_url] : [];
-        }
+    row.images = row.image_url ? [row.image_url] : [];
+}
 
-        res.json(row);
+res.json(row);
     });
 });
 
