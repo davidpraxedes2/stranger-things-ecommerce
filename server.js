@@ -174,8 +174,9 @@ app.get('/admin', (req, res) => {
         console.log('🔄 Inicializando banco de dados...');
 
         if (db.isPostgres) {
-            // Postgres - Initialize (this will run create table and migrations)
-            console.log('📦 Executando inicialização de Database Postgres...');
+            // Postgres - Initialize (db-helper creates base tables + server.js runs migrations)
+            console.log('📦 Executando inicialização COMPLETA (db-helper + migrations)...');
+            try { await db.initialize(); } catch (e) { console.error('Base init error:', e.message); }
             initializeDatabase();
         } else {
             // SQLite - Initialize
