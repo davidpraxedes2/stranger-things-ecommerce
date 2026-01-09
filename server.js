@@ -2687,6 +2687,146 @@ app.get('/api/gateway/active', async (req, res) => {
     }
 });
 
+// ===== ROTAS DE RASTREAMENTO (META PIXEL) =====
+
+// Buscar configuração do Meta Pixel (público - para carregar no frontend)
+app.get('/api/tracking/meta-pixel', async (req, res) => {
+    try {
+        const settings = await new Promise((resolve, reject) => {
+            db.get("SELECT * FROM tracking_settings WHERE provider = 'meta-pixel' ORDER BY id DESC LIMIT 1", [], (err, row) => {
+                if (err) reject(err);
+                else resolve(row);
+            });
+        });
+
+        if (settings && settings.is_active) {
+            res.json({
+                pixel_id: settings.pixel_id,
+                is_active: settings.is_active
+            });
+        } else {
+            res.json({ pixel_id: null, is_active: 0 });
+        }
+    } catch (error) {
+        console.error('Erro ao buscar configuração do Meta Pixel:', error);
+        res.json({ pixel_id: null, is_active: 0 });
+    }
+});
+
+// Salvar configuração do Meta Pixel (admin)
+app.post('/api/admin/tracking/meta-pixel', authenticateToken, async (req, res) => {
+    const { pixel_id, is_active } = req.body;
+
+    try {
+        // Verificar se já existe configuração
+        const existing = await new Promise((resolve, reject) => {
+            db.get("SELECT * FROM tracking_settings WHERE provider = 'meta-pixel'", [], (err, row) => {
+                if (err) reject(err);
+                else resolve(row);
+            });
+        });
+
+        if (existing) {
+            // Atualizar
+            await new Promise((resolve, reject) => {
+                db.run(
+                    "UPDATE tracking_settings SET pixel_id = ?, is_active = ?, updated_at = CURRENT_TIMESTAMP WHERE provider = 'meta-pixel'",
+                    [pixel_id, is_active ? 1 : 0],
+                    (err) => {
+                        if (err) reject(err);
+                        else resolve();
+                    }
+                );
+            });
+        } else {
+            // Inserir
+            await new Promise((resolve, reject) => {
+                db.run(
+                    "INSERT INTO tracking_settings (provider, pixel_id, is_active) VALUES ('meta-pixel', ?, ?)",
+                    [pixel_id, is_active ? 1 : 0],
+                    (err) => {
+                        if (err) reject(err);
+                        else resolve();
+                    }
+                );
+            });
+        }
+
+        res.json({ success: true, message: 'Configuração salva com sucesso' });
+    } catch (error) {
+        console.error('Erro ao salvar configuração do Meta Pixel:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Marcar que o código PIX foi copiado (público)
+app.post('/api/orders/:id/pix-copied', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        await new Promise((resolve, reject) => {
+            db.run(
+                'UPDATE orders SET pix_copied_at = CURRENT_TIMESTAMP WHERE id = ?',
+                [id],
+                (err) => {
+                    if (err) reject(err);
+                    else resolve();
+                }
+            );
+        });
+
+        res.json({ success: true, message: 'PIX copiado registrado' });
+    } catch (error) {
+        console.error('Erro ao registrar PIX copiado:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Excluir múltiplos pedidos (admin)
+app.delete('/api/admin/orders/bulk', authenticateToken, async (req, res) => {
+    const { order_ids } = req.body;
+
+    if (!order_ids || !Array.isArray(order_ids) || order_ids.length === 0) {
+        return res.status(400).json({ error: 'IDs de pedidos inválidos' });
+    }
+
+    try {
+        const placeholders = order_ids.map(() => '?').join(',');
+
+        // Deletar itens dos pedidos primeiro (foreign key)
+        await new Promise((resolve, reject) => {
+            db.run(
+                `DELETE FROM order_items WHERE order_id IN (${placeholders})`,
+                order_ids,
+                (err) => {
+                    if (err) reject(err);
+                    else resolve();
+                }
+            );
+        });
+
+        // Deletar pedidos
+        await new Promise((resolve, reject) => {
+            db.run(
+                `DELETE FROM orders WHERE id IN (${placeholders})`,
+                order_ids,
+                (err) => {
+                    if (err) reject(err);
+                    else resolve();
+                }
+            );
+        });
+
+        res.json({
+            success: true,
+            message: `${order_ids.length} pedido(s) excluído(s) com sucesso`
+        });
+    } catch (error) {
+        console.error('Erro ao excluir pedidos:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // ===== ROTAS DE PAGAMENTO BESTFY =====
 
 // Criar transação PIX via BESTFY

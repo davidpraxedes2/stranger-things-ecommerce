@@ -621,10 +621,25 @@ async function initializePostgres() {
             await client.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS transaction_id TEXT');
             await client.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS transaction_data TEXT');
 
+            // Meta Pixel: Adicionar coluna para rastrear quando PIX foi copiado
+            await client.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS pix_copied_at TIMESTAMP');
+
             console.log('✅ Migrações de schema aplicadas com sucesso');
         } catch (migError) {
             console.warn('⚠️ Nota sobre migração (pode ser ignorado se colunas já existirem):', migError.message);
         }
+
+        // Criar tabela de configurações de rastreamento
+        await client.query(`
+            CREATE TABLE IF NOT EXISTS tracking_settings (
+                id SERIAL PRIMARY KEY,
+                provider TEXT NOT NULL,
+                pixel_id TEXT,
+                is_active INTEGER DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
 
         console.log('✅ Tabelas PostgreSQL criadas/verificadas com sucesso');
     } catch (error) {
