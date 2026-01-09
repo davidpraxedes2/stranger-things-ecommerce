@@ -591,6 +591,30 @@ app.get('/api/debug/db', async (req, res) => {
     }
 });
 
+// Emergency DB Reset Endpoint (Admin only)
+app.post('/api/admin/force-db-reset', authenticateToken, async (req, res) => {
+    try {
+        console.log('🔄 Force DB Reset iniciado...');
+
+        // Reinitialize database
+        await db.initialize();
+
+        console.log('✅ Database reinicializado com sucesso');
+        res.json({
+            success: true,
+            message: 'Database reinicializado com sucesso',
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        console.error('❌ Erro ao resetar database:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message,
+            stack: error.stack
+        });
+    }
+});
+
 // Health check
 app.get('/api/health', async (req, res) => {
     try {
