@@ -2267,19 +2267,41 @@ app.get('/api/shipping-options', async (req, res) => {
 // ===== ROTAS DE GATEWAY DE PAGAMENTO =====
 
 // Listar gateways de pagamento (admin)
-app.get('/api/admin/gateways', authenticateToken, async (req, res) => {
-    try {
-        if (db.isPostgres) {
-            const result = await db.query('SELECT * FROM payment_gateways ORDER BY id ASC', []);
-            res.json(result.rows || []);
-        } else {
-            const gateways = db.prepare('SELECT * FROM payment_gateways ORDER BY id ASC').all();
-            res.json(gateways || []);
-        }
-    } catch (error) {
-        console.error('Erro ao buscar gateways:', error);
-        res.status(500).json({ error: error.message });
+try {
+    let gateways = [];
+    if (db.isPostgres) {
+        const result = await db.query('SELECT * FROM payment_gateways ORDER BY id ASC', []);
+        gateways = result.rows || [];
+    } else {
+        gateways = await db.prepare('SELECT * FROM payment_gateways ORDER BY id ASC').all(); // FIXED: await added
+        // Se falhar e retornar undefined, garantir array
+        if (!gateways) gateways = [];
     }
+
+    // AUTO-SEED: Se não houver gateways, criar o Bestfy automaticamente
+    if (gateways.length === 0) {
+        console.log('⚠️ Nenhum gateway encontrado. Criando Bestfy padrão...');
+        const seedQuery = `
+                INSERT INTO payment_gateways (name, gateway_type, public_key, secret_key, is_active, settings_json)
+                VALUES ('BESTFY Payment Gateway', 'bestfy', '', '', 0, '{}')
+            `;
+
+        if (db.isPostgres) {
+            await db.query(seedQuery);
+            // Buscar novamente
+            const r = await db.query('SELECT * FROM payment_gateways ORDER BY id ASC', []);
+            gateways = r.rows || [];
+        } else {
+            db.prepare(seedQuery).run();
+            gateways = await db.prepare('SELECT * FROM payment_gateways ORDER BY id ASC').all();
+        }
+    }
+
+    res.json(gateways);
+} catch (error) {
+    console.error('Erro ao buscar gateways:', error);
+    res.status(500).json({ error: error.message });
+}
 });
 
 // Buscar gateway específico (admin)
