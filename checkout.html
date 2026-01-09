@@ -314,7 +314,17 @@
         </div>
     </div>
 
+    <script src="pixel-tracking.js"></script>
     <script src="checkout.js"></script>
+    <script>
+        // Meta Pixel: Track InitiateCheckout when page loads
+        window.addEventListener('load', function () {
+            if (typeof window.metaPixel !== 'undefined' && window.cart && window.cart.length > 0) {
+                const total = window.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                window.metaPixel.trackInitiateCheckout(window.cart, total);
+            }
+        });
+    </script>
 </body>
 
 </html>

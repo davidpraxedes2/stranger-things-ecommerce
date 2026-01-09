@@ -17,10 +17,10 @@ async function initAnalytics() {
         const response = await fetch('https://ipapi.co/json/', {
             signal: AbortSignal.timeout(3000)
         });
-        
+
         if (response.ok) {
             const data = await response.json();
-            
+
             // Tentar enviar analytics, mas não crashar se falhar
             try {
                 await fetch(`${API_URL}/analytics/track-location`, {
@@ -50,6 +50,12 @@ if (document.readyState === 'loading') {
 } else {
     initAnalytics();
 }
+
+// Meta Pixel: Track PageView on home page
+if (typeof window.metaPixel !== 'undefined') {
+    window.metaPixel.trackPageView();
+}
+
 
 // Debounce helper para otimizar eventos
 function debounce(func, wait) {
@@ -113,10 +119,10 @@ async function renderCollectionsSections() {
                 // 3. Fallback hard-coded ('grid')
                 const userPreference = localStorage.getItem(`collection_${col.id}_view`);
                 const initialView = userPreference || col.default_view || 'grid';
-                
+
                 const isGridActive = initialView === 'grid';
                 const isCarouselActive = initialView === 'carousel';
-                
+
                 return `
                 <section class="products-section collection-section animate-entry" data-collection-id="${col.id}">
                     <div class="container">
@@ -172,10 +178,10 @@ async function renderCollectionsSections() {
             }).join('');
 
             container.innerHTML = html;
-            
+
             // Inicializar controles de carrossel
             initializeCollectionToggles();
-            
+
         } else {
             // Fallback: Mostrar tudo em "Destaques" se não houver coleções configuradas
             console.log('⚠️ Nenhuma coleção configurada com produtos. Usando fallback DESTAQUES.');
@@ -223,22 +229,22 @@ async function renderCollectionsSections() {
 function initializeCollectionToggles() {
     // Toggle entre grid e carousel
     document.querySelectorAll('.view-toggle-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function () {
             const view = this.dataset.view;
             const collectionId = this.dataset.collection;
-            
+
             // Salvar preferência do usuário no localStorage
             localStorage.setItem(`collection_${collectionId}_view`, view);
-            
+
             // Atualizar botões ativos
             const toggleContainer = this.parentElement;
             toggleContainer.querySelectorAll('.view-toggle-btn').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
-            
+
             // Toggle views
             const gridView = document.querySelector(`.collection-view-grid[data-collection="${collectionId}"]`);
             const carouselView = document.querySelector(`.collection-view-carousel[data-collection="${collectionId}"]`);
-            
+
             if (view === 'grid') {
                 gridView.style.display = 'grid';
                 carouselView.style.display = 'none';
@@ -248,25 +254,25 @@ function initializeCollectionToggles() {
             }
         });
     });
-    
+
     // Navegação do carrossel
     document.querySelectorAll('.carousel-prev, .carousel-next').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function () {
             const collectionId = this.dataset.collection;
             const track = document.querySelector(`.carousel-track[data-collection="${collectionId}"]`);
             const isPrev = this.classList.contains('carousel-prev');
-            
+
             if (!track) return;
-            
+
             const cardWidth = track.querySelector('.product-card').offsetWidth;
             const gap = 16; // spacing-md
             const scrollAmount = (cardWidth + gap) * 3; // Scroll 3 cards por vez
-            
+
             const currentScroll = track.scrollLeft;
-            const targetScroll = isPrev 
+            const targetScroll = isPrev
                 ? Math.max(0, currentScroll - scrollAmount)
                 : Math.min(track.scrollWidth - track.offsetWidth, currentScroll + scrollAmount);
-            
+
             track.scrollTo({
                 left: targetScroll,
                 behavior: 'smooth'
@@ -278,16 +284,16 @@ function initializeCollectionToggles() {
 // Helper para esconder page loader com retry (caso script não tenha carregado ainda)
 function hidePageLoaderWithRetry(maxAttempts = 5, interval = 200) {
     let attempts = 0;
-    
+
     const tryHide = () => {
         attempts++;
-        
+
         if (window.hidePageLoader && typeof window.hidePageLoader === 'function') {
             console.log('🙈 Hiding page loader (tentativa ' + attempts + ')');
             window.hidePageLoader();
             return true;
         }
-        
+
         if (attempts < maxAttempts) {
             console.log('⏳ Page loader não disponível, tentando novamente... (' + attempts + '/' + maxAttempts + ')');
             setTimeout(tryHide, interval);
@@ -304,7 +310,7 @@ function hidePageLoaderWithRetry(maxAttempts = 5, interval = 200) {
             }
         }
     };
-    
+
     tryHide();
 }
 
@@ -318,7 +324,7 @@ function renderProductCard(product) {
     // Calcular parcelamento e PIX (Home)
     const installmentValue = (price / 3).toFixed(2).replace('.', ',');
     const pixDiscount = (price * 0.95).toFixed(2).replace('.', ',');
-    
+
     // Sanitizar dados do produto para prevenir XSS
     const safeName = (product.name || '').replace(/[<>]/g, '');
     const safeDescription = (product.description || '').replace(/[<>]/g, '');
@@ -483,7 +489,7 @@ async function loadProductsFromAPI() {
             console.log('⚠️ Nenhum produto - garantindo renderização de fallback');
             renderCollectionsSections();
         }
-        
+
         // Garantir que loader seja escondido mesmo em caso de erro
         if (window.hidePageLoader) window.hidePageLoader();
     }
@@ -744,7 +750,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 showNotification('Seu carrinho está vazio!', 'error');
                 return;
             }
-            
+
             // Fechar o drawer com animação
             if (cartDrawer) {
                 cartDrawer.classList.add('closing');
@@ -752,7 +758,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (cartOverlay) {
                 cartOverlay.classList.add('closing');
             }
-            
+
             // Aguardar animação do drawer e mostrar loading profissional
             setTimeout(() => {
                 // Remover classes do drawer
@@ -763,7 +769,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     cartOverlay.classList.remove('active', 'closing');
                 }
                 document.body.classList.remove('no-scroll');
-                
+
                 // Mostrar loading profissional
                 const loadingHTML = `
                     <div id="checkoutLoadingOverlay" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: linear-gradient(135deg, rgba(0,0,0,0.95) 0%, rgba(20,0,0,0.98) 100%); z-index: 10000; display: flex; align-items: center; justify-content: center; animation: fadeIn 0.3s ease;">
@@ -809,7 +815,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 `;
                 document.body.insertAdjacentHTML('beforeend', loadingHTML);
-                
+
                 // Redirecionar após 1 segundo
                 setTimeout(() => {
                     window.location.href = 'checkout.html';
@@ -875,11 +881,11 @@ function toggleMobileMenu() {
     if (mainNav) {
         const isActive = mainNav.classList.toggle('active');
         const mobileNavOverlay = document.getElementById('mobileNavOverlay');
-        
+
         if (mobileMenuToggle) {
             mobileMenuToggle.classList.toggle('active');
         }
-        
+
         if (mobileNavOverlay) {
             if (isActive) {
                 mobileNavOverlay.classList.add('active');
@@ -1017,6 +1023,18 @@ async function addToCart(productId, quantity = 1, selectedVariant = null) {
         if (response.ok) {
             await loadCartFromAPI();
             showNotification(`${product.name} adicionado à sacola!`);
+
+            // Meta Pixel: Track AddToCart event
+            if (typeof window.metaPixel !== 'undefined') {
+                window.metaPixel.trackAddToCart({
+                    id: productId,
+                    product_id: productId,
+                    name: product.name,
+                    price: product.price,
+                    quantity: quantity
+                });
+            }
+
             openCartDrawer();
         } else {
             showNotification(data.error || 'Erro ao adicionar produto', 'error');
@@ -1111,14 +1129,14 @@ function updateCartUI() {
                 const safeId = parseInt(item.id) || 0;
                 const quantity = parseInt(item.quantity) || 1;
                 const price = parseFloat(item.price) || 0;
-                
+
                 return `
                 <div class="cart-item" data-cart-item-id="${safeId}">
                     <div class="cart-item-image">
                         ${item.image_url ?
-                    `<img src="${safeImageUrl}" alt="${safeName}">` :
-                    '<div style="font-size: 2rem;">👕</div>'
-                }
+                        `<img src="${safeImageUrl}" alt="${safeName}">` :
+                        '<div style="font-size: 2rem;">👕</div>'
+                    }
                     </div>
                     <div class="cart-item-info">
                         <div class="cart-item-name">${safeName}</div>
@@ -1133,7 +1151,7 @@ function updateCartUI() {
                 </div>
                 `;
             }).join('');
-            
+
             // Event delegation para botões do carrinho
             setupCartEventDelegation();
         }
@@ -1144,30 +1162,30 @@ function updateCartUI() {
 function setupCartEventDelegation() {
     const cartItemsContainer = document.getElementById('cartItems');
     if (!cartItemsContainer) return;
-    
+
     // Remover listener anterior se existir
     if (cartItemsContainer._hasCartListener) return;
     cartItemsContainer._hasCartListener = true;
-    
+
     cartItemsContainer.addEventListener('click', (e) => {
         const target = e.target.closest('button');
         if (!target) return;
-        
+
         const itemId = parseInt(target.dataset.itemId);
         if (!itemId) return;
-        
+
         // Botão de diminuir quantidade
         if (target.classList.contains('quantity-decrease')) {
             const quantity = parseInt(target.dataset.quantity);
             updateQuantity(itemId, quantity);
         }
-        
+
         // Botão de aumentar quantidade
         if (target.classList.contains('quantity-increase')) {
             const quantity = parseInt(target.dataset.quantity);
             updateQuantity(itemId, quantity);
         }
-        
+
         // Botão de remover
         if (target.classList.contains('remove-item')) {
             removeFromCart(itemId);
