@@ -3782,9 +3782,10 @@ object {
 }
 
 .carousel-track-container {
-    overflow: visible;
+    overflow: hidden;
     margin: 0;
     width: 100%;
+    position: relative;
 }
 
 .carousel-track {
@@ -3795,7 +3796,7 @@ object {
     scrollbar-width: none;
     -ms-overflow-style: none;
     padding: 4px 0 4px 20px;
-    /* Margem esquerda para não colar + espaço para sombra */
+    /* Margem esquerda + espaço para sombra */
 }
 
 .carousel-track::-webkit-scrollbar {
