@@ -177,11 +177,11 @@ app.get('/admin', (req, res) => {
             // Postgres - Initialize (db-helper creates base tables + server.js runs migrations)
             console.log('📦 Executando inicialização COMPLETA (db-helper + migrations)...');
             try { await db.initialize(); } catch (e) { console.error('Base init error:', e.message); }
-            initializeDatabase();
+            await initializeDatabase();
         } else {
             // SQLite - Initialize
             console.log('📦 Executando inicialização de Database SQLite...');
-            initializeDatabase();
+            await initializeDatabase();
         }
 
         console.log('✅ Banco inicializado e tabelas verificadas');
@@ -351,222 +351,193 @@ async function tryImportProductsFromJSON() {
 }
 
 // Criar tabelas
-function initializeDatabase() {
-    // Tabela de produtos
-
-    // Helper para evitar erros de "duplicate column" em migrações
-    const runMigration = (query) => {
-        db.run(query, (err) => {
-            if (err) {
-                // 42701 = Postgres duplicate_column code
-                const isDup = err.code === '42701' || err.message.includes('duplicate column');
-                if (!isDup) console.error(`⚠️ Migration Error (${query}):`, err.message);
-            } else {
-                // console.log(`✅ Migration success: ${query.substring(0, 30)}...`);
-            }
+// Criar tabelas e executar migrações de forma sequencial
+async function initializeDatabase() {
+    // Helper para rodar queries com Promise
+    const runQuery = (query, params = []) => {
+        return new Promise((resolve, reject) => {
+            db.run(query, params, (err) => {
+                if (err) reject(err);
+                else resolve();
+            });
         });
     };
 
-    db.run(`CREATE TABLE IF NOT EXISTS products (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        description TEXT,
-        price REAL NOT NULL,
-        category TEXT,
-        image_url TEXT,
-        stock INTEGER DEFAULT 0,
-        active INTEGER DEFAULT 1,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        images_json TEXT,
-        original_price REAL,
-        sku TEXT
-    )`, (err) => {
-        if (err) {
-            console.error('Erro ao criar tabela products:', err);
-        } else {
-            // Adicionar colunas que podem não existir (Schema Migrations)
-            runMigration(`ALTER TABLE products ADD COLUMN images_json TEXT`);
-            runMigration(`ALTER TABLE products ADD COLUMN original_price REAL`);
-            runMigration(`ALTER TABLE products ADD COLUMN sku TEXT`);
-            runMigration(`ALTER TABLE products ADD COLUMN has_variants INTEGER DEFAULT 0`);
-
-            // Verificar se há produtos, se não tiver, criar alguns
-            db.get('SELECT COUNT(*) as count FROM products', [], (err, row) => {
-                if (!err && row && row.count === 0) {
-                    console.log('📥 Criando produtos iniciais...');
-                    createSampleProducts();
-                    // Tentar importar produtos dos JSONs
-                    tryImportProductsFromJSON();
-                }
-            });
+    // Helper simplificado para migrações (ignora erro de coluna duplicada)
+    const runMigration = async (query) => {
+        try {
+            await runQuery(query);
+            // console.log(`✅ Migration success: ${query.substring(0, 30)}...`);
+        } catch (err) {
+            const isDup = err.code === '42701' || err.message.includes('duplicate column');
+            if (!isDup) console.error(`⚠️ Migration Error (${query}):`, err.message);
         }
-    });
+    };
 
-    // Tabela de usuários/admin
-    db.run(`CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT UNIQUE NOT NULL,
-        email TEXT UNIQUE NOT NULL,
-        password TEXT NOT NULL,
-        role TEXT DEFAULT 'admin',
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )`);
+    try {
+        // Tabela de produtos
+        await runQuery(`CREATE TABLE IF NOT EXISTS products (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            description TEXT,
+            price REAL NOT NULL,
+            category TEXT,
+            image_url TEXT,
+            stock INTEGER DEFAULT 0,
+            active INTEGER DEFAULT 1,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            images_json TEXT,
+            original_price REAL,
+            sku TEXT
+        )`);
 
-    // Tabela de pedidos
-    db.run(`CREATE TABLE IF NOT EXISTS orders (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        customer_name TEXT,
-        customer_email TEXT,
-        customer_phone TEXT,
-        customer_cpf TEXT,
-        customer_address TEXT,
-        total REAL NOT NULL,
-        status TEXT DEFAULT 'pending',
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )`);
+        // Migrações de produtos
+        await runMigration(`ALTER TABLE products ADD COLUMN images_json TEXT`);
+        await runMigration(`ALTER TABLE products ADD COLUMN original_price REAL`);
+        await runMigration(`ALTER TABLE products ADD COLUMN sku TEXT`);
+        await runMigration(`ALTER TABLE products ADD COLUMN has_variants INTEGER DEFAULT 0`);
 
-    // Migration: Adicionar colunas cpf e address se não existirem
-    runMigration("ALTER TABLE orders ADD COLUMN customer_cpf TEXT");
-    runMigration("ALTER TABLE orders ADD COLUMN customer_address TEXT");
+        // Popular produtos iniciais se vazio
+        const prodCount = await new Promise((resolve) => {
+            db.get('SELECT COUNT(*) as count FROM products', [], (err, row) => resolve(row ? row.count : 0));
+        });
 
-    // Tabela de itens do pedido
-    db.run(`CREATE TABLE IF NOT EXISTS order_items (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        order_id INTEGER NOT NULL,
-        product_id INTEGER NOT NULL,
-        quantity INTEGER NOT NULL,
-        price REAL NOT NULL,
-        FOREIGN KEY (order_id) REFERENCES orders(id),
-        FOREIGN KEY (product_id) REFERENCES products(id)
-    )`);
-
-    // Tabela de coleções
-    db.run(`CREATE TABLE IF NOT EXISTS collections (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        slug TEXT NOT NULL,
-        description TEXT,
-        is_active INTEGER DEFAULT 1,
-        sort_order INTEGER DEFAULT 0,
-        default_view TEXT DEFAULT 'grid',
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )`, (err) => {
-        if (!err) {
-            // Verificar se tabela está vazia e popular
-            db.get('SELECT COUNT(*) as count FROM collections', [], (err, row) => {
-                if (!err && row && row.count === 0) {
-                    const fs = require('fs');
-                    let collectionsData = [];
-
-                    if (fs.existsSync('collections.json')) {
-                        try {
-                            collectionsData = JSON.parse(fs.readFileSync('collections.json', 'utf8'));
-                            console.log('📦 Lendo coleções de collections.json');
-                        } catch (e) {
-                            console.error('Erro ao ler collections.json:', e);
-                        }
-                    }
-
-                    // Se não tiver dados (arquivo não existe ou vazio), usar defaults
-                    if (collectionsData.length === 0) {
-                        console.log('⚠️ collections.json não encontrado ou vazio. Usando coleções padrão.');
-                        collectionsData = [
-                            { name: 'Stranger Things', slug: 'stranger-things', description: 'Produtos oficiais da série', is_active: 1 },
-                            { name: 'Camisetas', slug: 'camisetas', description: 'Camisetas estampadas', is_active: 1 },
-                            { name: 'Acessórios', slug: 'acessorios', description: 'Acessórios diversos', is_active: 1 },
-                            { name: 'Lançamentos', slug: 'lancamentos', description: 'Novidades da loja', is_active: 1 }
-                        ];
-                    }
-
-                    const stmt = db.prepare('INSERT INTO collections (name, slug, description, is_active, sort_order) VALUES (?, ?, ?, ?, ?)');
-                    const transaction = db.transaction((colls) => {
-                        for (const coll of colls) stmt.run(coll.name, coll.slug, coll.description, coll.is_active, coll.sort_order || 0);
-                    });
-                    transaction(collectionsData);
-                    console.log(`✅ ${collectionsData.length} coleções iniciais criadas!`);
-                }
-            });
+        if (prodCount === 0) {
+            console.log('📥 Criando produtos iniciais...');
+            await createSampleProducts();
+            await tryImportProductsFromJSON();
         }
-    });
 
-    // Migration: Adicionar coluna default_view se não existir
-    runMigration(`ALTER TABLE collections ADD COLUMN default_view TEXT DEFAULT 'grid'`);
+        // Tabela de usuários
+        await runQuery(`CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            email TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL,
+            role TEXT DEFAULT 'admin',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
 
-    // Tabela collection_products (garantir criação após Collections)
-    db.run(`CREATE TABLE IF NOT EXISTS collection_products (
-        collection_id INTEGER,
-        product_id INTEGER,
-        sort_order INTEGER DEFAULT 0,
-        PRIMARY KEY (collection_id, product_id),
-        FOREIGN KEY (collection_id) REFERENCES collections(id) ON DELETE CASCADE,
-        FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
-    )`);
+        // Tabela de pedidos
+        await runQuery(`CREATE TABLE IF NOT EXISTS orders (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            customer_name TEXT,
+            customer_email TEXT,
+            customer_phone TEXT,
+            customer_cpf TEXT,
+            customer_address TEXT,
+            total REAL NOT NULL,
+            status TEXT DEFAULT 'pending',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
 
-    // Tabela de opções de frete
-    db.run(`CREATE TABLE IF NOT EXISTS shipping_options (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        price REAL NOT NULL,
-        delivery_time TEXT,
-        active INTEGER DEFAULT 1,
-        sort_order INTEGER DEFAULT 0,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )`, (err) => {
-        if (err) {
-            console.error('Erro ao criar tabela shipping_options:', err);
-        } else {
-            // Verificar se há fretes, se não tiver, criar padrão
-            db.get('SELECT COUNT(*) as count FROM shipping_options', [], (err, row) => {
-                if (!err && row && row.count === 0) {
-                    console.log('📦 Criando opções de frete padrão...');
-                    const stmt = db.prepare('INSERT INTO shipping_options (name, price, delivery_time, active, sort_order) VALUES (?, ?, ?, ?, ?)');
-                    stmt.run('PAC', 15.00, '7-12 dias úteis', 1, 0);
-                    stmt.run('SEDEX', 25.00, '3-5 dias úteis', 1, 1);
-                    stmt.finalize();
-                    console.log('✅ Fretes padrão criados (PAC e SEDEX)');
-                }
-            });
+        // Migrações de pedidos
+        await runMigration("ALTER TABLE orders ADD COLUMN customer_cpf TEXT");
+        await runMigration("ALTER TABLE orders ADD COLUMN customer_address TEXT");
+
+        // Tabela de itens do pedido
+        await runQuery(`CREATE TABLE IF NOT EXISTS order_items (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            order_id INTEGER NOT NULL,
+            product_id INTEGER NOT NULL,
+            quantity INTEGER NOT NULL,
+            price REAL NOT NULL,
+            FOREIGN KEY (order_id) REFERENCES orders(id),
+            FOREIGN KEY (product_id) REFERENCES products(id)
+        )`);
+
+        // Tabela de coleções
+        await runQuery(`CREATE TABLE IF NOT EXISTS collections (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            slug TEXT NOT NULL,
+            description TEXT,
+            is_active INTEGER DEFAULT 1,
+            sort_order INTEGER DEFAULT 0,
+            default_view TEXT DEFAULT 'grid',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
+
+        // Popular coleções se vazio
+        const collCount = await new Promise((resolve) => {
+            db.get('SELECT COUNT(*) as count FROM collections', [], (err, row) => resolve(row ? row.count : 0));
+        });
+
+        if (collCount === 0) {
+            const fs = require('fs');
+            let collectionsData = [];
+            if (fs.existsSync('collections.json')) {
+                try {
+                    collectionsData = JSON.parse(fs.readFileSync('collections.json', 'utf8'));
+                } catch (e) { console.error('Erro ler collections.json', e); }
+            }
+            if (collectionsData.length === 0) {
+                // Defaults
+                collectionsData = [
+                    { name: 'Stranger Things', slug: 'stranger-things', description: 'Produtos oficiais da série', is_active: 1 },
+                    { name: 'Camisetas', slug: 'camisetas', description: 'Camisetas estampadas', is_active: 1 },
+                    { name: 'Acessórios', slug: 'acessorios', description: 'Acessórios diversos', is_active: 1 },
+                    { name: 'Lançamentos', slug: 'lancamentos', description: 'Novidades da loja', is_active: 1 }
+                ];
+            }
+
+            // Inserir sequencialmente
+            const stmt = db.prepare('INSERT INTO collections (name, slug, description, is_active, sort_order) VALUES (?, ?, ?, ?, ?)');
+            // Note: transacton logic inside db-helper/better-sqlite might be sync? 
+            // Better to just insert loop for safety in Postgres/SQLite universal path
+            for (const coll of collectionsData) {
+                await runQuery('INSERT INTO collections (name, slug, description, is_active, sort_order) VALUES (?, ?, ?, ?, ?)',
+                    [coll.name, coll.slug, coll.description, coll.is_active, coll.sort_order || 0]);
+            }
+            console.log(`✅ ${collectionsData.length} coleções iniciais criadas!`);
         }
-    });
 
-    // Tabela de payment_gateways
-    db.run(`CREATE TABLE IF NOT EXISTS payment_gateways (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        gateway_type TEXT NOT NULL,
-        public_key TEXT,
-        secret_key TEXT,
-        is_active INTEGER DEFAULT 0,
-        settings_json TEXT,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )`, (err) => {
-        if (err) {
-            console.error('Erro ao criar tabela payment_gateways:', err);
-        } else {
-            // Criar gateway padrão se não existir
-            db.get('SELECT COUNT(*) as count FROM payment_gateways', [], (err, row) => {
-                if (!err && row && row.count === 0) {
-                    console.log('📦 Criando gateway padrão Bestfy...');
-                    const stmt = db.prepare('INSERT INTO payment_gateways (name, gateway_type, is_active) VALUES (?, ?, ?)');
-                    stmt.run('Bestfy', 'bestfy', 1);
-                    stmt.finalize();
-                }
-            });
-        }
-    });
+        // Migração Collection default_view
+        await runMigration(`ALTER TABLE collections ADD COLUMN default_view TEXT DEFAULT 'grid'`);
 
-    // Criar usuário admin padrão (senha: admin123)
-    const defaultPassword = bcrypt.hashSync('admin123', 10);
-    db.run(`INSERT OR IGNORE INTO users (username, email, password, role) 
-            VALUES ('admin', 'admin@strangerthings.com', ?, 'admin')`, [defaultPassword], (err) => {
-        if (err) {
-            console.error('Erro ao criar usuário admin:', err.message);
-        } else {
-            console.log('Usuário admin criado: admin / admin123');
-        }
-    });
+        // Tabela collection_products
+        await runQuery(`CREATE TABLE IF NOT EXISTS collection_products (
+            collection_id INTEGER,
+            product_id INTEGER,
+            sort_order INTEGER DEFAULT 0,
+            PRIMARY KEY (collection_id, product_id),
+            FOREIGN KEY (collection_id) REFERENCES collections(id) ON DELETE CASCADE,
+            FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+        )`);
+
+        // Shipping Options
+        await runQuery(`CREATE TABLE IF NOT EXISTS shipping_options (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            price REAL NOT NULL,
+            delivery_time TEXT,
+            active INTEGER DEFAULT 1,
+            sort_order INTEGER DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
+
+        // Payment Gateways
+        await runQuery(`CREATE TABLE IF NOT EXISTS payment_gateways (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            gateway_type TEXT NOT NULL,
+            public_key TEXT,
+            secret_key TEXT,
+            is_active INTEGER DEFAULT 0,
+            settings_json TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
+
+        // Admin User
+        const defaultPassword = bcrypt.hashSync('admin123', 10);
+        await runQuery(`INSERT OR IGNORE INTO users (username, email, password, role) 
+                VALUES ('admin', 'admin@strangerthings.com', ?, 'admin')`, [defaultPassword]);
+
+    } catch (err) {
+        console.error('❌ FATAL: Erro na inicialização do DB:', err);
+    }
 }
 
 // Middleware de autenticação
