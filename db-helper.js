@@ -447,7 +447,7 @@ async function queryPostgres(query, params = []) {
 
 // Initialize database
 db.initialize = async function () {
-    if (USE_POSTGRES && pgClient) {
+    if (USE_POSTGRES && pgPool) {
         await initializePostgres();
     } else {
         initializeSQLite();
