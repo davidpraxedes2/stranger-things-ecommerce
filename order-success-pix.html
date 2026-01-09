@@ -859,6 +859,20 @@
                 copyBtn.classList.add('copied');
                 copyBtnText.textContent = '✓ CÓDIGO COPIADO!';
 
+                // Track PIX Copied Event
+                if (orderId) {
+                    // Send to backend
+                    fetch(`${API_URL}/orders/${orderId}/pix-copied`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    }).catch(err => console.error('Erro ao registrar cópia do PIX:', err));
+
+                    // Meta Pixel custom event (optional)
+                    if (typeof fbq !== 'undefined') {
+                        fbq('track', 'CustomEvent', { content_name: 'PIX Copied', order_id: orderId });
+                    }
+                }
+
                 setTimeout(() => {
                     copyBtn.classList.remove('copied');
                     copyBtnText.textContent = 'COPIAR CÓDIGO PIX';

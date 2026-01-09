@@ -250,6 +250,11 @@ async function loadPage(pageName) {
                 subtitle: 'Gerenciamento de opções de frete',
                 render: renderShipping
             },
+            tracking: {
+                title: 'Rastreamento',
+                subtitle: 'Configurações de Pixel e Analytics',
+                render: renderTracking
+            },
             gateways: {
                 title: 'Gateways de Pagamento',
                 subtitle: 'Configuração de meios de pagamento',
@@ -1745,14 +1750,23 @@ async function renderOrders(container) {
                 <h1>Pedidos (${AppState.orders.length})</h1>
                 <p class="page-subtitle">Gestão completa de pedidos e status</p>
             </div>
-            <button class="btn btn-secondary" onclick="exportOrders()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="7 10 12 15 17 10"></polyline>
-                    <line x1="12" y1="15" x2="12" y2="3"></line>
-                </svg>
-                Exportar Relatório
-            </button>
+            <div class="header-actions">
+                <button id="btnDeleteSelected" class="btn btn-danger" style="display: none;" onclick="deleteSelectedOrders()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                    Excluir Selecionados (<span id="selectedCount">0</span>)
+                </button>
+                <button class="btn btn-secondary" onclick="exportOrders()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Exportar Relatório
+                </button>
+            </div>
         </div>
 
         <!-- Filters -->
@@ -1781,6 +1795,9 @@ async function renderOrders(container) {
             <table class="admin-table" id="ordersTable">
                 <thead>
                     <tr>
+                        <th width="40">
+                            <input type="checkbox" id="selectAllOrders" onchange="toggleSelectAllOrders(this)">
+                        </th>
                         <th>ID</th>
                         <th>Cliente</th>
                         <th>Data</th>
@@ -1793,12 +1810,18 @@ async function renderOrders(container) {
                 <tbody>
                     ${AppState.orders.length > 0 ? AppState.orders.map(order => `
                         <tr data-order-id="${order.id}">
+                            <td>
+                                <input type="checkbox" class="order-checkbox" value="${order.id}" onchange="updateBulkSelection()">
+                            </td>
                             <td><strong>#${order.id.toString().padStart(4, '0')}</strong></td>
                             <td>
                                 ${order.customer_name || 'Cliente'}
                                 <br><small style="color: var(--text-muted);">${order.customer_email || ''}</small>
                             </td>
-                            <td>${formatDate(order.created_at)}</td>
+                            <td>
+                                ${formatDate(order.created_at)}
+                                ${order.pix_copied_at ? '<br><span class="badge badge-success" style="font-size: 10px; margin-top: 4px;">PIX COPIADO</span>' : ''}
+                            </td>
                             <td>${order.items_count || 0} ${order.items_count === 1 ? 'item' : 'itens'}</td>
                             <td><strong style="color: var(--success);">R$ ${formatCurrency(order.total)}</strong></td>
                             <td>
@@ -1834,7 +1857,7 @@ async function renderOrders(container) {
                         </tr>
                     `).join('') : `
                         <tr>
-                            <td colspan="7" style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
+                            <td colspan="8" style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
                                      style="width: 64px; height: 64px; margin: 0 auto 16px; opacity: 0.3;">
                                     <circle cx="9" cy="21" r="1"></circle>
@@ -1931,30 +1954,110 @@ function viewOrderDetails(orderId) {
     const order = AppState.orders.find(o => o.id === orderId);
     if (!order) return;
 
+    // Helper para copiar ID
+    window.copyToClipboard = function (text) {
+        navigator.clipboard.writeText(text).then(() => {
+            showToast('Copiado para a área de transferência!', 'success');
+        });
+    };
+
     const modal = `
         <div class="modal-overlay" onclick="closeModal()">
             <div class="modal-dialog" onclick="event.stopPropagation()" style="max-width: 900px;">
                 <div class="modal-header">
-                    <h2>Detalhes do Pedido #${order.id.toString().padStart(4, '0')}</h2>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <h2>Pedido #${order.id.toString().padStart(4, '0')}</h2>
+                        <span class="badge ${getStatusColor(order.status)}">${getStatusLabel(order.status)}</span>
+                        ${order.pix_copied_at ?
+            `<span class="badge badge-success" title="Copiado em ${formatDate(order.pix_copied_at)}">
+                                ✓ PIX Copiado
+                            </span>` : ''}
+                    </div>
                     <button class="modal-close" onclick="closeModal()">×</button>
                 </div>
                 <div class="modal-body">
                     <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
                         <div>
-                            <h3 style="margin-bottom: 16px;">Informações do Cliente</h3>
+                            <!-- Cliente -->
+                            <h3 style="margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                Dados do Cliente
+                            </h3>
                             <div style="background: var(--bg-darker); padding: 16px; border-radius: 8px; margin-bottom: 24px;">
-                                <p><strong>Nome:</strong> ${order.customer_name}</p>
-                                <p><strong>Email:</strong> ${order.customer_email}</p>
-                                <p><strong>Data:</strong> ${formatDate(order.created_at)}</p>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                    <div>
+                                        <small style="color: var(--text-muted); display: block; margin-bottom: 4px;">Nome</small>
+                                        <strong>${order.customer_name || 'N/A'}</strong>
+                                    </div>
+                                    <div>
+                                        <small style="color: var(--text-muted); display: block; margin-bottom: 4px;">Email</small>
+                                        <strong>${order.customer_email || 'N/A'}</strong>
+                                    </div>
+                                    <div>
+                                        <small style="color: var(--text-muted); display: block; margin-bottom: 4px;">CPF</small>
+                                        <strong>${order.customer_cpf || 'N/A'}</strong>
+                                    </div>
+                                    <div>
+                                        <small style="color: var(--text-muted); display: block; margin-bottom: 4px;">Telefone</small>
+                                        <strong>${order.customer_phone || 'N/A'}</strong>
+                                    </div>
+                                    <div style="grid-column: 1 / -1;">
+                                        <small style="color: var(--text-muted); display: block; margin-bottom: 4px;">Endereço</small>
+                                        <strong>${order.customer_address || 'Endereço não informado'}</strong>
+                                    </div>
+                                </div>
                             </div>
                             
-                            <h3 style="margin-bottom: 16px;">Itens do Pedido</h3>
+                            <!-- Itens -->
+                            <h3 style="margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                                Itens do Pedido (${order.items_count})
+                            </h3>
                             <div style="background: var(--bg-darker); padding: 16px; border-radius: 8px;">
-                                <p style="color: var(--text-muted);">Simulação de ${order.items_count} itens</p>
+                                <!-- Mock de itens se não tivermos os dados detalhados carregados -->
+                                ${order.items ? order.items.map(item => `
+                                    <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border);">
+                                        <div>
+                                            <strong>${item.name}</strong>
+                                            <div style="font-size: 12px; color: var(--text-muted);">Qtd: ${item.quantity}</div>
+                                        </div>
+                                        <div>R$ ${formatCurrency(item.price * item.quantity)}</div>
+                                    </div>
+                                `).join('') : '<p style="color: var(--text-muted); text-align: center;">Itens detalhados não carregados na lista.</p>'}
                             </div>
                         </div>
                         
                         <div>
+                            <!-- Transação -->
+                            <h3 style="margin-bottom: 16px;">Pagamento</h3>
+                            <div style="background: var(--bg-darker); padding: 16px; border-radius: 8px; margin-bottom: 24px;">
+                                <div style="margin-bottom: 12px;">
+                                    <small style="color: var(--text-muted); display: block; margin-bottom: 4px;">Método</small>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <strong>${order.payment_method || 'PIX'}</strong>
+                                        ${order.payment_method === 'pix' || !order.payment_method ?
+            '<img src="https://upload.wikimedia.org/wikipedia/commons/a/a2/Logo_Pix_Banco_Central_do_Brasil.svg" height="16" alt="PIX">' :
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>'}
+                                    </div>
+                                </div>
+                                <div style="margin-bottom: 12px;">
+                                    <small style="color: var(--text-muted); display: block; margin-bottom: 4px;">ID da Transação</small>
+                                    <div style="display: flex; gap: 8px;">
+                                        <code style="background: #000; padding: 4px 8px; border-radius: 4px; font-size: 12px; flex: 1; overflow: hidden; text-overflow: ellipsis;">
+                                            ${order.transaction_id || 'N/A'}
+                                        </code>
+                                        ${order.transaction_id ?
+            `<button class="btn-icon" onclick="copyToClipboard('${order.transaction_id}')" title="Copiar ID">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                            </button>` : ''}
+                                    </div>
+                                </div>
+                                ${order.transaction_id ?
+            `<a href="https://bestfy.com.br/transactions/${order.transaction_id}" target="_blank" class="btn btn-secondary btn-sm btn-block" style="text-align: center; margin-top: 8px;">Ver no Gateway</a>`
+            : ''}
+                            </div>
+
+                            <!-- Valores -->
                             <h3 style="margin-bottom: 16px;">Resumo</h3>
                             <div style="background: var(--bg-darker); padding: 16px; border-radius: 8px;">
                                 <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
@@ -1984,6 +2087,17 @@ function viewOrderDetails(orderId) {
     `;
 
     document.getElementById('modalContainer').innerHTML = modal;
+}
+
+// Helpers para Status (se não existirem globalmente)
+function getStatusColor(status) {
+    const map = { pending: 'warning', processing: 'info', shipped: 'info', delivered: 'success', cancelled: 'danger' };
+    return map[status] || 'secondary';
+}
+
+function getStatusLabel(status) {
+    const map = { pending: 'Pendente', processing: 'Processando', shipped: 'Enviado', delivered: 'Entregue', cancelled: 'Cancelado' };
+    return map[status] || status;
 }
 
 function printInvoice(orderId) {
@@ -2852,14 +2966,147 @@ async function loadGateways() {
         showToast('Erro ao conectar com servidor', 'error');
         paymentGateways = [];
     }
-}
 
-async function renderGateways(container) {
-    await loadGateways();
+    async function renderTracking(container) {
+        container.innerHTML = `
+        <div class="page-header">
+            <div>
+                <h1>Rastreamento & Analytics</h1>
+                <p class="page-subtitle">Gerencie pixels de rastreamento e integrações de marketing</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn-primary" onclick="saveTrackingSettings()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                        <polyline points="7 3 7 8 15 8"></polyline>
+                    </svg>
+                    Salvar Alterações
+                </button>
+            </div>
+        </div>
 
-    const bestfyGateway = paymentGateways.find(g => g.gateway_type === 'bestfy');
+        <div class="details-grid">
+            <!-- Meta Pixel Configuration -->
+            <div class="details-card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+                        </svg>
+                        Meta Pixel (Facebook Ads)
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label>Pixel ID</label>
+                        <input type="text" id="metaPixelId" class="form-input" placeholder="Ex: 123456789012345" style="font-family: monospace;">
+                        <p class="form-hint">Encontre este ID no Gerenciador de Eventos do Facebook.</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="metaPixelActive">
+                            <span class="checkmark"></span>
+                            Ativar Rastreamento do Meta Pixel
+                        </label>
+                        <p class="form-hint">Quando ativo, enviará eventos de PageView, ViewContent, AddToCart, InitiateCheckout e Purchase.</p>
+                    </div>
 
-    container.innerHTML = `
+                    <div class="alert alert-info">
+                        <strong>Eventos suportados:</strong>
+                        <ul style="margin-top: 8px; margin-left: 20px; list-style-type: disc;">
+                            <li>PageView (Todas as páginas)</li>
+                            <li>ViewContent (Página de produto)</li>
+                            <li>AddToCart (Adicionar à sacola)</li>
+                            <li>InitiateCheckout (Iniciar compra)</li>
+                            <li>Purchase (Pedido finalizado - PIX e Cartão)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Other Analytics (Placeholder) -->
+            <div class="details-card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+                            <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+                        </svg>
+                        Google Analytics 4 (Em Breve)
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="empty-state" style="padding: 20px 0;">
+                        <p>A integração com Google Analytics 4 estará disponível em breve.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+        // Load current settings
+        try {
+            const response = await fetch(`${API_URL}/tracking/meta-pixel`);
+            const data = await response.json();
+
+            if (data && data.pixel_id) {
+                document.getElementById('metaPixelId').value = data.pixel_id;
+                document.getElementById('metaPixelActive').checked = !!data.is_active;
+            }
+        } catch (error) {
+            console.error('Erro ao carregar configurações de tracking:', error);
+            // Não mostrar erro ao usuário, apenas logar, pois pode não ter config ainda
+        }
+
+        // Define global save function
+        window.saveTrackingSettings = async function () {
+            const pixelId = document.getElementById('metaPixelId').value.trim();
+            const isActive = document.getElementById('metaPixelActive').checked;
+
+            if (isActive && !pixelId) {
+                showToast('Por favor, informe o Pixel ID para ativar', 'error');
+                return;
+            }
+
+            // Validate just numbers
+            if (pixelId && !/^\d+$/.test(pixelId)) {
+                showToast('Pixel ID deve conter apenas números', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/admin/tracking/meta-pixel`, {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify({
+                        pixel_id: pixelId,
+                        is_active: isActive
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast('Configurações salvas com sucesso!', 'success');
+                } else {
+                    showToast(result.error || 'Erro ao salvar configurações', 'error');
+                }
+            } catch (error) {
+                console.error('Erro ao salvar tracking:', error);
+                showToast('Erro de conexão ao salvar', 'error');
+            }
+        };
+    }
+
+
+    async function renderGateways(container) {
+        await loadGateways();
+
+        const bestfyGateway = paymentGateways.find(g => g.gateway_type === 'bestfy');
+
+        container.innerHTML = `
         <div class="page-header">
             <div>
                 <h1>Gateways de Pagamento</h1>
@@ -3061,110 +3308,110 @@ async function renderGateways(container) {
             </div>
         </div>
     `;
-}
-
-async function saveBestfyGateway(event) {
-    event.preventDefault();
-
-    const form = event.target;
-    const formData = new FormData(form);
-
-    const data = {
-        name: formData.get('name'),
-        gateway_type: 'bestfy',
-        public_key: formData.get('public_key'),
-        secret_key: formData.get('secret_key'),
-        is_active: formData.get('is_active') ? 1 : 0
-    };
-
-    showLoading();
-
-    try {
-        const response = await fetch(`${API_URL}/gateways`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
-            },
-            body: JSON.stringify(data)
-        });
-
-        const result = await response.json();
-
-        if (response.ok) {
-            showToast('Configurações salvas com sucesso!', 'success');
-            await loadGateways();
-            loadPage('gateways');
-        } else {
-            showToast(result.error || 'Erro ao salvar configurações', 'error');
-        }
-    } catch (error) {
-        console.error('Erro ao salvar gateway:', error);
-        showToast('Erro ao conectar com servidor', 'error');
-    } finally {
-        hideLoading();
-    }
-}
-
-async function testBestfyConnection() {
-    showLoading();
-    showToast('Testando conexão com BESTFY...', 'info');
-
-    try {
-        const response = await fetch(`${API_BASE}/api/gateway/active`);
-        const data = await response.json();
-
-        if (data.active && data.type === 'bestfy') {
-            showToast('✓ Conexão com BESTFY estabelecida com sucesso!', 'success');
-        } else {
-            showToast('Gateway não está ativo ou configurado', 'warning');
-        }
-    } catch (error) {
-        console.error('Erro ao testar conexão:', error);
-        showToast('Erro ao testar conexão com BESTFY', 'error');
-    } finally {
-        hideLoading();
-    }
-}
-
-// Continue na próxima parte com modais, notificações e utilitários...
-// =====================================================
-// MODALS - PARTE 4 (FINAL)
-// =====================================================
-
-function createModalContainers() {
-    if (!document.getElementById('modalContainer')) {
-        const modalContainer = document.createElement('div');
-        modalContainer.id = 'modalContainer';
-        document.body.appendChild(modalContainer);
     }
 
-    // Create generic modal if it doesn't exist
-    if (!document.getElementById('genericModal')) {
-        const genericModal = document.createElement('div');
-        genericModal.id = 'genericModal';
-        genericModal.style.cssText = 'display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; align-items: center; justify-content: center;';
-        document.body.appendChild(genericModal);
-    }
-}
+    async function saveBestfyGateway(event) {
+        event.preventDefault();
 
-async function openProductModal(productId = null) {
-    const product = productId ? AppState.products.find(p => p.id === productId) : null;
-    const isEdit = !!product;
+        const form = event.target;
+        const formData = new FormData(form);
 
-    let existingImages = '';
-    if (product && product.images_json) {
+        const data = {
+            name: formData.get('name'),
+            gateway_type: 'bestfy',
+            public_key: formData.get('public_key'),
+            secret_key: formData.get('secret_key'),
+            is_active: formData.get('is_active') ? 1 : 0
+        };
+
+        showLoading();
+
         try {
-            const parsed = JSON.parse(product.images_json);
-            if (Array.isArray(parsed)) {
-                existingImages = parsed.join('\n');
+            const response = await fetch(`${API_URL}/gateways`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                showToast('Configurações salvas com sucesso!', 'success');
+                await loadGateways();
+                loadPage('gateways');
+            } else {
+                showToast(result.error || 'Erro ao salvar configurações', 'error');
             }
-        } catch (e) {
-            console.error('Error parsing images_json', e);
+        } catch (error) {
+            console.error('Erro ao salvar gateway:', error);
+            showToast('Erro ao conectar com servidor', 'error');
+        } finally {
+            hideLoading();
         }
     }
 
-    const modalHTML = `
+    async function testBestfyConnection() {
+        showLoading();
+        showToast('Testando conexão com BESTFY...', 'info');
+
+        try {
+            const response = await fetch(`${API_BASE}/api/gateway/active`);
+            const data = await response.json();
+
+            if (data.active && data.type === 'bestfy') {
+                showToast('✓ Conexão com BESTFY estabelecida com sucesso!', 'success');
+            } else {
+                showToast('Gateway não está ativo ou configurado', 'warning');
+            }
+        } catch (error) {
+            console.error('Erro ao testar conexão:', error);
+            showToast('Erro ao testar conexão com BESTFY', 'error');
+        } finally {
+            hideLoading();
+        }
+    }
+
+    // Continue na próxima parte com modais, notificações e utilitários...
+    // =====================================================
+    // MODALS - PARTE 4 (FINAL)
+    // =====================================================
+
+    function createModalContainers() {
+        if (!document.getElementById('modalContainer')) {
+            const modalContainer = document.createElement('div');
+            modalContainer.id = 'modalContainer';
+            document.body.appendChild(modalContainer);
+        }
+
+        // Create generic modal if it doesn't exist
+        if (!document.getElementById('genericModal')) {
+            const genericModal = document.createElement('div');
+            genericModal.id = 'genericModal';
+            genericModal.style.cssText = 'display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; align-items: center; justify-content: center;';
+            document.body.appendChild(genericModal);
+        }
+    }
+
+    async function openProductModal(productId = null) {
+        const product = productId ? AppState.products.find(p => p.id === productId) : null;
+        const isEdit = !!product;
+
+        let existingImages = '';
+        if (product && product.images_json) {
+            try {
+                const parsed = JSON.parse(product.images_json);
+                if (Array.isArray(parsed)) {
+                    existingImages = parsed.join('\n');
+                }
+            } catch (e) {
+                console.error('Error parsing images_json', e);
+            }
+        }
+
+        const modalHTML = `
         <div class="modal-overlay" onclick="closeModal()">
             <div class="modal-dialog" onclick="event.stopPropagation()">
                 <div class="modal-header">
@@ -3247,85 +3494,85 @@ async function openProductModal(productId = null) {
         </div>
     `;
 
-    document.getElementById('modalContainer').innerHTML = modalHTML;
+        document.getElementById('modalContainer').innerHTML = modalHTML;
 
-    document.getElementById('productForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-        saveProduct(productId);
-    });
-}
-
-async function saveProduct(productId) {
-    const form = document.getElementById('productForm');
-    const formData = new FormData(form);
-
-    const additionalImagesRaw = formData.get('additional_images');
-    if (additionalImagesRaw) {
-        const imagesArray = additionalImagesRaw.split('\n')
-            .map(url => url.trim())
-            .filter(url => url.length > 0);
-        formData.append('images_json', JSON.stringify(imagesArray));
-        formData.delete('additional_images');
-    } else {
-        formData.append('images_json', '[]');
-    }
-
-    showLoading(productId ? 'Atualizando produto...' : 'Criando produto...');
-
-    try {
-        const url = productId ? `${API_URL}/products/${productId}` : `${API_URL}/products`;
-        const method = productId ? 'PUT' : 'POST';
-
-        const response = await fetch(url, {
-            method,
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
-            },
-            body: formData
+        document.getElementById('productForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            saveProduct(productId);
         });
+    }
 
-        if (response.ok) {
-            showToast(`Produto ${productId ? 'atualizado' : 'criado'} com sucesso!`, 'success');
-            closeModal();
-            loadPage('products');
+    async function saveProduct(productId) {
+        const form = document.getElementById('productForm');
+        const formData = new FormData(form);
+
+        const additionalImagesRaw = formData.get('additional_images');
+        if (additionalImagesRaw) {
+            const imagesArray = additionalImagesRaw.split('\n')
+                .map(url => url.trim())
+                .filter(url => url.length > 0);
+            formData.append('images_json', JSON.stringify(imagesArray));
+            formData.delete('additional_images');
         } else {
-            const error = await response.json();
-            showToast(error.error || 'Erro ao salvar produto', 'error');
+            formData.append('images_json', '[]');
         }
-    } catch (error) {
-        console.error('Erro ao salvar produto:', error);
-        showToast('Erro ao salvar produto', 'error');
-    } finally {
-        hideLoading();
-    }
-}
 
-async function openCollectionModal(collectionId = null) {
-    const collection = collectionId ? AppState.collections.find(c => c.id === collectionId) : null;
-    const isEdit = !!collection;
+        showLoading(productId ? 'Atualizando produto...' : 'Criando produto...');
 
-    let allProducts = AppState.products;
-    if (allProducts.length === 0) {
         try {
-            const res = await fetch(`${API_BASE}/api/products`);
-            if (res.ok) allProducts = await res.json();
-        } catch (e) { console.error(e); }
-    }
+            const url = productId ? `${API_URL}/products/${productId}` : `${API_URL}/products`;
+            const method = productId ? 'PUT' : 'POST';
 
-    let associatedIds = new Set();
-    if (isEdit) {
-        try {
-            const res = await fetch(`${API_URL}/collections/${collectionId}/products`, {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
+            const response = await fetch(url, {
+                method,
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+                },
+                body: formData
             });
-            if (res.ok) {
-                const ids = await res.json();
-                associatedIds = new Set(ids);
+
+            if (response.ok) {
+                showToast(`Produto ${productId ? 'atualizado' : 'criado'} com sucesso!`, 'success');
+                closeModal();
+                loadPage('products');
+            } else {
+                const error = await response.json();
+                showToast(error.error || 'Erro ao salvar produto', 'error');
             }
-        } catch (e) { console.error(e); }
+        } catch (error) {
+            console.error('Erro ao salvar produto:', error);
+            showToast('Erro ao salvar produto', 'error');
+        } finally {
+            hideLoading();
+        }
     }
 
-    const modalHTML = `
+    async function openCollectionModal(collectionId = null) {
+        const collection = collectionId ? AppState.collections.find(c => c.id === collectionId) : null;
+        const isEdit = !!collection;
+
+        let allProducts = AppState.products;
+        if (allProducts.length === 0) {
+            try {
+                const res = await fetch(`${API_BASE}/api/products`);
+                if (res.ok) allProducts = await res.json();
+            } catch (e) { console.error(e); }
+        }
+
+        let associatedIds = new Set();
+        if (isEdit) {
+            try {
+                const res = await fetch(`${API_URL}/collections/${collectionId}/products`, {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
+                });
+                if (res.ok) {
+                    const ids = await res.json();
+                    associatedIds = new Set(ids);
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        const modalHTML = `
         <div class="modal-overlay" onclick="closeModal()">
             <div class="modal-dialog" onclick="event.stopPropagation()">
                 <div class="modal-header">
@@ -3423,121 +3670,121 @@ async function openCollectionModal(collectionId = null) {
         </div>
     `;
 
-    document.getElementById('modalContainer').innerHTML = modalHTML;
+        document.getElementById('modalContainer').innerHTML = modalHTML;
 
-    window.switchTab = (btn, tabId) => {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
-        btn.classList.add('active');
-        document.getElementById(tabId).style.display = 'block';
-    };
+        window.switchTab = (btn, tabId) => {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+            btn.classList.add('active');
+            document.getElementById(tabId).style.display = 'block';
+        };
 
-    window.filterCollectionProducts = (input) => {
-        const term = input.value.toLowerCase();
-        document.querySelectorAll('.product-selection-item').forEach(item => {
-            const name = item.querySelector('.prod-name').innerText.toLowerCase();
-            item.style.display = name.includes(term) ? 'flex' : 'none';
-        });
-    };
+        window.filterCollectionProducts = (input) => {
+            const term = input.value.toLowerCase();
+            document.querySelectorAll('.product-selection-item').forEach(item => {
+                const name = item.querySelector('.prod-name').innerText.toLowerCase();
+                item.style.display = name.includes(term) ? 'flex' : 'none';
+            });
+        };
 
-    document.getElementById('collectionForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-        saveCollection(collectionId);
-    });
-
-    if (!isEdit) {
-        const nameInput = document.querySelector('[name="name"]');
-        const slugInput = document.querySelector('[name="slug"]');
-        nameInput.addEventListener('input', () => {
-            slugInput.value = nameInput.value
-                .toLowerCase()
-                .normalize('NFD')
-                .replace(/[\u0300-\u036f]/g, '')
-                .replace(/[^a-z0-9]+/g, '-')
-                .replace(/^-+|-+$/g, '');
-        });
-    }
-}
-
-async function saveCollection(collectionId) {
-    const form = document.getElementById('collectionForm');
-    const formData = new FormData(form);
-
-    const selectedProducts = [];
-    form.querySelectorAll('input[name="product_ids"]:checked').forEach(cb => {
-        selectedProducts.push(parseInt(cb.value));
-    });
-
-    const data = {
-        name: formData.get('name'),
-        slug: formData.get('slug'),
-        description: formData.get('description') || '',
-        is_active: formData.get('is_active') === 'on',
-        default_view: formData.get('default_view') || 'grid'
-    };
-
-    showLoading(collectionId ? 'Atualizando coleção...' : 'Criando coleção...');
-
-    try {
-        const url = collectionId ? `${API_URL}/collections/${collectionId}` : `${API_URL}/collections`;
-        const method = collectionId ? 'PUT' : 'POST';
-
-        const response = await fetch(url, {
-            method,
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
-            },
-            body: JSON.stringify(data)
+        document.getElementById('collectionForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            saveCollection(collectionId);
         });
 
-        if (response.ok) {
-            const result = await response.json();
-            const targetId = collectionId || result.id;
-
-            if (targetId) {
-                await fetch(`${API_URL}/collections/${targetId}/products`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
-                    },
-                    body: JSON.stringify({ product_ids: selectedProducts })
-                });
-            }
-
-            showToast(`Coleção ${collectionId ? 'atualizada' : 'criada'} com sucesso!`, 'success');
-            closeModal();
-            loadPage('collections');
-        } else {
-            const error = await response.json();
-            showToast(error.error || 'Erro ao salvar coleção', 'error');
+        if (!isEdit) {
+            const nameInput = document.querySelector('[name="name"]');
+            const slugInput = document.querySelector('[name="slug"]');
+            nameInput.addEventListener('input', () => {
+                slugInput.value = nameInput.value
+                    .toLowerCase()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/^-+|-+$/g, '');
+            });
         }
-    } catch (error) {
-        console.error('Erro ao salvar coleção:', error);
-        showToast('Erro ao salvar coleção', 'error');
-    } finally {
-        hideLoading();
     }
-}
 
-async function manageCollectionProducts(collectionId) {
-    showLoading('Carregando produtos...');
-    try {
-        const collectionsResp = await fetch(`${API_URL}/collections`, {
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
+    async function saveCollection(collectionId) {
+        const form = document.getElementById('collectionForm');
+        const formData = new FormData(form);
+
+        const selectedProducts = [];
+        form.querySelectorAll('input[name="product_ids"]:checked').forEach(cb => {
+            selectedProducts.push(parseInt(cb.value));
         });
-        const allCollections = await collectionsResp.json();
-        const collection = allCollections.find(c => c.id === collectionId);
 
-        const productsResp = await fetch(`${API_BASE}/api/products`);
-        let allProducts = await productsResp.json();
+        const data = {
+            name: formData.get('name'),
+            slug: formData.get('slug'),
+            description: formData.get('description') || '',
+            is_active: formData.get('is_active') === 'on',
+            default_view: formData.get('default_view') || 'grid'
+        };
 
-        const inCollectionIds = new Set((collection.products || []).map(p => p.id));
-        const productsIn = collection.products || [];
-        const productsOut = allProducts.filter(p => !inCollectionIds.has(p.id));
+        showLoading(collectionId ? 'Atualizando coleção...' : 'Criando coleção...');
 
-        const modalHtml = `
+        try {
+            const url = collectionId ? `${API_URL}/collections/${collectionId}` : `${API_URL}/collections`;
+            const method = collectionId ? 'PUT' : 'POST';
+
+            const response = await fetch(url, {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                const targetId = collectionId || result.id;
+
+                if (targetId) {
+                    await fetch(`${API_URL}/collections/${targetId}/products`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+                        },
+                        body: JSON.stringify({ product_ids: selectedProducts })
+                    });
+                }
+
+                showToast(`Coleção ${collectionId ? 'atualizada' : 'criada'} com sucesso!`, 'success');
+                closeModal();
+                loadPage('collections');
+            } else {
+                const error = await response.json();
+                showToast(error.error || 'Erro ao salvar coleção', 'error');
+            }
+        } catch (error) {
+            console.error('Erro ao salvar coleção:', error);
+            showToast('Erro ao salvar coleção', 'error');
+        } finally {
+            hideLoading();
+        }
+    }
+
+    async function manageCollectionProducts(collectionId) {
+        showLoading('Carregando produtos...');
+        try {
+            const collectionsResp = await fetch(`${API_URL}/collections`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
+            });
+            const allCollections = await collectionsResp.json();
+            const collection = allCollections.find(c => c.id === collectionId);
+
+            const productsResp = await fetch(`${API_BASE}/api/products`);
+            let allProducts = await productsResp.json();
+
+            const inCollectionIds = new Set((collection.products || []).map(p => p.id));
+            const productsIn = collection.products || [];
+            const productsOut = allProducts.filter(p => !inCollectionIds.has(p.id));
+
+            const modalHtml = `
             <div class="modal-overlay" onclick="closeModal()">
                 <div class="modal-dialog" style="max-width: 1000px; max-height: 85vh;" onclick="event.stopPropagation()">
                     <div class="modal-header">
@@ -3571,25 +3818,25 @@ async function manageCollectionProducts(collectionId) {
             </div>
         `;
 
-        document.getElementById('modalContainer').innerHTML = modalHtml;
+            document.getElementById('modalContainer').innerHTML = modalHtml;
 
-        if (typeof Sortable !== 'undefined') {
-            Sortable.create(document.getElementById('inCollectionList'), {
-                animation: 150,
-                onEnd: () => saveCollectionProductOrder(collectionId)
-            });
+            if (typeof Sortable !== 'undefined') {
+                Sortable.create(document.getElementById('inCollectionList'), {
+                    animation: 150,
+                    onEnd: () => saveCollectionProductOrder(collectionId)
+                });
+            }
+
+        } catch (e) {
+            console.error(e);
+            showToast('Erro ao carregar dados', 'error');
+        } finally {
+            hideLoading();
         }
-
-    } catch (e) {
-        console.error(e);
-        showToast('Erro ao carregar dados', 'error');
-    } finally {
-        hideLoading();
     }
-}
 
-function renderManageProductItem(product, isIn, collectionId) {
-    return `
+    function renderManageProductItem(product, isIn, collectionId) {
+        return `
         <div class="pm-item" data-id="${product.id}" style="background: var(--bg-card); padding: 10px; border-radius: 6px; border: 1px solid var(--border); display: flex; align-items: center; gap: 10px; cursor: ${isIn ? 'move' : 'default'}; transition: all 0.2s;">
             <img src="${product.image_url || 'https://via.placeholder.com/40'}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
             <div style="flex: 1; min-width: 0;">
@@ -3599,133 +3846,133 @@ function renderManageProductItem(product, isIn, collectionId) {
             <button class="btn-icon ${isIn ? 'danger' : 'success'}" style="flex-shrink: 0;"
                 onclick="${isIn ? `removeProductFromCollection(${collectionId}, ${product.id})` : `addProductToCollection(${collectionId}, ${product.id})`}">
                 ${isIn ?
-            '<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>' :
-            '<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>'}
+                '<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>' :
+                '<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>'}
             </button>
         </div>
     `;
-}
+    }
 
-async function addProductToCollection(collectionId, productId) {
-    try {
-        const response = await fetch(`${API_URL}/collections/${collectionId}/products`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
-            },
-            body: JSON.stringify({ product_id: productId })
-        });
-        if (response.ok) {
-            manageCollectionProducts(collectionId);
-        } else {
-            const data = await response.json();
-            showToast(data.error || 'Erro ao adicionar', 'error');
+    async function addProductToCollection(collectionId, productId) {
+        try {
+            const response = await fetch(`${API_URL}/collections/${collectionId}/products`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+                },
+                body: JSON.stringify({ product_id: productId })
+            });
+            if (response.ok) {
+                manageCollectionProducts(collectionId);
+            } else {
+                const data = await response.json();
+                showToast(data.error || 'Erro ao adicionar', 'error');
+            }
+        } catch (e) {
+            console.error(e);
+            showToast('Erro de conexão', 'error');
         }
-    } catch (e) {
-        console.error(e);
-        showToast('Erro de conexão', 'error');
     }
-}
 
-async function removeProductFromCollection(collectionId, productId) {
-    if (!confirm('Remover produto da coleção?')) return;
-    try {
-        const response = await fetch(`${API_URL}/collections/${collectionId}/products/${productId}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
-        });
-        if (response.ok) {
-            manageCollectionProducts(collectionId);
-        } else {
-            showToast('Erro ao remover', 'error');
+    async function removeProductFromCollection(collectionId, productId) {
+        if (!confirm('Remover produto da coleção?')) return;
+        try {
+            const response = await fetch(`${API_URL}/collections/${collectionId}/products/${productId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
+            });
+            if (response.ok) {
+                manageCollectionProducts(collectionId);
+            } else {
+                showToast('Erro ao remover', 'error');
+            }
+        } catch (e) {
+            console.error(e);
+            showToast('Erro de conexão', 'error');
         }
-    } catch (e) {
-        console.error(e);
-        showToast('Erro de conexão', 'error');
     }
-}
 
-async function saveCollectionProductOrder(collectionId) {
-    const items = document.querySelectorAll('#inCollectionList .pm-item');
-    const order = Array.from(items).map((item, index) => ({
-        product_id: parseInt(item.dataset.id),
-        sort_order: index
-    }));
+    async function saveCollectionProductOrder(collectionId) {
+        const items = document.querySelectorAll('#inCollectionList .pm-item');
+        const order = Array.from(items).map((item, index) => ({
+            product_id: parseInt(item.dataset.id),
+            sort_order: index
+        }));
 
-    try {
-        await fetch(`${API_URL}/collections/${collectionId}/reorder-products`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
-            },
-            body: JSON.stringify({ order })
+        try {
+            await fetch(`${API_URL}/collections/${collectionId}/reorder-products`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+                },
+                body: JSON.stringify({ order })
+            });
+        } catch (e) {
+            console.error('Erro ao salvar ordem', e);
+        }
+    }
+
+    function filterPMList(input) {
+        const term = input.value.toLowerCase();
+        const items = document.querySelectorAll('#outCollectionList .pm-item');
+        items.forEach(item => {
+            const text = item.innerText.toLowerCase();
+            item.style.display = text.includes(term) ? 'flex' : 'none';
         });
-    } catch (e) {
-        console.error('Erro ao salvar ordem', e);
-    }
-}
-
-function filterPMList(input) {
-    const term = input.value.toLowerCase();
-    const items = document.querySelectorAll('#outCollectionList .pm-item');
-    items.forEach(item => {
-        const text = item.innerText.toLowerCase();
-        item.style.display = text.includes(term) ? 'flex' : 'none';
-    });
-}
-
-// Selecionar visualização padrão no modal de coleção
-function selectDefaultView(btn, view) {
-    // Atualizar botões ativos
-    const container = btn.parentElement;
-    container.querySelectorAll('.view-toggle-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-
-    // Atualizar campo hidden
-    const form = btn.closest('form');
-    const hiddenInput = form.querySelector('input[name="default_view"]');
-    if (hiddenInput) {
-        hiddenInput.value = view;
-    }
-}
-
-// Tornar função global
-window.selectDefaultView = selectDefaultView;
-
-function closeModal() {
-    const modalContainer = document.getElementById('modalContainer');
-    if (modalContainer) {
-        modalContainer.innerHTML = '';
     }
 
-    // Also close generic modal
-    const genericModal = document.getElementById('genericModal');
-    if (genericModal) {
-        genericModal.style.display = 'none';
-        genericModal.innerHTML = '';
+    // Selecionar visualização padrão no modal de coleção
+    function selectDefaultView(btn, view) {
+        // Atualizar botões ativos
+        const container = btn.parentElement;
+        container.querySelectorAll('.view-toggle-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        // Atualizar campo hidden
+        const form = btn.closest('form');
+        const hiddenInput = form.querySelector('input[name="default_view"]');
+        if (hiddenInput) {
+            hiddenInput.value = view;
+        }
     }
-}
 
-// =====================================================
-// NOTIFICATIONS & TOASTS
-// =====================================================
+    // Tornar função global
+    window.selectDefaultView = selectDefaultView;
 
-function showToast(message, type = 'info') {
-    const container = document.getElementById('toastContainer') || createToastContainer();
+    function closeModal() {
+        const modalContainer = document.getElementById('modalContainer');
+        if (modalContainer) {
+            modalContainer.innerHTML = '';
+        }
 
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
+        // Also close generic modal
+        const genericModal = document.getElementById('genericModal');
+        if (genericModal) {
+            genericModal.style.display = 'none';
+            genericModal.innerHTML = '';
+        }
+    }
 
-    const icons = {
-        success: '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>',
-        error: '<circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line>',
-        warning: '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line>',
-        info: '<circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line>'
-    };
+    // =====================================================
+    // NOTIFICATIONS & TOASTS
+    // =====================================================
 
-    toast.innerHTML = `
+    function showToast(message, type = 'info') {
+        const container = document.getElementById('toastContainer') || createToastContainer();
+
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+
+        const icons = {
+            success: '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>',
+            error: '<circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line>',
+            warning: '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line>',
+            info: '<circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line>'
+        };
+
+        toast.innerHTML = `
         <div class="toast-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 ${icons[type]}
@@ -3740,47 +3987,47 @@ function showToast(message, type = 'info') {
         </button>
     `;
 
-    container.appendChild(toast);
+        container.appendChild(toast);
 
-    setTimeout(() => toast.classList.add('toast-exit'), 4000);
-    setTimeout(() => toast.remove(), 4300);
-}
-
-function createToastContainer() {
-    const container = document.createElement('div');
-    container.id = 'toastContainer';
-    container.className = 'toast-container';
-    document.body.appendChild(container);
-    return container;
-}
-
-function showLoading(message = 'Carregando...') {
-    let loader = document.getElementById('globalLoader');
-    if (!loader) {
-        loader = document.createElement('div');
-        loader.id = 'globalLoader';
-        loader.className = 'global-loader';
-        document.body.appendChild(loader);
+        setTimeout(() => toast.classList.add('toast-exit'), 4000);
+        setTimeout(() => toast.remove(), 4300);
     }
 
-    loader.innerHTML = `
+    function createToastContainer() {
+        const container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+        return container;
+    }
+
+    function showLoading(message = 'Carregando...') {
+        let loader = document.getElementById('globalLoader');
+        if (!loader) {
+            loader = document.createElement('div');
+            loader.id = 'globalLoader';
+            loader.className = 'global-loader';
+            document.body.appendChild(loader);
+        }
+
+        loader.innerHTML = `
         <div class="loader-content">
             <div class="loader-spinner"></div>
             <div class="loader-text">${message}</div>
         </div>
     `;
-    loader.classList.add('active');
-}
-
-function hideLoading() {
-    const loader = document.getElementById('globalLoader');
-    if (loader) {
-        loader.classList.remove('active');
+        loader.classList.add('active');
     }
-}
 
-function showNotificationsPanel() {
-    const modal = `
+    function hideLoading() {
+        const loader = document.getElementById('globalLoader');
+        if (loader) {
+            loader.classList.remove('active');
+        }
+    }
+
+    function showNotificationsPanel() {
+        const modal = `
         <div class="modal-overlay" onclick="closeModal()">
             <div class="modal-dialog" style="max-width: 500px;" onclick="event.stopPropagation()">
                 <div class="modal-header">
@@ -3838,72 +4085,72 @@ function showNotificationsPanel() {
         </div>
     `;
 
-    document.getElementById('modalContainer').innerHTML = modal;
-}
-
-// =====================================================
-// UTILITY FUNCTIONS
-// =====================================================
-
-function formatDate(dateString) {
-    if (!dateString) return '-';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-    });
-}
-
-function formatCurrency(value) {
-    if (typeof value === 'number') {
-        return value.toFixed(2).replace('.', ',');
-    }
-    return parseFloat(value || 0).toFixed(2).replace('.', ',');
-}
-
-function formatDateTime(dateString) {
-    if (!dateString) return '-';
-    const date = new Date(dateString);
-    return date.toLocaleString('pt-BR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-}
-
-// =====================================================
-// BULK DISCOUNT MODAL
-// =====================================================
-
-function openBulkDiscountModal() {
-    const selectedProducts = Array.from(AppState.selected.products).map(id =>
-        AppState.products.find(p => p.id === id)
-    ).filter(Boolean);
-
-    if (selectedProducts.length === 0) {
-        showToast('Selecione produtos para aplicar desconto', 'warning');
-        return;
+        document.getElementById('modalContainer').innerHTML = modal;
     }
 
-    const modal = document.getElementById('genericModal');
-    if (!modal) {
-        console.error('Modal container not found');
-        return;
+    // =====================================================
+    // UTILITY FUNCTIONS
+    // =====================================================
+
+    function formatDate(dateString) {
+        if (!dateString) return '-';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        });
     }
 
-    modal.style.display = 'flex';
-
-    // Add click event to close modal when clicking overlay
-    modal.onclick = (e) => {
-        if (e.target === modal) {
-            closeModal();
+    function formatCurrency(value) {
+        if (typeof value === 'number') {
+            return value.toFixed(2).replace('.', ',');
         }
-    };
+        return parseFloat(value || 0).toFixed(2).replace('.', ',');
+    }
 
-    modal.innerHTML = `
+    function formatDateTime(dateString) {
+        if (!dateString) return '-';
+        const date = new Date(dateString);
+        return date.toLocaleString('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+
+    // =====================================================
+    // BULK DISCOUNT MODAL
+    // =====================================================
+
+    function openBulkDiscountModal() {
+        const selectedProducts = Array.from(AppState.selected.products).map(id =>
+            AppState.products.find(p => p.id === id)
+        ).filter(Boolean);
+
+        if (selectedProducts.length === 0) {
+            showToast('Selecione produtos para aplicar desconto', 'warning');
+            return;
+        }
+
+        const modal = document.getElementById('genericModal');
+        if (!modal) {
+            console.error('Modal container not found');
+            return;
+        }
+
+        modal.style.display = 'flex';
+
+        // Add click event to close modal when clicking overlay
+        modal.onclick = (e) => {
+            if (e.target === modal) {
+                closeModal();
+            }
+        };
+
+        modal.innerHTML = `
         <div class="modal-content" style="max-width: 700px; background: var(--bg-card); border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); animation: modalSlideIn 0.3s ease; overflow: hidden;">
             <div class="modal-header" style="padding: 24px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
                 <h2 style="margin: 0; color: var(--text-primary); font-size: 1.5rem;">💰 Desconto em Massa</h2>
@@ -4004,17 +4251,17 @@ function openBulkDiscountModal() {
         </style>
     `;
 
-    // Store selected products in modal data
-    modal.dataset.selectedProducts = JSON.stringify(selectedProducts.map(p => ({ id: p.id, price: p.price })));
-}
+        // Store selected products in modal data
+        modal.dataset.selectedProducts = JSON.stringify(selectedProducts.map(p => ({ id: p.id, price: p.price })));
+    }
 
-function renderDiscountPreview(products, discountPercent) {
-    return products.map(product => {
-        const originalPrice = parseFloat(product.price);
-        const newPrice = originalPrice * (1 - discountPercent / 100);
-        const saving = originalPrice - newPrice;
+    function renderDiscountPreview(products, discountPercent) {
+        return products.map(product => {
+            const originalPrice = parseFloat(product.price);
+            const newPrice = originalPrice * (1 - discountPercent / 100);
+            const saving = originalPrice - newPrice;
 
-        return `
+            return `
             <div style="display: flex; align-items: center; padding: 12px; background: var(--bg-secondary); border-radius: 6px; margin-bottom: 8px; border-left: 3px solid var(--primary);">
                 <div style="flex: 1; min-width: 0;">
                     <div style="font-weight: 600; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
@@ -4037,131 +4284,131 @@ function renderDiscountPreview(products, discountPercent) {
                 </div>
             </div>
         `;
-    }).join('');
-}
-
-function updateDiscountPreview(discountPercent) {
-    document.getElementById('discountValue').textContent = discountPercent;
-
-    // Update slider background gradient
-    const slider = document.getElementById('discountSlider');
-    const percentage = ((discountPercent - 10) / 70) * 100;
-    slider.style.background = `linear-gradient(90deg, #52c77a 0%, #52c77a ${percentage}%, #E50914 ${percentage}%, #E50914 100%)`;
-
-    const modal = document.getElementById('genericModal');
-    const productsData = JSON.parse(modal.dataset.selectedProducts || '[]');
-    const products = productsData.map(pd => AppState.products.find(p => p.id === pd.id)).filter(Boolean);
-
-    document.getElementById('discountPreviewList').innerHTML = renderDiscountPreview(products, discountPercent);
-}
-
-async function applyBulkDiscount() {
-    const discountPercent = parseInt(document.getElementById('discountSlider').value);
-    const modal = document.getElementById('genericModal');
-    const productsData = JSON.parse(modal.dataset.selectedProducts || '[]');
-
-    if (productsData.length === 0) {
-        showToast('Nenhum produto selecionado', 'error');
-        return;
+        }).join('');
     }
 
-    if (!confirm(`Tem certeza que deseja aplicar ${discountPercent}% de desconto em ${productsData.length} produtos?\n\nEsta ação irá atualizar os preços permanentemente.`)) {
-        return;
+    function updateDiscountPreview(discountPercent) {
+        document.getElementById('discountValue').textContent = discountPercent;
+
+        // Update slider background gradient
+        const slider = document.getElementById('discountSlider');
+        const percentage = ((discountPercent - 10) / 70) * 100;
+        slider.style.background = `linear-gradient(90deg, #52c77a 0%, #52c77a ${percentage}%, #E50914 ${percentage}%, #E50914 100%)`;
+
+        const modal = document.getElementById('genericModal');
+        const productsData = JSON.parse(modal.dataset.selectedProducts || '[]');
+        const products = productsData.map(pd => AppState.products.find(p => p.id === pd.id)).filter(Boolean);
+
+        document.getElementById('discountPreviewList').innerHTML = renderDiscountPreview(products, discountPercent);
     }
 
-    showLoading('Aplicando descontos...');
+    async function applyBulkDiscount() {
+        const discountPercent = parseInt(document.getElementById('discountSlider').value);
+        const modal = document.getElementById('genericModal');
+        const productsData = JSON.parse(modal.dataset.selectedProducts || '[]');
 
-    try {
-        const response = await fetch(`${API_URL}/products/bulk-discount`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
-            },
-            body: JSON.stringify({
-                productIds: productsData.map(p => p.id),
-                discountPercent: discountPercent
-            })
-        });
-
-        if (response.ok) {
-            hideLoading();
-            showToast(`${productsData.length} produtos atualizados com sucesso!`, 'success');
-            closeModal();
-            await loadProducts(); // Reload table
-            renderProducts(document.getElementById('mainContent')); // Re-render products after loading
-            AppState.selected.products.clear(); // Clear selection after successful update
-        } else {
-            const data = await response.json();
-            throw new Error(data.error || 'Erro ao aplicar descontos');
+        if (productsData.length === 0) {
+            showToast('Nenhum produto selecionado', 'error');
+            return;
         }
 
-    } catch (error) {
-        hideLoading();
-        console.error('Erro ao aplicar desconto em massa:', error);
-        showToast('Erro ao aplicar descontos: ' + error.message, 'error');
+        if (!confirm(`Tem certeza que deseja aplicar ${discountPercent}% de desconto em ${productsData.length} produtos?\n\nEsta ação irá atualizar os preços permanentemente.`)) {
+            return;
+        }
+
+        showLoading('Aplicando descontos...');
+
+        try {
+            const response = await fetch(`${API_URL}/products/bulk-discount`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+                },
+                body: JSON.stringify({
+                    productIds: productsData.map(p => p.id),
+                    discountPercent: discountPercent
+                })
+            });
+
+            if (response.ok) {
+                hideLoading();
+                showToast(`${productsData.length} produtos atualizados com sucesso!`, 'success');
+                closeModal();
+                await loadProducts(); // Reload table
+                renderProducts(document.getElementById('mainContent')); // Re-render products after loading
+                AppState.selected.products.clear(); // Clear selection after successful update
+            } else {
+                const data = await response.json();
+                throw new Error(data.error || 'Erro ao aplicar descontos');
+            }
+
+        } catch (error) {
+            hideLoading();
+            console.error('Erro ao aplicar desconto em massa:', error);
+            showToast('Erro ao aplicar descontos: ' + error.message, 'error');
+        }
     }
-}
 
-// =====================================================
-// GLOBAL EXPORTS
-// =====================================================
+    // =====================================================
+    // GLOBAL EXPORTS
+    // =====================================================
 
-window.openProductModal = openProductModal;
-window.openCollectionModal = openCollectionModal;
-window.openCustomerModal = openCustomerModal;
-window.editProduct = editProduct;
-window.deleteProduct = deleteProduct;
-window.deleteCollection = deleteCollection;
-window.toggleProductSelection = toggleProductSelection;
-window.toggleSelectAllProducts = toggleSelectAllProducts;
-window.bulkEditProducts = bulkEditProducts;
-window.bulkDeleteProducts = bulkDeleteProducts;
-window.openBulkDiscountModal = openBulkDiscountModal;
-window.updateDiscountPreview = updateDiscountPreview;
-window.applyBulkDiscount = applyBulkDiscount;
-window.importProductsCSV = importProductsCSV;
-window.previewProduct = previewProduct;
-window.filterProductsTable = filterProductsTable;
-window.filterOrdersTable = filterOrdersTable;
-window.filterCustomersTable = filterCustomersTable;
-window.manageCollectionProducts = manageCollectionProducts;
-window.addProductToCollection = addProductToCollection;
-window.removeProductFromCollection = removeProductFromCollection;
-window.saveCollectionProductOrder = saveCollectionProductOrder;
-window.filterPMList = filterPMList;
-window.updateOrderStatus = updateOrderStatus;
-window.viewOrderDetails = viewOrderDetails;
-window.viewCustomerDetails = viewCustomerDetails;
-window.printInvoice = printInvoice;
-window.exportOrders = exportOrders;
-window.adjustInventory = adjustInventory;
-window.adjustStockModal = adjustStockModal;
-window.previousProductsPage = previousProductsPage;
-window.nextProductsPage = nextProductsPage;
-window.closeModal = closeModal;
-window.showToast = showToast;
-window.showLoading = showLoading;
-window.hideLoading = hideLoading;
-window.loadPage = loadPage;
+    window.openProductModal = openProductModal;
+    window.openCollectionModal = openCollectionModal;
+    window.openCustomerModal = openCustomerModal;
+    window.editProduct = editProduct;
+    window.deleteProduct = deleteProduct;
+    window.deleteCollection = deleteCollection;
+    window.toggleProductSelection = toggleProductSelection;
+    window.toggleSelectAllProducts = toggleSelectAllProducts;
+    window.bulkEditProducts = bulkEditProducts;
+    window.bulkDeleteProducts = bulkDeleteProducts;
+    window.openBulkDiscountModal = openBulkDiscountModal;
+    window.updateDiscountPreview = updateDiscountPreview;
+    window.applyBulkDiscount = applyBulkDiscount;
+    window.importProductsCSV = importProductsCSV;
+    window.previewProduct = previewProduct;
+    window.filterProductsTable = filterProductsTable;
+    window.filterOrdersTable = filterOrdersTable;
+    window.filterCustomersTable = filterCustomersTable;
+    window.manageCollectionProducts = manageCollectionProducts;
+    window.addProductToCollection = addProductToCollection;
+    window.removeProductFromCollection = removeProductFromCollection;
+    window.saveCollectionProductOrder = saveCollectionProductOrder;
+    window.filterPMList = filterPMList;
+    window.updateOrderStatus = updateOrderStatus;
+    window.viewOrderDetails = viewOrderDetails;
+    window.viewCustomerDetails = viewCustomerDetails;
+    window.printInvoice = printInvoice;
+    window.exportOrders = exportOrders;
+    window.adjustInventory = adjustInventory;
+    window.adjustStockModal = adjustStockModal;
+    window.previousProductsPage = previousProductsPage;
+    window.nextProductsPage = nextProductsPage;
+    window.closeModal = closeModal;
+    window.showToast = showToast;
+    window.showLoading = showLoading;
+    window.hideLoading = hideLoading;
+    window.loadPage = loadPage;
 
-console.log('%c🎬 Stranger Things Admin Dashboard PRO v2.0', 'background: #E50914; color: white; font-size: 16px; font-weight: bold; padding: 10px;');
-console.log('%cSistema carregado com sucesso! ✨', 'color: #10B981; font-size: 14px;');
-// =====================================================
-// GATEWAYS PAGE
-// =====================================================
+    console.log('%c🎬 Stranger Things Admin Dashboard PRO v2.0', 'background: #E50914; color: white; font-size: 16px; font-weight: bold; padding: 10px;');
+    console.log('%cSistema carregado com sucesso! ✨', 'color: #10B981; font-size: 14px;');
+    // =====================================================
+    // GATEWAYS PAGE
+    // =====================================================
 
-async function renderGateways(container) {
-    showLoading('Carregando gateways...');
+    async function renderGateways(container) {
+        showLoading('Carregando gateways...');
 
-    try {
-        const response = await fetch(`${API_URL}/gateways`, {
-            headers: getAuthHeaders()
-        });
+        try {
+            const response = await fetch(`${API_URL}/gateways`, {
+                headers: getAuthHeaders()
+            });
 
-        const gateways = await response.json();
+            const gateways = await response.json();
 
-        container.innerHTML = `
+            container.innerHTML = `
             <div class="page-header">
                 <h2>Gateways de Pagamento</h2>
                 <p>Configure as credenciais dos gateways de pagamento</p>
@@ -4333,28 +4580,28 @@ async function renderGateways(container) {
                 }
             </style>
         `;
-    } catch (error) {
-        console.error('Erro ao carregar gateways:', error);
-        showToast('Erro ao carregar gateways', 'error');
-    } finally {
-        hideLoading();
-    }
-}
-
-function editGateway(id) {
-    showLoading('Carregando configurações...');
-
-    fetch(`${API_URL}/gateways/${id}`, {
-        headers: getAuthHeaders()
-    })
-        .then(res => res.json())
-        .then(gateway => {
+        } catch (error) {
+            console.error('Erro ao carregar gateways:', error);
+            showToast('Erro ao carregar gateways', 'error');
+        } finally {
             hideLoading();
+        }
+    }
 
-            const settings = gateway.settings_json ? JSON.parse(gateway.settings_json) : {};
+    function editGateway(id) {
+        showLoading('Carregando configurações...');
 
-            const modal = document.getElementById('modalContainer');
-            modal.innerHTML = `
+        fetch(`${API_URL}/gateways/${id}`, {
+            headers: getAuthHeaders()
+        })
+            .then(res => res.json())
+            .then(gateway => {
+                hideLoading();
+
+                const settings = gateway.settings_json ? JSON.parse(gateway.settings_json) : {};
+
+                const modal = document.getElementById('modalContainer');
+                modal.innerHTML = `
             <div class="modal-overlay" onclick="closeModal()"></div>
             <div class="modal" style="max-width: 600px;">
                 <div class="modal-header">
@@ -4412,54 +4659,123 @@ function editGateway(id) {
                 </div>
             </div>
         `;
-        })
-        .catch(error => {
-            hideLoading();
-            console.error('Erro:', error);
-            showToast('Erro ao carregar gateway', 'error');
-        });
-}
-
-async function saveGateway(event, id) {
-    event.preventDefault();
-    showLoading('Salvando...');
-
-    const formData = new FormData(event.target);
-
-    // settings_json logic
-    const settings = {
-        enable_pix: formData.get('enable_pix') ? true : false,
-        enable_credit_card: formData.get('enable_credit_card') ? true : false
-    };
-
-    const data = {
-        name: 'Bestfy Payments', // Mantém o nome
-        public_key: formData.get('public_key'),
-        secret_key: formData.get('secret_key'),
-        is_active: formData.get('is_active') ? 1 : 0,
-        settings_json: JSON.stringify(settings)
-    };
-
-    try {
-        const response = await fetch(`${API_URL}/gateways/${id}`, {
-            method: 'PUT',
-            headers: getAuthHeaders(),
-            body: JSON.stringify(data)
-        });
-
-        const result = await response.json();
-
-        if (response.ok) {
-            showToast('Gateway configurado com sucesso!', 'success');
-            closeModal();
-            await loadPage('gateways');
-        } else {
-            showToast(result.error || 'Erro ao salvar gateway', 'error');
-        }
-    } catch (error) {
-        console.error('Erro:', error);
-        showToast('Erro ao salvar gateway', 'error');
-    } finally {
-        hideLoading();
+            })
+            .catch(error => {
+                hideLoading();
+                console.error('Erro:', error);
+                showToast('Erro ao carregar gateway', 'error');
+            });
     }
-}
+
+    async function saveGateway(event, id) {
+        event.preventDefault();
+        showLoading('Salvando...');
+
+        const formData = new FormData(event.target);
+
+        // settings_json logic
+        const settings = {
+            enable_pix: formData.get('enable_pix') ? true : false,
+            enable_credit_card: formData.get('enable_credit_card') ? true : false
+        };
+
+        const data = {
+            name: 'Bestfy Payments', // Mantém o nome
+            public_key: formData.get('public_key'),
+            secret_key: formData.get('secret_key'),
+            is_active: formData.get('is_active') ? 1 : 0,
+            settings_json: JSON.stringify(settings)
+        };
+
+        try {
+            const response = await fetch(`${API_URL}/gateways/${id}`, {
+                method: 'PUT',
+                headers: getAuthHeaders(),
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                showToast('Gateway salvo com sucesso!', 'success');
+                closeModal();
+                // Recarregar a página atual se for gateways
+                const hash = window.location.hash.substring(1);
+                if (hash === 'gateways') {
+                    loadPage('gateways');
+                }
+            } else {
+                showToast(result.error || 'Erro ao salvar', 'error');
+            }
+        } catch (error) {
+            console.error('Erro:', error);
+            showToast('Erro ao salvar gateway', 'error');
+        } finally {
+            hideLoading();
+        }
+    }
+
+    // =====================================================
+    // BULK ACTIONS & HELPERS
+    // =====================================================
+
+    window.toggleSelectAllOrders = function (source) {
+        const checkboxes = document.querySelectorAll('.order-checkbox');
+        checkboxes.forEach(chk => {
+            chk.checked = source.checked;
+        });
+        updateBulkSelection();
+    }
+
+    window.updateBulkSelection = function () {
+        const checkboxes = document.querySelectorAll('.order-checkbox:checked');
+        const count = checkboxes.length;
+        const btnDelete = document.getElementById('btnDeleteSelected');
+        const countSpan = document.getElementById('selectedCount');
+
+        if (btnDelete && countSpan) {
+            countSpan.textContent = count;
+            btnDelete.style.display = count > 0 ? 'inline-flex' : 'none';
+        }
+    }
+
+    window.deleteSelectedOrders = async function () {
+        const checkboxes = document.querySelectorAll('.order-checkbox:checked');
+        const ids = Array.from(checkboxes).map(cb => cb.value);
+
+        if (ids.length === 0) return;
+
+        if (!confirm(`Tem certeza que deseja excluir ${ids.length} pedido(s)? Esta ação não pode ser desfeita.`)) {
+            return;
+        }
+
+        showLoading('Excluindo pedidos...');
+
+        try {
+            const response = await fetch(`${API_URL}/orders/bulk`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+                },
+                body: JSON.stringify({ order_ids: ids })
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                showToast(result.message || 'Pedidos excluídos com sucesso', 'success');
+                loadPage('orders'); // Recarrega a lista
+            } else {
+                showToast(result.error || 'Erro ao excluir pedidos', 'error');
+            }
+        } catch (error) {
+            console.error('Erro ao excluir pedidos:', error);
+            showToast('Erro ao conectar com o servidor', 'error');
+        } finally {
+            hideLoading();
+        }
+    }
+
+
+

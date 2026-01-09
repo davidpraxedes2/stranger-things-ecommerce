@@ -173,6 +173,7 @@ function runSQLite(query, params, callback) {
                     callback(null, { lastID: info.lastInsertRowid, changes: info.changes });
                 }, 0);
             }
+            return info;
         } else {
             // sqlite3 (async)
             sqliteDb.run(query, params, function (err) {
@@ -200,6 +201,7 @@ function getSQLite(query, params, callback) {
             if (callback) {
                 setTimeout(() => callback(null, row), 0);
             }
+            return row;
         } else {
             // sqlite3 (async)
             sqliteDb.get(query, params, callback);
@@ -223,6 +225,7 @@ function allSQLite(query, params, callback) {
             if (callback) {
                 setTimeout(() => callback(null, rows), 0);
             }
+            return rows;
         } else {
             // sqlite3 (async)
             sqliteDb.all(query, params, callback);

@@ -836,6 +836,11 @@ async function handleCheckout(e) {
                     }
 
                     // Sucesso no pagamento
+                    // Meta Pixel: Track Purchase event
+                    if (typeof window.metaPixel !== 'undefined') {
+                        window.metaPixel.trackPurchase(createdOrderId, total, cart);
+                    }
+
                     showPaymentSuccess(); // MODIFICADO: Sucesso no Modal
                     setTimeout(() => {
                         localStorage.removeItem('cart_session_id');
@@ -892,6 +897,11 @@ async function handleCheckout(e) {
                     }
 
                     // Sucesso PIX
+                    // Meta Pixel: Track Purchase event
+                    if (typeof window.metaPixel !== 'undefined') {
+                        window.metaPixel.trackPurchase(createdOrderId, total, cart);
+                    }
+
                     localStorage.removeItem('cart_session_id');
                     window.location.href = `order-success-pix.html?order_id=${createdOrderId}&total=${total.toFixed(2).replace('.', ',')}&email=${customerData.email}&bestfy=true`;
 

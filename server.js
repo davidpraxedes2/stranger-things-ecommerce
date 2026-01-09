@@ -8,6 +8,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const BestfyService = require('./bestfy-service');
 require('dotenv').config();
+const { seedCollections } = require('./collection-seeder');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -187,6 +188,7 @@ app.get('/admin', (req, res) => {
         // Popular banco se estiver vazio (em background)
         setImmediate(() => {
             populateDatabaseIfEmpty();
+            seedCollections(db);
         });
     } catch (error) {
         console.error('❌ Erro ao inicializar banco de dados:', error);
