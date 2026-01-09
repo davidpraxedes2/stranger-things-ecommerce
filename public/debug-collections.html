@@ -51,8 +51,8 @@
     <p>Use este botão para forçar a criação das coleções no banco de dados.</p>
 
     <button onclick="runSeed()" id="btnAction">Rodar Correção Agora</button>
-    <button onclick="runReset()" id="btnReset" style="background-color: #ff9800; margin-left: 10px;">RESETAR Capas e
-        Copos</button>
+    <button onclick="runReset()" id="btnReset" style="background-color: #ff9800; margin-left: 10px;">RESETAR (Capas,
+        Copos, Mochilas)</button>
     <br><br>
 
     <div id="status"></div>
@@ -68,7 +68,7 @@
 
         async function runReset() {
             const btn = document.getElementById('btnReset');
-            if (!confirm('Isso vai limpar e recriar as coleções de Capas e Copos. Continuar?')) return;
+            if (!confirm('Isso vai limpar e recriar as coleções de Capas, Copos e Mochilas. Continuar?')) return;
             await executeAction('/api/admin/debug/reset-collections', btn);
         }
 

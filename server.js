@@ -3131,7 +3131,7 @@ app.post('/api/admin/debug/reset-collections', async (req, res) => {
     try {
         console.log('🔄 Resetting specific collections (Capinhas & Quenchers)...');
 
-        const targetSlugs = ['capinhas-celular', 'quenchers-copos'];
+        const targetSlugs = ['capinhas-celular', 'quenchers-copos', 'mochilas'];
         const logs = [];
 
         for (const slug of targetSlugs) {

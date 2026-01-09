@@ -44,7 +44,10 @@ async function seedCollections(db, returnLogs = false) {
         {
             title: 'Mochilas',
             slug: 'mochilas',
-            keywords: ['mochila', 'bag', 'costas', 'backpack', 'escolar']
+            keywords: ['mochila', 'bag', 'costas', 'backpack', 'escolar'],
+            namePattern: /mochila|bag|backpack|escolar/i,
+            strictMatch: true,
+            priceOverride: 29.90
         },
         {
             title: 'Roupas',
