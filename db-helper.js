@@ -610,13 +610,25 @@ async function initializePostgres() {
             WHERE NOT EXISTS (SELECT 1 FROM payment_gateways WHERE gateway_type = 'bestfy')
         `);
 
-        console.log('✅ Tabelas PostgreSQL criadas com sucesso');
-    } catch (error) {
-        console.error('❌ Erro ao criar tabelas PostgreSQL:', error);
-        throw error;
-    } finally {
-        if (client) client.release();
     }
+
+        // Schema Migrations (Add missing columns to existing tables)
+        try {
+        await client.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS customer_cpf TEXT');
+        await client.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS customer_phone TEXT');
+        await client.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS customer_address TEXT');
+        console.log('✅ Migrações de schema aplicadas com sucesso');
+    } catch (migError) {
+        console.warn('⚠️ Nota sobre migração (pode ser ignorado se colunas já existirem):', migError.message);
+    }
+
+    console.log('✅ Tabelas PostgreSQL criadas/verificadas com sucesso');
+} catch (error) {
+    console.error('❌ Erro ao criar tabelas PostgreSQL:', error);
+    throw error;
+} finally {
+    if (client) client.release();
+}
 }
 
 function initializeSQLite() {
