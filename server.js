@@ -1277,7 +1277,7 @@ app.get('/api/products/:id', (req, res) => {
 });
 
 // Criar pedido (público)
-app.post('/api/orders', (req, res) => {
+app.post('/api/orders', async (req, res) => {
     const { customer_name, customer_email, customer_phone, customer_cpf, customer_address, payment_method, items, subtotal, shipping, discount, total, session_id, status } = req.body;
 
     if (!items || !Array.isArray(items) || items.length === 0) {
