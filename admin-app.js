@@ -4072,60 +4072,34 @@ async function applyBulkDiscount() {
     showLoading('Aplicando descontos...');
 
     try {
-        let successCount = 0;
-        let errorCount = 0;
+        const response = await fetch(`${API_URL}/admin/products/bulk-discount`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+            },
+            body: JSON.stringify({
+                productIds: productsData.map(p => p.id),
+                discountPercent: discountPercent
+            })
+        });
 
-        for (const productData of productsData) {
-            const originalPrice = parseFloat(productData.price);
-            const newPrice = originalPrice * (1 - discountPercent / 100);
-
-            try {
-                const response = await fetch(`${API_URL}/products/${productData.id}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
-                    },
-                    body: JSON.stringify({ price: newPrice.toFixed(2) })
-                });
-
-                if (response.ok) {
-                    successCount++;
-                    // Update local state
-                    const product = AppState.products.find(p => p.id === productData.id);
-                    if (product) {
-                        product.price = newPrice.toFixed(2);
-                    }
-                } else {
-                    errorCount++;
-                }
-            } catch (error) {
-                console.error(`Erro ao atualizar produto ${productData.id}:`, error);
-                errorCount++;
-            }
+        if (response.ok) {
+            hideLoading();
+            showToast(`${productsData.length} produtos atualizados com sucesso!`, 'success');
+            closeModal();
+            await loadProducts(); // Reload table
+            renderProducts(document.getElementById('mainContent')); // Re-render products after loading
+            AppState.selected.products.clear(); // Clear selection after successful update
+        } else {
+            const data = await response.json();
+            throw new Error(data.error || 'Erro ao aplicar descontos');
         }
-
-        hideLoading();
-        closeModal();
-
-        if (successCount > 0) {
-            showToast(`✅ Desconto aplicado em ${successCount} produtos!`, 'success');
-            // Refresh products view
-            await loadProducts();
-            renderProducts(document.getElementById('mainContent'));
-        }
-
-        if (errorCount > 0) {
-            showToast(`⚠️ ${errorCount} produtos falharam`, 'warning');
-        }
-
-        // Clear selection
-        AppState.selected.products.clear();
 
     } catch (error) {
         hideLoading();
         console.error('Erro ao aplicar desconto em massa:', error);
-        showToast('Erro ao aplicar descontos', 'error');
+        showToast('Erro ao aplicar descontos: ' + error.message, 'error');
     }
 }
 

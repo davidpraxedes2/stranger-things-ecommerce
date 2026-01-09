@@ -1836,6 +1836,46 @@ app.put('/api/admin/products/:id', authenticateToken, (req, res) => {
     });
 });
 
+// Aplicar desconto em massa (admin)
+app.post('/api/admin/products/bulk-discount', authenticateToken, async (req, res) => {
+    const { productIds, discountPercent } = req.body;
+
+    if (!productIds || !Array.isArray(productIds) || productIds.length === 0) {
+        return res.status(400).json({ error: 'Nenhum produto fornecido' });
+    }
+
+    try {
+        const factor = 1 - (parseFloat(discountPercent) / 100);
+
+        if (db.isPostgres) {
+            // Postgres - Update usando IN clause para ser atômico e rápido
+            await db.query(`
+                UPDATE products 
+                SET price = price * $1, updated_at = CURRENT_TIMESTAMP
+                WHERE id = ANY($2)
+            `, [factor, productIds]);
+        } else {
+            // SQLite - Transaction
+            db.exec('BEGIN TRANSACTION');
+            try {
+                const stmt = db.prepare('UPDATE products SET price = price * ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?');
+                for (const id of productIds) {
+                    stmt.run(factor, id);
+                }
+                db.exec('COMMIT');
+            } catch (err) {
+                db.exec('ROLLBACK');
+                throw err;
+            }
+        }
+
+        res.json({ success: true, message: `${productIds.length} produtos atualizados com sucesso` });
+    } catch (err) {
+        console.error('Erro no desconto em massa:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // Deletar produto (admin)
 app.delete('/api/admin/products/:id', authenticateToken, (req, res) => {
     const { id } = req.params;
