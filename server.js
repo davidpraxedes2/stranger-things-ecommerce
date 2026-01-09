@@ -52,7 +52,7 @@ const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'stranger-things-secret-key-change-in-production';
 
 // Log de inicialização
-console.log('🚀 Servidor iniciando...');
+console.log('🚀 Servidor iniciando... [VERSION FIX 2.1 - POSTGRES COMPAT]');
 console.log('📦 Ambiente:', process.env.NODE_ENV || 'development');
 
 // Middleware

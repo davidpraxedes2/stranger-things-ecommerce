@@ -1,6 +1,6 @@
-// =====================================================
 // STRANGER THINGS E-COMMERCE - ADMIN DASHBOARD PRO
 // Production-Ready Admin Panel with Advanced Features
+// v2.1 (Fix Patch) - Debug Mode
 // =====================================================
 
 const API_BASE = window.location.origin;
@@ -4952,3 +4952,21 @@ window.deleteSelectedOrders = async function () {
 
 
 
+
+// Debug Helper globally available
+window.forceProductionSeed = async function() {
+    console.log('🚀 Forçando seed manual...');
+    try {
+        const res = await fetch(`${API_BASE}/api/admin/force-db-reset`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
+        });
+        const data = await res.json();
+        console.log('Seed Result:', data);
+        alert('Seed executado: ' + (data.success ? 'Sucesso' : 'Falha'));
+    } catch(e) {
+        console.error(e);
+        alert('Erro ao executar seed');
+    }
+}
+console.log('🛠️ DEBUG: Para rodar seed manual, digite forceProductionSeed() no console.');
