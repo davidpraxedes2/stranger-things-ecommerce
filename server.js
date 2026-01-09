@@ -450,6 +450,12 @@ async function initializeDatabase() {
             FOREIGN KEY (product_id) REFERENCES products(id)
         )`);
 
+        // Migrações de order_items
+        await runMigration("ALTER TABLE order_items ADD COLUMN selected_variant TEXT");
+        // Ensure variant columns are large enough for complex JSON variants
+        await runMigration("ALTER TABLE order_items ALTER COLUMN selected_variant TYPE TEXT");
+        await runMigration("ALTER TABLE cart_items ALTER COLUMN selected_variant TYPE TEXT");
+
         // Tabela de coleções
         await runQuery(`CREATE TABLE IF NOT EXISTS collections (
             id INTEGER PRIMARY KEY AUTOINCREMENT,

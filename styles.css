@@ -3909,3 +3909,51 @@ object {
 }
 
 /* Cache buster: Wed Jan  8 03:15:00 -03 2026 */
+
+/* Variants Styling */
+.variant-block-wrapper label {
+    font-family: var(--font-teko);
+    font-size: 1.2rem;
+    color: var(--text-gray);
+    letter-spacing: 0.5px;
+}
+
+.variant-block-wrapper select {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    padding: 12px;
+    border-radius: 4px;
+    background: var(--medium-gray);
+    color: var(--text-white);
+    border: 1px solid var(--light-gray);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.variant-block-wrapper select:focus {
+    border-color: var(--netflix-red);
+    box-shadow: 0 0 0 2px rgba(229, 9, 20, 0.2);
+}
+
+.variant-block-wrapper select:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.variant-block-wrapper select option {
+    background: var(--dark-gray);
+    color: var(--text-white);
+}
+
+#variantOptions {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.variant-block-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}

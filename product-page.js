@@ -319,31 +319,25 @@ function renderAdvancedVariants(blocks) {
     variantOptions.innerHTML = '';
 
     // Override flex logic for legacy buttons
-    variantOptions.style.display = 'flex';
-    variantOptions.style.flexDirection = 'column';
-    variantOptions.style.gap = '15px';
+    // Styles moved to CSS
+    // Styles moved to CSS
+    // Styles moved to CSS
 
     blocks.forEach(block => {
         const wrapper = document.createElement('div');
         wrapper.className = 'variant-block-wrapper';
-        wrapper.style.display = 'flex';
-        wrapper.style.flexDirection = 'column';
-        wrapper.style.gap = '5px';
+        // Styles moved to CSS
+        // Styles moved to CSS
+        // Styles moved to CSS
 
         const label = document.createElement('label');
         label.textContent = block.name;
-        label.style.fontWeight = 'bold';
-        label.style.fontSize = '0.9rem';
-        label.style.color = '#ccc';
+        // Styles moved to CSS
 
         const select = document.createElement('select');
-        select.style.padding = '10px';
-        select.style.borderRadius = '4px';
-        select.style.background = '#222';
-        select.style.color = '#fff';
-        select.style.border = '1px solid #444';
-        select.style.fontSize = '1rem';
         select.setAttribute('data-name', block.name);
+        // Styles moved to CSS
+        // Styles moved to CSS
 
         // Populate options based on type
         if (block.type === 'select') {
