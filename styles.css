@@ -3782,24 +3782,24 @@ object {
 }
 
 .carousel-track-container {
-    overflow-x: auto;
-    overflow-y: hidden;
+    overflow: visible;
     margin: 0;
     width: 100%;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-}
-
-.carousel-track-container::-webkit-scrollbar {
-    display: none;
 }
 
 .carousel-track {
     display: flex;
     gap: var(--spacing-md);
+    overflow-x: auto;
     scroll-behavior: smooth;
-    padding: 4px 20px;
-    /* Espaço para sombra do hover + padding lateral para não cortar */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 4px 0 4px 20px;
+    /* Margem esquerda para não colar + espaço para sombra */
+}
+
+.carousel-track::-webkit-scrollbar {
+    display: none;
 }
 
 /* Cards do carrossel: imagem QUADRADA como no grid */
