@@ -186,52 +186,43 @@ body.fade-out {
     height: auto;
     max-width: 90vw;
     opacity: 0.85;
-    filter: drop-shadow(0 0 20px rgba(229, 9, 20, 0.8))
-            drop-shadow(0 0 40px rgba(229, 9, 20, 0.6))
-            drop-shadow(0 0 60px rgba(229, 9, 20, 0.4));
+    filter: drop-shadow(0 0 20px rgba(229, 9, 20, 0.8)) drop-shadow(0 0 40px rgba(229, 9, 20, 0.6)) drop-shadow(0 0 60px rgba(229, 9, 20, 0.4));
     animation: logoPulse 2s ease-in-out infinite;
 }
 
 @keyframes logoPulse {
-    0%, 100% {
+
+    0%,
+    100% {
         opacity: 0.85;
-        filter: drop-shadow(0 0 20px rgba(229, 9, 20, 0.8))
-                drop-shadow(0 0 40px rgba(229, 9, 20, 0.6))
-                drop-shadow(0 0 60px rgba(229, 9, 20, 0.4));
+        filter: drop-shadow(0 0 20px rgba(229, 9, 20, 0.8)) drop-shadow(0 0 40px rgba(229, 9, 20, 0.6)) drop-shadow(0 0 60px rgba(229, 9, 20, 0.4));
         transform: scale(1);
     }
-    
+
     25% {
         opacity: 0.95;
-        filter: drop-shadow(0 0 25px rgba(229, 9, 20, 0.9))
-                drop-shadow(0 0 50px rgba(229, 9, 20, 0.7))
-                drop-shadow(0 0 75px rgba(229, 9, 20, 0.5));
+        filter: drop-shadow(0 0 25px rgba(229, 9, 20, 0.9)) drop-shadow(0 0 50px rgba(229, 9, 20, 0.7)) drop-shadow(0 0 75px rgba(229, 9, 20, 0.5));
         transform: scale(1.02);
     }
-    
+
     50% {
         opacity: 1;
-        filter: drop-shadow(0 0 30px rgba(229, 9, 20, 1))
-                drop-shadow(0 0 60px rgba(229, 9, 20, 0.8))
-                drop-shadow(0 0 90px rgba(229, 9, 20, 0.6))
-                drop-shadow(0 0 120px rgba(229, 9, 20, 0.4));
+        filter: drop-shadow(0 0 30px rgba(229, 9, 20, 1)) drop-shadow(0 0 60px rgba(229, 9, 20, 0.8)) drop-shadow(0 0 90px rgba(229, 9, 20, 0.6)) drop-shadow(0 0 120px rgba(229, 9, 20, 0.4));
         transform: scale(1.05);
     }
-    
+
     /* Efeito flicker sutil */
     65% {
         opacity: 0.92;
     }
-    
+
     66% {
         opacity: 1;
     }
-    
+
     75% {
         opacity: 0.95;
-        filter: drop-shadow(0 0 25px rgba(229, 9, 20, 0.9))
-                drop-shadow(0 0 50px rgba(229, 9, 20, 0.7))
-                drop-shadow(0 0 75px rgba(229, 9, 20, 0.5));
+        filter: drop-shadow(0 0 25px rgba(229, 9, 20, 0.9)) drop-shadow(0 0 50px rgba(229, 9, 20, 0.7)) drop-shadow(0 0 75px rgba(229, 9, 20, 0.5));
         transform: scale(1.02);
     }
 }
@@ -272,7 +263,7 @@ body.fade-out {
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: url('https://eurofarma.com.br/images/lp/valda-st/bg.png');
+    background-image: url('/images/fundo.jpg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -1270,7 +1261,7 @@ body:has(.announcement-bar:not(.hidden)) .hero-slider {
         height: 400px;
         margin-top: 0;
     }
-    
+
     body.has-announcement .hero-slider,
     body:has(.announcement-bar:not(.hidden)) .hero-slider {
         margin-top: 0;
@@ -3722,7 +3713,8 @@ object {
 
 .carousel-track-container {
     overflow: hidden;
-    margin: 0; /* Sem margem - usar 100% da largura */
+    margin: 0;
+    /* Sem margem - usar 100% da largura */
     width: 100%;
 }
 
@@ -3731,31 +3723,39 @@ object {
     gap: var(--spacing-md);
     overflow-x: auto;
     scroll-behavior: smooth;
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE/Edge */
-    padding: 4px; /* Espaço para sombra do hover */
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE/Edge */
+    padding: 4px;
+    /* Espaço para sombra do hover */
 }
 
 .carousel-track::-webkit-scrollbar {
-    display: none; /* Chrome/Safari */
+    display: none;
+    /* Chrome/Safari */
 }
 
 /* Cards do carrossel: imagem QUADRADA como no grid */
 .carousel-track .product-image {
-    padding-bottom: 100%; /* QUADRADO 1:1 - IGUAL AO GRID */
+    padding-bottom: 100%;
+    /* QUADRADO 1:1 - IGUAL AO GRID */
 }
 
 /* Imagens do carrossel: COMPLETAS sem cortar - IGUAL AO GRID */
 .carousel-track .product-image img {
-    object-fit: contain; /* Mostrar produto COMPLETO sem cortar */
+    object-fit: contain;
+    /* Mostrar produto COMPLETO sem cortar */
     object-position: center;
 }
 
 /* Cards do carrossel: mais largos mas proporcionais */
 .carousel-track .product-card {
     flex: 0 0 auto;
-    width: 70%; /* Largura ajustada para mobile */
-    max-width: 280px; /* Tamanho máximo adequado */
+    width: 70%;
+    /* Largura ajustada para mobile */
+    max-width: 280px;
+    /* Tamanho máximo adequado */
 }
 
 /* TEXTOS DO CARROSSEL: MESMO TAMANHO DO GRID - SEM CUSTOMIZAÇÃO */
@@ -3767,10 +3767,13 @@ object {
     transform: translateY(-50%);
     width: 45px;
     height: 45px;
-    background: rgba(0, 0, 0, 0.3); /* Bem transparente - quase invisível */
+    background: rgba(0, 0, 0, 0.3);
+    /* Bem transparente - quase invisível */
     backdrop-filter: blur(5px);
-    border: 1px solid rgba(255, 255, 255, 0.1); /* Borda quase invisível */
-    color: rgba(255, 255, 255, 0.5); /* Ícone bem suave */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    /* Borda quase invisível */
+    color: rgba(255, 255, 255, 0.5);
+    /* Ícone bem suave */
     cursor: pointer;
     border-radius: 50%;
     display: flex;
@@ -3779,7 +3782,8 @@ object {
     transition: all var(--transition-base);
     z-index: 100;
     -webkit-tap-highlight-color: transparent;
-    opacity: 0.4; /* Muito transparente por padrão */
+    opacity: 0.4;
+    /* Muito transparente por padrão */
 }
 
 .carousel-nav-btn svg {
@@ -3794,7 +3798,8 @@ object {
     color: var(--text-white);
     box-shadow: 0 0 15px rgba(229, 9, 20, 0.5);
     transform: translateY(-50%) scale(1.05);
-    opacity: 1; /* Só fica visível no hover */
+    opacity: 1;
+    /* Só fica visível no hover */
 }
 
 .carousel-nav-btn:active {
@@ -3802,31 +3807,36 @@ object {
 }
 
 .carousel-prev {
-    left: 4px; /* Bem próximo da borda */
+    left: 4px;
+    /* Bem próximo da borda */
 }
 
 .carousel-next {
-    right: 4px; /* Bem próximo da borda */
+    right: 4px;
+    /* Bem próximo da borda */
 }
 
 /* Desktop: Mais cards visíveis no carrossel - mantendo proporção quadrada */
 @media (min-width: 768px) {
     .carousel-track .product-card {
-        width: 32%; /* ~3 cards visíveis no tablet */
+        width: 32%;
+        /* ~3 cards visíveis no tablet */
         max-width: 320px;
     }
 }
 
 @media (min-width: 1024px) {
     .carousel-track .product-card {
-        width: 24%; /* ~4 cards visíveis no desktop */
+        width: 24%;
+        /* ~4 cards visíveis no desktop */
         max-width: 340px;
     }
 }
 
 @media (min-width: 1400px) {
     .carousel-track .product-card {
-        width: 19%; /* ~5 cards visíveis em telas muito grandes */
+        width: 19%;
+        /* ~5 cards visíveis em telas muito grandes */
         max-width: 360px;
     }
 }
