@@ -949,7 +949,7 @@ if (!document.getElementById('leaflet-custom-styles')) {
 }
 
 async function renderActiveSessions() {
-    const sessionsContainer = document.getElementById('activeSessionsList');
+    const sessionsContainer = document.getElementById('activeSessions');
     if (!sessionsContainer) return;
 
     try {
