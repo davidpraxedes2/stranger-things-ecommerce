@@ -1286,24 +1286,74 @@ app.post('/api/orders', (req, res) => {
 
     try {
         // Inserir pedido
-        const stmt = db.prepare(`
+        const query = `
             INSERT INTO orders (customer_name, customer_email, customer_phone, customer_cpf, customer_address, total, status, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
-        `);
+            VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        `; // Changed datetime('now') to CURRENT_TIMESTAMP for compatibility
 
-        const result = stmt.run(customer_name, customer_email, customer_phone, customer_cpf, customer_address, total, status || 'pending');
-        const orderId = result.lastInsertRowid;
+        let orderId;
+
+        if (db.isPostgres) {
+            // Postgres - Async await
+            // db.run returns { lastID, changes }
+            const result = await db.run(query, [
+                customer_name,
+                customer_email,
+                customer_phone,
+                customer_cpf,
+                customer_address,
+                total,
+                status || 'pending'
+            ]);
+            orderId = result.lastID;
+        } else {
+            // SQLite - Sync (db.run returns result directly if no callback)
+            // But db-helper wraps it. For consistency, let's use the callback-less promise version if supported, 
+            // OR use the specific logic. 
+            // db-helper db.run returns a Promise for Postgres but sync for SQLite?
+            // Checking db-helper wrapper again:
+            // runSQLite always returns (sync) if no callback? 
+            // No, runSQLite in db-helper uses callbacks. 
+            // db.run tries to handle both.
+
+            // Safer way: use db.run as Promise (db-helper supports it for Postgres, but for SQLite it might not)
+            // Let's stick to simple db.prepare for SQLite since it works well there.
+
+            const stmt = db.prepare(`
+                INSERT INTO orders (customer_name, customer_email, customer_phone, customer_cpf, customer_address, total, status, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
+            `);
+            const result = stmt.run(customer_name, customer_email, customer_phone, customer_cpf, customer_address, total, status || 'pending');
+            orderId = result.lastInsertRowid;
+        }
+
+        if (!orderId) {
+            throw new Error('Falha ao obter ID do pedido');
+        }
 
         // Inserir itens do pedido
-        const itemStmt = db.prepare('INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)');
+        const itemQuery = 'INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)';
 
-        items.forEach(item => {
-            itemStmt.run(orderId, item.id, item.quantity, item.price);
-        });
+        // For items, we can use a loop. For Postgres we need to await.
+        if (db.isPostgres) {
+            for (const item of items) {
+                await db.run(itemQuery, [orderId, item.id, item.quantity, item.price]);
+            }
+        } else {
+            const itemStmt = db.prepare(itemQuery);
+            const transaction = db.transaction((orderItems) => {
+                for (const item of orderItems) itemStmt.run(orderId, item.id, item.quantity, item.price);
+            });
+            transaction(items);
+        }
 
         // Limpar carrinho da sessão se fornecido
         if (session_id) {
-            db.prepare('DELETE FROM cart_items WHERE session_id = ?').run(session_id);
+            if (db.isPostgres) {
+                await db.run('DELETE FROM cart_items WHERE session_id = ?', [session_id]);
+            } else {
+                db.prepare('DELETE FROM cart_items WHERE session_id = ?').run(session_id);
+            }
         }
 
         res.json({
