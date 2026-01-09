@@ -68,8 +68,13 @@ const db = {
 
     // Run query (INSERT, UPDATE, DELETE)
     run: function (query, params = [], callback) {
+        if (typeof params === 'function') {
+            callback = params;
+            params = [];
+        }
+
         if (USE_POSTGRES) {
-            if (!callback && typeof params !== 'function') {
+            if (!callback) {
                 return new Promise((resolve, reject) => {
                     runPostgres(query, params, (err, res) => {
                         if (err) reject(err);
@@ -85,8 +90,13 @@ const db = {
 
     // Get single row
     get: function (query, params = [], callback) {
+        if (typeof params === 'function') {
+            callback = params;
+            params = [];
+        }
+
         if (USE_POSTGRES) {
-            if (!callback && typeof params !== 'function') {
+            if (!callback) {
                 return new Promise((resolve, reject) => {
                     getPostgres(query, params, (err, row) => {
                         if (err) reject(err);
@@ -102,8 +112,13 @@ const db = {
 
     // Get all rows
     all: function (query, params = [], callback) {
+        if (typeof params === 'function') {
+            callback = params;
+            params = [];
+        }
+
         if (USE_POSTGRES) {
-            if (!callback && typeof params !== 'function') {
+            if (!callback) {
                 return new Promise((resolve, reject) => {
                     allPostgres(query, params, (err, rows) => {
                         if (err) reject(err);
