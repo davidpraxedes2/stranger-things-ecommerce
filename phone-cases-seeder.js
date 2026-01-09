@@ -52,16 +52,18 @@ const phoneVariants = {
 };
 
 const designs = [
-    { name: "Capinha Stranger Things - Hellfire Club", image: "https://http2.mlstatic.com/D_NQ_NP_832626-MLB51347065998_092022-O.webp" },
-    { name: "Capinha Stranger Things - Friends Don't Lie", image: "https://http2.mlstatic.com/D_NQ_NP_688648-MLB50066530635_052022-O.webp" },
-    { name: "Capinha Stranger Things - Alphabets Lights", image: "https://http2.mlstatic.com/D_NQ_NP_956740-MLB43912666160_102020-O.webp" },
-    { name: "Capinha Stranger Things - Eleven Powers", image: "https://down-br.img.susercontent.com/file/br-11134207-7qukw-lk7v6u1k7x8e35" },
-    { name: "Capinha Stranger Things - Hawkins High School", image: "https://down-br.img.susercontent.com/file/br-11134207-7qukw-lk7v6u1k9buk96" },
-    { name: "Capinha Stranger Things - Demogorgon Pattern", image: "https://img.elo7.com.br/product/original/3E66683/capinha-celular-stranger-things-samsung-galaxy-j7-prime-c1-capa-celular-stranger-things.jpg" },
-    { name: "Capinha Stranger Things - Surfer Boy Pizza", image: "https://img.elo7.com.br/product/main/42D8E3B/capa-capinha-celular-stranger-things-personalizada-md01-capa-de-celular.jpg" },
-    { name: "Capinha Stranger Things - Max & Eleven", image: "https://cf.shopee.com.br/file/d282438787f0b8d5a7d7f2e46d0a7a4a" },
-    { name: "Capinha Stranger Things - Bike Ride", image: "https://cf.shopee.com.br/file/br-11134207-7r98o-lm0w6j7z8t5c09" },
-    { name: "Capinha Stranger Things - Logo Classic", image: "https://cf.shopee.com.br/file/br-11134207-7r98c-ll2x0v2y7u0a7f" }
+    { name: "Capinha Stranger Things - Classic Red Logo", image: "https://ik.imagekit.io/gocase/govinci/nfx-st-03/infiniteair-iphone13/mockup?stamp=prisma-render%2Fprod-v2%2Fpreviews%2Fnfx-st-03%2F9769%2Fstandard-iphone11%2F174160922597570820576144384044182.png&expires=yes" },
+    { name: "Capinha Stranger Things - Friends Don't Lie", image: "https://ik.imagekit.io/gocase/govinci/nfx-st-14/infiniteair-iphone13/mockup?stamp=prisma-render%2Fprod-v2%2Fpreviews%2Fnfx-st-14%2F12356%2Fstandard-iphone11%2F17416121316516457012306804105089697.png&expires=yes" },
+    { name: "Capinha Stranger Things - Hellfire Club Icon", image: "https://ik.imagekit.io/gocase/govinci/nfx-st-42/infiniteair-iphone13/mockup?stamp=prisma-render%2Fprod-v2%2Fpreviews%2Fnfx-st-37%2F14875%2Fstandard-iphone11%2F17622573938896887049065457470278095.png&expires=yes" },
+    { name: "Capinha Stranger Things - Run Lights", image: "https://ik.imagekit.io/gocase/govinci/nfx-st-01/infiniteair-iphone13/mockup?stamp=prisma-render%2Fprod-v2%2Fpreviews%2Fnfx-st-01%2F9768%2Fstandard-iphone11%2F174160911984804530010510865344595222.png&expires=yes" },
+    { name: "Capinha Stranger Things - Monster Hunters", image: "https://ik.imagekit.io/gocase/govinci/nfx-st-86/infiniteair-iphone13/mockup?stamp=prisma-render%2Fprod-v2%2Fpreviews%2Fst5-monster-hunters%2F129947%2Fstandard-iphone11%2F17635696736943247007101686725747569.png&expires=yes" },
+    { name: "Capinha Stranger Things - Scoops Ahoy Steve", image: "https://ik.imagekit.io/gocase/govinci/nfx-st-79/infiniteair-iphone13/mockup?stamp=prisma-render%2Fprod-v2%2Fpreviews%2Fst5-steve-scoops-ahoy%2F126762%2Fstandard-iphone11%2F1761306590814816502039174389094921.png&expires=yes" },
+    { name: "Capinha Stranger Things - 1987 Tape", image: "https://ik.imagekit.io/gocase/govinci/nfx-st-55/infiniteair-iphone13/mockup?stamp=prisma-render%2Fprod-v2%2Fpreviews%2Fst5-1987%2F121232%2Fstandard-iphone11%2F17600404182239742021116496070114432.png&expires=yes" },
+    { name: "Capinha Stranger Things - Pixel Art Game", image: "https://ik.imagekit.io/gocase/govinci/nfx-st-50/infiniteair-iphone13/mockup?stamp=prisma-render%2Fprod-v2%2Fpreviews%2Fst5-pixel-art-game%2F125061%2Fantiimpactoslimair-iphone14%2F1760104109258312707235325077454576.png&expires=yes" },
+    { name: "Capinha Stranger Things - The Upside Down Red", image: "https://ik.imagekit.io/gocase/govinci/nfx-st-84/infiniteair-iphone13/mockup?stamp=prisma-render%2Fprod-v2%2Fpreviews%2Fst5-inverso-case%2F129983%2Fstandard-iphone11%2F176357543960955380284653450056478.png&expires=yes" },
+    { name: "Capinha Stranger Things - Demogorgon Anatomy", image: "https://ik.imagekit.io/gocase/govinci/nfx-st-54/infiniteair-iphone13/mockup?stamp=prisma-render%2Fprod-v2%2Fpreviews%2Fst5-anatomia-demogorgon%2F121317%2Fantiimpactoslimair-iphone14%2F1761937773329347408476895006336835.png&expires=yes" },
+    { name: "Capinha Stranger Things - Paper Logo Collage", image: "https://ik.imagekit.io/gocase/govinci/nfx-st-47/infiniteair-iphone13/mockup?stamp=prisma-render%2Fprod-v2%2Fpreviews%2Fst5-paper-logo%2F121195%2Fstandard-iphone11%2F1757974630696925406827942788730481.png&expires=yes" },
+    { name: "Capinha Stranger Things - Eleven Profile", image: "https://ik.imagekit.io/gocase/govinci/nfx-st-45/infiniteair-iphone13/mockup?stamp=prisma-render%2Fprod-v2%2Fpreviews%2Fnfx-st-36%2F14874%2Fstandard-iphone11%2F1743512461171500402011916322481072.png&expires=yes" }
 ];
 
 async function seedStrangerCases(db) {
