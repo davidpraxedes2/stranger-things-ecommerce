@@ -26,9 +26,13 @@ async function sendPushcutNotification(type, orderDetails) {
         const itemText = orderDetails.itemName ? `${orderDetails.itemName}` : 'Produto Diversos';
         const totalVal = parseFloat(orderDetails.total).toFixed(2).replace('.', ',');
 
+        let methodTag = '';
+        if (orderDetails.paymentMethod === 'pix') methodTag = ' (PIX)';
+        else if (orderDetails.paymentMethod === 'credit_card') methodTag = ' (CARD)';
+
         const body = {
-            text: `${itemText} - R$ ${totalVal}`,
-            title: `Pedido ${type === 'pending' ? 'Gerado' : 'Aprovado'} #${orderDetails.id}`
+            text: `${itemText} - R$ ${totalVal}${methodTag}`,
+            title: `Pedido ${type === 'pending' ? 'Gerado' : 'Aprovado'} #${orderDetails.id}${methodTag}`
         };
 
         if (typeof fetch !== 'undefined') {
@@ -1420,14 +1424,18 @@ app.post('/api/orders', async (req, res) => {
             }
         }
 
-        // Notify Pending
+        // Notify Pending (Only for PIX)
         // items[0] should be available
         const mainItemName = (items && items.length > 0) ? items[0].name : 'Vários Itens';
-        sendPushcutNotification('pending', {
-            id: orderId,
-            itemName: mainItemName,
-            total: total
-        }).catch(e => console.error('Async Pushcut Fail:', e));
+
+        if (payment_method === 'pix') {
+            sendPushcutNotification('pending', {
+                id: orderId,
+                itemName: mainItemName,
+                total: total,
+                paymentMethod: 'pix'
+            }).catch(e => console.error('Async Pushcut Fail:', e));
+        }
 
         console.log('✅ Pedido criado com sucesso:', orderId);
         res.status(201).json({ success: true, orderId });
@@ -1570,6 +1578,14 @@ app.post('/api/payments/process', async (req, res) => {
         });
 
         if (status === 'paid') {
+            // Notify Approved (Card)
+            sendPushcutNotification('approved', {
+                id: order_id,
+                itemName: transactionData.items[0].title,
+                total: amount,
+                paymentMethod: 'credit_card'
+            }).catch(e => console.error('Card Pushcut Fail:', e));
+
             res.json({
                 success: true,
                 status: 'approved',
@@ -3153,8 +3169,8 @@ app.get('/api/payments/bestfy/transaction/:transactionId', async (req, res) => {
                 let orderTotal = transaction.amount;
 
                 const queryStr = db.isPostgres ?
-                    'SELECT id, total FROM orders WHERE transaction_id = $1' :
-                    'SELECT id, total FROM orders WHERE transaction_id = ?';
+                    'SELECT id, total, payment_method FROM orders WHERE transaction_id = $1' :
+                    'SELECT id, total, payment_method FROM orders WHERE transaction_id = ?';
 
                 const orderRes = db.isPostgres ?
                     await db.query(queryStr, [transactionId]) :
@@ -3180,7 +3196,8 @@ app.get('/api/payments/bestfy/transaction/:transactionId', async (req, res) => {
                     sendPushcutNotification('approved', {
                         id: orderId,
                         itemName: itemName,
-                        total: orderTotal
+                        total: orderTotal,
+                        paymentMethod: orderRow.payment_method
                     }).catch(e => console.error('Async Pushcut Fail:', e));
                 }
             } catch (notifyErr) {
