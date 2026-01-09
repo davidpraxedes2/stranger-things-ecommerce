@@ -4072,7 +4072,7 @@ async function applyBulkDiscount() {
     showLoading('Aplicando descontos...');
 
     try {
-        const response = await fetch(`${API_URL}/admin/products/bulk-discount`, {
+        const response = await fetch(`${API_URL}/products/bulk-discount`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
