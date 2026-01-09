@@ -1265,7 +1265,7 @@ async function renderProducts(container) {
             </select>
         </div>
 
-        <!--Products Table-- >
+        <!--Products Table-->
         <div class="table-container">
             <table class="admin-table" id="productsTable">
                 <thead>
