@@ -4377,6 +4377,8 @@ function editGateway(id) {
         .then(gateway => {
             hideLoading();
 
+            const settings = gateway.settings_json ? JSON.parse(gateway.settings_json) : {};
+
             const modal = document.getElementById('modalContainer');
             modal.innerHTML = `
             <div class="modal-overlay" onclick="closeModal()"></div>
@@ -4406,8 +4408,22 @@ function editGateway(id) {
                                 Chave secreta fornecida pela Bestfy (nunca compartilhe)
                             </small>
                         </div>
+
+                         <div class="form-group" style="background: var(--bg-darker); padding: 12px; border-radius: 8px; margin-top: 16px;">
+                            <label style="margin-bottom: 8px; display: block;">Métodos Aceitos</label>
+                            
+                            <label class="checkbox-label" style="margin-bottom: 8px;">
+                                <input type="checkbox" name="enable_pix" ${settings.enable_pix !== false ? 'checked' : ''}>
+                                <span>Processar PIX</span>
+                            </label>
+
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="enable_credit_card" ${settings.enable_credit_card !== false ? 'checked' : ''}>
+                                <span>Processar Cartão de Crédito</span>
+                            </label>
+                        </div>
                         
-                        <div class="form-group">
+                        <div class="form-group" style="margin-top: 16px;">
                             <label class="checkbox-label">
                                 <input type="checkbox" name="is_active" ${gateway.is_active ? 'checked' : ''}>
                                 <span>Ativar gateway (permitir pagamentos)</span>
@@ -4435,11 +4451,19 @@ async function saveGateway(event, id) {
     showLoading('Salvando...');
 
     const formData = new FormData(event.target);
+
+    // settings_json logic
+    const settings = {
+        enable_pix: formData.get('enable_pix') ? true : false,
+        enable_credit_card: formData.get('enable_credit_card') ? true : false
+    };
+
     const data = {
         name: 'Bestfy Payments', // Mantém o nome
         public_key: formData.get('public_key'),
         secret_key: formData.get('secret_key'),
-        is_active: formData.get('is_active') ? 1 : 0
+        is_active: formData.get('is_active') ? 1 : 0,
+        settings_json: JSON.stringify(settings)
     };
 
     try {

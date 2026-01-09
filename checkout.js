@@ -57,8 +57,29 @@ function hideSpinner() {
     }
 }
 
+let gatewaySettings = { enable_pix: true, enable_credit_card: true }; // Default
+
+async function loadGatewaySettings() {
+    try {
+        const response = await fetch(`${API_URL}/gateway/active`);
+        if (response.ok) {
+            const data = await response.json();
+            if (data.settings) {
+                // Se active for false, assumimos que tudo está desabilitado ou lidamos com erro
+                gatewaySettings = data.settings;
+                console.log('✅ Configurações de gateway carregadas:', gatewaySettings);
+            }
+        }
+    } catch (error) {
+        console.error('Erro ao carregar configurações de gateway:', error);
+    }
+}
+
 async function loadCart() {
     showSpinner();
+
+    // Carregar configurações de pagamento APÓS carregar o carrinho (ou paralelo)
+    await loadGatewaySettings();
 
     if (!sessionId) {
         hideSpinner();
@@ -72,7 +93,7 @@ async function loadCart() {
         });
 
         if (response.ok) {
-            const data = await response.json();
+            const data = await response.json(); // Fix missing await on response.json() if it was missing before, but assuming original was correct.
             cart = data.items || [];
             renderCheckout();
             hideSpinner();
@@ -265,8 +286,9 @@ function renderCheckout() {
                     </svg>
                     Pagamento
                 </h2>
-                <div class="payment-methods">
-                    <div class="payment-method selected" data-method="pix">
+                <div class="payment-methods" id="paymentMethodsContainer">
+                    ${gatewaySettings.enable_pix ? `
+                    <div class="payment-method ${!gatewaySettings.enable_credit_card || gatewaySettings.enable_pix ? 'selected' : ''}" data-method="pix">
                         <div class="payment-icon">
                             <img src="https://files.passeidireto.com/2889edc1-1a70-456a-a32c-e3f050102347/2889edc1-1a70-456a-a32c-e3f050102347.png" alt="PIX">
                         </div>
@@ -274,8 +296,10 @@ function renderCheckout() {
                         <div class="payment-info">
                             <span style="color: #46d369; font-weight: 600;">💰 5% de desconto</span>
                         </div>
-                    </div>
-                    <div class="payment-method" data-method="card">
+                    </div>` : ''}
+                    
+                    ${gatewaySettings.enable_credit_card ? `
+                    <div class="payment-method ${!gatewaySettings.enable_pix ? 'selected' : ''}" data-method="card">
                         <div class="payment-icon">
                             <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" style="width: 64px; height: 64px;">
                                 <rect x="4" y="12" width="40" height="24" rx="3" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.6)" stroke-width="2"/>
@@ -285,12 +309,16 @@ function renderCheckout() {
                         </div>
                         <div class="payment-label">Cartão</div>
                         <div class="payment-info">Parcelamento disponível</div>
-                    </div>
+                    </div>` : ''}
+
+                    ${!gatewaySettings.enable_pix && !gatewaySettings.enable_credit_card ? `
+                    <div style="color: #ef4444; padding: 16px; text-align: center;">Nenhum método de pagamento disponível no momento.</div>
+                    ` : ''}
                 </div>
 
                 <div class="payment-details" id="paymentDetails">
                     <!-- PIX Details - Simples (sem gerar antes) -->
-                    <div class="payment-detail-section active" data-payment="pix">
+                    <div class="payment-detail-section ${!gatewaySettings.enable_credit_card || gatewaySettings.enable_pix ? 'active' : ''}" data-payment="pix">
                         <div class="pix-info-box">
                             <div class="pix-icon-large">
                                 <img src="https://files.passeidireto.com/2889edc1-1a70-456a-a32c-e3f050102347/2889edc1-1a70-456a-a32c-e3f050102347.png" alt="PIX" style="width: 64px; height: 64px;">
@@ -326,7 +354,7 @@ function renderCheckout() {
                     </div>
 
                     <!-- Card Details -->
-                    <div class="payment-detail-section" data-payment="card">
+                    <div class="payment-detail-section ${!gatewaySettings.enable_pix && gatewaySettings.enable_credit_card ? 'active' : ''}" data-payment="card">
                         <div class="form-group">
                             <label class="form-label">Número do cartão</label>
                             <div class="card-input-wrapper">

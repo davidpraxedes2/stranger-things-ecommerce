@@ -2454,7 +2454,7 @@ app.get('/api/gateway/active', async (req, res) => {
     try {
         if (db.isPostgres) {
             const result = await db.query(
-                'SELECT gateway_type, public_key FROM payment_gateways WHERE is_active = 1 LIMIT 1',
+                'SELECT gateway_type, public_key, settings_json FROM payment_gateways WHERE is_active = 1 LIMIT 1',
                 []
             );
             const gateway = result.rows?.[0];
@@ -2463,24 +2463,44 @@ app.get('/api/gateway/active', async (req, res) => {
                 return res.json({ active: false });
             }
 
+            let settings = {};
+            try {
+                settings = typeof gateway.settings_json === 'string'
+                    ? JSON.parse(gateway.settings_json)
+                    : gateway.settings_json || {};
+            } catch (e) {
+                settings = {};
+            }
+
             res.json({
                 active: true,
                 type: gateway.gateway_type,
-                publicKey: gateway.public_key
+                publicKey: gateway.public_key,
+                settings: settings
             });
         } else {
             const gateway = db.prepare(
-                'SELECT gateway_type, public_key FROM payment_gateways WHERE is_active = 1 LIMIT 1'
+                'SELECT gateway_type, public_key, settings_json FROM payment_gateways WHERE is_active = 1 LIMIT 1'
             ).get();
 
             if (!gateway) {
                 return res.json({ active: false });
             }
 
+            let settings = {};
+            try {
+                settings = typeof gateway.settings_json === 'string'
+                    ? JSON.parse(gateway.settings_json)
+                    : gateway.settings_json || {};
+            } catch (e) {
+                settings = {};
+            }
+
             res.json({
                 active: true,
                 type: gateway.gateway_type,
-                publicKey: gateway.public_key
+                publicKey: gateway.public_key,
+                settings: settings
             });
         }
     } catch (error) {
