@@ -1129,37 +1129,31 @@ app.put('/api/admin/collections/:id', authenticateToken, (req, res) => {
     try {
         // Se passar apenas default_view (toggle de visualização)
         if (name === undefined && slug === undefined && description === undefined && default_view !== undefined) {
-            const stmt = db.prepare('UPDATE collections SET default_view = ? WHERE id = ?');
-            const result = stmt.run(default_view, id);
-
-            if (result.changes === 0) {
-                return res.status(404).json({ error: 'Coleção não encontrada' });
-            }
-
-            return res.json({ success: true, message: 'Visualização padrão atualizada' });
+            return db.run('UPDATE collections SET default_view = ? WHERE id = ?', [default_view, id], (err, result) => {
+                if (err) return res.status(500).json({ error: err.message });
+                if (result && result.changes === 0) return res.status(404).json({ error: 'Coleção não encontrada' });
+                res.json({ success: true, message: 'Visualização padrão atualizada' });
+            });
         }
 
         // Se passar apenas is_active (toggle de status)
         if (name === undefined && is_active !== undefined && default_view === undefined) {
-            const stmt = db.prepare('UPDATE collections SET is_active = ? WHERE id = ?');
-            const result = stmt.run(is_active ? 1 : 0, id);
-
-            if (result.changes === 0) {
-                return res.status(404).json({ error: 'Coleção não encontrada' });
-            }
-
-            return res.json({ success: true, message: 'Status atualizado' });
+            return db.run('UPDATE collections SET is_active = ? WHERE id = ?', [is_active ? 1 : 0, id], (err, result) => {
+                if (err) return res.status(500).json({ error: err.message });
+                if (result && result.changes === 0) return res.status(404).json({ error: 'Coleção não encontrada' });
+                res.json({ success: true, message: 'Status atualizado' });
+            });
         }
 
         // Atualização completa
-        const stmt = db.prepare('UPDATE collections SET name = ?, slug = ?, description = ?, is_active = ?, default_view = ? WHERE id = ?');
-        const result = stmt.run(name, slug, description, is_active ? 1 : 0, default_view || 'grid', id);
-
-        if (result.changes === 0) {
-            return res.status(404).json({ error: 'Coleção não encontrada' });
-        }
-
-        res.json({ success: true, message: 'Coleção atualizada' });
+        db.run('UPDATE collections SET name = ?, slug = ?, description = ?, is_active = ?, default_view = ? WHERE id = ?',
+            [name, slug, description, is_active ? 1 : 0, default_view || 'grid', id],
+            (err, result) => {
+                if (err) return res.status(500).json({ error: err.message });
+                if (result && result.changes === 0) return res.status(404).json({ error: 'Coleção não encontrada' });
+                res.json({ success: true, message: 'Coleção atualizada' });
+            }
+        );
     } catch (error) {
         console.error('Erro ao atualizar coleção:', error);
         res.status(500).json({ error: error.message });
