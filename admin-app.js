@@ -781,11 +781,11 @@ function generateTopProductsRows() {
 }
 
 // Map Instance
-let liveMap = null;
-let mapMarkers = [];
+// let liveMap = null; // Removed Leaflet
+// let mapMarkers = []; // Removed Leaflet
 
 async function initializeLiveView() {
-    initLeafletMap();
+    renderBrazilMap();
     await updateLiveViewData();
 
     // Polling every 5 seconds
@@ -793,40 +793,122 @@ async function initializeLiveView() {
     window.liveInterval = setInterval(updateLiveViewData, 5000);
 }
 
-function initLeafletMap() {
+// Reverted to SVG Map Logic
+async function renderBrazilMap() {
     const mapContainer = document.getElementById('brazilMap');
-    if (!mapContainer || liveMap) return; // Already init
+    if (!mapContainer) return;
 
-    // Clear loading text
-    mapContainer.innerHTML = '';
+    // Only load SVG if not already loaded
+    if (mapContainer.querySelector('svg')) return updateMapMarkersSVG();
 
-    // Init Map centered on Brazil with constraints
-    liveMap = L.map('brazilMap', {
-        center: [-14.2350, -51.9253],
-        zoom: 4, // Zoom inicial
-        minZoom: 4, // Não deixa afastar muito
-        zoomControl: false,
-        attributionControl: false,
-        maxBounds: [ // Restringe a visão ao Brasil (aproximadamente)
-            [5.2, -74.0], // Noroeste
-            [-34.0, -34.0] // Sudeste
-        ],
-        maxBoundsViscosity: 1.0 // Força o mapa a ficar nos limites
-    });
+    mapContainer.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted);">Carregando mapa...</div>';
 
-    // Dark Tile Layer (CartoDB Dark Matter)
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap &copy; CARTO',
-        subdomains: 'abcd',
-        maxZoom: 19
-    }).addTo(liveMap);
+    try {
+        const svgResponse = await fetch('/brazil.svg');
+        const svgText = await svgResponse.text();
+        const parser = new DOMParser();
+        const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+        const svgElement = svgDoc.querySelector('svg');
+
+        if (svgElement) {
+            svgElement.setAttribute('viewBox', '0 0 612 639');
+            svgElement.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+            svgElement.style.width = '100%';
+            svgElement.style.height = '100%';
+            svgElement.style.maxHeight = '400px';
+
+            const paths = svgElement.querySelectorAll('path');
+            paths.forEach(path => {
+                path.setAttribute('fill', 'rgba(229, 9, 20, 0.15)');
+                path.setAttribute('stroke', 'rgba(229, 9, 20, 0.5)');
+                path.setAttribute('stroke-width', '1');
+                path.style.transition = 'all 0.3s';
+            });
+
+            mapContainer.innerHTML = '';
+            const wrapper = document.createElement('div');
+            wrapper.style.cssText = 'width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 20px; position: relative;';
+            wrapper.appendChild(svgElement);
+            mapContainer.appendChild(wrapper);
+
+            // Initial markers update
+            updateMapMarkersSVG();
+        }
+    } catch (error) {
+        console.error('Erro ao carregar mapa:', error);
+        mapContainer.innerHTML = 'Erro ao carregar mapa';
+    }
+}
+
+async function updateMapMarkersSVG() {
+    const mapContainer = document.getElementById('brazilMap');
+    const svgElement = mapContainer?.querySelector('svg');
+    if (!svgElement) return;
+
+    try {
+        const res = await fetch(`${API_URL}/analytics/visitor-locations`, {
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
+        });
+        const locations = await res.json();
+
+        // Clear existing markers (circles and texts inside g elements that are not paths)
+        const existingMarkers = svgElement.querySelectorAll('.map-marker-group');
+        existingMarkers.forEach(el => el.remove());
+
+        // City Coordinates Mapping (approximate X,Y on the SVG 612x639)
+        // We will match mostly by City Name since we don't have a geo-projection library loaded
+        const cityMap = {
+            'São Paulo': { x: 420, y: 480 },
+            'Rio de Janeiro': { x: 460, y: 500 },
+            'Brasília': { x: 380, y: 380 },
+            'Belo Horizonte': { x: 450, y: 440 },
+            'Curitiba': { x: 390, y: 530 },
+            'Porto Alegre': { x: 350, y: 600 },
+            'Salvador': { x: 500, y: 320 },
+            'Recife': { x: 540, y: 230 },
+            'Fortaleza': { x: 530, y: 190 },
+            'Manaus': { x: 200, y: 190 },
+            'Goiânia': { x: 400, y: 410 },
+            'Florianópolis': { x: 400, y: 560 },
+            'Belém': { x: 350, y: 120 }
+        };
+
+        locations.forEach((loc, index) => {
+            // Try to find coords
+            let coords = cityMap[loc.city];
+
+            // If we have real lat/lon, we could project it, but for now fallback to city map or default
+            // Just displaying known cities clearly is better than random dots
+            if (!coords) return;
+
+            const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            group.classList.add('map-marker-group');
+
+            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle.setAttribute('cx', coords.x);
+            circle.setAttribute('cy', coords.y);
+            circle.setAttribute('r', '6');
+            circle.setAttribute('fill', '#10B981');
+            circle.setAttribute('opacity', '0.8');
+            // Adding a pulsing class or style
+            circle.innerHTML = `<animate attributeName="r" values="6;10;6" dur="2s" repeatCount="indefinite" /> <animate attributeName="opacity" values="0.8;0.4;0.8" dur="2s" repeatCount="indefinite" />`;
+
+            const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+            title.textContent = `${loc.city}: ${loc.count} online`;
+
+            group.appendChild(title);
+            group.appendChild(circle);
+            svgElement.appendChild(group);
+        });
+
+    } catch (e) { console.error(e); }
 }
 
 async function updateLiveViewData() {
     await Promise.all([
         renderActiveSessions(),
-        updateMapMarkers(),
-        updateOnlineCount() // Helper to update the big number
+        updateMapMarkersSVG(), // SVG Update
+        updateOnlineCount()
     ]);
 }
 
@@ -837,46 +919,19 @@ async function updateOnlineCount() {
         });
         const data = await res.json();
         const el = document.getElementById('onlineCount');
-        if (el) el.textContent = data.count;
+        if (el) {
+            // Animate only if changed
+            if (el.textContent !== String(data.count)) {
+                el.textContent = data.count;
+                el.style.transform = 'scale(1.2)';
+                setTimeout(() => el.style.transform = 'scale(1)', 200);
+            }
+        }
     } catch (e) { }
 }
 
 async function updateMapMarkers() {
-    if (!liveMap) return;
-
-    try {
-        const res = await fetch(`${API_URL}/analytics/visitor-locations`, {
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
-        });
-        const locations = await res.json();
-
-        // Clear existing markers
-        mapMarkers.forEach(m => liveMap.removeLayer(m));
-        mapMarkers = [];
-
-        // Add new markers
-        locations.forEach(loc => {
-            if (loc.lat && loc.lon) {
-                const pulseIcon = L.divIcon({
-                    className: 'custom-div-icon',
-                    html: `<div style="
-                        width: 12px;
-                        height: 12px;
-                        background-color: #10B981;
-                        border-radius: 50%;
-                        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-                        animation: leaflet-pulse 2s infinite;
-                    "></div>`,
-                    iconSize: [20, 20],
-                    iconAnchor: [10, 10]
-                });
-
-                const marker = L.marker([loc.lat, loc.lon], { icon: pulseIcon }).addTo(liveMap);
-                marker.bindPopup(`<b>${loc.city}</b><br>${loc.count} visitantes`);
-                mapMarkers.push(marker);
-            }
-        });
-    } catch (e) { console.error('Map Update Error', e); }
+    // Legacy / Leaflet placeholder - doing nothing now
 }
 
 // Add CSS for pulse animation if not exists
@@ -894,94 +949,106 @@ if (!document.getElementById('leaflet-custom-styles')) {
 }
 
 async function renderActiveSessions() {
-    const sessionsContainer = document.getElementById('activeSessions');
+    const sessionsContainer = document.getElementById('activeSessionsList');
     if (!sessionsContainer) return;
 
-    sessionsContainer.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-secondary);">Sem sessões ativas no momento</div>';
-
     try {
-        const response = await fetch(`${API_URL}/sessions/active`, {
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` },
-            signal: AbortSignal.timeout(3000)
+        const response = await fetch(`${API_URL}/admin/sessions/active`, {
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
         });
 
         if (response.ok) {
             const sessions = await response.json();
 
             if (!sessions || sessions.length === 0) {
+                sessionsContainer.innerHTML = '<div class="text-muted text-center p-4">Nenhuma sessão ativa no momento</div>';
                 return;
             }
 
             const uniqueCities = new Set(sessions.map(s => s.city)).size;
             const locationsCountEl = document.getElementById('locationsCount');
-            if (locationsCountEl) {
-                locationsCountEl.textContent = uniqueCities;
-            }
+            if (locationsCountEl) locationsCountEl.textContent = uniqueCities;
 
-            // RENDERIZAÇÃO INTELIGENTE (SEM PISCAR)
-            // 1. Criar mapa dos elementos atuais
-            const currentElements = new Map();
+            // --- OPTIMIZED LIST RENDERING (NO BLINKING) ---
+
+            // 1. Identify current DOM elements
+            const currentMap = new Map();
             sessionsContainer.querySelectorAll('[data-session-id]').forEach(el => {
-                currentElements.set(el.dataset.sessionId, el);
+                currentMap.set(el.dataset.sessionId, el);
             });
 
-            // 2. Renderizar novos ou atualizar existentes
-            sessions.forEach(session => {
-                const existingEl = currentElements.get(session.session_id || session.ip); // Fallback ID
-                const isNew = !existingEl;
+            const processedIds = new Set();
 
-                // HTML do card
-                const cardHTML = `
+            // 2. Update or Create
+            sessions.forEach(session => {
+                const id = session.session_id || session.ip; // Fallback
+                processedIds.add(id);
+
+                const existingEl = currentMap.get(id);
+
+                // Safe content generation
+                const city = session.city === 'Desconhecido' ? 'Detectando...' : session.city;
+                const pageTitle = session.pageTitle || 'Navegando...';
+                const pageUrl = session.page || '/';
+                const device = session.device || 'Desktop';
+                const duration = session.duration || '0m';
+
+                const contentHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
                         <div style="display: flex; align-items: center; gap: 12px;">
-                            <div style="width: 10px; height: 10px; background: var(--success); border-radius: 50%; animation: pulse-dot 2s infinite;"></div>
+                            <div style="width: 10px; height: 10px; background: var(--success); border-radius: 50%; box-shadow: 0 0 8px var(--success);"></div>
                             <div>
-                                <div style="font-weight: 700; color: var(--text-primary); font-size: 14px;">${session.city}, ${session.state}</div>
-                                <div style="font-size: 12px; color: var(--text-muted);">${session.ip} • ${session.device}</div>
+                                <div style="font-weight: 700; color: var(--text-primary); font-size: 14px;">${city}, ${session.state || ''}</div>
+                                <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">${session.ip} • ${device}</div>
                             </div>
                         </div>
                         <div style="text-align: right;">
-                            <div style="font-size: 11px; color: var(--text-secondary);">${session.duration} ativo</div>
+                            <div style="font-size: 11px; color: var(--text-secondary); background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px;">${duration}</div>
                         </div>
                     </div>
                     
-                    <div style="background: rgba(0,0,0,0.3); border-radius: 6px; padding: 8px 12px; display: flex; align-items: center; gap: 8px;">
+                    <div style="background: rgba(0,0,0,0.2); border-left: 2px solid var(--primary); border-radius: 4px; padding: 8px 12px; display: flex; align-items: center; gap: 10px;">
                         <div style="color: var(--text-secondary);">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
-                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                                <path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"></path>
+                                <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                             </svg>
                         </div>
                         <div style="flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">
-                            <span style="font-size: 13px; font-weight: 500; color: var(--text-primary);">
-                                ${session.pageTitle || 'Navegando...'}
-                            </span>
-                            <div style="font-size: 11px; color: var(--text-muted); font-family: monospace;">${session.page}</div>
+                            <div style="font-size: 13px; font-weight: 500; color: var(--text-primary); margin-bottom: 2px;">${pageTitle}</div>
+                            <div style="font-size: 10px; color: var(--text-muted); font-family: monospace; opacity: 0.7;">${pageUrl}</div>
                         </div>
                     </div>
                 `;
 
                 if (existingEl) {
-                    // Atualizar conteúdo apenas se mudou (para evitar repaint desnecessário)
-                    if (existingEl.innerHTML !== cardHTML) {
-                        existingEl.innerHTML = cardHTML;
+                    // Compare essential data to avoid rewriting DOM (which causes blinking selection/animation)
+                    // We use a custom attribute to store the 'signature' of the content
+                    const newSignature = `${city}-${pageTitle}-${pageUrl}-${duration}`;
+                    if (existingEl.dataset.signature !== newSignature) {
+                        existingEl.innerHTML = contentHTML;
+                        existingEl.dataset.signature = newSignature;
+                        // Do NOT add 'animate-entry' again for updates
                     }
-                    // Marcar como mantido (remover do map para saber quem sobrou pra deletar)
-                    currentElements.delete(session.session_id || session.ip);
                 } else {
-                    // Criar novo elemento
                     const newEl = document.createElement('div');
-                    newEl.dataset.sessionId = session.session_id || session.ip;
-                    newEl.style.cssText = "background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 12px; transition: all 0.2s;";
-                    newEl.onmouseover = function () { this.style.borderColor = 'var(--primary)'; };
-                    newEl.onmouseout = function () { this.style.borderColor = 'var(--border)'; };
-                    newEl.className = 'session-card animate-entry'; // Add animation class
-                    newEl.innerHTML = cardHTML;
-                    sessionsContainer.appendChild(newEl); // Adicionar ao final (ou prepend se preferir)
+                    newEl.dataset.sessionId = id;
+                    newEl.dataset.signature = `${city}-${pageTitle}-${pageUrl}-${duration}`;
+                    newEl.className = 'session-card animate-entry'; // Only animate new ones
+                    newEl.style.cssText = "background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 12px; transition: all 0.3s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.1);";
+                    newEl.innerHTML = contentHTML;
+                    sessionsContainer.prepend(newEl); // New sessions at top
                 }
             });
 
-            // 3. Remover sessões que não existem mais
-            currentElements.forEach(el => el.remove());
+            // 3. Cleanup removed
+            currentMap.forEach((el, id) => {
+                if (!processedIds.has(id)) {
+                    el.style.opacity = '0';
+                    el.style.transform = 'translateX(-20px)';
+                    setTimeout(() => el.remove(), 300);
+                }
+            });
 
         }
     } catch (error) {
