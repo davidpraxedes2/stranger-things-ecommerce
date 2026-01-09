@@ -3088,6 +3088,19 @@ if (require.main === module) {
 
 
 
+// DEBUG ROUTE: Force Seed Collections
+app.post('/api/admin/debug/seed', async (req, res) => {
+    try {
+        console.log('🔄 Manually triggering collection seed...');
+        const { seedCollections } = require('./collection-seeder');
+        const logs = await seedCollections(db, true);
+        res.json({ success: true, logs });
+    } catch (error) {
+        console.error('❌ Error manual seeding:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 // Error handler global (deve ser o último middleware)
 app.use((err, req, res, next) => {
     console.error('❌ Erro:', err.message);

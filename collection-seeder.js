@@ -1,10 +1,38 @@
 // collection-seeder.js
 // Responsible for ensuring default/custom collections exist on startup.
 
-async function seedCollections(db) {
-    console.log('🌱 Seeding Product Collections...');
+async function seedCollections(db, returnLogs = false) {
+    const logs = [];
+    const log = (msg) => {
+        console.log(msg);
+        if (returnLogs) logs.push(msg);
+    };
+
+    log('🌱 Seeding Product Collections...');
 
     const collectionsToCreate = [
+        {
+            title: 'Lançamentos',
+            slug: 'lancamentos',
+            view: 'carousel',
+            keywords: ['lançamento', 'novo', 'novidade', '2024']
+        },
+        {
+            title: 'Hellfire Club',
+            slug: 'hellfire-club',
+            keywords: ['hellfire', 'club', 'eddie', 'munson', 'dungeons']
+        },
+        {
+            title: 'Colecionáveis',
+            slug: 'colecionaveis',
+            view: 'carousel',
+            keywords: ['funko', 'pop', 'action', 'figure', 'colecionável']
+        },
+        {
+            title: 'Acessórios',
+            slug: 'acessorios',
+            keywords: ['mochila', 'garrafa', 'copo', 'boné', 'meia', 'chaveiro']
+        },
         {
             title: 'Quenchers & Copos',
             slug: 'quenchers-copos',
@@ -13,7 +41,7 @@ async function seedCollections(db) {
         {
             title: 'Mochilas',
             slug: 'mochilas',
-            keywords: ['mochila', 'bag', 'costas', 'backpack']
+            keywords: ['mochila', 'bag', 'costas', 'backpack', 'escolar']
         },
         {
             title: 'Roupas',
@@ -34,8 +62,8 @@ async function seedCollections(db) {
         const products = await db.all('SELECT id, name, description, price FROM products'); // Added price to select
 
         if (!products || products.length === 0) {
-            console.log('   ⚠️ No products found. Skipping collection population.');
-            return;
+            log('   ⚠️ No products found. Skipping collection population.');
+            return logs;
         }
 
         for (const col of collectionsToCreate) {
@@ -47,10 +75,10 @@ async function seedCollections(db) {
                 // Already exists, skip creation
                 collectionId = existingRow.id;
             } else {
-                console.log(`   Creating collection: ${col.title}...`);
+                log(`   Creating collection: ${col.title}...`);
                 await db.run(
                     'INSERT INTO collections (name, slug, description) VALUES (?, ?, ?)',
-                    [col.title, col.slug, `Coleção de ${col.title}`]
+                    [col.title, col.slug, `Coleção de ${col.title} `]
                 );
 
                 // Get the ID back
@@ -62,6 +90,7 @@ async function seedCollections(db) {
                     collectionId = newRow.id;
                 } else {
                     console.error(`   ❌ Failed to retrieve ID for ${col.slug}`);
+                    if (returnLogs) logs.push(`Error: Failed to retrieve ID for ${col.slug}`);
                     continue;
                 }
             }
@@ -104,17 +133,20 @@ async function seedCollections(db) {
                     }
                 }
                 if (addedCount > 0) {
-                    console.log(`   🔗 Added ${addedCount} products to ${col.title}`);
+                    log(`   🔗 Added ${addedCount} products to ${col.title} `);
                 }
                 if (updatedPriceCount > 0) {
-                    console.log(`   💰 Updated price to R$ ${col.priceOverride} for ${updatedPriceCount} items in ${col.title}`);
+                    log(`   💰 Updated price to R$ ${col.priceOverride} for ${updatedPriceCount} items in ${col.title} `);
                 }
             }
         }
-        console.log('✅ Collection seeding completed.');
+        log('✅ Collection seeding completed.');
+        return logs;
 
     } catch (error) {
         console.error('❌ Error seeding collections:', error);
+        log('Error seeding collections: ' + error.message);
+        return logs;
     }
 }
 

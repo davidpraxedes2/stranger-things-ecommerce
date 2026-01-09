@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Collections</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+            background: #111;
+            color: #eee;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #E50914;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background: #b20710;
+        }
+
+        pre {
+            background: #222;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin-top: 20px;
+            border: 1px solid #333;
+        }
+
+        .success {
+            color: #4caf50;
+        }
+
+        .error {
+            color: #f44336;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🛠️ Reparar Coleções</h1>
+    <p>Use este botão para forçar a criação das coleções no banco de dados.</p>
+
+    <button onclick="runSeed()" id="btnAction">Rodar Correção Agora</button>
+    <br><br>
+
+    <div id="status"></div>
+    <pre id="output" style="display:none"></pre>
+
+    <script>
+        async function runSeed() {
+            const btn = document.getElementById('btnAction');
+            const output = document.getElementById('output');
+            const status = document.getElementById('status');
+
+            btn.disabled = true;
+            btn.innerText = 'Rodando...';
+            output.innerText = '';
+            output.style.display = 'block';
+            status.innerText = '';
+
+            try {
+                const response = await fetch('/api/admin/debug/seed', { method: 'POST' });
+                const data = await response.json();
+
+                if (data.success) {
+                    status.innerHTML = '<h3 class="success">✅ Sucesso! Coleções verificadas. Recarregue o Admin.</h3>';
+                    output.innerText = data.logs.join('\n');
+                } else {
+                    status.innerHTML = '<h3 class="error">❌ Erro ao rodar script.</h3>';
+                    output.innerText = data.error || 'Erro desconhecido';
+                }
+            } catch (err) {
+                status.innerHTML = '<h3 class="error">❌ Falha na conexão.</h3>';
+                output.innerText = err.message;
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Rodar Novamente';
+            }
+        }
+    </script>
+</body>
+
+</html>
