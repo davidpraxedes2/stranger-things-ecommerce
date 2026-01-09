@@ -547,25 +547,51 @@ async function initializePostgres() {
         `);
 
         await client.query(`
-            CREATE TABLE IF NOT EXISTS cart_items (
+            CREATE TABLE IF NOT EXISTS cart_items(
+            id SERIAL PRIMARY KEY,
+            session_id TEXT NOT NULL,
+            product_id INTEGER NOT NULL,
+            quantity INTEGER NOT NULL,
+            price REAL NOT NULL,
+            selected_variant TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+            `);
+
+        await client.query(`
+            CREATE TABLE IF NOT EXISTS payment_gateways(
                 id SERIAL PRIMARY KEY,
-                session_id TEXT NOT NULL,
-                product_id INTEGER NOT NULL,
-                quantity INTEGER NOT NULL,
+                name TEXT NOT NULL,
+                gateway_type TEXT NOT NULL,
+                public_key TEXT,
+                secret_key TEXT,
+                is_active INTEGER DEFAULT 0,
+                settings_json TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            `);
+
+        await client.query(`
+            CREATE TABLE IF NOT EXISTS shipping_options(
+                id SERIAL PRIMARY KEY,
+                name TEXT NOT NULL,
                 price REAL NOT NULL,
-                selected_variant TEXT,
+                delivery_time TEXT,
+                active INTEGER DEFAULT 1,
+                sort_order INTEGER DEFAULT 0,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
-        `);
+            `);
 
         // Create admin user if doesn't exist
         const bcrypt = require('bcryptjs');
         const defaultPassword = bcrypt.hashSync('admin123', 10);
         await client.query(`
-            INSERT INTO users (username, email, password, role)
+            INSERT INTO users(username, email, password, role)
             SELECT 'admin', 'admin@strangerthings.com', $1, 'admin'
-            WHERE NOT EXISTS (SELECT 1 FROM users WHERE username = 'admin')
-        `, [defaultPassword]);
+            WHERE NOT EXISTS(SELECT 1 FROM users WHERE username = 'admin')
+            `, [defaultPassword]);
 
         await client.end();
         console.log('✅ Tabelas PostgreSQL criadas com sucesso');

@@ -2130,12 +2130,13 @@ app.post('/api/analytics/track-location', (req, res) => {
 // ===== ROTAS DE FRETES (ADMIN) =====
 
 // Listar opções de frete (admin)
-app.get('/api/admin/shipping', authenticateToken, (req, res) => {
+// Listar opções de frete (admin)
+app.get('/api/admin/shipping', authenticateToken, async (req, res) => {
     console.log('🔍 Rota /api/admin/shipping chamada');
     try {
         console.log('🔍 Tentando executar query...');
-        const options = db.prepare('SELECT * FROM shipping_options ORDER BY sort_order ASC').all();
-        console.log('✅ Query executada com sucesso:', options);
+        const options = await db.prepare('SELECT * FROM shipping_options ORDER BY sort_order ASC').all();
+        console.log('✅ Query executada com sucesso, registros:', options ? options.length : 0);
         res.json(options || []);
     } catch (error) {
         console.error('❌ Erro ao buscar fretes:', error);
@@ -2145,7 +2146,7 @@ app.get('/api/admin/shipping', authenticateToken, (req, res) => {
 });
 
 // Criar opção de frete (admin)
-app.post('/api/admin/shipping', authenticateToken, (req, res) => {
+app.post('/api/admin/shipping', authenticateToken, async (req, res) => {
     const { name, price, delivery_time, active } = req.body;
 
     if (!name || price === undefined) {
@@ -2153,18 +2154,30 @@ app.post('/api/admin/shipping', authenticateToken, (req, res) => {
     }
 
     try {
-        const stmt = db.prepare(`
-            INSERT INTO shipping_options(name, price, delivery_time, active, sort_order)
-        VALUES(?, ?, ?, ?, (SELECT COALESCE(MAX(sort_order), -1) + 1 FROM shipping_options))
-        `);
-        const result = stmt.run(name, price, delivery_time || null, active ? 1 : 0);
-
-        res.json({ success: true, id: result.lastInsertRowid, message: 'Frete criado com sucesso' });
+        if (db.isPostgres) {
+            // Postgres direct query
+            const result = await db.query(
+                `INSERT INTO shipping_options(name, price, delivery_time, active, sort_order)
+                 VALUES($1, $2, $3, $4, (SELECT COALESCE(MAX(sort_order), -1) + 1 FROM shipping_options)) RETURNING id`,
+                [name, price, delivery_time || null, active ? 1 : 0]
+            );
+            res.json({ success: true, id: result.rows[0].id, message: 'Frete criado com sucesso' });
+        } else {
+            // SQLite / Wrapper
+            const stmt = db.prepare(`
+                INSERT INTO shipping_options(name, price, delivery_time, active, sort_order)
+                VALUES(?, ?, ?, ?, (SELECT COALESCE(MAX(sort_order), -1) + 1 FROM shipping_options))
+            `);
+            const result = await stmt.run(name, price, delivery_time || null, active ? 1 : 0);
+            res.json({ success: true, id: result.lastID, message: 'Frete criado com sucesso' });
+        }
     } catch (error) {
         console.error('Erro ao criar frete:', error);
         res.status(500).json({ error: error.message });
     }
 });
+
+
 
 // Atualizar opção de frete (admin)
 app.put('/api/admin/shipping/:id', authenticateToken, (req, res) => {
