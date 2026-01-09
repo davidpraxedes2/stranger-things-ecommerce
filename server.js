@@ -1383,23 +1383,34 @@ app.post('/api/orders', async (req, res) => {
 });
 
 // Buscar pedido por ID (público - para página de sucesso)
-app.get('/api/orders/:id', (req, res) => {
+// Buscar pedido por ID (público - para página de sucesso)
+app.get('/api/orders/:id', async (req, res) => {
     const { id } = req.params;
 
     try {
-        const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(id);
+        const order = await new Promise((resolve, reject) => {
+            db.get('SELECT * FROM orders WHERE id = ?', [id], (err, row) => {
+                if (err) reject(err);
+                else resolve(row);
+            });
+        });
 
         if (!order) {
             return res.status(404).json({ error: 'Pedido não encontrado' });
         }
 
         // Buscar itens do pedido com dados dos produtos
-        const items = db.prepare(`
+        const items = await new Promise((resolve, reject) => {
+            db.all(`
             SELECT oi.*, p.name, p.image_url
             FROM order_items oi
             LEFT JOIN products p ON oi.product_id = p.id
             WHERE oi.order_id = ?
-        `).all(id);
+        `, [id], (err, rows) => {
+                if (err) reject(err);
+                else resolve(rows || []);
+            });
+        });
 
         order.items = items;
 
