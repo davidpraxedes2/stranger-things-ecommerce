@@ -212,7 +212,7 @@ function renderProduct(product) {
 
     // Coletar todas as imagens disponíveis
     let images = [];
-    
+
     // Prioridade 1: usar product.images se já vier parseado da API
     if (product.images && Array.isArray(product.images) && product.images.length > 0) {
         images = [...product.images];
@@ -230,7 +230,7 @@ function renderProduct(product) {
             console.warn('⚠️ Erro ao fazer parse de images_json:', e);
         }
     }
-    
+
     // Adicionar image_url se não estiver na lista
     if (product.image_url && !images.includes(product.image_url)) {
         images.unshift(product.image_url);
@@ -239,7 +239,7 @@ function renderProduct(product) {
 
     // Remover duplicatas e valores vazios
     images = [...new Set(images.filter(img => img && typeof img === 'string'))];
-    
+
     console.log('📸 Total de imagens finais:', images.length);
     console.log('📸 URLs:', images);
 
@@ -266,6 +266,20 @@ function renderProduct(product) {
 
 // Setup variants
 function setupVariants(product) {
+    // Check for advanced JSON options first
+    if (product.options_json) {
+        try {
+            const options = JSON.parse(product.options_json);
+            if (options.blocks) {
+                renderAdvancedVariants(options.blocks);
+                return;
+            }
+        } catch (e) {
+            console.error('Error parsing options_json:', e);
+        }
+    }
+
+    // Fallback to old sizes logic
     // Check if product has variants enabled (default to false if unsupported/missing)
     if (!product.has_variants) {
         availableVariants = [];
@@ -291,7 +305,132 @@ function setupVariants(product) {
     renderVariants();
 }
 
-// Render variants
+// Global state for advanced selections
+let advancedSelections = {};
+
+function renderAdvancedVariants(blocks) {
+    const variantSelector = document.getElementById('variantSelector');
+    const variantOptions = document.getElementById('variantOptions'); // This container will hold our new UI
+
+    if (!variantSelector || !variantOptions) return;
+    variantSelector.style.display = 'block';
+
+    // Clear legacy options
+    variantOptions.innerHTML = '';
+
+    // Override flex logic for legacy buttons
+    variantOptions.style.display = 'flex';
+    variantOptions.style.flexDirection = 'column';
+    variantOptions.style.gap = '15px';
+
+    blocks.forEach(block => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'variant-block-wrapper';
+        wrapper.style.display = 'flex';
+        wrapper.style.flexDirection = 'column';
+        wrapper.style.gap = '5px';
+
+        const label = document.createElement('label');
+        label.textContent = block.name;
+        label.style.fontWeight = 'bold';
+        label.style.fontSize = '0.9rem';
+        label.style.color = '#ccc';
+
+        const select = document.createElement('select');
+        select.style.padding = '10px';
+        select.style.borderRadius = '4px';
+        select.style.background = '#222';
+        select.style.color = '#fff';
+        select.style.border = '1px solid #444';
+        select.style.fontSize = '1rem';
+        select.setAttribute('data-name', block.name);
+
+        // Populate options based on type
+        if (block.type === 'select') {
+            select.innerHTML = `<option value="">Selecione ${block.name}...</option>` +
+                block.options.map(opt => `<option value="${opt}">${opt}</option>`).join('');
+
+            select.addEventListener('change', (e) => {
+                advancedSelections[block.name] = e.target.value;
+                updateDependentSelects(blocks);
+                updateSelectedVariantStr();
+            });
+
+        } else if (block.type === 'dependent_select') {
+            select.innerHTML = `<option value="">Selecione primeiro ${block.parent}...</option>`;
+            select.disabled = true;
+
+            select.addEventListener('change', (e) => {
+                advancedSelections[block.name] = e.target.value;
+                updateSelectedVariantStr();
+            });
+        }
+
+        wrapper.appendChild(label);
+        wrapper.appendChild(select);
+        variantOptions.appendChild(wrapper);
+    });
+
+    // Initial state update
+    updateDependentSelects(blocks);
+}
+
+function updateDependentSelects(blocks) {
+    blocks.forEach(block => {
+        if (block.type === 'dependent_select') {
+            const parentValue = advancedSelections[block.parent];
+            const select = document.querySelector(`select[data-name="${block.name}"]`);
+
+            if (select) {
+                if (parentValue && block.options[parentValue]) {
+                    const currentVal = select.value;
+                    select.disabled = false;
+                    const opts = block.options[parentValue];
+                    select.innerHTML = `<option value="">Selecione ${block.name}...</option>` +
+                        opts.map(opt => `<option value="${opt}">${opt}</option>`).join('');
+
+                    // Restore value if still valid
+                    if (opts.includes(currentVal)) {
+                        select.value = currentVal;
+                    } else {
+                        select.value = "";
+                        delete advancedSelections[block.name];
+                    }
+                } else {
+                    select.disabled = true;
+                    select.innerHTML = `<option value="">Selecione custom ${block.parent}</option>`;
+                    select.value = "";
+                    delete advancedSelections[block.name];
+                }
+            }
+        }
+    });
+}
+
+function updateSelectedVariantStr() {
+    // Check if fully selected
+    const selects = document.querySelectorAll('#variantOptions select');
+    let allSelected = true;
+    const parts = [];
+
+    selects.forEach(sel => {
+        if (!sel.value) allSelected = false;
+        parts.push(`${sel.getAttribute('data-name')}: ${sel.value}`);
+    });
+
+    if (allSelected) {
+        selectedVariant = {
+            name: parts.join(' | '),
+            price: currentProduct.price, // assuming price doesn't change for now
+            id: 'custom-' + Date.now()
+        };
+    } else {
+        selectedVariant = null;
+    }
+}
+
+
+// Render variants (Legacy function kept for fallback)
 function renderVariants() {
     const variantSelector = document.getElementById('variantSelector');
     const variantOptions = document.getElementById('variantOptions');

@@ -389,7 +389,9 @@ async function initializeDatabase() {
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             images_json TEXT,
             original_price REAL,
-            sku TEXT
+            sku TEXT,
+            has_variants INTEGER DEFAULT 0,
+            options_json TEXT
         )`);
 
         // Migrações de produtos
@@ -397,6 +399,7 @@ async function initializeDatabase() {
         await runMigration(`ALTER TABLE products ADD COLUMN original_price REAL`);
         await runMigration(`ALTER TABLE products ADD COLUMN sku TEXT`);
         await runMigration(`ALTER TABLE products ADD COLUMN has_variants INTEGER DEFAULT 0`);
+        await runMigration(`ALTER TABLE products ADD COLUMN options_json TEXT`); // JSON string for advanced variants
 
         // Popular produtos iniciais se vazio
         const prodCount = await new Promise((resolve) => {
@@ -3155,6 +3158,16 @@ app.post('/api/admin/debug/reset-collections', async (req, res) => {
             } else {
                 logs.push(`⚠️ Collection ${slug} not found`);
             }
+        }
+
+        // Seed Stranger Cases (ensure products exist with variants)
+        try {
+            const { seedStrangerCases } = require('./phone-cases-seeder');
+            await seedStrangerCases(db);
+            logs.push('✅ Phone cases created/updated with variants');
+        } catch (e) {
+            console.error('Error seeding phone cases:', e);
+            logs.push(`❌ Error seeding cases: ${e.message}`);
         }
 
         // Re-seed (will re-populate empty collections with strict rules)
