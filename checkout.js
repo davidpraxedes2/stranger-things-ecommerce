@@ -1,6 +1,13 @@
 // Checkout JS - Stranger Things Store
-const API_BASE = window.location.origin;
-const API_URL = `${API_BASE}/api`;
+if (!window.API_BASE) window.API_BASE = window.location.origin;
+if (!window.API_URL) window.API_URL = `${window.API_BASE}/api`;
+if (!window.API_BASE) {
+    window.API_BASE = window.location.origin;
+    window.API_URL = `${window.API_BASE}/api`;
+}
+
+// Use local variables or window. globals to avoid redeclaration errors
+
 const sessionId = localStorage.getItem('cart_session_id');
 
 let cart = [];
@@ -61,7 +68,7 @@ let gatewaySettings = { enable_pix: true, enable_credit_card: true }; // Default
 
 async function loadGatewaySettings() {
     try {
-        const response = await fetch(`${API_URL}/gateway/active`);
+        const response = await fetch(`${window.API_URL}/gateway/active`);
         if (response.ok) {
             const data = await response.json();
             if (data.settings) {
@@ -88,7 +95,7 @@ async function loadCart() {
     }
 
     try {
-        const response = await fetch(`${API_URL}/cart?session_id=${sessionId}`, {
+        const response = await fetch(`${window.API_URL}/cart?session_id=${sessionId}`, {
             headers: { 'x-session-id': sessionId }
         });
 
