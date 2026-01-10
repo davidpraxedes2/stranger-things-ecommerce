@@ -2670,6 +2670,12 @@ app.get('/api/admin/sessions/active', authenticateToken, (req, res) => {
 
 // API: Registrar Heartbeat do visitante (endpoint único e completo)
 app.post('/api/analytics/heartbeat', async (req, res) => {
+    console.log('🔵 Heartbeat recebido:', {
+        sessionId: req.body.sessionId,
+        page: req.body.page,
+        hasLocation: !!req.body.location
+    });
+
     const { sessionId, page, title, action, ip: clientIp, location, utm, device, browser } = req.body;
 
     // Extract Real IP (Vercel/Proxy friendly)
@@ -2681,14 +2687,19 @@ app.post('/api/analytics/heartbeat', async (req, res) => {
     // Clean up IPv6 prefix if present
     if (ip && ip.includes('::ffff:')) ip = ip.replace('::ffff:', '');
 
-    if (!sessionId) return res.status(400).json({ error: 'No Session ID' });
+    if (!sessionId) {
+        console.error('❌ Heartbeat: sessionId ausente');
+        return res.status(400).json({ error: 'No Session ID' });
+    }
 
     try {
+        console.log('🔍 Verificando sessão existente...');
         // Upsert logic
         let existing;
         if (db.isPostgres) {
             const r = await db.query('SELECT session_id FROM analytics_sessions WHERE session_id = $1', [sessionId]);
             existing = r.rows[0];
+            console.log('🔍 Postgres check:', existing ? 'Sessão existe' : 'Nova sessão');
         } else {
             existing = await new Promise((resolve, reject) => {
                 db.get('SELECT session_id FROM analytics_sessions WHERE session_id = ?', [sessionId], (err, row) => {
@@ -2696,9 +2707,11 @@ app.post('/api/analytics/heartbeat', async (req, res) => {
                     else resolve(row);
                 });
             });
+            console.log('🔍 SQLite check:', existing ? 'Sessão existe' : 'Nova sessão');
         }
 
         if (existing) {
+            console.log('🔄 Atualizando sessão existente...');
             // Update
             const updateQ = db.isPostgres ?
                 "UPDATE analytics_sessions SET current_page=$1, page_title=$2, last_action=$3, last_active_at=NOW() WHERE session_id=$4" :
@@ -2716,7 +2729,9 @@ app.post('/api/analytics/heartbeat', async (req, res) => {
                     });
                 });
             }
+            console.log('✅ Sessão atualizada');
         } else {
+            console.log('➕ Criando nova sessão...');
             // Insert
             const loc = location || { city: 'Desconhecido', region: 'BR', country: 'BR', lat: 0, lon: 0 };
 
@@ -2742,6 +2757,14 @@ app.post('/api/analytics/heartbeat', async (req, res) => {
                 utmSource, utmMedium, utmCampaign
             ];
 
+            console.log('📝 Dados para inserir:', {
+                sessionId,
+                ip,
+                city: loc.city,
+                device: deviceType,
+                browser: browserType
+            });
+
             if (db.isPostgres) {
                 await db.query(insertQ, params);
             } else {
@@ -2752,12 +2775,16 @@ app.post('/api/analytics/heartbeat', async (req, res) => {
                     });
                 });
             }
+            console.log('✅ Nova sessão criada');
         }
 
+        console.log('✅ Heartbeat processado com sucesso');
         res.json({ success: true });
     } catch (e) {
-        console.error('Heartbeat Error:', e);
-        res.status(500).json({ error: e.message });
+        console.error('❌ Heartbeat Error:', e);
+        console.error('❌ Stack:', e.stack);
+        console.error('❌ DB Type:', db.isPostgres ? 'Postgres' : 'SQLite');
+        res.status(500).json({ error: e.message, stack: e.stack });
     }
 });
 
