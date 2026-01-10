@@ -2561,76 +2561,76 @@ setInterval(() => {
 }, 60000);
 
 // API: Contador de visitantes online db-backed
-app.get('/api/admin/analytics/online-count', authenticateToken, (req, res) => {
+// API: Contador de visitantes online db-backed
+app.get('/api/admin/analytics/online-count', authenticateToken, async (req, res) => {
     try {
         // Active in last 5 minutes
-        const query = db.isPostgres ?
-            "SELECT COUNT(*) as count FROM analytics_sessions WHERE last_active_at > NOW() - INTERVAL '5 minutes'" :
-            "SELECT COUNT(*) as count FROM analytics_sessions WHERE last_active_at > datetime('now', '-5 minutes')";
-
         if (db.isPostgres) {
-            db.query(query, []).then(result => {
+            try {
+                const query = "SELECT COUNT(*) as count FROM analytics_sessions WHERE last_active_at > NOW() - INTERVAL '5 minutes'";
+                const result = await db.query(query);
                 res.json({ count: parseInt(result.rows[0]?.count || 0) });
-            }).catch(err => {
-                console.error('Error online count PG:', err);
-                res.status(500).json({ count: 0 });
-            });
+            } catch (pgErr) {
+                console.error('Error online count PG:', pgErr);
+                // Graceful fallback for dashboard (show 0 instead of crashing)
+                res.json({ count: 0 });
+            }
         } else {
+            const query = "SELECT COUNT(*) as count FROM analytics_sessions WHERE last_active_at > datetime('now', '-5 minutes')";
             db.get(query, [], (err, result) => {
                 if (err) {
                     console.error('Error online count SQLite:', err);
-                    return res.status(500).json({ count: 0 });
+                    return res.json({ count: 0 });
                 }
                 res.json({ count: parseInt(result?.count || 0) });
             });
         }
     } catch (e) {
-        console.error('Error online count:', e);
+        console.error('Error online count wrapper:', e);
         res.status(500).json({ count: 0 });
     }
 });
 
 // API: Localizações de visitantes (para o mapa)
-app.get('/api/admin/analytics/visitor-locations', authenticateToken, (req, res) => {
+// API: Localizações de visitantes (para o mapa)
+app.get('/api/admin/analytics/visitor-locations', authenticateToken, async (req, res) => {
     try {
-        const query = db.isPostgres ?
-            "SELECT city, region, lat, lon, COUNT(*) as count FROM analytics_sessions WHERE last_active_at > NOW() - INTERVAL '5 minutes' GROUP BY city, region, lat, lon" :
-            "SELECT city, region, lat, lon, COUNT(*) as count FROM analytics_sessions WHERE last_active_at > datetime('now', '-5 minutes') GROUP BY city, region, lat, lon";
-
         if (db.isPostgres) {
-            db.query(query, []).then(result => {
-                res.json((result.rows || []).map(r => ({
+            try {
+                const query = "SELECT city, region, lat, lon, COUNT(*) as count FROM analytics_sessions WHERE last_active_at > NOW() - INTERVAL '5 minutes' GROUP BY city, region, lat, lon";
+                const result = await db.query(query);
+
+                const locations = (result.rows || []).map(r => ({
                     city: r.city,
                     state: r.region,
                     count: parseInt(r.count),
                     lat: r.lat || 0,
-                    lon: r.lon || 0,
-                    x: 0,
-                    y: 0
-                })));
-            }).catch(err => {
-                console.error('Error visitor locations PG:', err);
-                res.status(500).json([]);
-            });
+                    lon: r.lon || 0
+                }));
+                res.json(locations);
+            } catch (pgErr) {
+                console.error('Error visitor locations PG:', pgErr);
+                res.json([]); // Return empty array instead of 500
+            }
         } else {
+            const query = "SELECT city, region, lat, lon, COUNT(*) as count FROM analytics_sessions WHERE last_active_at > datetime('now', '-5 minutes') GROUP BY city, region, lat, lon";
             db.all(query, [], (err, rows) => {
                 if (err) {
                     console.error('Error visitor locations SQLite:', err);
-                    return res.status(500).json([]);
+                    return res.json([]);
                 }
-                res.json((rows || []).map(r => ({
+                const locations = (rows || []).map(r => ({
                     city: r.city,
                     state: r.region,
                     count: parseInt(r.count),
                     lat: r.lat || 0,
-                    lon: r.lon || 0,
-                    x: 0,
-                    y: 0
-                })));
+                    lon: r.lon || 0
+                }));
+                res.json(locations);
             });
         }
     } catch (e) {
-        console.error('Error visitor locations:', e);
+        console.error('Error visitor locations wrapper:', e);
         res.status(500).json([]);
     }
 });
