@@ -2334,6 +2334,7 @@ app.get('/api/admin/customers/:id', authenticateToken, async (req, res) => {
 
 // Criar cliente (admin)
 // Criar cliente (admin)
+// Criar cliente (admin)
 app.post('/api/admin/customers', authenticateToken, async (req, res) => {
     const { name, email, phone, cpf, address, city, state, zip_code } = req.body;
 
