@@ -1,117 +1,179 @@
-const https = require('https');
+const fetch = require('node-fetch');
+const cheerio = require('cheerio');
 
-async function fetchFunkosFromAPI() {
-    return new Promise((resolve, reject) => {
-        // Fetch 50 items to ensure we get all 40 valid ones even if search has noise
-        const url = 'https://www.funko.com.br/api/catalog_system/pub/products/search?fq=stranger-things&_from=0&_to=49';
-
-        https.get(url, { headers: { 'User-Agent': 'Mozilla/5.0' } }, (res) => {
-            let data = '';
-            res.on('data', chunk => data += chunk);
-            res.on('end', () => {
-                try {
-                    resolve(JSON.parse(data));
-                } catch (e) {
-                    reject(e);
-                }
-            });
-        }).on('error', reject);
-    });
-}
+const TARGET_URL = 'https://www.funko.com.br/stranger-things';
+const TARGET_COUNT = 40;
+const FIXED_PRICE = 29.00;
+const COLLECTION_NAME = 'FUNKOS';
 
 async function seedFunkosFromAPI(db) {
-    console.log('🎯 Starting Funko seeder from funko.com.br API...');
+    console.log('🎯 Starting Funko seeder from funko.com.br (JSON-LD)...');
 
     try {
-        // Fetch from API
-        console.log('🔍 Fetching Funkos from funko.com.br...');
-        const apiProducts = await fetchFunkosFromAPI();
-        console.log(`✅ Found ${apiProducts.length} products from API`);
+        let products = [];
+        let page = 1;
 
-        // Get or create collection
-        let collectionResult = await db.query(
-            "SELECT id FROM collections WHERE slug = 'stranger-things-funkos' LIMIT 1"
-        );
+        // --- 1. Scrape Data ---
+        while (products.length < TARGET_COUNT) {
+            console.log(`\n📄 Scraping Page ${page}...`);
+            const url = `${TARGET_URL}?page=${page}`;
+
+            try {
+                const res = await fetch(url, {
+                    headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36' }
+                });
+
+                if (!res.ok) {
+                    console.error(`❌ Failed to fetch page ${page}: ${res.status} ${res.statusText}`);
+                    break;
+                }
+
+                const html = await res.text();
+                const $ = cheerio.load(html);
+                let foundOnPage = 0;
+
+                $('script[type="application/ld+json"]').each((i, el) => {
+                    if (products.length >= TARGET_COUNT) return false;
+
+                    try {
+                        const json = JSON.parse($(el).html());
+
+                        // Look for ItemList which contains product listings
+                        if (json['@type'] === 'ItemList' && Array.isArray(json.itemListElement)) {
+                            for (const item of json.itemListElement) {
+                                if (products.length >= TARGET_COUNT) break;
+
+                                const productData = item.item;
+                                if (!productData || productData['@type'] !== 'Product') continue;
+
+                                // Filter for Stranger Things just in case
+                                const name = productData.name || '';
+                                const brandName = productData.brand?.name || '';
+
+                                if (!name.toLowerCase().includes('stranger things') && !brandName.toLowerCase().includes('stranger things')) {
+                                    continue;
+                                }
+
+                                // Avoid duplicates locally
+                                if (products.some(p => p.name === name)) continue;
+
+                                const imageUrl = productData.image;
+                                const description = productData.description || `Boneco Funko Pop! Stranger Things - ${name}`;
+
+                                products.push({
+                                    name: name,
+                                    description: description,
+                                    price: FIXED_PRICE,
+                                    category: 'stranger-things-funkos',
+                                    image_url: imageUrl,
+                                    stock: 10,
+                                    active: 1
+                                });
+                                foundOnPage++;
+                            }
+                        }
+                    } catch (e) {
+                        // Ignore parse errors
+                    }
+                });
+
+                console.log(`   Found ${foundOnPage} new products on page ${page}`);
+
+                if (foundOnPage === 0) {
+                    console.log('   No more products found on site, stopping.');
+                    break;
+                }
+
+                page++;
+                // Be polite but fast enough for deployment
+                await new Promise(r => setTimeout(r, 500));
+
+            } catch (err) {
+                console.error(`❌ Error scraping page ${page}:`, err.message);
+                break;
+            }
+        }
+
+        console.log(`\n🎉 Collected ${products.length} products (Target: ${TARGET_COUNT})`);
+
+        if (products.length === 0) {
+            console.log('⚠️ No products found to import.');
+            return;
+        }
+
+        // --- 2. Database Insertion ---
+
+        // Get or Create Collection
+        console.log(`\n📦 Checking Collection "${COLLECTION_NAME}"...`);
+        let collection = await db.get('SELECT * FROM collections WHERE name = ?', [COLLECTION_NAME]);
 
         let collectionId;
-        if (collectionResult.rows.length === 0) {
-            console.log('📝 Creating Stranger Things Funkos collection...');
-            const createResult = await db.query(
-                `INSERT INTO collections (name, slug, description, is_active, default_view, sort_order) 
-                 VALUES ($1, $2, $3, $4, $5, $6) 
-                 RETURNING id`,
-                ['Stranger Things Funkos', 'stranger-things-funkos',
-                    'Coleção completa de Funkos Pop! de Stranger Things', 1, 'grid', 0]
-            );
-            collectionId = createResult.rows[0].id;
+        if (collection) {
+            console.log(`   Found existing collection ID: ${collection.id}`);
+            collectionId = collection.id;
         } else {
-            collectionId = collectionResult.rows[0].id;
-        }
-        console.log(`✅ Collection ID: ${collectionId}`);
+            console.log(`   Creating new collection...`);
+            await db.run(`
+                INSERT INTO collections (name, slug, description, is_active)
+                VALUES (?, ?, ?, ?)
+            `, [COLLECTION_NAME, 'funkos', 'Coleção exclusiva de Stranger Things Funkos', 1]);
 
-        // Get existing products to avoid duplicates
-        const existingResult = await db.query(
-            "SELECT name FROM products WHERE category = 'stranger-things-funkos'"
-        );
-        const existingNames = new Set(existingResult.rows.map(r => r.name));
-        console.log(`📊 Existing Funkos in DB: ${existingNames.size}`);
-
-        let imported = 0;
-        let skipped = 0;
-        let sortOrder = 0;
-
-        for (const apiProduct of apiProducts) {
-            // ✅ FILTER: Strict check for "Stranger Things" in the original name
-            if (!apiProduct.productName || !apiProduct.productName.toLowerCase().includes('stranger things')) {
-                console.log(`⏭️  Skip (not Stranger Things): ${apiProduct.productName}`);
-                skipped++;
-                continue;
-            }
-
-            // Use the original name from API (it already contains "Stranger Things")
-            const name = apiProduct.productName;
-
-            if (existingNames.has(name)) {
-                skipped++;
-                continue;
-            }
-
-            // Extract data
-            const imageUrl = apiProduct.items?.[0]?.images?.[0]?.imageUrl ||
-                'https://via.placeholder.com/300x300?text=Funko+Pop';
-            const description = apiProduct.description ||
-                `<p>Boneco colecionável Funko Pop! da série Stranger Things. Produto oficial licenciado pela Netflix.</p>`;
-
-            // Insert product
-            const productResult = await db.query(
-                `INSERT INTO products (name, description, price, category, image_url, stock, active, original_price) 
-                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
-                 RETURNING id`,
-                [name, description, 29.00, 'stranger-things-funkos', imageUrl, 10, 1, 39.90]
-            );
-
-            const productId = productResult.rows[0].id;
-
-            // Associate with collection
-            await db.query(
-                `INSERT INTO collection_products (collection_id, product_id, sort_order) 
-                 VALUES ($1, $2, $3) ON CONFLICT DO NOTHING`,
-                [collectionId, productId, sortOrder++]
-            );
-
-            imported++;
+            const newColl = await db.get('SELECT * FROM collections WHERE name = ?', [COLLECTION_NAME]);
+            collectionId = newColl ? newColl.id : null;
+            console.log(`   Created collection ID: ${collectionId}`);
         }
 
-        console.log(`🎉 Funko seeder complete!`);
-        console.log(`   ✅ Imported: ${imported}`);
-        console.log(`   ⏭️  Skipped: ${skipped}`);
-        console.log(`   📊 Total: ${imported + existingNames.size}`);
+        if (!collectionId) {
+            console.error('❌ Failed to get collection ID, aborting.');
+            return;
+        }
 
-        return { imported, skipped, total: imported + existingNames.size };
+        // Insert Products
+        console.log('\n💾 Inserting Products...');
+        let insertedCount = 0;
 
-    } catch (error) {
-        console.error('❌ Funko seeder error:', error.message);
-        throw error;
+        for (const p of products) {
+            // Check if product exists
+            const existing = await db.get('SELECT id FROM products WHERE name = ?', [p.name]);
+
+            let productId;
+            if (existing) {
+                // Update existing price and ensure active
+                await db.run('UPDATE products SET price = ?, active = 1 WHERE id = ?', [FIXED_PRICE, existing.id]);
+                productId = existing.id;
+            } else {
+                // Insert new
+                if (db.isPostgres) {
+                    // Using raw query for ID return simulation if needed, but db-helper uses run
+                    await db.run(`
+                        INSERT INTO products (name, description, price, category, image_url, stock, active)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                     `, [p.name, p.description, p.price, p.category, p.image_url, p.stock, p.active]);
+                    const inserted = await db.get('SELECT id FROM products WHERE name = ?', [p.name]);
+                    productId = inserted ? inserted.id : null;
+                } else {
+                    const res = await db.run(`
+                        INSERT INTO products (name, description, price, category, image_url, stock, active)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                     `, [p.name, p.description, p.price, p.category, p.image_url, p.stock, p.active]);
+                    productId = res.lastID;
+                }
+                insertedCount++;
+            }
+
+            if (productId) {
+                // Link to Collection
+                const linkExists = await db.get('SELECT * FROM collection_products WHERE collection_id = ? AND product_id = ?', [collectionId, productId]);
+                if (!linkExists) {
+                    await db.run('INSERT INTO collection_products (collection_id, product_id) VALUES (?, ?)', [collectionId, productId]);
+                }
+            }
+        }
+
+        console.log(`\n✅ Seeding Complete! New Products: ${insertedCount}`);
+
+    } catch (err) {
+        console.error('\n❌ Fatal Error in Funko Seeder:', err);
     }
 }
 
