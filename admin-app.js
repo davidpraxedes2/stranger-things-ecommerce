@@ -1000,8 +1000,8 @@ if (!document.getElementById('leaflet-custom-styles')) {
 }
 
 async function renderActiveSessions() {
-    const sessionsContainer = document.getElementById('activeSessions');
-    if (!sessionsContainer) return;
+    const list = document.getElementById('activeSessions');
+    if (!list) return;
 
     try {
         const response = await fetch(`${API_URL}/sessions/active`, {
@@ -1010,6 +1010,12 @@ async function renderActiveSessions() {
 
         if (response.ok) {
             const sessions = await response.json();
+
+            // USER REQUEST: STRICTLY HIDE DESKTOP
+            // Filter out anything that is NOT Mobile or Tablet
+            const mobileOnlySessions = sessions.filter(s =>
+                s.device === 'Mobile' || s.device === 'Tablet'
+            );
 
             // Updates count stat
             const uniqueCities = new Set(sessions.map(s => s.city)).size;
