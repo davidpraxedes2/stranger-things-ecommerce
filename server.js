@@ -2705,9 +2705,17 @@ app.get('/api/debug-db', async (req, res) => {
                 // Check Product Count
                 const count = await db.query('SELECT COUNT(*) as c FROM products');
 
+                // Check Analytics Schema
+                const schema = await db.query(`
+                    SELECT column_name 
+                    FROM information_schema.columns 
+                    WHERE table_name = 'analytics_sessions'
+                `);
+
                 status.connection = 'OK';
                 status.time = now.rows[0].time;
                 status.productCount = count.rows[0].c;
+                status.columns = schema.rows.map(r => r.column_name);
             } catch (e) {
                 status.connection = 'ERROR';
                 status.error = e.message;
