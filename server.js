@@ -2692,6 +2692,17 @@ app.post('/api/analytics/heartbeat', async (req, res) => {
         return res.status(400).json({ error: 'No Session ID' });
     }
 
+    // BOT FILTERING: Ignore heartbeats from known bots/crawlers
+    const ua = req.headers['user-agent'] || '';
+    const isBot = /bot|googlebot|crawler|spider|robot|crawling|facebookexternalhit/i.test(ua);
+    // Filter Vercel/AWS Health Checks (often have empty UA or specific tokens)
+    const isHealthCheck = ua.includes('Vercel-Health') || ua.includes('AWS-Health');
+
+    if (isBot || isHealthCheck) {
+        console.log('🤖 Bot/Crawler detectado, ignorando heartbeat:', ua);
+        return res.json({ ignored: true });
+    }
+
     try {
         console.log('🔍 Verificando sessão existente...');
         // Upsert logic
