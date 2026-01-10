@@ -60,6 +60,13 @@ async function seedFunkosFromAPI(db) {
         let sortOrder = 0;
 
         for (const apiProduct of apiProducts) {
+            // ✅ FILTER: Only import if product name contains "Stranger Things"
+            if (!apiProduct.productName || !apiProduct.productName.toLowerCase().includes('stranger things')) {
+                console.log(`⏭️  Skip (not Stranger Things): ${apiProduct.productName}`);
+                skipped++;
+                continue;
+            }
+
             const name = `Boneco Funko Pop! Stranger Things - ${apiProduct.productName}`;
 
             if (existingNames.has(name)) {
