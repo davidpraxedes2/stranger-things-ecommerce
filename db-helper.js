@@ -23,29 +23,38 @@ const connectionString = process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA
 if (connectionString) {
     USE_POSTGRES = true;
     console.log('📦 Detectado PostgreSQL - modo produção (Vercel)');
+    // Vercel Postgres best practice: Use NON_POOLING url for direct connections via 'pg' driver
+    // caused by "Prepared statements" issues with pgbouncer in transaction mode often used in poolers
+    const connectionString = process.env.POSTGRES_URL_NON_POOLING || process.env.POSTGRES_URL || process.env.DATABASE_URL;
 
     const { Pool } = require('pg');
 
     // Debug configs (Safe logging)
     console.log('🔌 DB Connection Config Check:', {
+        usingNonPooling: !!process.env.POSTGRES_URL_NON_POOLING,
         hasPostgresUrl: !!process.env.POSTGRES_URL,
-        hasPrismaUrl: !!process.env.POSTGRES_PRISMA_URL,
-        hasDatabaseUrl: !!process.env.DATABASE_URL,
         connectionStringLength: connectionString ? connectionString.length : 0
     });
 
     const poolConfig = {
         connectionString,
-        max: 5,
-        idleTimeoutMillis: 5000,
-        connectionTimeoutMillis: 10000,
+        max: 3, // Very conservative pool size for serverless
+        idleTimeoutMillis: 1000,
+        connectionTimeoutMillis: 5000,
     };
 
-    // Only add SSL if not localhost env (assuming production string implies it, or force it)
-    if (!connectionString.includes('localhost') && !connectionString.includes('127.0.0.1')) {
+    // Only add manual SSL config if NOT present in connection string
+    // Vercel URLs usually have ?sslmode=require, adding ssl object causes conflict
+    const hasSSLInUrl = connectionString && connectionString.includes('sslmode=');
+    const isLocalhost = connectionString && (connectionString.includes('localhost') || connectionString.includes('127.0.0.1'));
+
+    if (!isLocalhost && !hasSSLInUrl) {
         poolConfig.ssl = {
             rejectUnauthorized: false
         };
+    } else if (hasSSLInUrl) {
+        // If query param exists, do NOT add ssl object to config to avoid "The options "ssl" and "sslmode" cannot be used together"
+        console.log('🔒 SSL detected in URL, skipping manual SSL config');
     }
 
     pgPool = new Pool(poolConfig);
