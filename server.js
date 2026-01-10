@@ -2668,6 +2668,40 @@ app.get('/api/admin/sessions/active', authenticateToken, (req, res) => {
     }
 });
 
+// DEBUG: Endpoint to check DB connection status
+app.get('/api/debug-db', async (req, res) => {
+    try {
+        const dbHelper = require('./db-helper');
+        const status = {
+            env: process.env.NODE_ENV,
+            isVercel: !!process.env.VERCEL,
+            dbType: db.isPostgres ? 'Postgres' : 'SQLite',
+            postgresConfig: db.isPostgres ? {
+                hasPool: !!dbHelper.pgPool,
+                connectionStringExists: !!(process.env.POSTGRES_URL || process.env.DATABASE_URL)
+            } : 'N/A'
+        };
+
+        if (db.isPostgres) {
+            try {
+                const now = await db.query('SELECT NOW() as time');
+                status.connection = 'OK';
+                status.time = now.rows[0].time;
+            } catch (e) {
+                status.connection = 'ERROR';
+                status.error = e.message;
+                status.stack = e.stack;
+            }
+        } else {
+            status.connection = 'SQLite OK (Local)';
+        }
+
+        res.json(status);
+    } catch (e) {
+        res.status(500).json({ error: e.message, stack: e.stack });
+    }
+});
+
 // API: Registrar Heartbeat do visitante (endpoint único e completo)
 app.post('/api/analytics/heartbeat', async (req, res) => {
     console.log('🔵 Heartbeat recebido:', {
