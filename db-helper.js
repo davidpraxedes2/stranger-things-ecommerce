@@ -29,7 +29,7 @@ if (connectionString) {
         connectionString,
         max: 10, // Limit max connections to prevent exhaustion (Neon/Vercel limit is usually 10-20)
         idleTimeoutMillis: 2000, // Aggressively close idle connections (was 30s)
-        connectionTimeoutMillis: 2000, // Fail fast if DB is unreachable
+        connectionTimeoutMillis: 10000, // Wait up to 10s for DB causing cold start protection
     });
 
     pgPool.on('error', (err, client) => {
