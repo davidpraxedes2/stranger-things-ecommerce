@@ -2,7 +2,8 @@ const https = require('https');
 
 async function fetchFunkosFromAPI() {
     return new Promise((resolve, reject) => {
-        const url = 'https://www.funko.com.br/api/catalog_system/pub/products/search?fq=stranger-things&_from=0&_to=39';
+        // Fetch 50 items to ensure we get all 40 valid ones even if search has noise
+        const url = 'https://www.funko.com.br/api/catalog_system/pub/products/search?fq=stranger-things&_from=0&_to=49';
 
         https.get(url, { headers: { 'User-Agent': 'Mozilla/5.0' } }, (res) => {
             let data = '';
@@ -60,14 +61,15 @@ async function seedFunkosFromAPI(db) {
         let sortOrder = 0;
 
         for (const apiProduct of apiProducts) {
-            // ✅ FILTER: Only import if product name contains "Stranger Things"
+            // ✅ FILTER: Strict check for "Stranger Things" in the original name
             if (!apiProduct.productName || !apiProduct.productName.toLowerCase().includes('stranger things')) {
                 console.log(`⏭️  Skip (not Stranger Things): ${apiProduct.productName}`);
                 skipped++;
                 continue;
             }
 
-            const name = `Boneco Funko Pop! Stranger Things - ${apiProduct.productName}`;
+            // Use the original name from API (it already contains "Stranger Things")
+            const name = apiProduct.productName;
 
             if (existingNames.has(name)) {
                 skipped++;
