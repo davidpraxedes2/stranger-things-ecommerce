@@ -763,16 +763,23 @@ function generateSessionsHTML(sessions) {
 
     return sessions.map(s => {
         // UTM Icons Logic
+        // UTM Icons Logic
         let sourceIcon = '';
-        let sourceClass = '';
         if (s.utm_source) {
             const source = s.utm_source.toLowerCase();
-            if (source.includes('instagram') || source.includes('ig')) sourceIcon = '📸';
-            else if (source.includes('facebook') || source.includes('fb')) sourceIcon = '👥';
-            else if (source.includes('google')) sourceIcon = '🔍';
-            else if (source.includes('tiktok')) sourceIcon = '🎵';
-            else if (source.includes('whatsapp')) sourceIcon = '💬';
-            else sourceIcon = '🔗';
+            if (source.includes('instagram') || source.includes('ig')) {
+                sourceIcon = '<i class="fa-brands fa-instagram" style="background: -webkit-linear-gradient(45deg, #405de6, #5851db, #833ab4, #c13584, #e1306c, #fd1d1d); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>';
+            } else if (source.includes('facebook') || source.includes('fb')) {
+                sourceIcon = '<i class="fa-brands fa-facebook" style="color: #1877F2;"></i>';
+            } else if (source.includes('google')) {
+                sourceIcon = '<i class="fa-brands fa-google" style="color: #4285F4;"></i>';
+            } else if (source.includes('tiktok')) {
+                sourceIcon = '<i class="fa-brands fa-tiktok" style="color: #000000; filter: drop-shadow(0 0 1px rgba(255,255,255,0.5));"></i>';
+            } else if (source.includes('whatsapp')) {
+                sourceIcon = '<i class="fa-brands fa-whatsapp" style="color: #25D366;"></i>';
+            } else {
+                sourceIcon = '<i class="fa-solid fa-link" style="color: #A0A0A0;"></i>';
+            }
         }
 
         // Location & IP Logic
