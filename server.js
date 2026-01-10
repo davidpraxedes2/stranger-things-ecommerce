@@ -2668,6 +2668,23 @@ app.get('/api/admin/sessions/active', authenticateToken, (req, res) => {
     }
 });
 
+// TEMP: Public endpoint to force seed (User needs this to fix empty DB)
+app.get('/api/temp-seed', async (req, res) => {
+    try {
+        console.log('🌱 Starting Temporary Seed...');
+        const { seedFunkosFromAPI } = require('./funko-seeder');
+
+        // Run in background if possible, but Vercel might kill it. 
+        // We'll try to await it but catch timeout errors.
+        await seedFunkosFromAPI(db);
+
+        res.json({ success: true, message: 'Seeding completed!' });
+    } catch (e) {
+        console.error('Seed Error:', e);
+        res.status(500).json({ error: e.message, checkLogs: true });
+    }
+});
+
 // DEBUG: Endpoint to check DB connection status
 app.get('/api/debug-db', async (req, res) => {
     try {
