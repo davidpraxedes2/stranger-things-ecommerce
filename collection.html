@@ -542,39 +542,68 @@
                 const installmentValue = (price / 3).toFixed(2).replace('.', ',');
                 const pixDiscount = (price * 0.95).toFixed(2).replace('.', ','); // 5% desconto no PIX
 
-                // Strip HTML from description
-                let cleanDescription = product.description || '';
-                // Simple regex to strip tags
-                cleanDescription = cleanDescription.replace(/<[^>]*>?/gm, '');
-                // Truncate if too long (optional, e.g. 100 chars)
+                // Robust Description Cleaning
+                let cleanDescription = '';
+                if (product.description) {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = product.description;
+                    // Remove unwanted elements
+                    const unwanted = tempDiv.querySelectorAll('.noprint, style, script, .hidden');
+                    unwanted.forEach(el => el.remove());
+                    // Get text content
+                    cleanDescription = tempDiv.textContent || tempDiv.innerText || '';
+                    // Collapse whitespace
+                    cleanDescription = cleanDescription.replace(/\s+/g, ' ').trim();
+                }
+
+                // Truncate if too long
                 if (cleanDescription.length > 100) {
                     cleanDescription = cleanDescription.substring(0, 100) + '...';
                 }
 
                 return `
-                    <a href="product.html?id=${product.id}" class="product-card" data-product-id="${product.id}">
-                        <div class="product-image-wrapper">
-                            ${hasDiscount && discountPercent > 0 ? `<span class="product-badge discount">-${discountPercent}%</span>` : ''}
-                            <div class="product-image">
-                                ${product.image_url ?
+                    <div class="product-card" data-product-id="${product.id}">
+                        <a href="product.html?id=${product.id}" class="product-link-wrapper" style="text-decoration: none; color: inherit;">
+                            <div class="product-image-wrapper">
+                                ${hasDiscount && discountPercent > 0 ? `<span class="product-badge discount">-${discountPercent}%</span>` : ''}
+                                <div class="product-image">
+                                    ${product.image_url ?
                         `<img src="${product.image_url}" alt="${product.name}" loading="lazy">` :
                         '<div style="font-size: 3rem; display: flex; align-items: center; justify-content: center; height: 100%;">📦</div>'
                     }
+                                </div>
                             </div>
+                            <div class="product-info">
+                                <h3 class="product-name">${product.name}</h3>
+                                <p class="product-description">${cleanDescription}</p>
+                                <div class="product-price">
+                                    ${hasDiscount ? `<span class="product-price-old">R$ ${originalPrice.toFixed(2).replace('.', ',')}</span>` : ''}
+                                    <span>R$ ${price.toFixed(2).replace('.', ',')}</span>
+                                </div>
+                                <div class="product-payment-info">
+                                    <div class="payment-installment">3x de R$ ${installmentValue} sem juros</div>
+                                    <div class="payment-pix">R$ ${pixDiscount} no PIX (5% OFF)</div>
+                                </div>
+                            </div>
+                        </a>
+                        <!-- Add to Cart Button -->
+                        <div style="padding: 0 var(--spacing-md) var(--spacing-md);">
+                             <button 
+                                onclick="addToCart('${product.id}', 1, this)"
+                                class="btn" 
+                                style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; background-color: var(--netflix-red); color: white; border: none; padding: 10px; border-radius: 4px; font-weight: 600; cursor: pointer; transition: background 0.2s;"
+                                onmouseover="this.style.backgroundColor='#b20710'"
+                                onmouseout="this.style.backgroundColor='var(--netflix-red)'"
+                            >
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px;">
+                                    <path d="M6 2L3 6V20C3 20.5304 3.21071 21.0391 3.58579 21.4142C3.96086 21.7893 4.46957 22 5 22H19C19.5304 22 20.0391 21.7893 20.4142 21.4142C20.7893 21.0391 21 20.5304 21 20V6L18 2H6Z"></path>
+                                    <path d="M3 6H21"></path>
+                                    <path d="M16 10C16 11.0609 15.5786 12.0783 14.8284 12.8284C14.0783 13.5786 13.0609 14 12 14C10.9391 14 9.92172 13.5786 9.17157 12.8284C8.42143 12.0783 8 11.0609 8 10"></path>
+                                </svg>
+                                ADICIONAR
+                            </button>
                         </div>
-                        <div class="product-info">
-                            <h3 class="product-name">${product.name}</h3>
-                            <p class="product-description">${cleanDescription}</p>
-                            <div class="product-price">
-                                ${hasDiscount ? `<span class="product-price-old">R$ ${originalPrice.toFixed(2).replace('.', ',')}</span>` : ''}
-                                <span>R$ ${price.toFixed(2).replace('.', ',')}</span>
-                            </div>
-                            <div class="product-payment-info">
-                                <div class="payment-installment">3x de R$ ${installmentValue} sem juros</div>
-                                <div class="payment-pix">R$ ${pixDiscount} no PIX (5% OFF)</div>
-                            </div>
-                        </div>
-                    </a>
+                    </div>
                 `;
             }).join('');
         }
