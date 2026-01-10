@@ -1073,9 +1073,10 @@ app.get('/api/products', async (req, res) => {
 
 
 // Função helper para buscar coleções com produtos
-function getCollectionsWithProducts(onlyActive = true) {
+async function getCollectionsWithProducts(onlyActive = true) {
     console.log(`🔍 Buscando coleções (onlyActive=${onlyActive}, Tabela=${db.isPostgres ? 'Postgres' : 'SQLite'})...`);
-    return new Promise((resolve, reject) => {
+
+    try {
         const query = `
             SELECT c.*, 
             (SELECT COUNT(*) FROM collection_products WHERE collection_id = c.id) as explicit_count
@@ -1084,48 +1085,46 @@ function getCollectionsWithProducts(onlyActive = true) {
             ORDER BY c.sort_order ASC
         `;
 
-        db.all(query, [], async (err, collections) => {
-            if (err) {
-                console.error('❌ Erro ao buscar coleções:', err);
-                return reject(err);
-            }
-
-            console.log(`✅ Coleções encontradas: ${collections?.length || 0}`);
-            if (!collections || collections.length === 0) {
-                return resolve([]);
-            }
-
-            // Para cada coleção, buscar os produtos ordenados
-            for (const col of collections) {
-                col.products = await new Promise((res) => {
-                    db.all(`
-                        SELECT p.*, cp.sort_order 
-                        FROM products p
-                        JOIN collection_products cp ON p.id = cp.product_id
-                        WHERE cp.collection_id = ? AND p.active = 1
-                        ORDER BY cp.sort_order ASC
-                    `, [col.id], (err, products) => {
-                        if (err) {
-                            console.error(`❌ Erro ao buscar produtos da coleção ${col.id}:`, err);
-                            res([]);
-                        }
-                        else {
-                            // Parse JSON fields if necessary
-                            products.forEach(p => {
-                                if (p.images_json) try { p.images = JSON.parse(p.images_json) } catch (e) { }
-                            });
-                            console.log(`📦 Coleção "${col.name}" (ID ${col.id}): ${products.length} produtos`);
-                            res(products);
-                        }
-                    });
-                });
-
-                // Compatibility: count is explicit count + fallback logic count (not implemented on backend to save time, relying on front for fuzzy)
-                col.product_count = col.products.length;
-            }
-            resolve(collections);
+        const collections = await new Promise((resolve, reject) => {
+            db.all(query, [], (err, rows) => {
+                if (err) reject(err);
+                else resolve(rows || []);
+            });
         });
-    });
+
+        console.log(`✅ Coleções encontradas: ${collections.length}`);
+
+        // Para cada coleção, buscar os produtos ordenados
+        for (const col of collections) {
+            col.products = await new Promise((resolve) => {
+                db.all(`
+                    SELECT p.*, cp.sort_order 
+                    FROM products p
+                    JOIN collection_products cp ON p.id = cp.product_id
+                    WHERE cp.collection_id = ? AND p.active = 1
+                    ORDER BY cp.sort_order ASC
+                `, [col.id], (err, products) => {
+                    if (err) {
+                        console.error(`❌ Erro ao buscar produtos da coleção ${col.id}:`, err);
+                        resolve([]);
+                    } else {
+                        // Parse JSON fields
+                        products.forEach(p => {
+                            if (p.images_json) try { p.images = JSON.parse(p.images_json) } catch (e) { }
+                        });
+                        resolve(products);
+                    }
+                });
+            });
+            col.product_count = col.products.length;
+        }
+
+        return collections;
+
+    } catch (error) {
+        console.error('❌ Erro helper getCollectionsWithProducts:', error);
+        throw error;
+    }
 }
 
 // Buscar coleções (público) - DB Backed
@@ -2043,14 +2042,20 @@ app.get('/api/admin/stats', authenticateToken, async (req, res) => {
 });
 
 // Listar todos os produtos (admin)
-app.get('/api/admin/products', authenticateToken, (req, res) => {
-    db.all('SELECT * FROM products ORDER BY created_at DESC', (err, rows) => {
-        if (err) {
-            res.status(500).json({ error: err.message });
-            return;
-        }
-        res.json(rows);
-    });
+// Listar todos os produtos (admin)
+app.get('/api/admin/products', authenticateToken, async (req, res) => {
+    try {
+        const products = await new Promise((resolve, reject) => {
+            db.all('SELECT * FROM products ORDER BY created_at DESC', [], (err, rows) => {
+                if (err) reject(err);
+                else resolve(rows || []);
+            });
+        });
+        res.json(products);
+    } catch (err) {
+        console.error('Erro ao listar produtos admin:', err);
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // Criar produto (admin)
