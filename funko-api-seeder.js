@@ -103,9 +103,36 @@ async function seedFunkosFromAPI(db) {
 
         // --- 2. Database Insertion ---
 
+        // Helper to ensure DB calls return Promises (fixes potential db-helper mismatch)
+        const queryDB = (method, sql, params) => {
+            return new Promise((resolve, reject) => {
+                try {
+                    // Try to call method. If strict callback required, passing callback handles it.
+                    // If it returns promise (pg pool), catch handles it? No, db-helper usually returns object or promise.
+
+                    const result = db[method](sql, params, (err, res) => {
+                        if (err) reject(err);
+                        else resolve(res);
+                    });
+
+                    // If the result itself is a promise (some implementations), attach handlers
+                    if (result && typeof result.then === 'function') {
+                        result.then(resolve).catch(reject);
+                    }
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        };
+
         // Get or Create Collection
         console.log(`\n📦 Checking Collection "${COLLECTION_NAME}"...`);
-        let collection = await db.get('SELECT * FROM collections WHERE name = ?', [COLLECTION_NAME]);
+        let collection = null;
+        try {
+            collection = await queryDB('get', 'SELECT * FROM collections WHERE name = ?', [COLLECTION_NAME]);
+        } catch (e) {
+            console.log('Error checking collection (might not exist yet):', e.message);
+        }
 
         let collectionId;
         if (collection) {
@@ -113,12 +140,12 @@ async function seedFunkosFromAPI(db) {
             collectionId = collection.id;
         } else {
             console.log(`   Creating new collection...`);
-            await db.run(`
+            await queryDB('run', `
                 INSERT INTO collections (name, slug, description, is_active)
                 VALUES (?, ?, ?, ?)
             `, [COLLECTION_NAME, 'funkos', 'Coleção exclusiva de Stranger Things Funkos', 1]);
 
-            const newColl = await db.get('SELECT * FROM collections WHERE name = ?', [COLLECTION_NAME]);
+            const newColl = await queryDB('get', 'SELECT * FROM collections WHERE name = ?', [COLLECTION_NAME]);
             collectionId = newColl ? newColl.id : null;
             console.log(`   Created collection ID: ${collectionId}`);
         }
@@ -134,38 +161,37 @@ async function seedFunkosFromAPI(db) {
 
         for (const p of products) {
             // Check if product exists
-            const existing = await db.get('SELECT id FROM products WHERE name = ?', [p.name]);
+            const existing = await queryDB('get', 'SELECT id FROM products WHERE name = ?', [p.name]);
 
             let productId;
             if (existing) {
                 // Update existing price and ensure active
-                await db.run('UPDATE products SET price = ?, active = 1 WHERE id = ?', [FIXED_PRICE, existing.id]);
+                await queryDB('run', 'UPDATE products SET price = ?, active = 1 WHERE id = ?', [FIXED_PRICE, existing.id]);
                 productId = existing.id;
             } else {
                 // Insert new
                 if (db.isPostgres) {
-                    // Using raw query for ID return simulation if needed, but db-helper uses run
-                    await db.run(`
+                    await queryDB('run', `
                         INSERT INTO products (name, description, price, category, image_url, stock, active)
                         VALUES (?, ?, ?, ?, ?, ?, ?)
                      `, [p.name, p.description, p.price, p.category, p.image_url, p.stock, p.active]);
-                    const inserted = await db.get('SELECT id FROM products WHERE name = ?', [p.name]);
+                    const inserted = await queryDB('get', 'SELECT id FROM products WHERE name = ?', [p.name]);
                     productId = inserted ? inserted.id : null;
                 } else {
-                    const res = await db.run(`
+                    const res = await queryDB('run', `
                         INSERT INTO products (name, description, price, category, image_url, stock, active)
                         VALUES (?, ?, ?, ?, ?, ?, ?)
                      `, [p.name, p.description, p.price, p.category, p.image_url, p.stock, p.active]);
-                    productId = res.lastID;
+                    productId = res ? res.lastID : null;
                 }
                 insertedCount++;
             }
 
             if (productId) {
                 // Link to Collection
-                const linkExists = await db.get('SELECT * FROM collection_products WHERE collection_id = ? AND product_id = ?', [collectionId, productId]);
+                const linkExists = await queryDB('get', 'SELECT * FROM collection_products WHERE collection_id = ? AND product_id = ?', [collectionId, productId]);
                 if (!linkExists) {
-                    await db.run('INSERT INTO collection_products (collection_id, product_id) VALUES (?, ?)', [collectionId, productId]);
+                    await queryDB('run', 'INSERT INTO collection_products (collection_id, product_id) VALUES (?, ?)', [collectionId, productId]);
                 }
             }
         }
