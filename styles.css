@@ -1096,7 +1096,8 @@ body.has-announcement .header,
     aspect-ratio: 16 / 9;
     height: auto;
     overflow: hidden;
-    margin-top: 0;
+    margin-top: 70px;
+    /* Push below fixed header */
     z-index: 1;
 }
 
