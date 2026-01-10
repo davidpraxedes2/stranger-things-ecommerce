@@ -2685,8 +2685,12 @@ app.get('/api/debug-db', async (req, res) => {
         if (db.isPostgres) {
             try {
                 const now = await db.query('SELECT NOW() as time');
+                // Check Product Count
+                const count = await db.query('SELECT COUNT(*) as c FROM products');
+
                 status.connection = 'OK';
                 status.time = now.rows[0].time;
+                status.productCount = count.rows[0].c;
             } catch (e) {
                 status.connection = 'ERROR';
                 status.error = e.message;
