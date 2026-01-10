@@ -27,9 +27,12 @@ if (connectionString) {
     const { Pool } = require('pg');
     pgPool = new Pool({
         connectionString,
-        max: 5, // Reduced from 10 - Vercel serverless works better with fewer connections
-        idleTimeoutMillis: 1000, // Release idle connections after 1s
-        connectionTimeoutMillis: 5000, // Reduced from 10s - fail fast
+        max: 5, // Keep small pool for serverless
+        idleTimeoutMillis: 5000, // Slightly increased to reduce connection churn
+        connectionTimeoutMillis: 10000, // Increased wait time for initial connection
+        ssl: {
+            rejectUnauthorized: false // Required for many cloud Postgres providers
+        }
     });
 
     pgPool.on('error', (err, client) => {
