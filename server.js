@@ -233,15 +233,22 @@ app.get('/admin', (req, res) => {
         console.log('✅ Banco inicializado e tabelas verificadas');
 
         // Popular banco se estiver vazio (em background)
+        // Popular banco se estiver vazio (em background)
         setImmediate(async () => {
-            // Primeiro limpa os Funkos antigos/errados conforme solicitado
-            const { cleanupFunkos } = require('./cleanup-funkos');
-            await cleanupFunkos(db);
+            try {
+                // Primeiro limpa os Funkos antigos/errados conforme solicitado
+                const { cleanupFunkos } = require('./cleanup-funkos');
+                await cleanupFunkos(db);
 
-            populateDatabaseIfEmpty();
-            seedCollections(db);
-            seedFunkos(db);
-            seedFunkosFromAPI(db); // Fetch 40 Funkos from funko.com.br API
+                await populateDatabaseIfEmpty();
+                await seedCollections(db);
+                await seedFunkos(db);
+                await seedFunkosFromAPI(db); // Fetch 40 Funkos from funko.com.br API
+
+                console.log('🏁 Inicialização de dados concluída.');
+            } catch (seedErr) {
+                console.error('⚠️ Erro durante seeding inicial:', seedErr);
+            }
         });
     } catch (error) {
         console.error('❌ Erro ao inicializar banco de dados:', error);
