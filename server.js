@@ -2333,19 +2333,106 @@ app.get('/api/admin/customers/:id', authenticateToken, async (req, res) => {
 });
 
 // Criar cliente (admin)
-app.post('/api/admin/customers', authenticateToken, (req, res) => {
+// Criar cliente (admin)
+app.post('/api/admin/customers', authenticateToken, async (req, res) => {
     const { name, email, phone, cpf, address, city, state, zip_code } = req.body;
 
-    db.run(`
-        INSERT INTO customers(name, email, phone, cpf, address, city, state, zip_code)
-        VALUES(?, ?, ?, ?, ?, ?, ?, ?)
-            `, [name, email, phone, cpf, address, city, state, zip_code], function (err) {
-        if (err) {
-            res.status(500).json({ error: err.message });
-            return;
+    try {
+        if (db.isPostgres) {
+            const result = await db.query(`
+                INSERT INTO customers(name, email, phone, cpf, address, city, state, zip_code)
+                VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id
+            `, [name, email, phone, cpf, address, city, state, zip_code]);
+            res.json({ success: true, message: 'Cliente criado com sucesso', id: result.rows[0].id });
+        } else {
+            await new Promise((resolve, reject) => {
+                db.run(`
+                    INSERT INTO customers(name, email, phone, cpf, address, city, state, zip_code)
+                    VALUES(?, ?, ?, ?, ?, ?, ?, ?)
+                `, [name, email, phone, cpf, address, city, state, zip_code], function (err) {
+                    if (err) reject(err);
+                    else {
+                        res.json({ success: true, message: 'Cliente criado com sucesso', id: this.lastID });
+                        resolve();
+                    }
+                });
+            });
         }
-        res.json({ success: true, message: 'Cliente criado com sucesso', id: this.lastID });
-    });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Atualizar cliente (admin)
+app.put('/api/admin/customers/:id', authenticateToken, async (req, res) => {
+    const { id } = req.params;
+    const { name, email, phone, cpf, address, city, state, zip_code } = req.body;
+
+    try {
+        if (db.isPostgres) {
+            const result = await db.query(`
+                UPDATE customers 
+                SET name = $1, email = $2, phone = $3, cpf = $4, address = $5, city = $6, state = $7, zip_code = $8, updated_at = CURRENT_TIMESTAMP
+                WHERE id = $9
+            `, [name, email, phone, cpf, address, city, state, zip_code, parseInt(id)]);
+
+            if (result.rowCount === 0) {
+                return res.status(404).json({ error: 'Cliente não encontrado' });
+            }
+            res.json({ success: true, message: 'Cliente atualizado com sucesso' });
+
+        } else {
+            await new Promise((resolve, reject) => {
+                db.run(`
+                    UPDATE customers 
+                    SET name = ?, email = ?, phone = ?, cpf = ?, address = ?, city = ?, state = ?, zip_code = ?, updated_at = CURRENT_TIMESTAMP
+                    WHERE id = ?
+                `, [name, email, phone, cpf, address, city, state, zip_code, id], function (err) {
+                    if (err) reject(err);
+                    else {
+                        if (this.changes === 0) {
+                            res.status(404).json({ error: 'Cliente não encontrado' });
+                        } else {
+                            res.json({ success: true, message: 'Cliente atualizado com sucesso' });
+                        }
+                        resolve();
+                    }
+                });
+            });
+        }
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Deletar cliente (admin)
+app.delete('/api/admin/customers/:id', authenticateToken, async (req, res) => {
+    const { id } = req.params;
+    try {
+        if (db.isPostgres) {
+            const result = await db.query('DELETE FROM customers WHERE id = $1', [parseInt(id)]);
+            if (result.rowCount === 0) {
+                return res.status(404).json({ error: 'Cliente não encontrado' });
+            }
+            res.json({ success: true, message: 'Cliente deletado com sucesso' });
+        } else {
+            await new Promise((resolve, reject) => {
+                db.run('DELETE FROM customers WHERE id = ?', [id], function (err) {
+                    if (err) reject(err);
+                    else {
+                        if (this.changes === 0) {
+                            res.status(404).json({ error: 'Cliente não encontrado' });
+                        } else {
+                            res.json({ success: true, message: 'Cliente deletado com sucesso' });
+                        }
+                        resolve();
+                    }
+                });
+            });
+        }
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // Atualizar cliente (admin)
