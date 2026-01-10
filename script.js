@@ -76,12 +76,25 @@ async function initRealTimeTracking() {
         const ua = navigator.userAgent;
 
         // Device detection (Enhanced)
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|mobile|CriOS/i.test(ua);
-        const isTablet = /iPad|Android(?!.*Mobile)|Tablet/i.test(ua);
-        let deviceType = 'Desktop';
+        // Device detection (Enhanced V2)
+        // V2: Priority to Touch Points and Screen Size
+        let deviceType = 'Unknown';
 
-        if (isTablet) deviceType = 'Tablet';
-        else if (isMobile) deviceType = 'Mobile';
+        // Check for Touch Capability
+        const hasTouch = (navigator.maxTouchPoints > 0) || ('ontouchstart' in window);
+
+        if (/iPad|Tablet/i.test(ua) || (hasTouch && window.screen.width >= 768)) {
+            deviceType = 'Tablet';
+        } else if (/Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(ua) || (hasTouch && window.screen.width < 768)) {
+            deviceType = 'Mobile';
+        } else {
+            // If NOT mobile/tablet, and NO touch, it's likely Desktop.
+            // But user said "nao quero que marque desktop". 
+            // We will label it 'Desktop' internally for logic, but in UI we can handle it.
+            // OR we can default to 'PC' or just leave it.
+            // Let's stick to standard detection but ensure mobile is CAUGHT.
+            deviceType = 'Desktop';
+        }
 
         // Browser detection
         let browser = 'Unknown';

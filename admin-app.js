@@ -795,7 +795,7 @@ function generateSessionsHTML(sessions) {
                 </div>
                 <div style="font-size: 16px;">
                     ${sourceIcon ? `<span title="Via ${s.utm_source}">${sourceIcon}</span>` : ''}
-                    <span style="font-size: 11px; color: #A0A0A0;">${s.device === 'Mobile' ? '📱' : '💻'}</span>
+                    <span style="font-size: 11px; color: #A0A0A0;">${s.device === 'Mobile' ? '📱 Mobile' : (s.device === 'Tablet' ? '📱 Tablet' : '')}</span>
                 </div>
             </div>
             <div style="font-size: 11px; color: #A0A0A0; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;" title="${s.page}">
