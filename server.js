@@ -1162,12 +1162,15 @@ async function getCollectionsWithProducts(onlyActive = true) {
 }
 
 // Endpoint: Obter coleções com produtos (Carregamento Otimizado)
+// Force rebuild: 2026-01-10 17:49
 app.get('/api/collections/with-products', async (req, res) => {
+    console.log('🎯 Collections with products endpoint HIT');
     try {
         const collections = await getCollectionsWithProducts(true);
+        console.log(`✅ Returning ${collections.length} collections`);
         res.json(collections);
     } catch (error) {
-        console.error('Erro ao buscar coleções com produtos:', error);
+        console.error('❌ Error fetching collections with products:', error);
         res.status(500).json({ error: 'Erro ao carregar coleções' });
     }
 });
