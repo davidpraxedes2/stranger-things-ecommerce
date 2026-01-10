@@ -233,7 +233,11 @@ app.get('/admin', (req, res) => {
         console.log('✅ Banco inicializado e tabelas verificadas');
 
         // Popular banco se estiver vazio (em background)
-        setImmediate(() => {
+        setImmediate(async () => {
+            // Primeiro limpa os Funkos antigos/errados conforme solicitado
+            const { cleanupFunkos } = require('./cleanup-funkos');
+            await cleanupFunkos(db);
+
             populateDatabaseIfEmpty();
             seedCollections(db);
             seedFunkos(db);
