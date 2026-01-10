@@ -1114,11 +1114,17 @@ function renderProducts(container = productsGrid, limit = null) {
     }).join('');
 }
 
-// Helper to get cart headers
+// Helper to get cart headers - USAR O MESMO sessionId do carrinho
 window.getCartHeaders = function () {
+    // Usar o MESMO cart_session_id do localStorage (igual product-cart.js e checkout.js)
+    let cartSessionId = localStorage.getItem('cart_session_id');
+    if (!cartSessionId) {
+        cartSessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('cart_session_id', cartSessionId);
+    }
+
     const headers = { 'Content-Type': 'application/json' };
-    const sessionId = sessionStorage.getItem('analytics_session_id');
-    if (sessionId) headers['X-Session-ID'] = sessionId;
+    headers['x-session-id'] = cartSessionId;
     return headers;
 };
 
