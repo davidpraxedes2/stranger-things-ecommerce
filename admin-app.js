@@ -902,51 +902,35 @@ async function updateMapMarkersSVG() {
         });
         const locations = await res.json();
 
-        // Clear existing markers (circles and texts inside g elements that are not paths)
+        // Clear existing markers
         const existingMarkers = svgElement.querySelectorAll('.map-marker-group');
         existingMarkers.forEach(el => el.remove());
 
-        // City Coordinates Mapping (approximate X,Y on the SVG 612x639)
-        const cityMap = {
-            'São Paulo': { x: 420, y: 480 },
-            'Rio de Janeiro': { x: 460, y: 500 },
-            'Brasília': { x: 380, y: 380 },
-            'Belo Horizonte': { x: 450, y: 440 },
-            'Curitiba': { x: 390, y: 530 },
-            'Porto Alegre': { x: 350, y: 600 },
-            'Salvador': { x: 500, y: 320 },
-            'Recife': { x: 540, y: 230 },
-            'Fortaleza': { x: 530, y: 190 },
-            'Manaus': { x: 200, y: 190 },
-            'Goiânia': { x: 400, y: 410 },
-            'Florianópolis': { x: 400, y: 560 },
-            'Belém': { x: 350, y: 120 },
-            'Sorocaba': { x: 410, y: 490 },
-            'Campinas': { x: 430, y: 475 },
-            'Santos': { x: 440, y: 495 },
-            'Ribeirão Preto': { x: 440, y: 450 },
-            'Uberlândia': { x: 420, y: 420 },
-            'Londrina': { x: 370, y: 500 },
-            'Joinville': { x: 400, y: 545 },
-            'Niterói': { x: 465, y: 505 },
-            'Vitória': { x: 480, y: 460 },
-            'Natal': { x: 550, y: 210 },
-            'João Pessoa': { x: 545, y: 220 },
-            'Maceió': { x: 540, y: 250 },
-            'Aracaju': { x: 530, y: 280 },
-            'Teresina': { x: 500, y: 210 },
-            'São Luís': { x: 470, y: 160 },
-            'Cuiabá': { x: 320, y: 380 },
-            'Campo Grande': { x: 330, y: 460 }
-        };
+        // Convert lat/lon to SVG coordinates automatically
+        // Brazil bounds: lat -33.75 to 5.27, lon -73.99 to -34.79
+        // SVG viewBox: 0 0 612 639
+        function latLonToSVG(lat, lon) {
+            // Brazil geographic bounds
+            const minLat = -33.75, maxLat = 5.27;
+            const minLon = -73.99, maxLon = -34.79;
+
+            // Normalize to 0-1
+            const normX = (lon - minLon) / (maxLon - minLon);
+            const normY = (maxLat - lat) / (maxLat - minLat); // Inverted because SVG Y goes down
+
+            // Map to SVG coordinates with padding
+            const padding = 30;
+            const x = padding + normX * (612 - 2 * padding);
+            const y = padding + normY * (639 - 2 * padding);
+
+            return { x, y };
+        }
 
         locations.forEach((loc, index) => {
-            // Try to find coords
-            let coords = cityMap[loc.city];
+            // Use real lat/lon if available, otherwise skip
+            if (!loc.lat || !loc.lon || loc.lat === 0 || loc.lon === 0) return;
 
-            // If we have real lat/lon, we could project it, but for now fallback to city map or default
-            // Just displaying known cities clearly is better than random dots
-            if (!coords) return;
+            const coords = latLonToSVG(loc.lat, loc.lon);
 
             const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
             group.classList.add('map-marker-group');
