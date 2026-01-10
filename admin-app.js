@@ -776,15 +776,16 @@ function generateSessionsHTML(sessions) {
         </div>
     `).join('');
 }
-const products = [
-    { name: 'Camiseta Hellfire Club', sales: 245, revenue: 12250, growth: 15 },
-    { name: 'Moletom Upside Down', sales: 198, revenue: 19800, growth: 22 },
-    { name: 'Caneca Demogorgon', sales: 156, revenue: 4680, growth: -3 },
-    { name: 'Poster Stranger Things', sales: 142, revenue: 4260, growth: 8 },
-    { name: 'Action Figure Eleven', sales: 128, revenue: 11520, growth: 12 }
-];
+function generateTopProductsRows() {
+    const products = [
+        { name: 'Camiseta Hellfire Club', sales: 245, revenue: 12250, growth: 15 },
+        { name: 'Moletom Upside Down', sales: 198, revenue: 19800, growth: 22 },
+        { name: 'Caneca Demogorgon', sales: 156, revenue: 4680, growth: -3 },
+        { name: 'Poster Stranger Things', sales: 142, revenue: 4260, growth: 8 },
+        { name: 'Action Figure Eleven', sales: 128, revenue: 11520, growth: 12 }
+    ];
 
-return products.map(p => `
+    return products.map(p => `
         <tr>
             <td><strong>${p.name}</strong></td>
             <td>${p.sales} unidades</td>
@@ -967,6 +968,32 @@ if (!document.getElementById('leaflet-custom-styles')) {
 }
 
 async function renderActiveSessions() {
+    const sessionsContainer = document.getElementById('activeSessions');
+    if (!sessionsContainer) return;
+
+    try {
+        const response = await fetch(`${API_URL}/sessions/active`, {
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
+        });
+
+        if (response.ok) {
+            const sessions = await response.json();
+
+            // Updates count stat
+            const uniqueCities = new Set(sessions.map(s => s.city)).size;
+            const locationsCountEl = document.getElementById('locationsCount');
+            if (locationsCountEl) locationsCountEl.textContent = uniqueCities;
+
+            // Simple Render using helper with truncation
+            sessionsContainer.innerHTML = generateSessionsHTML(sessions);
+        }
+    } catch (e) {
+        console.error('Erro rendering sessions:', e);
+        sessionsContainer.innerHTML = '<div class="text-danger">Erro ao carregar sessões</div>';
+    }
+}
+
+async function renderActiveSessions_Legacy() {
     const sessionsContainer = document.getElementById('activeSessions');
     if (!sessionsContainer) return;
 
