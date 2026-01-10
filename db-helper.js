@@ -84,6 +84,7 @@ if (!USE_POSTGRES && !isVercel) {
 
 // --- LAZY INITIALIZATION & MIGRATION SYSTEM ---
 let _initPromise = null;
+let _schemaVerified = false;
 
 async function performSchemaMigration() {
     if (!pgPool) return;
@@ -136,8 +137,13 @@ async function performSchemaMigration() {
 
 async function ensureSchema() {
     if (!USE_POSTGRES) return;
+    if (_schemaVerified) return; // Fast exit (HOT PATH)
+
     if (!_initPromise) {
-        _initPromise = performSchemaMigration();
+        _initPromise = (async () => {
+            await performSchemaMigration();
+            _schemaVerified = true;
+        })();
     }
     await _initPromise;
 }
