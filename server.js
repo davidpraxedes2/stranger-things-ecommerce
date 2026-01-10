@@ -1726,18 +1726,30 @@ app.get('/api/cart', async (req, res) => {
     const sessionId = getSessionId(req);
 
     try {
-        const rows = await new Promise((resolve, reject) => {
-            db.all(`
-        SELECT ci.*, p.name, p.image_url, p.sku 
-        FROM cart_items ci
-        JOIN products p ON ci.product_id = p.id
-        WHERE ci.session_id = ?
-            ORDER BY ci.created_at DESC
+        let rows;
+        if (db.isPostgres) {
+            const result = await db.query(`
+                SELECT ci.*, p.name, p.image_url, p.sku 
+                FROM cart_items ci
+                JOIN products p ON ci.product_id = p.id
+                WHERE ci.session_id = $1
+                ORDER BY ci.created_at DESC
+            `, [sessionId]);
+            rows = result.rows;
+        } else {
+            rows = await new Promise((resolve, reject) => {
+                db.all(`
+                    SELECT ci.*, p.name, p.image_url, p.sku 
+                    FROM cart_items ci
+                    JOIN products p ON ci.product_id = p.id
+                    WHERE ci.session_id = ?
+                    ORDER BY ci.created_at DESC
                 `, [sessionId], (err, rows) => {
-                if (err) reject(err);
-                else resolve(rows || []);
+                    if (err) reject(err);
+                    else resolve(rows || []);
+                });
             });
-        });
+        }
 
         const total = rows.reduce((sum, item) => sum + (item.price * item.quantity), 0);
         res.json({ items: rows, total: total });
