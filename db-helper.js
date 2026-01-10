@@ -25,18 +25,41 @@ if (connectionString) {
     console.log('📦 Detectado PostgreSQL - modo produção (Vercel)');
 
     const { Pool } = require('pg');
-    pgPool = new Pool({
-        connectionString,
-        max: 5, // Keep small pool for serverless
-        idleTimeoutMillis: 5000, // Slightly increased to reduce connection churn
-        connectionTimeoutMillis: 10000, // Increased wait time for initial connection
-        ssl: {
-            rejectUnauthorized: false // Required for many cloud Postgres providers
-        }
+
+    // Debug configs (Safe logging)
+    console.log('🔌 DB Connection Config Check:', {
+        hasPostgresUrl: !!process.env.POSTGRES_URL,
+        hasPrismaUrl: !!process.env.POSTGRES_PRISMA_URL,
+        hasDatabaseUrl: !!process.env.DATABASE_URL,
+        connectionStringLength: connectionString ? connectionString.length : 0
     });
+
+    const poolConfig = {
+        connectionString,
+        max: 5,
+        idleTimeoutMillis: 5000,
+        connectionTimeoutMillis: 10000,
+    };
+
+    // Only add SSL if not localhost env (assuming production string implies it, or force it)
+    if (!connectionString.includes('localhost') && !connectionString.includes('127.0.0.1')) {
+        poolConfig.ssl = {
+            rejectUnauthorized: false
+        };
+    }
+
+    pgPool = new Pool(poolConfig);
 
     pgPool.on('error', (err, client) => {
         console.error('❌ Unexpected error on idle client', err);
+    });
+
+    // Initial connection test
+    pgPool.connect().then(client => {
+        console.log('✅ Postgres connection pool successfully established');
+        client.release();
+    }).catch(err => {
+        console.error('❌ Failed to establish initial Postgres connection:', err);
     });
 }
 
