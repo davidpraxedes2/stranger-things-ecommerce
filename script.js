@@ -12,11 +12,24 @@ let collections = [];
 // ===== SISTEMA DE ANALYTICS - TEMPO REAL (HEARTBEAT) =====
 
 async function initRealTimeTracking() {
-    let sessionId = sessionStorage.getItem('analytics_session_id');
-    if (!sessionId) {
-        sessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        sessionStorage.setItem('analytics_session_id', sessionId);
+    // V3: Use localStorage to share session across tabs (prevent duplicates)
+    // Check for existing session
+    let sessionId = localStorage.getItem('analytics_session_id');
+    const lastActive = localStorage.getItem('analytics_session_last_active');
+    const now = Date.now();
+
+    // Expire session after 30 mins of inactivity
+    if (sessionId && lastActive && (now - lastActive > 30 * 60 * 1000)) {
+        console.log('🔄 Sessão expirada. Gerando nova...');
+        sessionId = null;
     }
+
+    if (!sessionId) {
+        sessionId = 'sess_' + now + '_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('analytics_session_id', sessionId);
+    }
+    // Update last active timestamp
+    localStorage.setItem('analytics_session_last_active', now);
 
     // V2: Force cache refresh to fix "stuck in Sorocaba" issues
     const LOC_CACHE_KEY = 'user_location_cache_v2';
@@ -89,6 +102,9 @@ async function initRealTimeTracking() {
     const sendHeartbeat = () => {
         // Stop if tab is hidden (prevents "Tab War" overwriting current page)
         if (document.visibilityState === 'hidden') return;
+
+        // Keep session alive
+        localStorage.setItem('analytics_session_last_active', Date.now());
 
         const payload = {
             sessionId: sessionId,  // Backend expects 'sessionId'
