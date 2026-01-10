@@ -234,22 +234,24 @@ app.get('/admin', (req, res) => {
 
         // Popular banco se estiver vazio (em background)
         // Popular banco se estiver vazio (em background)
-        setImmediate(async () => {
-            try {
-                // Primeiro limpa os Funkos antigos/errados conforme solicitado
-                const { cleanupFunkos } = require('./cleanup-funkos');
-                await cleanupFunkos(db);
+        try {
+            // PRIMEIRO FIX: Desativar todos os seeds automáticos para evitar TIMEOUT no Vercel
+            // Apenas o trigger manual via /api/admin/seed-funkos deve ser usado
 
-                await populateDatabaseIfEmpty();
-                await seedCollections(db);
-                await seedFunkos(db);
-                // await seedFunkosFromAPI(db); // REMOVE AUTO-SEED TO PREVENT TIMEOUTS ON VERCEL
+            // const { cleanupFunkos } = require('./cleanup-funkos');
+            // await cleanupFunkos(db);
 
-                console.log('🏁 Inicialização de dados concluída.');
-            } catch (seedErr) {
-                console.error('⚠️ Erro durante seeding inicial:', seedErr);
-            }
-        });
+            // await populateDatabaseIfEmpty();
+            // await seedCollections(db);
+            // await seedFunkos(db);
+
+            // await seedFunkosFromAPI(db); // REMOVE AUTO-SEED TO PREVENT TIMEOUTS ON VERCEL
+
+            console.log('🏁 Inicialização de dados: SEED AUTOMÁTICO DESATIVADO (Use Trigger Manual).');
+        } catch (seedErr) {
+            console.error('⚠️ Erro durante seeding inicial:', seedErr);
+        }
+
     } catch (error) {
         console.error('❌ Erro ao inicializar banco de dados:', error);
     }
