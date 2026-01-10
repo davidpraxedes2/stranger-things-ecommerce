@@ -2,8 +2,12 @@ if (typeof window.API_BASE === 'undefined') {
     window.API_BASE = window.location.origin;
     window.API_URL = `${window.API_BASE}/api`;
 }
-var API_BASE = window.API_BASE;
-var API_URL = window.API_URL;
+
+// Only declare if not already declared (to avoid const/let conflicts)
+if (typeof API_BASE === 'undefined') {
+    var API_BASE = window.API_BASE;
+    var API_URL = window.API_URL;
+}
 
 // Products Data (loaded from API)
 let products = [];
