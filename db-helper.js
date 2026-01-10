@@ -293,12 +293,6 @@ async function initializePostgres() {
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
                 images_json TEXT, original_price REAL, sku TEXT
             )`,
-            `CREATE TABLE IF NOT EXISTS analytics_sessions (
-                session_id TEXT PRIMARY KEY, ip TEXT, city TEXT, region TEXT, country TEXT, 
-                lat REAL, lon REAL, current_page TEXT, page_title TEXT, last_action TEXT, 
-                device TEXT, browser TEXT, utm_source TEXT, utm_medium TEXT, utm_campaign TEXT, 
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, last_active_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )`,
             // ... (Add other tables if needed but keeping it minimal to ensure boot)
             `CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, username TEXT UNIQUE NOT NULL, email TEXT UNIQUE NOT NULL, password TEXT, role TEXT DEFAULT 'admin', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`,
             `CREATE TABLE IF NOT EXISTS cart_items (id SERIAL PRIMARY KEY, session_id TEXT NOT NULL, product_id INTEGER, quantity INTEGER, price REAL, selected_variant TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`,
