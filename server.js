@@ -2690,7 +2690,12 @@ app.post('/api/analytics/heartbeat', async (req, res) => {
             const r = await db.query('SELECT session_id FROM analytics_sessions WHERE session_id = $1', [sessionId]);
             existing = r.rows[0];
         } else {
-            existing = db.prepare('SELECT session_id FROM analytics_sessions WHERE session_id = ?').get(sessionId);
+            existing = await new Promise((resolve, reject) => {
+                db.get('SELECT session_id FROM analytics_sessions WHERE session_id = ?', [sessionId], (err, row) => {
+                    if (err) reject(err);
+                    else resolve(row);
+                });
+            });
         }
 
         if (existing) {
@@ -2700,8 +2705,17 @@ app.post('/api/analytics/heartbeat', async (req, res) => {
                 "UPDATE analytics_sessions SET current_page=?, page_title=?, last_action=?, last_active_at=CURRENT_TIMESTAMP WHERE session_id=?";
 
             const params = [page, title, action || 'view', sessionId];
-            if (db.isPostgres) await db.query(updateQ, params);
-            else db.prepare(updateQ).run(...params);
+
+            if (db.isPostgres) {
+                await db.query(updateQ, params);
+            } else {
+                await new Promise((resolve, reject) => {
+                    db.run(updateQ, params, (err) => {
+                        if (err) reject(err);
+                        else resolve();
+                    });
+                });
+            }
         } else {
             // Insert
             const loc = location || { city: 'Desconhecido', region: 'BR', country: 'BR', lat: 0, lon: 0 };
@@ -2728,8 +2742,16 @@ app.post('/api/analytics/heartbeat', async (req, res) => {
                 utmSource, utmMedium, utmCampaign
             ];
 
-            if (db.isPostgres) await db.query(insertQ, params);
-            else db.prepare(insertQ).run(...params);
+            if (db.isPostgres) {
+                await db.query(insertQ, params);
+            } else {
+                await new Promise((resolve, reject) => {
+                    db.run(insertQ, params, (err) => {
+                        if (err) reject(err);
+                        else resolve();
+                    });
+                });
+            }
         }
 
         res.json({ success: true });
