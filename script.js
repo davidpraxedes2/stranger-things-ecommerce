@@ -3,11 +3,7 @@ if (typeof window.API_BASE === 'undefined') {
     window.API_URL = `${window.API_BASE}/api`;
 }
 
-// Only declare if not already declared (to avoid const/let conflicts)
-if (typeof API_BASE === 'undefined') {
-    var API_BASE = window.API_BASE;
-    var API_URL = window.API_URL;
-}
+// Global variables removed to use window properties directly
 
 // Products Data (loaded from API)
 let products = [];
@@ -137,9 +133,9 @@ async function initRealTimeTracking() {
 
         if (navigator.sendBeacon) {
             const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
-            navigator.sendBeacon(`${API_URL || '/api'}/analytics/heartbeat`, blob);
+            navigator.sendBeacon(`${window.API_URL || '/api'}/analytics/heartbeat`, blob);
         } else {
-            fetch(`${API_URL || '/api'}/analytics/heartbeat`, {
+            fetch(`${window.API_URL || '/api'}/analytics/heartbeat`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -198,7 +194,7 @@ async function loadCollections() {
     console.log('🔄 loadCollections INICIADA');
     try {
         console.log('📡 Fazendo fetch de collections...');
-        const response = await fetch(`${API_URL}/collections`);
+        const response = await fetch(`${window.API_URL}/collections/with-products`);
         console.log('📡 Response recebida:', response.status);
         if (response.ok) {
             collections = await response.json();
@@ -602,7 +598,7 @@ function enrichProductsFrontend(products) {
 
 // Load products from API
 async function loadProductsFromAPI() {
-    const fullUrl = `${API_URL}/products`;
+    const fullUrl = `${window.API_URL}/products`;
 
     console.log('🚀 INICIANDO CARREGAMENTO DE PRODUTOS');
     console.log('🌐 URL:', fullUrl);
@@ -1185,7 +1181,7 @@ window.getCartHeaders = function () {
 // Load Cart from API
 async function loadCartFromAPI() {
     try {
-        const response = await fetch(`${API_URL}/cart?session_id=${window.sessionId}`, {
+        const response = await fetch(`${window.API_URL}/cart?session_id=${window.sessionId}`, {
             headers: window.getCartHeaders()
         });
 
@@ -1205,7 +1201,7 @@ async function addToCart(productId, quantity = 1, selectedVariant = null) {
     if (!product) return;
 
     try {
-        const response = await fetch(`${API_URL}/cart/add`, {
+        const response = await fetch(`${window.API_URL}/cart/add`, {
             method: 'POST',
             headers: window.getCartHeaders(),
             body: JSON.stringify({
@@ -1247,7 +1243,7 @@ async function addToCart(productId, quantity = 1, selectedVariant = null) {
 // Remove from Cart
 async function removeFromCart(cartItemId) {
     try {
-        const response = await fetch(`${API_URL}/cart/remove/${cartItemId}`, {
+        const response = await fetch(`${window.API_URL}/cart/remove/${cartItemId}`, {
             method: 'DELETE',
             headers: window.getCartHeaders()
         });
@@ -1274,7 +1270,7 @@ async function updateQuantity(cartItemId, quantity) {
     }
 
     try {
-        const response = await fetch(`${API_URL}/cart/update/${cartItemId}`, {
+        const response = await fetch(`${window.API_URL}/cart/update/${cartItemId}`, {
             method: 'PUT',
             headers: window.getCartHeaders(),
             body: JSON.stringify({ quantity: quantity, session_id: window.sessionId })
@@ -1421,7 +1417,7 @@ async function handleCheckout() {
     }));
 
     try {
-        const response = await fetch(`${API_URL}/orders`, {
+        const response = await fetch(`${window.API_URL}/orders`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
