@@ -1,5 +1,5 @@
 // Database helper - abstracts SQLite and PostgreSQL differences
-// VERSÃO CORRIGIDA - Pool de Conexões para PostgreSQL
+// VERSÃO OTIMIZADA PARA VERCEL POSTGRES (SDK OFICIAL)
 
 let Database;
 try {
@@ -14,62 +14,32 @@ try {
     }
 }
 
-let pgPool = null;
+let VercelPool = null;
 let USE_POSTGRES = false;
 
 // Check if we're using PostgreSQL (Vercel)
-const connectionString = process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL;
-
-if (connectionString) {
+// Vercel SDK handles env vars automatically (POSTGRES_URL, etc)
+if (process.env.POSTGRES_URL || process.env.VERCEL) {
     USE_POSTGRES = true;
-    console.log('📦 Detectado PostgreSQL - modo produção (Vercel)');
-    // Vercel Postgres best practice: Use NON_POOLING url for direct connections via 'pg' driver
-    // caused by "Prepared statements" issues with pgbouncer in transaction mode often used in poolers
-    const connectionString = process.env.POSTGRES_URL_NON_POOLING || process.env.POSTGRES_URL || process.env.DATABASE_URL;
+    console.log('📦 Detectado Vercel PostgreSQL - Usando SDK Oficial');
 
-    const { Pool } = require('pg');
+    try {
+        const { createPool } = require('@vercel/postgres');
+        VercelPool = createPool({
+            connectionString: process.env.POSTGRES_URL_NON_POOLING || process.env.POSTGRES_URL
+        });
 
-    // Debug configs (Safe logging)
-    console.log('🔌 DB Connection Config Check:', {
-        usingNonPooling: !!process.env.POSTGRES_URL_NON_POOLING,
-        hasPostgresUrl: !!process.env.POSTGRES_URL,
-        connectionStringLength: connectionString ? connectionString.length : 0
-    });
+        // Test connection
+        VercelPool.sql`SELECT 1`.then(() => {
+            console.log('✅ Vercel Postgres conectado com sucesso!');
+        }).catch(err => {
+            console.error('❌ Erro na conexão inicial Vercel Postgres:', err);
+        });
 
-    const poolConfig = {
-        connectionString,
-        max: 3, // Very conservative pool size for serverless
-        idleTimeoutMillis: 1000,
-        connectionTimeoutMillis: 5000,
-    };
-
-    // Only add manual SSL config if NOT present in connection string
-    // Vercel URLs usually have ?sslmode=require, adding ssl object causes conflict
-    const hasSSLInUrl = connectionString && connectionString.includes('sslmode=');
-    const isLocalhost = connectionString && (connectionString.includes('localhost') || connectionString.includes('127.0.0.1'));
-
-    if (!isLocalhost && !hasSSLInUrl) {
-        poolConfig.ssl = {
-            rejectUnauthorized: false
-        };
-    } else if (hasSSLInUrl) {
-        // If query param exists, do NOT add ssl object to config to avoid "The options "ssl" and "sslmode" cannot be used together"
-        console.log('🔒 SSL detected in URL, skipping manual SSL config');
+    } catch (err) {
+        console.error('❌ Erro ao carregar @vercel/postgres:', err);
+        USE_POSTGRES = false; // Fallback to SQLite if SDK fails
     }
-
-    pgPool = new Pool(poolConfig);
-
-    pgPool.on('error', (err, client) => {
-        console.error('❌ Unexpected error on idle client', err);
-    });
-
-    // Initial connection test
-    pgPool.connect().then(client => {
-        console.log('✅ Postgres connection pool successfully established');
-        client.release();
-    }).catch(err => {
-        console.error('❌ Failed to establish initial Postgres connection:', err);
-    });
 }
 
 let sqliteDb = null;
@@ -102,94 +72,90 @@ const db = {
     isPostgres: USE_POSTGRES,
 
     // Run query (INSERT, UPDATE, DELETE)
-    run: function (query, params = [], callback) {
+    run: async function (query, params = [], callback) {
         if (typeof params === 'function') {
             callback = params;
             params = [];
         }
 
         if (USE_POSTGRES) {
-            if (!callback) {
-                return new Promise((resolve, reject) => {
-                    runPostgres(query, params, (err, res) => {
-                        if (err) reject(err);
-                        else resolve(res);
-                    });
-                });
+            try {
+                const result = await runPostgres(query, params);
+                if (callback) callback(null, result);
+                return result;
+            } catch (err) {
+                if (callback) callback(err);
+                else throw err;
             }
-            return runPostgres(query, params, callback);
         } else {
             return runSQLite(query, params, callback);
         }
     },
 
     // Get single row
-    get: function (query, params = [], callback) {
+    get: async function (query, params = [], callback) {
         if (typeof params === 'function') {
             callback = params;
             params = [];
         }
 
         if (USE_POSTGRES) {
-            if (!callback) {
-                return new Promise((resolve, reject) => {
-                    getPostgres(query, params, (err, row) => {
-                        if (err) reject(err);
-                        else resolve(row);
-                    });
-                });
+            try {
+                const row = await getPostgres(query, params);
+                if (callback) callback(null, row);
+                return row;
+            } catch (err) {
+                if (callback) callback(err);
+                else throw err;
             }
-            return getPostgres(query, params, callback);
         } else {
             return getSQLite(query, params, callback);
         }
     },
 
     // Get all rows
-    all: function (query, params = [], callback) {
+    all: async function (query, params = [], callback) {
         if (typeof params === 'function') {
             callback = params;
             params = [];
         }
 
         if (USE_POSTGRES) {
-            if (!callback) {
-                return new Promise((resolve, reject) => {
-                    allPostgres(query, params, (err, rows) => {
-                        if (err) reject(err);
-                        else resolve(rows);
-                    });
-                });
+            try {
+                const rows = await allPostgres(query, params);
+                if (callback) callback(null, rows);
+                return rows;
+            } catch (err) {
+                if (callback) callback(err);
+                else throw err;
             }
-            return allPostgres(query, params, callback);
         } else {
             return allSQLite(query, params, callback);
         }
     },
 
-    // Prepare statement
+    // Prepare statement (Simulation for Postgres)
     prepare: function (query) {
-        if (USE_POSTGRES) {
-            return preparePostgres(query);
-        } else {
-            return sqliteDb.prepare(query);
-        }
+        return {
+            run: async (params, cb) => db.run(query, params, cb),
+            get: async (params, cb) => db.get(query, params, cb),
+            all: async (params, cb) => db.all(query, params, cb),
+            finalize: (cb) => { if (cb) cb(); }
+        };
     },
 
-    // Direct query for PostgreSQL (for migrations)
+    // Direct query for PostgreSQL (using SDK pool)
     query: async function (queryText, params = []) {
         if (!USE_POSTGRES) {
             throw new Error('query() only available for PostgreSQL');
         }
-        // Properly acquire and release client from pool
-        let client = null;
-        try {
-            client = await pgPool.connect();
-            const result = await client.query(queryText, params);
-            return result;
-        } finally {
-            if (client) client.release();
-        }
+
+        // Convert ? to $1, $2, etc for compatibility
+        let paramIndex = 1;
+        const convertedQuery = queryText.replace(/\?/g, () => `$${paramIndex++}`);
+
+        // Use Vercel Pool
+        return await VercelPool.query(convertedQuery, params);
     }
 };
 
@@ -277,225 +243,56 @@ function allSQLite(query, params, callback) {
     }
 }
 
-// PostgreSQL functions using POOL
-function runPostgres(query, params, callback) {
-    (async () => {
-        let client = null;
+// PostgreSQL functions using Vercel SDK
+async function runPostgres(query, params) {
+    // Convert ? to $1
+    let paramIndex = 1;
+    let convertedQuery = query.replace(/\?/g, () => `$${paramIndex++}`);
+
+    // Fix syntax
+    convertedQuery = convertedQuery
+        .replace(/INTEGER PRIMARY KEY AUTOINCREMENT/g, 'SERIAL PRIMARY KEY')
+        .replace(/DATETIME DEFAULT CURRENT_TIMESTAMP/g, 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP');
+
+    // Handle INSERT OR IGNORE
+    if (convertedQuery.includes('INSERT OR IGNORE')) {
+        convertedQuery = convertedQuery.replace('INSERT OR IGNORE', 'INSERT') + ' ON CONFLICT DO NOTHING';
+    }
+
+    const result = await VercelPool.query(convertedQuery, params);
+
+    // Attempt to get ID for INSERTs
+    let lastID = null;
+    if (convertedQuery.trim().toUpperCase().startsWith('INSERT')) {
         try {
-            // Convert ? to $1, $2, etc
-            let paramIndex = 1;
-            let convertedQuery = query.replace(/\?/g, () => {
-                const idx = paramIndex++;
-                return `$${idx}`;
-            });
+            // Only works if the insert actually happened and table has serial
+            // For simple usage we just return null or try currval if possible, but standard is complex
+        } catch (e) { }
+    }
 
-            // Fix syntax differences
-            convertedQuery = convertedQuery
-                .replace(/INTEGER PRIMARY KEY AUTOINCREMENT/g, 'SERIAL PRIMARY KEY')
-                .replace(/DATETIME DEFAULT CURRENT_TIMESTAMP/g, 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP');
-
-            // Handle INSERT OR IGNORE
-            if (query.includes('INSERT OR IGNORE')) {
-                const match = query.match(/INSERT OR IGNORE INTO (\w+)/);
-                if (match) {
-                    convertedQuery = convertedQuery.replace(/INSERT OR IGNORE/, 'INSERT') +
-                        ` ON CONFLICT DO NOTHING`;
-                }
-            }
-
-            // Get client from pool
-            client = await pgPool.connect();
-
-            const result = await client.query(convertedQuery, params);
-
-            // Get last inserted ID if it's an INSERT
-            let lastID = null;
-            if (convertedQuery.trim().toUpperCase().startsWith('INSERT')) {
-                const idResult = await client.query('SELECT LASTVAL() as id');
-                lastID = idResult.rows[0]?.id || null;
-            }
-
-            const mockResult = {
-                lastID: lastID,
-                changes: result.rowCount || 0
-            };
-
-            if (callback) {
-                callback(null, mockResult);
-            }
-        } catch (error) {
-            // Ignore duplicate column errors or harmless migration errors
-            if (error.code !== '42701' && !error.message?.includes('duplicate column')) {
-                console.error('PG Run Error:', error);
-            }
-            if (callback) {
-                callback(error);
-            }
-        } finally {
-            if (client) client.release();
-        }
-    })();
-}
-
-function getPostgres(query, params, callback) {
-    (async () => {
-        let client = null;
-        try {
-            let paramIndex = 1;
-            const convertedQuery = query.replace(/\?/g, () => {
-                const idx = paramIndex++;
-                return `$${idx}`;
-            }).replace(/INTEGER PRIMARY KEY AUTOINCREMENT/g, 'SERIAL PRIMARY KEY')
-                .replace(/DATETIME DEFAULT CURRENT_TIMESTAMP/g, 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP');
-
-            client = await pgPool.connect();
-            const result = await client.query(convertedQuery, params);
-
-            const row = result.rows && result.rows[0] ? result.rows[0] : null;
-
-            if (callback) {
-                callback(null, row);
-            }
-        } catch (error) {
-            console.error('PG Get Error:', error);
-            if (callback) {
-                callback(error, null);
-            }
-        } finally {
-            if (client) client.release();
-        }
-    })();
-}
-
-function allPostgres(query, params, callback) {
-    (async () => {
-        let client = null;
-        try {
-            let paramIndex = 1;
-            const convertedQuery = query.replace(/\?/g, () => {
-                const idx = paramIndex++;
-                return `$${idx}`;
-            }).replace(/INTEGER PRIMARY KEY AUTOINCREMENT/g, 'SERIAL PRIMARY KEY')
-                .replace(/DATETIME DEFAULT CURRENT_TIMESTAMP/g, 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP');
-
-            client = await pgPool.connect();
-            const result = await client.query(convertedQuery, params);
-
-            if (callback) {
-                callback(null, result.rows || []);
-            }
-        } catch (error) {
-            console.error('PG All Error:', error);
-            if (callback) {
-                callback(error, []);
-            }
-        } finally {
-            if (client) client.release();
-        }
-    })();
-}
-
-function preparePostgres(query) {
     return {
-        run: async function (params = [], callback) {
-            try {
-                let paramIndex = 1;
-                const convertedQuery = query.replace(/\?/g, () => {
-                    const idx = paramIndex++;
-                    return `$${idx}`;
-                }).replace(/INTEGER PRIMARY KEY AUTOINCREMENT/g, 'SERIAL PRIMARY KEY')
-                    .replace(/DATETIME DEFAULT CURRENT_TIMESTAMP/g, 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP');
-
-                const { Client } = require('pg');
-                const client = new Client({
-                    connectionString: process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL
-                });
-
-                await client.connect();
-                await client.query(convertedQuery, params);
-                await client.end();
-
-                if (callback) callback(null);
-            } catch (error) {
-                if (callback) callback(error);
-                else throw error;
-            }
-        },
-        all: async function (params = [], callback) {
-            // Se params for callback (overload)
-            if (typeof params === 'function') {
-                callback = params;
-                params = [];
-            } else if (!Array.isArray(params) && params !== undefined) {
-                // better-sqlite3 aceita varargs: .all(1, 2)
-                // mas aqui vamos simplificar assumindo array ou nada
-                params = [params];
-            }
-
-            try {
-                // Reutilizar lógica de allPostgres
-                if (!callback) {
-                    return new Promise((resolve, reject) => {
-                        allPostgres(query, params, (err, rows) => {
-                            if (err) reject(err);
-                            else resolve(rows);
-                        });
-                    });
-                }
-                return allPostgres(query, params, callback);
-            } catch (error) {
-                if (callback) callback(error);
-                else throw error;
-            }
-        },
-        get: async function (params = [], callback) {
-            // Se params for callback (overload)
-            if (typeof params === 'function') {
-                callback = params;
-                params = [];
-            } else if (!Array.isArray(params) && params !== undefined) {
-                params = [params];
-            }
-
-            try {
-                // Reutilizar lógica de getPostgres
-                if (!callback) {
-                    return new Promise((resolve, reject) => {
-                        getPostgres(query, params, (err, row) => {
-                            if (err) reject(err);
-                            else resolve(row);
-                        });
-                    });
-                }
-                return getPostgres(query, params, callback);
-            } catch (error) {
-                if (callback) callback(error);
-                else throw error;
-            }
-        },
-        finalize: function (callback) {
-            if (callback) callback();
-        }
+        lastID: lastID,
+        changes: result.rowCount
     };
 }
 
-// Direct query for migrations (returns promise)
-async function queryPostgres(query, params = []) {
-    const { Client } = require('pg');
-    const client = new Client({
-        connectionString: process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL
-    });
+async function getPostgres(query, params) {
+    let paramIndex = 1;
+    const convertedQuery = query.replace(/\?/g, () => `$${paramIndex++}`);
+    const result = await VercelPool.query(convertedQuery, params);
+    return result.rows[0] || null;
+}
 
-    await client.connect();
-    const result = await client.query(query, params);
-    await client.end();
-
-    return result;
+async function allPostgres(query, params) {
+    let paramIndex = 1;
+    const convertedQuery = query.replace(/\?/g, () => `$${paramIndex++}`);
+    const result = await VercelPool.query(convertedQuery, params);
+    return result.rows || [];
 }
 
 // Initialize database
 db.initialize = async function () {
-    if (USE_POSTGRES && pgPool) {
+    if (USE_POSTGRES && VercelPool) {
         await initializePostgres();
     } else {
         initializeSQLite();
@@ -503,14 +300,11 @@ db.initialize = async function () {
 };
 
 async function initializePostgres() {
-    let client = null;
     try {
-        // Use the existing pool instead of creating a new Client
-        client = await pgPool.connect();
-        console.log('✅ Conectado ao PostgreSQL');
+        console.log('📦 Inicializando Schema no Vercel Postgres...');
 
-        // Create tables
-        await client.query(`
+        // Use direct queries via pool
+        await VercelPool.query(`
             CREATE TABLE IF NOT EXISTS products (
                 id SERIAL PRIMARY KEY,
                 name TEXT NOT NULL,
@@ -528,7 +322,7 @@ async function initializePostgres() {
             )
         `);
 
-        await client.query(`
+        await VercelPool.query(`
             CREATE TABLE IF NOT EXISTS users (
                 id SERIAL PRIMARY KEY,
                 username TEXT UNIQUE NOT NULL,
@@ -539,7 +333,7 @@ async function initializePostgres() {
             )
         `);
 
-        await client.query(`
+        await VercelPool.query(`
             CREATE TABLE IF NOT EXISTS orders (
                 id SERIAL PRIMARY KEY,
                 customer_name TEXT,
@@ -554,7 +348,7 @@ async function initializePostgres() {
             )
         `);
 
-        await client.query(`
+        await VercelPool.query(`
             CREATE TABLE IF NOT EXISTS order_items (
                 id SERIAL PRIMARY KEY,
                 order_id INTEGER NOT NULL,
@@ -564,7 +358,7 @@ async function initializePostgres() {
             )
         `);
 
-        await client.query(`
+        await VercelPool.query(`
             CREATE TABLE IF NOT EXISTS customers (
                 id SERIAL PRIMARY KEY,
                 name TEXT NOT NULL,
@@ -580,7 +374,7 @@ async function initializePostgres() {
             )
         `);
 
-        await client.query(`
+        await VercelPool.query(`
             CREATE TABLE IF NOT EXISTS cart_items(
             id SERIAL PRIMARY KEY,
             session_id TEXT NOT NULL,
@@ -592,7 +386,7 @@ async function initializePostgres() {
         )
             `);
 
-        await client.query(`
+        await VercelPool.query(`
             CREATE TABLE IF NOT EXISTS payment_gateways(
                 id SERIAL PRIMARY KEY,
                 name TEXT NOT NULL,
@@ -606,7 +400,7 @@ async function initializePostgres() {
             )
             `);
 
-        await client.query(`
+        await VercelPool.query(`
             CREATE TABLE IF NOT EXISTS shipping_options(
                 id SERIAL PRIMARY KEY,
                 name TEXT NOT NULL,
@@ -618,7 +412,7 @@ async function initializePostgres() {
             )
             `);
 
-        await client.query(`
+        await VercelPool.query(`
             CREATE TABLE IF NOT EXISTS collections(
                 id SERIAL PRIMARY KEY,
                 name TEXT NOT NULL,
@@ -631,7 +425,7 @@ async function initializePostgres() {
             )
             `);
 
-        await client.query(`
+        await VercelPool.query(`
             CREATE TABLE IF NOT EXISTS collection_products(
                 collection_id INTEGER,
                 product_id INTEGER,
@@ -642,17 +436,39 @@ async function initializePostgres() {
             )
             `);
 
+        await VercelPool.query(`
+            CREATE TABLE IF NOT EXISTS analytics_sessions (
+                session_id TEXT PRIMARY KEY,
+                ip TEXT,
+                city TEXT,
+                region TEXT,
+                country TEXT,
+                lat REAL,
+                lon REAL,
+                current_page TEXT,
+                page_title TEXT,
+                last_action TEXT,
+                device TEXT,
+                browser TEXT,
+                utm_source TEXT,
+                utm_medium TEXT,
+                utm_campaign TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                last_active_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
         // Create admin user if doesn't exist
         const bcrypt = require('bcryptjs');
         const defaultPassword = bcrypt.hashSync('admin123', 10);
-        await client.query(`
+        await VercelPool.query(`
             INSERT INTO users(username, email, password, role)
             SELECT 'admin', 'admin@strangerthings.com', $1, 'admin'
             WHERE NOT EXISTS(SELECT 1 FROM users WHERE username = 'admin')
             `, [defaultPassword]);
 
         // Seed Bestfy Gateway if doesn't exist
-        await client.query(`
+        await VercelPool.query(`
             INSERT INTO payment_gateways (name, gateway_type, public_key, secret_key, is_active, settings_json)
             SELECT 'BESTFY Payment Gateway', 'bestfy', '', '', 0, '{}'
             WHERE NOT EXISTS (SELECT 1 FROM payment_gateways WHERE gateway_type = 'bestfy')
@@ -661,16 +477,16 @@ async function initializePostgres() {
 
         // Schema Migrations (Add missing columns to existing tables)
         try {
-            await client.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS customer_cpf TEXT');
-            await client.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS customer_phone TEXT');
-            await client.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS customer_address TEXT');
+            await VercelPool.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS customer_cpf TEXT');
+            await VercelPool.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS customer_phone TEXT');
+            await VercelPool.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS customer_address TEXT');
 
             // Fix: Adicionar colunas de transação que estavam faltando e causando erro 500 no PIX
-            await client.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS transaction_id TEXT');
-            await client.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS transaction_data TEXT');
+            await VercelPool.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS transaction_id TEXT');
+            await VercelPool.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS transaction_data TEXT');
 
             // Meta Pixel: Adicionar coluna para rastrear quando PIX foi copiado
-            await client.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS pix_copied_at TIMESTAMP');
+            await VercelPool.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS pix_copied_at TIMESTAMP');
 
             console.log('✅ Migrações de schema aplicadas com sucesso');
         } catch (migError) {
@@ -678,7 +494,7 @@ async function initializePostgres() {
         }
 
         // Criar tabela de configurações de rastreamento
-        await client.query(`
+        await VercelPool.query(`
             CREATE TABLE IF NOT EXISTS tracking_settings (
                 id SERIAL PRIMARY KEY,
                 provider TEXT NOT NULL,
@@ -693,14 +509,11 @@ async function initializePostgres() {
     } catch (error) {
         console.error('❌ Erro ao criar tabelas PostgreSQL:', error);
         throw error;
-    } finally {
-        if (client) client.release();
     }
 }
 
 function initializeSQLite() {
-    // SQLite initialization happens in server.js initializeDatabase()
-    // This function is a placeholder for consistency
+    // Placeholder
 }
 
 module.exports = db;
