@@ -907,7 +907,6 @@ async function updateMapMarkersSVG() {
         existingMarkers.forEach(el => el.remove());
 
         // City Coordinates Mapping (approximate X,Y on the SVG 612x639)
-        // We will match mostly by City Name since we don't have a geo-projection library loaded
         const cityMap = {
             'São Paulo': { x: 420, y: 480 },
             'Rio de Janeiro': { x: 460, y: 500 },
@@ -921,7 +920,24 @@ async function updateMapMarkersSVG() {
             'Manaus': { x: 200, y: 190 },
             'Goiânia': { x: 400, y: 410 },
             'Florianópolis': { x: 400, y: 560 },
-            'Belém': { x: 350, y: 120 }
+            'Belém': { x: 350, y: 120 },
+            'Sorocaba': { x: 410, y: 490 },
+            'Campinas': { x: 430, y: 475 },
+            'Santos': { x: 440, y: 495 },
+            'Ribeirão Preto': { x: 440, y: 450 },
+            'Uberlândia': { x: 420, y: 420 },
+            'Londrina': { x: 370, y: 500 },
+            'Joinville': { x: 400, y: 545 },
+            'Niterói': { x: 465, y: 505 },
+            'Vitória': { x: 480, y: 460 },
+            'Natal': { x: 550, y: 210 },
+            'João Pessoa': { x: 545, y: 220 },
+            'Maceió': { x: 540, y: 250 },
+            'Aracaju': { x: 530, y: 280 },
+            'Teresina': { x: 500, y: 210 },
+            'São Luís': { x: 470, y: 160 },
+            'Cuiabá': { x: 320, y: 380 },
+            'Campo Grande': { x: 330, y: 460 }
         };
 
         locations.forEach((loc, index) => {
