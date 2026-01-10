@@ -40,9 +40,11 @@ if (isVercel || connectionString) {
         // Configuration meant for Vercel/Neon
         const poolConfig = {
             connectionString: connectionString,
-            max: 4, // Conservative
+            max: 2, // Very conservative for Vercel serverless
+            min: 0,
             idleTimeoutMillis: 5000,
             connectionTimeoutMillis: 10000,
+            allowExitOnIdle: true
         };
 
         // SSL Logic: If not localhost, FORCE SSL with rejectUnauthorized: false
