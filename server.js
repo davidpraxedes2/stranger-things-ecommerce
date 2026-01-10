@@ -2783,8 +2783,13 @@ app.post('/api/analytics/heartbeat', async (req, res) => {
     // Filter Vercel/AWS Health Checks (often have empty UA or specific tokens)
     const isHealthCheck = ua.includes('Vercel-Health') || ua.includes('AWS-Health');
 
-    if (isBot || isHealthCheck) {
-        console.log('🤖 Bot/Crawler detectado, ignorando heartbeat:', ua);
+    // Check City immediately if passed, or wait for header parsing?
+    // Header parsing happens inside logic. Let's do a quick check on headers if available.
+    const vCity = req.headers['x-vercel-ip-city'];
+    const isDataCenterCity = vCity && ['Santa Clara', 'Mountain View', 'Ashburn', 'Boardman', 'Dublin', 'Seattle', 'Chicago'].includes(decodeURIComponent(vCity));
+
+    if (isBot || isHealthCheck || isDataCenterCity) {
+        console.log(`🤖 Bot/DataCenter executado (${vCity || 'UA'}), ignorando heartbeat:`, ua);
         return res.json({ ignored: true });
     }
 
