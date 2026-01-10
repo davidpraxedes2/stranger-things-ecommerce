@@ -1089,14 +1089,14 @@ body.has-announcement .header,
 }
 
 /* ===== Hero Slider ===== */
-    position: relative;
-    width: 100%;
-    /* 16:9 Aspect Ratio to match 1600x900 images */
-    aspect-ratio: 16 / 9;
-    height: auto;
-    overflow: hidden;
-    margin-top: 0;
-    z-index: 1;
+position: relative;
+width: 100%;
+/* 16:9 Aspect Ratio to match 1600x900 images */
+aspect-ratio: 16 / 9;
+height: auto;
+overflow: hidden;
+margin-top: 0;
+z-index: 1;
 }
 
 /* Quando há announcement bar */
@@ -1261,8 +1261,9 @@ body:has(.announcement-bar:not(.hidden)) .hero-slider {
 /* Mobile responsiveness for slider */
 @media (max-width: 768px) {
     .hero-slider {
-        height: 400px;
-        margin-top: 0;
+        /* Allow aspect ratio to control height */
+        height: auto;
+        min-height: auto;
     }
 
     body.has-announcement .hero-slider,
