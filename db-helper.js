@@ -141,11 +141,24 @@ async function ensureSchema() {
 
     if (!_initPromise) {
         _initPromise = (async () => {
-            await performSchemaMigration();
-            _schemaVerified = true;
+            try {
+                await performSchemaMigration();
+                _schemaVerified = true;
+            } catch (e) {
+                console.error('⚠️ Schema Check Failed (Will Retry):', e.message);
+                _initPromise = null; // Reset so next req tries again
+                throw e;
+            }
         })();
     }
-    await _initPromise;
+    try {
+        await _initPromise;
+    } catch (e) {
+        // Allow request to proceed (maybe DB is fine, just migration check failed)
+        // or rethrow if strictly required. 
+        // For robustness, let's rethrow but we know next one will retry.
+        throw e;
+    }
 }
 
 // Helper functions
