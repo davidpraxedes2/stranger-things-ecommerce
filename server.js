@@ -1307,23 +1307,35 @@ app.put('/api/admin/collections/:id/products', authenticateToken, (req, res) => 
 });
 
 // Admin: Reordenar produtos na coleção
-app.put('/api/admin/collections/:id/reorder-products', authenticateToken, (req, res) => {
+app.put('/api/admin/collections/:id/reorder-products', authenticateToken, async (req, res) => {
     const { id } = req.params;
     const { order } = req.body; // Array of { product_id, sort_order }
 
     if (!order || !Array.isArray(order)) return res.status(400).json({ error: 'Formato inválido' });
 
-    const stmt = db.prepare('UPDATE collection_products SET sort_order = ? WHERE collection_id = ? AND product_id = ?');
-    const transaction = db.transaction((items) => {
-        for (const item of items) {
-            stmt.run(item.sort_order, id, item.product_id);
-        }
-    });
-
     try {
-        transaction(order);
-        res.json({ success: true, message: 'Ordem dos produtos atualizada' });
+        if (db.isPostgres) {
+            // Postgres - Use db.query directly to update order
+            for (const item of order) {
+                await db.query(
+                    'UPDATE collection_products SET sort_order = $1 WHERE collection_id = $2 AND product_id = $3',
+                    [item.sort_order, parseInt(id), item.product_id]
+                );
+            }
+            res.json({ success: true, message: 'Ordem updated (Postgres)' });
+        } else {
+            // SQLite
+            const stmt = db.prepare('UPDATE collection_products SET sort_order = ? WHERE collection_id = ? AND product_id = ?');
+            const transaction = db.transaction((items) => {
+                for (const item of items) {
+                    stmt.run(item.sort_order, id, item.product_id);
+                }
+            });
+            transaction(order);
+            res.json({ success: true, message: 'Ordem dos produtos atualizada' });
+        }
     } catch (err) {
+        console.error('Erro ao reordenar:', err);
         res.status(500).json({ error: err.message });
     }
 });
