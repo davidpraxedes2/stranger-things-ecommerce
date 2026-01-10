@@ -18,24 +18,32 @@ async function initRealTimeTracking() {
         sessionStorage.setItem('analytics_session_id', sessionId);
     }
 
-    let userLocation = JSON.parse(localStorage.getItem('user_location_cache') || 'null');
+    // V2: Force cache refresh to fix "stuck in Sorocaba" issues
+    const LOC_CACHE_KEY = 'user_location_cache_v2';
+    let userLocation = JSON.parse(localStorage.getItem(LOC_CACHE_KEY) || 'null');
 
-    // Fetch Location if missing
+    // Fetch Location if missing or forced
     if (!userLocation) {
         try {
+            // Using ipapi.co (Free Tier)
             const res = await fetch('https://ipapi.co/json/');
             if (res.ok) {
                 const data = await res.json();
                 userLocation = {
-                    city: data.city,
-                    region: data.region_code,
-                    country: data.country_code,
-                    lat: data.latitude,
-                    lon: data.longitude
+                    city: data.city || 'Desconhecido',
+                    region: data.region_code || '',
+                    country: data.country_code || 'BR',
+                    lat: data.latitude || 0,
+                    lon: data.longitude || 0,
+                    cached_at: Date.now()
                 };
-                localStorage.setItem('user_location_cache', JSON.stringify(userLocation));
+                localStorage.setItem(LOC_CACHE_KEY, JSON.stringify(userLocation));
             }
-        } catch (e) { console.warn('Loc Fail', e); }
+        } catch (e) {
+            console.warn('Loc Fail:', e);
+            // Fallback placeholder (will be ignored by server logic if better IP handling exists)
+            userLocation = null;
+        }
     }
 
     // Extract UTM parameters (capture once per session)
