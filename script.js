@@ -87,9 +87,12 @@ async function initRealTimeTracking() {
     const deviceInfo = getDeviceInfo();
 
     const sendHeartbeat = () => {
+        // Stop if tab is hidden (prevents "Tab War" overwriting current page)
+        if (document.visibilityState === 'hidden') return;
+
         const payload = {
             sessionId: sessionId,  // Backend expects 'sessionId'
-            page: window.location.pathname + window.location.search,
+            page: window.location.pathname + window.location.search + window.location.hash,
             title: document.title,  // Backend expects 'title'
             action: 'view',
             location: userLocation,
@@ -112,7 +115,8 @@ async function initRealTimeTracking() {
     };
 
     // Initial Ping
-    sendHeartbeat();
+    if (document.visibilityState === 'visible') sendHeartbeat();
+
     // Loop Ping (every 10s)
     setInterval(sendHeartbeat, 10000);
 
