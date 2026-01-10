@@ -1,69 +1,107 @@
 // Database helper - abstracts SQLite and PostgreSQL differences
-// VERSÃO OTIMIZADA PARA VERCEL POSTGRES (SDK OFICIAL)
+// DEBUG MODE ATIVADO
 
-let Database;
+// Tentar carregar dependências no topo para garantir que o bundler detecte
+let VercelPostgres = null;
+try {
+    VercelPostgres = require('@vercel/postgres');
+} catch (e) {
+    console.log('⚠️ @vercel/postgres driver not found at top level');
+}
+
+let Database = null;
 try {
     Database = require('better-sqlite3');
-} catch (e) {
-    console.error('⚠️  better-sqlite3 não disponível, tentando sqlite3...');
+} catch (e) { /* ignore */ }
+if (!Database) {
     try {
         Database = require('sqlite3').verbose().Database;
-    } catch (e2) {
-        console.error('❌ Nenhum driver SQLite disponível');
-        Database = null;
-    }
+    } catch (e) { /* ignore */ }
 }
 
 let VercelPool = null;
 let USE_POSTGRES = false;
 
-// Check if we're using PostgreSQL (Vercel)
-// Vercel SDK handles env vars automatically (POSTGRES_URL, etc)
-if (process.env.POSTGRES_URL || process.env.VERCEL) {
+// LOGS DIAGNÓSTICOS CRÍTICOS
+console.log('🔍 DB HELPER INIT START');
+console.log('🔍 ENV CHECKS:', {
+    NODE_ENV: process.env.NODE_ENV,
+    VERCEL: process.env.VERCEL,
+    HAS_POSTGRES_URL: !!process.env.POSTGRES_URL,
+    HAS_POSTGRES_URL_NON_POOLING: !!process.env.POSTGRES_URL_NON_POOLING,
+    HAS_DATABASE_URL: !!process.env.DATABASE_URL,
+    HAS_VERCEL_POSTGRES_PKG: !!VercelPostgres
+});
+
+// Forçar Postgres se estiver no Vercel, mesmo que vars pareçam faltar (para ver o erro real)
+const IS_VERCEL = !!process.env.VERCEL;
+const HAS_PG_VARS = !!(process.env.POSTGRES_URL || process.env.POSTGRES_URL_NON_POOLING);
+
+if (IS_VERCEL || HAS_PG_VARS) {
     USE_POSTGRES = true;
-    console.log('📦 Detectado Vercel PostgreSQL - Usando SDK Oficial');
+    console.log('📦 Inicializando Modo Postgres...');
 
-    try {
-        const { createPool } = require('@vercel/postgres');
-        VercelPool = createPool({
-            connectionString: process.env.POSTGRES_URL_NON_POOLING || process.env.POSTGRES_URL
-        });
+    if (!VercelPostgres) {
+        console.error('❌ FATAL: @vercel/postgres não foi carregado! Verifique node_modules.');
+        // Tentar fallback para 'pg' se vercel sdk pifar
+        try {
+            console.log('⚠️ Tentando fallback para driver pg nativo...');
+            const { Pool } = require('pg');
+            const connStr = process.env.POSTGRES_URL_NON_POOLING || process.env.POSTGRES_URL || process.env.DATABASE_URL;
+            VercelPool = new Pool({
+                connectionString: connStr,
+                ssl: { rejectUnauthorized: false }, // Force SSL for fallback
+                max: 3,
+                connectionTimeoutMillis: 10000
+            });
+            console.log('✅ Fallback pg pool criado');
+        } catch (pgErr) {
+            console.error('❌ FATAL: Fallback pg também falhou:', pgErr);
+        }
+    } else {
+        try {
+            const { createPool } = VercelPostgres;
+            const connStr = process.env.POSTGRES_URL_NON_POOLING || process.env.POSTGRES_URL;
 
-        // Test connection
-        VercelPool.sql`SELECT 1`.then(() => {
-            console.log('✅ Vercel Postgres conectado com sucesso!');
-        }).catch(err => {
-            console.error('❌ Erro na conexão inicial Vercel Postgres:', err);
-        });
+            console.log('🔌 Tentando conectar Vercel Pool com string length:', connStr ? connStr.length : 'NULL');
 
-    } catch (err) {
-        console.error('❌ Erro ao carregar @vercel/postgres:', err);
-        USE_POSTGRES = false; // Fallback to SQLite if SDK fails
+            VercelPool = createPool({
+                connectionString: connStr
+            });
+
+            // Teste imediato
+            VercelPool.sql`SELECT 1`.then(() => {
+                console.log('✅ Vercel Postgres conectado e verificado!');
+            }).catch(err => {
+                console.error('❌ Vercel Postgres falhou no ping inicial:', err);
+                console.error('❌ Detalhes:', JSON.stringify(err, Object.getOwnPropertyNames(err)));
+            });
+        } catch (err) {
+            console.error('❌ Erro fatal criando pool Vercel:', err);
+        }
     }
 }
 
 let sqliteDb = null;
 
-// Só inicializar SQLite se não estiver no Vercel (que tem sistema de arquivos read-only)
-if (!USE_POSTGRES && !process.env.VERCEL) {
-    try {
-        if (Database === require('better-sqlite3')) {
-            // better-sqlite3 initialization
-            console.log('📦 Usando better-sqlite3 (desenvolvimento local)');
-            sqliteDb = new Database('database.sqlite');
-            console.log('✅ Conectado ao SQLite via better-sqlite3');
-        } else if (Database) {
-            // sqlite3 initialization (fallback)
-            console.log('📦 Usando SQLite clsssico (fallback)');
-            sqliteDb = new Database('database.sqlite', (err) => {
-                if (err) console.error('Erro ao conectar ao SQLite:', err.message);
-                else console.log('✅ Conectado ao SQLite');
-            });
-        }
-    } catch (error) {
-        console.error('Erro ao inicializar SQLite:', error.message);
-        sqliteDb = null;
+// Só inicializar SQLite se NÃO for usar Postgres e NÃO estiver no Vercel
+if (!USE_POSTGRES && !IS_VERCEL) {
+    if (Database) {
+        console.log('📦 Inicializando SQLite local...');
+        try {
+            // Logica simplificada para sqlite...
+            if (Database.prototype && Database.prototype.prepare) {
+                // better-sqlite3
+                sqliteDb = new Database('database.sqlite');
+            } else {
+                // sqlite3
+                sqliteDb = new Database('database.sqlite');
+            }
+            console.log('✅ SQLite inicializado');
+        } catch (e) { console.error('Error init sqlite', e); }
     }
+} else if (IS_VERCEL && !USE_POSTGRES) {
+    console.error('❌ ERRO CRÍTICO: Ambiente Vercel detectado mas Postgres falhou e SQLite é proibido.');
 }
 
 // Helper functions
