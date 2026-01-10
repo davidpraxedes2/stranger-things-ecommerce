@@ -1551,6 +1551,38 @@ app.get('/api/orders/:id', async (req, res) => {
             return res.status(404).json({ error: 'Pedido não encontrado' });
         }
 
+        // Endpoint: Obter coleções com produtos (Carregamento Otimizado)
+        app.get('/api/collections/with-products', async (req, res) => {
+            try {
+                const collections = await getCollectionsWithProducts(true);
+                res.json(collections);
+            } catch (error) {
+                console.error('Erro ao buscar coleções com produtos:', error);
+                res.status(500).json({ error: 'Erro ao carregar coleções' });
+            }
+        });
+
+        // Endpoint: Obter todas as coleções (apenas dados básicos)
+        app.get('/api/collections', async (req, res) => {
+            try {
+                const query = db.isPostgres ?
+                    'SELECT * FROM collections ORDER BY sort_order ASC' :
+                    'SELECT * FROM collections ORDER BY sort_order ASC';
+
+                let collections;
+                if (db.isPostgres) {
+                    const result = await db.query(query);
+                    collections = result.rows;
+                } else {
+                    collections = await db.all(query);
+                }
+                res.json(collections);
+            } catch (error) {
+                console.error('Erro ao listar coleções:', error);
+                res.status(500).json({ error: error.message });
+            }
+        });
+
         // Buscar itens do pedido com dados dos produtos
         const items = await new Promise((resolve, reject) => {
             db.all(`
