@@ -659,7 +659,7 @@ async function renderAnalytics(container) {
     let onlineUsers = 0;
 
     try {
-        const response = await fetch(`${API_URL}/analytics/online-count`, {
+        const response = await fetch(`${API_URL}/admin/analytics/online-count`, {
             headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` },
             signal: AbortSignal.timeout(3000)
         });
@@ -846,7 +846,7 @@ async function updateMapMarkersSVG() {
     if (!svgElement) return;
 
     try {
-        const res = await fetch(`${API_URL}/analytics/visitor-locations`, {
+        const res = await fetch(`${API_URL}/admin/analytics/visitor-locations`, {
             headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
         });
         const locations = await res.json();
@@ -914,7 +914,7 @@ async function updateLiveViewData() {
 
 async function updateOnlineCount() {
     try {
-        const res = await fetch(`${API_URL}/analytics/online-count`, {
+        const res = await fetch(`${API_URL}/admin/analytics/online-count`, {
             headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
         });
         const data = await res.json();
@@ -953,7 +953,7 @@ async function renderActiveSessions() {
     if (!sessionsContainer) return;
 
     try {
-        const response = await fetch(`${API_URL}/sessions/active`, {
+        const response = await fetch(`${API_URL}/admin/sessions/active`, {
             headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
         });
 
@@ -1140,7 +1140,7 @@ function startLiveUpdates() {
 
     AppState.liveUpdateInterval = setInterval(async () => {
         try {
-            const response = await fetch(`${API_URL}/analytics/online-count`, {
+            const response = await fetch(`${API_URL}/admin/analytics/online-count`, {
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` },
                 signal: AbortSignal.timeout(2000)
             });

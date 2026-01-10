@@ -2668,43 +2668,7 @@ app.get('/api/admin/sessions/active', authenticateToken, (req, res) => {
     }
 });
 
-app.post('/api/analytics/heartbeat', (req, res) => {
-    try {
-        const { session_id, page, pageTitle, action } = req.body;
-        if (!session_id) return res.status(400).json({ error: 'Missing session_id' });
-
-        const updateQ = db.isPostgres ?
-            "UPDATE analytics_sessions SET current_page=$1, page_title=$2, last_action=$3, last_active_at=NOW() WHERE session_id=$4" :
-            "UPDATE analytics_sessions SET current_page=?, page_title=?, last_action=?, last_active_at=datetime('now') WHERE session_id=?";
-
-        const params = [page, pageTitle, action, session_id];
-
-        if (db.isPostgres) {
-            db.query(updateQ, params).then(result => {
-                if (result.rowCount === 0) {
-                    // Session not found, maybe re-create? For now just ignore
-                }
-                res.json({ success: true });
-            }).catch(err => {
-                console.error('Error heartbeat PG:', err);
-                res.status(500).json({ error: 'DB Error' });
-            });
-        } else {
-            db.run(updateQ, params, (err) => {
-                if (err) {
-                    console.error('Error heartbeat SQLite:', err);
-                    return res.status(500).json({ error: 'DB Error' });
-                }
-                res.json({ success: true });
-            });
-        }
-    } catch (e) {
-        console.error('Error heartbeat:', e);
-        res.status(500).json({ error: 'Server Error' });
-    }
-});
-
-// API: Registrar Heartbeat do visitante
+// API: Registrar Heartbeat do visitante (endpoint único e completo)
 app.post('/api/analytics/heartbeat', async (req, res) => {
     const { sessionId, page, title, action, ip: clientIp, location, utm, device, browser } = req.body;
 

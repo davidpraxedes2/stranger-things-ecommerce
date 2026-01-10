@@ -79,9 +79,9 @@ async function initRealTimeTracking() {
 
     const sendHeartbeat = () => {
         const payload = {
-            session_id: sessionId,
+            sessionId: sessionId,  // Backend expects 'sessionId'
             page: window.location.pathname + window.location.search,
-            pageTitle: document.title,
+            title: document.title,  // Backend expects 'title'
             action: 'view',
             location: userLocation,
             utm: utmParams,
