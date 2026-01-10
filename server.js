@@ -255,6 +255,19 @@ app.get('/admin', (req, res) => {
     }
 })();
 
+// TRIGGER MANUAL: Seed Funkos
+app.post('/api/admin/seed-funkos', authenticateToken, async (req, res) => {
+    try {
+        console.log('🔄 Manual Seed Funkos triggered...');
+        const { seedFunkosFromAPI } = require('./funko-api-seeder');
+        await seedFunkosFromAPI(db);
+        res.json({ success: true, message: 'Seeding completed successfully.' });
+    } catch (error) {
+        console.error('❌ Manual Seed Error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 // Popular banco se estiver vazio
 async function populateDatabaseIfEmpty() {
     db.get('SELECT COUNT(*) as count FROM products', [], async (err, row) => {
