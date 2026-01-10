@@ -1000,8 +1000,8 @@ if (!document.getElementById('leaflet-custom-styles')) {
 }
 
 async function renderActiveSessions() {
-    const list = document.getElementById('activeSessions');
-    if (!list) return;
+    const sessionsContainer = document.getElementById('activeSessions');
+    if (!sessionsContainer) return;
 
     try {
         const response = await fetch(`${API_URL}/sessions/active`, {
@@ -1022,8 +1022,8 @@ async function renderActiveSessions() {
             const locationsCountEl = document.getElementById('locationsCount');
             if (locationsCountEl) locationsCountEl.textContent = uniqueCities;
 
-            // Simple Render using helper with truncation
-            sessionsContainer.innerHTML = generateSessionsHTML(sessions);
+            // Simple Render using helper with truncation (USING FILTERED LIST)
+            sessionsContainer.innerHTML = generateSessionsHTML(mobileOnlySessions);
         }
     } catch (e) {
         console.error('Erro rendering sessions:', e);
