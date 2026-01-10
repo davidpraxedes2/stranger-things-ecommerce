@@ -2732,8 +2732,35 @@ app.post('/api/analytics/heartbeat', async (req, res) => {
             console.log('✅ Sessão atualizada');
         } else {
             console.log('➕ Criando nova sessão...');
+            console.log('➕ Criando nova sessão...');
             // Insert
-            const loc = location || { city: 'Desconhecido', region: 'BR', country: 'BR', lat: 0, lon: 0 };
+
+            // 1. Try Frontend Location
+            // 2. Try Vercel GeoIP Headers
+            // 3. Fallback to Unknown
+            let finalLoc = location;
+
+            // Check if frontend failed to provide valid city
+            if (!finalLoc || !finalLoc.city || finalLoc.city === 'Desconhecido') {
+                const vCity = req.headers['x-vercel-ip-city'];
+                const vRegion = req.headers['x-vercel-ip-country-region'];
+                const vCountry = req.headers['x-vercel-ip-country'];
+                const vLat = req.headers['x-vercel-ip-latitude'];
+                const vLon = req.headers['x-vercel-ip-longitude'];
+
+                if (vCity) {
+                    finalLoc = {
+                        city: decodeURIComponent(vCity),
+                        region: vRegion || 'BR',
+                        country: vCountry || 'BR',
+                        lat: parseFloat(vLat) || 0,
+                        lon: parseFloat(vLon) || 0
+                    };
+                    console.log('📍 Location resolved via Vercel Headers:', finalLoc.city);
+                } else {
+                    finalLoc = { city: 'Desconhecido', region: 'BR', country: 'BR', lat: 0, lon: 0 };
+                }
+            }
 
             // Use device/browser from frontend (more accurate than server-side UA parsing)
             const deviceType = device || 'Desktop';
@@ -2750,8 +2777,8 @@ app.post('/api/analytics/heartbeat', async (req, res) => {
 
             const params = [
                 sessionId, ip,
-                loc.city, loc.region, loc.country,
-                loc.lat, loc.lon,
+                finalLoc.city, finalLoc.region, finalLoc.country,
+                finalLoc.lat, finalLoc.lon,
                 page, title, action || 'view',
                 deviceType, browserType,
                 utmSource, utmMedium, utmCampaign

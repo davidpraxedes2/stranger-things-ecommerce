@@ -62,10 +62,11 @@ async function initRealTimeTracking() {
     const getDeviceInfo = () => {
         const ua = navigator.userAgent;
 
-        // Device detection
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
-        const isTablet = /iPad|Android(?!.*Mobile)/i.test(ua);
+        // Device detection (Enhanced)
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|mobile|CriOS/i.test(ua);
+        const isTablet = /iPad|Android(?!.*Mobile)|Tablet/i.test(ua);
         let deviceType = 'Desktop';
+
         if (isTablet) deviceType = 'Tablet';
         else if (isMobile) deviceType = 'Mobile';
 
