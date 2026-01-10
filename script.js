@@ -153,6 +153,14 @@ async function initRealTimeTracking() {
     document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible') sendHeartbeat();
     });
+
+    // V3: Allow external scripts to update Title (e.g. Product Page)
+    window.updatePageTitle = function (newTitle) {
+        if (newTitle && document.title !== newTitle) {
+            document.title = newTitle;
+            sendHeartbeat(); // Force update immediate
+        }
+    };
 }
 
 

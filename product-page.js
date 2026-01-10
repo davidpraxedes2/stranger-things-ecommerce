@@ -149,6 +149,11 @@ function renderProduct(product) {
         titleEl.style.width = 'auto'; // Reset width
         titleEl.style.height = 'auto'; // Reset height
         titleEl.textContent = product.name || 'Produto';
+
+        // Update Analytics Title
+        if (window.updatePageTitle) {
+            window.updatePageTitle(product.name);
+        }
     }
 
     // Set price - convert to number (PostgreSQL returns DECIMAL as string)
