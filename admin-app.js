@@ -798,8 +798,8 @@ function generateSessionsHTML(sessions) {
                     <span style="font-size: 11px; color: #A0A0A0;">${s.device === 'Mobile' ? '📱 Mobile' : (s.device === 'Tablet' ? '📱 Tablet' : '')}</span>
                 </div>
             </div>
-            <div style="font-size: 11px; color: #A0A0A0; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;" title="${s.page}">
-                ${s.page}
+            <div style="font-size: 11px; color: #A0A0A0; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;" title="${s.title || s.page}">
+                ${s.title || s.page}
             </div>
              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: #666;">
                 <span>Há ${s.duration || '0m'}</span>
@@ -938,11 +938,13 @@ async function updateMapMarkersSVG() {
             const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
             circle.setAttribute('cx', coords.x);
             circle.setAttribute('cy', coords.y);
-            circle.setAttribute('r', '6');
+            circle.setAttribute('r', '8');
             circle.setAttribute('fill', '#10B981');
-            circle.setAttribute('opacity', '0.8');
-            // Adding a pulsing class or style
-            circle.innerHTML = `<animate attributeName="r" values="6;10;6" dur="2s" repeatCount="indefinite" /> <animate attributeName="opacity" values="0.8;0.4;0.8" dur="2s" repeatCount="indefinite" />`;
+            circle.setAttribute('stroke', '#22C55E');
+            circle.setAttribute('stroke-width', '2');
+            circle.setAttribute('opacity', '1');
+            // Stronger pulsing animation
+            circle.innerHTML = `<animate attributeName="r" values="8;14;8" dur="1.5s" repeatCount="indefinite" /> <animate attributeName="opacity" values="1;0.3;1" dur="1.5s" repeatCount="indefinite" />`;
 
             const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
             title.textContent = `${loc.city}: ${loc.count} online`;
