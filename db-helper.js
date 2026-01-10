@@ -27,9 +27,9 @@ if (connectionString) {
     const { Pool } = require('pg');
     pgPool = new Pool({
         connectionString,
-        max: 10, // Limit max connections to prevent exhaustion (Neon/Vercel limit is usually 10-20)
-        idleTimeoutMillis: 2000, // Aggressively close idle connections (was 30s)
-        connectionTimeoutMillis: 10000, // Wait up to 10s for DB causing cold start protection
+        max: 5, // Reduced from 10 - Vercel serverless works better with fewer connections
+        idleTimeoutMillis: 1000, // Release idle connections after 1s
+        connectionTimeoutMillis: 5000, // Reduced from 10s - fail fast
     });
 
     pgPool.on('error', (err, client) => {
@@ -146,8 +146,15 @@ const db = {
         if (!USE_POSTGRES) {
             throw new Error('query() only available for PostgreSQL');
         }
-        // Use pool directly
-        return await pgPool.query(queryText, params);
+        // Properly acquire and release client from pool
+        let client = null;
+        try {
+            client = await pgPool.connect();
+            const result = await client.query(queryText, params);
+            return result;
+        } finally {
+            if (client) client.release();
+        }
     }
 };
 
