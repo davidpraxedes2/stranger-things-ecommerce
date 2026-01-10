@@ -2254,14 +2254,25 @@ app.get('/api/admin/orders/:id', authenticateToken, (req, res) => {
 // ===== ROTAS DE CLIENTES (ADMIN) =====
 
 // Listar clientes (admin)
-app.get('/api/admin/customers', authenticateToken, (req, res) => {
-    db.all('SELECT * FROM customers ORDER BY created_at DESC', (err, rows) => {
-        if (err) {
-            res.status(500).json({ error: err.message });
-            return;
+// Listar clientes (admin)
+app.get('/api/admin/customers', authenticateToken, async (req, res) => {
+    try {
+        let customers = [];
+        if (db.isPostgres) {
+            const result = await db.query('SELECT * FROM customers ORDER BY created_at DESC');
+            customers = result.rows;
+        } else {
+            customers = await new Promise((resolve, reject) => {
+                db.all('SELECT * FROM customers ORDER BY created_at DESC', [], (err, rows) => {
+                    if (err) reject(err);
+                    else resolve(rows || []);
+                });
+            });
         }
-        res.json(rows);
-    });
+        res.json(customers);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // Buscar cliente por ID (admin)
