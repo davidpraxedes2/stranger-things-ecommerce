@@ -1903,7 +1903,8 @@ app.post('/api/admin/login', async (req, res) => {
 
         let user;
         if (db.isPostgres) {
-            user = await db.get(query, [username, username]);
+            const result = await db.query(query, [username, username]);
+            user = result.rows[0];
         } else {
             // SQLite síncrono
             user = db.prepare(query).get(username, username);
@@ -1925,7 +1926,8 @@ app.post('/api/admin/login', async (req, res) => {
                 console.log('✅ Admin user created successfully (PostgreSQL)');
 
                 // Buscar ID do admin recém-criado
-                user = await db.get('SELECT * FROM users WHERE username = $1', ['admin']);
+                const adminResult = await db.query('SELECT * FROM users WHERE username = $1', ['admin']);
+                user = adminResult.rows[0];
             } else {
                 db.prepare(insertQuery).run('admin', 'admin@strangerthings.com', defaultPassword, 'admin');
                 console.log('✅ Admin user created successfully (SQLite)');
