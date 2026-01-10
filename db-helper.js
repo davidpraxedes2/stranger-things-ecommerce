@@ -1,5 +1,5 @@
 // Database helper - abstracts SQLite and PostgreSQL differences
-// DEBUG MODE: PG DRIVER DIRECT + NON-POOLING PRIORITY
+// DEBUG MODE: PG DRIVER DIRECT + NON-POOLING PRIORITY + LAZY INIT
 
 let Database;
 try {
@@ -59,15 +59,6 @@ if (isVercel || connectionString) {
             console.error('❌ PG Pool Error:', err.message);
         });
 
-        // Immediate Connection Test
-        pgPool.connect().then(client => {
-            console.log('✅ PostgreSQL conectado com sucesso!');
-            client.release();
-        }).catch(err => {
-            console.error('❌ Falha na conexão inicial PG:', err.message);
-            console.error('🔍 Detalhe:', err);
-        });
-
     } catch (err) {
         console.error('❌ Erro crítico inicializando PG:', err);
         USE_POSTGRES = false; // Fallback? Not if Vercel...
@@ -84,30 +75,87 @@ if (!USE_POSTGRES && !isVercel) {
                 sqliteDb = new Database('database.sqlite');
             } else {
                 sqliteDb = new Database('database.sqlite', (err) => {
-                    if (err) console.error('SQLite Error:', err);
+                    if (err) console.error(err);
                 });
             }
-            console.log('✅ SQLite Initialized');
         } catch (e) { console.error('SQLite Init Fail:', e); }
     }
+}
+
+// --- LAZY INITIALIZATION & MIGRATION SYSTEM ---
+let _initPromise = null;
+
+async function performSchemaMigration() {
+    if (!pgPool) return;
+
+    console.log('🔄 Verificando e Migrando Schema Postgres...');
+    const client = await pgPool.connect();
+    try {
+        // Core Tables
+        const baseTables = [
+            `CREATE TABLE IF NOT EXISTS products (id SERIAL PRIMARY KEY, name TEXT NOT NULL, description TEXT, price REAL NOT NULL, category TEXT, image_url TEXT, stock INTEGER DEFAULT 0, active INTEGER DEFAULT 1, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, images_json TEXT, original_price REAL, sku TEXT)`,
+            `CREATE TABLE IF NOT EXISTS analytics_sessions (session_id TEXT PRIMARY KEY, ip TEXT, city TEXT, region TEXT, country TEXT, lat REAL, lon REAL, current_page TEXT, page_title TEXT, last_action TEXT, device TEXT, browser TEXT, utm_source TEXT, utm_medium TEXT, utm_campaign TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, last_active_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`,
+            `CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, username TEXT UNIQUE NOT NULL, email TEXT UNIQUE NOT NULL, password TEXT NOT NULL, role TEXT DEFAULT 'admin', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`,
+            `CREATE TABLE IF NOT EXISTS orders (id SERIAL PRIMARY KEY, customer_name TEXT, customer_email TEXT, customer_phone TEXT, total REAL NOT NULL, status TEXT DEFAULT 'pending', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, customer_id INTEGER, shipping_address TEXT, payment_method TEXT, customer_cpf TEXT, customer_address TEXT, transaction_id TEXT, transaction_data TEXT, pix_copied_at TIMESTAMP)`,
+            `CREATE TABLE IF NOT EXISTS order_items (id SERIAL PRIMARY KEY, order_id INTEGER NOT NULL, product_id INTEGER NOT NULL, quantity INTEGER NOT NULL, price REAL NOT NULL)`,
+            `CREATE TABLE IF NOT EXISTS customers (id SERIAL PRIMARY KEY, name TEXT NOT NULL, email TEXT UNIQUE NOT NULL, password TEXT, phone TEXT, cpf TEXT, address TEXT, city TEXT, state TEXT, zip_code TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`,
+            `CREATE TABLE IF NOT EXISTS cart_items (id SERIAL PRIMARY KEY, session_id TEXT NOT NULL, product_id INTEGER NOT NULL, quantity INTEGER NOT NULL, price REAL NOT NULL, selected_variant TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`,
+            `CREATE TABLE IF NOT EXISTS payment_gateways (id SERIAL PRIMARY KEY, name TEXT NOT NULL, gateway_type TEXT NOT NULL, public_key TEXT, secret_key TEXT, is_active INTEGER DEFAULT 0, settings_json TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`,
+            `CREATE TABLE IF NOT EXISTS shipping_options (id SERIAL PRIMARY KEY, name TEXT NOT NULL, price REAL NOT NULL, delivery_time TEXT, active INTEGER DEFAULT 1, sort_order INTEGER DEFAULT 0, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`,
+            `CREATE TABLE IF NOT EXISTS collections (id SERIAL PRIMARY KEY, name TEXT NOT NULL, slug TEXT NOT NULL, description TEXT, is_active INTEGER DEFAULT 1, sort_order INTEGER DEFAULT 0, default_view TEXT DEFAULT 'grid', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`,
+            `CREATE TABLE IF NOT EXISTS collection_products (collection_id INTEGER, product_id INTEGER, sort_order INTEGER DEFAULT 0, PRIMARY KEY (collection_id, product_id))`,
+            `CREATE TABLE IF NOT EXISTS tracking_settings (id SERIAL PRIMARY KEY, provider TEXT NOT NULL, pixel_id TEXT, is_active INTEGER DEFAULT 1, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`
+        ];
+
+        for (const t of baseTables) {
+            await client.query(t);
+        }
+
+        // CRITICAL: Explicit Column Migrations (Idempotent)
+        const migrations = [
+            'ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS browser TEXT',
+            'ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS device TEXT',
+            'ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS utm_source TEXT',
+            'ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS utm_medium TEXT',
+            'ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS utm_campaign TEXT',
+            'ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS page_title TEXT',
+            'ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS last_action TEXT'
+        ];
+
+        for (const m of migrations) {
+            try { await client.query(m); } catch (e) { /* ignore duplicate column errors */ }
+        }
+
+        console.log('✅ Schema Verificado e Atualizado');
+    } catch (e) {
+        console.error('❌ Falha na migração de schema:', e.message);
+    } finally {
+        client.release();
+    }
+}
+
+async function ensureSchema() {
+    if (!USE_POSTGRES) return;
+    if (!_initPromise) {
+        _initPromise = performSchemaMigration();
+    }
+    await _initPromise;
 }
 
 // Helper functions
 const db = {
     isPostgres: USE_POSTGRES,
 
-    // Ensure Pool is ready or fail gracefully
-    ensurePool: function () {
-        if (USE_POSTGRES && !pgPool) {
-            throw new Error('PostgreSQL configured but Pool is null. Initialization failed.');
-        }
-        return pgPool;
+    // Explicit init (can be called by server.js, but ensures idempotent)
+    initialize: async function () {
+        await ensureSchema();
     },
 
     run: async function (query, params = [], callback) {
         if (typeof params === 'function') { callback = params; params = []; }
 
         if (USE_POSTGRES) {
+            await ensureSchema(); // Lazy Init Check
             try {
                 // Ensure pool
                 if (!pgPool) throw new Error('PG Pool not initialized');
@@ -129,11 +177,6 @@ const db = {
 
                     const result = await client.query(convertedQuery, params);
 
-                    // Try to get ID if Insert
-                    let lastID = null;
-                    // Note: LASTVAL() is session specific, might be flaky in pool, but ok for now
-                    // reliable way is RETURNING id in query, but that requires changing changing callers
-
                     if (callback) callback(null, { lastID: 0, changes: result.rowCount });
                     return { lastID: 0, changes: result.rowCount };
 
@@ -154,6 +197,7 @@ const db = {
         if (typeof params === 'function') { callback = params; params = []; }
 
         if (USE_POSTGRES) {
+            await ensureSchema(); // Lazy Init Check
             try {
                 if (!pgPool) throw new Error('PG Pool not initialized');
                 const client = await pgPool.connect();
@@ -180,6 +224,7 @@ const db = {
         if (typeof params === 'function') { callback = params; params = []; }
 
         if (USE_POSTGRES) {
+            await ensureSchema(); // Lazy Init Check
             try {
                 if (!pgPool) throw new Error('PG Pool not initialized');
                 const client = await pgPool.connect();
@@ -205,6 +250,7 @@ const db = {
     // Query Direct (Promises)
     query: async function (queryText, params = []) {
         if (!USE_POSTGRES) throw new Error('query() only for Postgres');
+        await ensureSchema(); // Lazy Init Check
         if (!pgPool) throw new Error('PG Pool not initialized');
 
         const client = await pgPool.connect();
@@ -229,11 +275,6 @@ const db = {
             finalize: (cb) => { if (cb) cb() }
         }
     },
-
-    initialize: async function () {
-        if (USE_POSTGRES) await initializePostgres();
-        // else sqlite init in server
-    }
 };
 
 // SQLite Helpers (Keep simplified)
@@ -276,41 +317,6 @@ function allSQLite(query, params, callback) {
             sqliteDb.all(query, params, callback);
         }
     } catch (e) { if (callback) callback(e); }
-}
-
-
-async function initializePostgres() {
-    if (!pgPool) return;
-    let client;
-    try {
-        client = await pgPool.connect();
-
-        // Ensure Tables - Simplified for robustness
-        const tables = [
-            `CREATE TABLE IF NOT EXISTS products (
-                id SERIAL PRIMARY KEY, name TEXT NOT NULL, description TEXT, price REAL NOT NULL, 
-                category TEXT, image_url TEXT, stock INTEGER DEFAULT 0, active INTEGER DEFAULT 1, 
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
-                images_json TEXT, original_price REAL, sku TEXT
-            )`,
-            // ... (Add other tables if needed but keeping it minimal to ensure boot)
-            `CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, username TEXT UNIQUE NOT NULL, email TEXT UNIQUE NOT NULL, password TEXT, role TEXT DEFAULT 'admin', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`,
-            `CREATE TABLE IF NOT EXISTS cart_items (id SERIAL PRIMARY KEY, session_id TEXT NOT NULL, product_id INTEGER, quantity INTEGER, price REAL, selected_variant TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`,
-            `CREATE TABLE IF NOT EXISTS collections (id SERIAL PRIMARY KEY, name TEXT NOT NULL, slug TEXT, description TEXT, is_active INTEGER DEFAULT 1, sort_order INTEGER DEFAULT 0, default_view TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`,
-            `CREATE TABLE IF NOT EXISTS collection_products (collection_id INTEGER, product_id INTEGER, sort_order INTEGER DEFAULT 0, PRIMARY KEY(collection_id, product_id))`,
-            `CREATE TABLE IF NOT EXISTS tracking_settings (id SERIAL PRIMARY KEY, provider TEXT, pixel_id TEXT, is_active INTEGER DEFAULT 1, created_at TIMESTAMP, updated_at TIMESTAMP)`
-        ];
-
-        for (const t of tables) {
-            await client.query(t);
-        }
-
-        console.log('✅ Tabelas verificadas.');
-    } catch (e) {
-        console.error('❌ Init Tables Error:', e.message);
-    } finally {
-        if (client) client.release();
-    }
 }
 
 module.exports = db;
