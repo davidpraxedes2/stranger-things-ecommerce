@@ -2223,32 +2223,62 @@ app.put('/api/admin/orders/:id', authenticateToken, (req, res) => {
 });
 
 // Buscar pedido completo com itens (admin)
-app.get('/api/admin/orders/:id', authenticateToken, (req, res) => {
+// Buscar pedido completo com itens (admin)
+app.get('/api/admin/orders/:id', authenticateToken, async (req, res) => {
     const { id } = req.params;
 
-    db.get('SELECT * FROM orders WHERE id = ?', [id], (err, order) => {
-        if (err) {
-            res.status(500).json({ error: err.message });
-            return;
-        }
-        if (!order) {
-            res.status(404).json({ error: 'Pedido não encontrado' });
-            return;
+    try {
+        let order = null;
+        let items = [];
+
+        if (db.isPostgres) {
+            // Fetch order
+            const orderResult = await db.query('SELECT * FROM orders WHERE id = $1', [parseInt(id)]);
+            order = orderResult.rows[0];
+
+            if (order) {
+                // Fetch items
+                const itemsResult = await db.query(`
+                    SELECT oi.*, p.name, p.image_url 
+                    FROM order_items oi
+                    JOIN products p ON oi.product_id = p.id
+                    WHERE oi.order_id = $1
+                 `, [parseInt(id)]);
+                items = itemsResult.rows || [];
+            }
+        } else {
+            // SQLite
+            order = await new Promise((resolve, reject) => {
+                db.get('SELECT * FROM orders WHERE id = ?', [id], (err, row) => {
+                    if (err) reject(err);
+                    else resolve(row);
+                });
+            });
+
+            if (order) {
+                items = await new Promise((resolve, reject) => {
+                    db.all(`
+                        SELECT oi.*, p.name, p.image_url 
+                        FROM order_items oi
+                        JOIN products p ON oi.product_id = p.id
+                        WHERE oi.order_id = ?
+                        `, [id], (err, rows) => {
+                        if (err) reject(err);
+                        else resolve(rows || []);
+                    });
+                });
+            }
         }
 
-        db.all(`
-            SELECT oi.*, p.name, p.image_url 
-            FROM order_items oi
-            JOIN products p ON oi.product_id = p.id
-            WHERE oi.order_id = ?
-            `, [id], (err, items) => {
-            if (err) {
-                res.status(500).json({ error: err.message });
-                return;
-            }
-            res.json({ ...order, items: items });
-        });
-    });
+        if (!order) {
+            return res.status(404).json({ error: 'Pedido não encontrado' });
+        }
+
+        res.json({ ...order, items: items });
+
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // ===== ROTAS DE CLIENTES (ADMIN) =====
@@ -2276,19 +2306,30 @@ app.get('/api/admin/customers', authenticateToken, async (req, res) => {
 });
 
 // Buscar cliente por ID (admin)
-app.get('/api/admin/customers/:id', authenticateToken, (req, res) => {
+// Buscar cliente por ID (admin)
+app.get('/api/admin/customers/:id', authenticateToken, async (req, res) => {
     const { id } = req.params;
-    db.get('SELECT * FROM customers WHERE id = ?', [id], (err, row) => {
-        if (err) {
-            res.status(500).json({ error: err.message });
-            return;
+    try {
+        let customer = null;
+        if (db.isPostgres) {
+            const result = await db.query('SELECT * FROM customers WHERE id = $1', [parseInt(id)]);
+            customer = result.rows[0];
+        } else {
+            customer = await new Promise((resolve, reject) => {
+                db.get('SELECT * FROM customers WHERE id = ?', [id], (err, row) => {
+                    if (err) reject(err);
+                    else resolve(row);
+                });
+            });
         }
-        if (!row) {
-            res.status(404).json({ error: 'Cliente não encontrado' });
-            return;
+
+        if (!customer) {
+            return res.status(404).json({ error: 'Cliente não encontrado' });
         }
-        res.json(row);
-    });
+        res.json(customer);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // Criar cliente (admin)
