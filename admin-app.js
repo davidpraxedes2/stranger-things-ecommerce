@@ -759,22 +759,47 @@ async function renderAnalytics(container) {
 
 // ... helper ...
 function generateSessionsHTML(sessions) {
-    if (!sessions || sessions.length === 0) return '<div class="text-muted">Nenhum visitante ativo no momento</div>';
+    if (!sessions || sessions.length === 0) return '<div class="text-muted" style="text-align:center; padding: 20px;">Nenhum visitante ativo no momento</div>';
 
-    return sessions.map(s => `
+    return sessions.map(s => {
+        // UTM Icons Logic
+        let sourceIcon = '';
+        let sourceClass = '';
+        if (s.utm_source) {
+            const source = s.utm_source.toLowerCase();
+            if (source.includes('instagram') || source.includes('ig')) sourceIcon = '📸';
+            else if (source.includes('facebook') || source.includes('fb')) sourceIcon = '👥';
+            else if (source.includes('google')) sourceIcon = '🔍';
+            else if (source.includes('tiktok')) sourceIcon = '🎵';
+            else if (source.includes('whatsapp')) sourceIcon = '💬';
+            else sourceIcon = '🔗';
+        }
+
+        // Location & IP Logic
+        const locationText = s.city && s.city !== 'Desconhecido' ? s.city : '📍 Localizando...';
+        const flag = s.country === 'BR' ? '🇧🇷' : '';
+
+        return `
         <div class="session-card" style="margin-bottom: 12px; padding: 12px; background: var(--bg-hover); border-radius: 8px; border-left: 3px solid #10B981;">
             <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                <span style="font-weight: 700; color: #FFF; font-size: 13px;">${s.city || 'Desconhecido'}</span>
-                <span style="font-size: 11px; color: #A0A0A0;">${s.device || 'Desktop'}</span>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span style="font-weight: 700; color: #FFF; font-size: 13px;">${flag} ${locationText}</span>
+                    <span style="font-size: 10px; color: #666; font-family: monospace;">${s.ip || ''}</span>
+                </div>
+                <div style="font-size: 16px;">
+                    ${sourceIcon ? `<span title="Via ${s.utm_source}">${sourceIcon}</span>` : ''}
+                    <span style="font-size: 11px; color: #A0A0A0;">${s.device === 'Mobile' ? '📱' : '💻'}</span>
+                </div>
             </div>
-            <div style="font-size: 11px; color: #A0A0A0; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${s.page}">
+            <div style="font-size: 11px; color: #A0A0A0; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;" title="${s.page}">
                 ${s.page}
             </div>
-             <div style="font-size: 10px; color: #666;">
-                ${s.utm_source ? `<span style="color: #F59E0B">Via ${s.utm_source}</span> • ` : ''} Há ${s.duration || '0m'}
+             <div style="display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: #666;">
+                <span>Há ${s.duration || '0m'}</span>
+                ${s.utm_campaign ? `<span style="background: rgba(245, 158, 11, 0.1); color: #F59E0B; padding: 1px 4px; border-radius: 4px;">${s.utm_campaign}</span>` : ''}
             </div>
         </div>
-    `).join('');
+    `}).join('');
 }
 function generateTopProductsRows() {
     const products = [
