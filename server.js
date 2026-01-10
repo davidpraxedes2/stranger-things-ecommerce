@@ -2767,53 +2767,22 @@ app.post('/api/analytics/heartbeat', async (req, res) => {
     }
 
     try {
-        console.log('🔍 Verificando sessão existente...');
-        // Upsert logic
-        let existing;
         if (db.isPostgres) {
-            const r = await db.query('SELECT session_id FROM analytics_sessions WHERE session_id = $1', [sessionId]);
-            existing = r.rows[0];
-            console.log('🔍 Postgres check:', existing ? 'Sessão existe' : 'Nova sessão');
-        } else {
-            existing = await new Promise((resolve, reject) => {
-                db.get('SELECT session_id FROM analytics_sessions WHERE session_id = ?', [sessionId], (err, row) => {
-                    if (err) reject(err);
-                    else resolve(row);
-                });
-            });
-            console.log('🔍 SQLite check:', existing ? 'Sessão existe' : 'Nova sessão');
-        }
+            // Postgres Native UPSERT (Atomic & Safe)
+            const upsertQ = `
+                INSERT INTO analytics_sessions 
+                (session_id, ip, city, region, country, lat, lon, current_page, page_title, last_action, device, browser, utm_source, utm_medium, utm_campaign, last_active_at)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, NOW())
+                ON CONFLICT (session_id) 
+                DO UPDATE SET 
+                    current_page = EXCLUDED.current_page,
+                    page_title = EXCLUDED.page_title,
+                    last_action = EXCLUDED.last_action,
+                    last_active_at = NOW();
+            `;
 
-        if (existing) {
-            console.log('🔄 Atualizando sessão existente...');
-            // Update
-            const updateQ = db.isPostgres ?
-                "UPDATE analytics_sessions SET current_page=$1, page_title=$2, last_action=$3, last_active_at=NOW() WHERE session_id=$4" :
-                "UPDATE analytics_sessions SET current_page=?, page_title=?, last_action=?, last_active_at=CURRENT_TIMESTAMP WHERE session_id=?";
-
-            const params = [page, title, action || 'view', sessionId];
-
-            if (db.isPostgres) {
-                await db.query(updateQ, params);
-            } else {
-                await new Promise((resolve, reject) => {
-                    db.run(updateQ, params, (err) => {
-                        if (err) reject(err);
-                        else resolve();
-                    });
-                });
-            }
-            console.log('✅ Sessão atualizada');
-        } else {
-            console.log('➕ Criando nova sessão...');
-            console.log('➕ Criando nova sessão...');
-            // Insert
-
-            // 1. Try Frontend Location
-            // 2. Try Vercel GeoIP Headers
-            // 3. Fallback to Unknown
+            // Prepare location (fallback logic moved here)
             let finalLoc = location;
-
             // Check if frontend failed to provide valid city
             if (!finalLoc || !finalLoc.city || finalLoc.city === 'Desconhecido') {
                 const vCity = req.headers['x-vercel-ip-city'];
@@ -2830,53 +2799,53 @@ app.post('/api/analytics/heartbeat', async (req, res) => {
                         lat: parseFloat(vLat) || 0,
                         lon: parseFloat(vLon) || 0
                     };
-                    console.log('📍 Location resolved via Vercel Headers:', finalLoc.city);
                 } else {
                     finalLoc = { city: 'Desconhecido', region: 'BR', country: 'BR', lat: 0, lon: 0 };
                 }
             }
-
-            // Use device/browser from frontend (more accurate than server-side UA parsing)
-            const deviceType = device || 'Desktop';
-            const browserType = browser || 'Unknown';
-
-            // Extract UTM params
-            const utmSource = utm?.source || null;
-            const utmMedium = utm?.medium || null;
-            const utmCampaign = utm?.campaign || null;
-
-            const insertQ = db.isPostgres ?
-                "INSERT INTO analytics_sessions (session_id, ip, city, region, country, lat, lon, current_page, page_title, last_action, device, browser, utm_source, utm_medium, utm_campaign) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)" :
-                "INSERT INTO analytics_sessions (session_id, ip, city, region, country, lat, lon, current_page, page_title, last_action, device, browser, utm_source, utm_medium, utm_campaign) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
             const params = [
                 sessionId, ip,
                 finalLoc.city, finalLoc.region, finalLoc.country,
                 finalLoc.lat, finalLoc.lon,
                 page, title, action || 'view',
-                deviceType, browserType,
-                utmSource, utmMedium, utmCampaign
+                device || 'Desktop', browser || 'Unknown',
+                utm?.source || null, utm?.medium || null, utm?.campaign || null
             ];
 
-            console.log('📝 Dados para inserir:', {
-                sessionId,
-                ip,
-                city: finalLoc.city,
-                device: deviceType,
-                browser: browserType
+            await db.query(upsertQ, params);
+            console.log('✅ Heartbeat processado (Postgres Upsert)');
+
+        } else {
+            // SQLite Fallback (Simple Check/Insert loop)
+            existing = await new Promise((resolve, reject) => {
+                db.get('SELECT session_id FROM analytics_sessions WHERE session_id = ?', [sessionId], (err, row) => {
+                    if (err) reject(err);
+                    else resolve(row);
+                });
             });
 
-            if (db.isPostgres) {
-                await db.query(insertQ, params);
-            } else {
+            if (existing) {
+                // Update
+                const updateQ = "UPDATE analytics_sessions SET current_page=?, page_title=?, last_action=?, last_active_at=CURRENT_TIMESTAMP WHERE session_id=?";
+                const params = [page, title, action || 'view', sessionId];
                 await new Promise((resolve, reject) => {
-                    db.run(insertQ, params, (err) => {
-                        if (err) reject(err);
-                        else resolve();
-                    });
+                    db.run(updateQ, params, (err) => { if (err) reject(err); else resolve(); });
+                });
+            } else {
+                // Insert (Simplified for SQLite dev)
+                const insertQ = "INSERT INTO analytics_sessions (session_id, ip, city, region, country, lat, lon, current_page, page_title, last_action, device, browser, utm_source, utm_medium, utm_campaign) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+                const finalLoc = location || { city: 'Desconhecido', region: 'BR', country: 'BR', lat: 0, lon: 0 };
+                const params = [
+                    sessionId, ip, finalLoc.city, finalLoc.region, finalLoc.country, finalLoc.lat, finalLoc.lon,
+                    page, title, action || 'view', device || 'Desktop', browser || 'Unknown',
+                    utm?.source || null, utm?.medium || null, utm?.campaign || null
+                ];
+                await new Promise((resolve, reject) => {
+                    db.run(insertQ, params, (err) => { if (err) reject(err); else resolve(); });
                 });
             }
-            console.log('✅ Nova sessão criada');
         }
 
         console.log('✅ Heartbeat processado com sucesso');
