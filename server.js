@@ -2045,12 +2045,18 @@ app.get('/api/admin/stats', authenticateToken, async (req, res) => {
 // Listar todos os produtos (admin)
 app.get('/api/admin/products', authenticateToken, async (req, res) => {
     try {
-        const products = await new Promise((resolve, reject) => {
-            db.all('SELECT * FROM products ORDER BY created_at DESC', [], (err, rows) => {
-                if (err) reject(err);
-                else resolve(rows || []);
+        let products = [];
+        if (db.isPostgres) {
+            const result = await db.query('SELECT * FROM products ORDER BY created_at DESC');
+            products = result.rows;
+        } else {
+            products = await new Promise((resolve, reject) => {
+                db.all('SELECT * FROM products ORDER BY created_at DESC', [], (err, rows) => {
+                    if (err) reject(err);
+                    else resolve(rows || []);
+                });
             });
-        });
+        }
         res.json(products);
     } catch (err) {
         console.error('Erro ao listar produtos admin:', err);
