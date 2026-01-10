@@ -10,6 +10,7 @@ const BestfyService = require('./bestfy-service');
 require('dotenv').config();
 const { seedCollections } = require('./collection-seeder');
 const { seedFunkos } = require('./funko-seeder');
+const { seedFunkosFromAPI } = require('./funko-api-seeder');
 
 const app = express();
 
@@ -236,6 +237,7 @@ app.get('/admin', (req, res) => {
             populateDatabaseIfEmpty();
             seedCollections(db);
             seedFunkos(db);
+            seedFunkosFromAPI(db); // Fetch 40 Funkos from funko.com.br API
         });
     } catch (error) {
         console.error('❌ Erro ao inicializar banco de dados:', error);
