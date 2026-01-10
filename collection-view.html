@@ -412,12 +412,14 @@
             let hidden = false;
 
             function hideLoader() {
+                console.log('🙈 hideLoader called. Hidden:', hidden, 'Loader:', !!loader);
                 if (hidden || !loader) return;
 
                 const elapsed = Date.now() - startTime;
                 const remaining = Math.max(0, MIN_LOADING_TIME - elapsed);
 
                 setTimeout(() => {
+                    console.log('🙈 Hiding loader (timeout executing)');
                     if (hidden) return;
                     hidden = true;
 
@@ -426,6 +428,7 @@
 
                     // Remove from DOM after transition
                     setTimeout(() => {
+                        console.log('🙈 Loader display: none');
                         loader.style.display = 'none';
                     }, 500);
                 }, remaining);
@@ -433,6 +436,7 @@
 
             // Expose functions globally
             window.showPageLoader = function () {
+                console.log('🔄 showPageLoader called');
                 if (loader) {
                     hidden = false;
                     loader.style.display = 'flex';
@@ -453,6 +457,7 @@
     </script>
     <script>
         // INLINED COLLECTION-PAGE.JS
+        console.log('🔹 INLINE COLLECTION SCRIPT START');
         // Collection Page JavaScript
         // API Base URL logic handled by script.js or fallback here
         if (typeof window.API_BASE === 'undefined') {

@@ -1,3 +1,27 @@
+# Release Notes - v1.1.0
+
+**Date**: 2026-01-09
+**Status**: Feature Release
+
+## 📦 What's New
+
+### 📊 Meta Pixel Tracking
+-   Added robust facebook pixel tracking integration.
+-   Updated Purchase event for PIX and Card.
+-   Added custom event "PIX Copiado".
+
+### 🛍️ New Collections & Pricing
+-   Added "Capinhas de Celular" collection with **auto-pricing rules (R$ 12,90)**.
+-   Added "Quenchers & Copos", "Mochilas", and "Roupas".
+-   Implemented automated collection seeding for production environments.
+
+### 🛠️ Admin Enhancements
+-   New "Rastreamento" tab for Pixel configuration.
+-   Improved Order Details modal with customer info and PIX data.
+-   Bulk delete functionality for orders.
+
+---
+
 # Release Notes - v1.0.0
 
 **Date**: 2026-01-07
