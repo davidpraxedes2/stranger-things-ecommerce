@@ -2787,7 +2787,7 @@ app.post('/api/analytics/heartbeat', async (req, res) => {
             console.log('📝 Dados para inserir:', {
                 sessionId,
                 ip,
-                city: loc.city,
+                city: finalLoc.city,
                 device: deviceType,
                 browser: browserType
             });
