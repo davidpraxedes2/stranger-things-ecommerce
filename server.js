@@ -243,7 +243,7 @@ app.get('/admin', (req, res) => {
                 await populateDatabaseIfEmpty();
                 await seedCollections(db);
                 await seedFunkos(db);
-                await seedFunkosFromAPI(db); // Fetch 40 Funkos from funko.com.br API
+                // await seedFunkosFromAPI(db); // REMOVE AUTO-SEED TO PREVENT TIMEOUTS ON VERCEL
 
                 console.log('🏁 Inicialização de dados concluída.');
             } catch (seedErr) {
