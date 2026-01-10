@@ -2835,12 +2835,19 @@ app.post('/api/analytics/heartbeat', async (req, res) => {
                 utm?.source || null, utm?.medium || null, utm?.campaign || null
             ];
 
-            await db.query(upsertQ, params);
-            console.log('✅ Heartbeat processado (Postgres Upsert)');
+            try {
+                await db.query(upsertQ, params);
+                console.log('✅ Heartbeat processado (Postgres Upsert)');
+            } catch (pgErr) {
+                console.error('❌ Postgres Heartbeat Error:', pgErr);
+                // Don't crash the request, just log it. Client can retry.
+                // But we must return a response.
+                return res.status(500).json({ error: 'DB Error (PG)', details: pgErr.message });
+            }
 
         } else {
             // SQLite Fallback (Simple Check/Insert loop)
-            existing = await new Promise((resolve, reject) => {
+            const existing = await new Promise((resolve, reject) => {
                 db.get('SELECT session_id FROM analytics_sessions WHERE session_id = ?', [sessionId], (err, row) => {
                     if (err) reject(err);
                     else resolve(row);
