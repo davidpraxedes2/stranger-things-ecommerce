@@ -1101,47 +1101,47 @@ async function getCollectionsWithProducts(onlyActive = true) {
     console.log(`🔍 Buscando coleções (onlyActive=${onlyActive}, Tabela=${db.isPostgres ? 'Postgres' : 'SQLite'})...`);
 
     try {
-        const query = `
+        // Fetch all collections first
+        const colsQuery = `
             SELECT c.*, 
             (SELECT COUNT(*) FROM collection_products WHERE collection_id = c.id) as explicit_count
             FROM collections c 
             ${onlyActive ? 'WHERE c.is_active = 1' : ''}
             ORDER BY c.sort_order ASC
         `;
-
-        const collections = await new Promise((resolve, reject) => {
-            db.all(query, [], (err, rows) => {
-                if (err) reject(err);
-                else resolve(rows || []);
-            });
-        });
+        const collections = await db.all(colsQuery);
 
         console.log(`✅ Coleções encontradas: ${collections.length}`);
 
-        // Para cada coleção, buscar os produtos ordenados
-        for (const col of collections) {
-            col.products = await new Promise((resolve) => {
-                db.all(`
+        if (collections.length === 0) return [];
+
+        // Fetch products for ALL collections in one go (or efficient parallel)
+        // For simplicity and robustness with current helpers, let's use Promise.all 
+        // which runs them in parallel (better than sequential loop)
+        await Promise.all(collections.map(async (col) => {
+            try {
+                const prodsQuery = `
                     SELECT p.*, cp.sort_order 
                     FROM products p
                     JOIN collection_products cp ON p.id = cp.product_id
-                    WHERE cp.collection_id = ? AND p.active = 1
+                    WHERE cp.collection_id = ${db.isPostgres ? '$1' : '?'} AND p.active = 1
                     ORDER BY cp.sort_order ASC
-                `, [col.id], (err, products) => {
-                    if (err) {
-                        console.error(`❌ Erro ao buscar produtos da coleção ${col.id}:`, err);
-                        resolve([]);
-                    } else {
-                        // Parse JSON fields
-                        products.forEach(p => {
-                            if (p.images_json) try { p.images = JSON.parse(p.images_json) } catch (e) { }
-                        });
-                        resolve(products);
-                    }
+                `;
+                const products = await db.all(prodsQuery, [col.id]);
+
+                // Parse JSON
+                products.forEach(p => {
+                    if (p.images_json) try { p.images = JSON.parse(p.images_json) } catch (e) { p.images = [] }
                 });
-            });
-            col.product_count = col.products.length;
-        }
+
+                col.products = products;
+                col.product_count = products.length;
+            } catch (err) {
+                console.error(`❌ Erro produtos col ${col.id}:`, err);
+                col.products = [];
+                col.product_count = 0;
+            }
+        }));
 
         return collections;
 
