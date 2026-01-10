@@ -1397,16 +1397,23 @@ app.put('/api/admin/orders/:id/status', authenticateToken, (req, res) => {
 });
 
 // Buscar produto por ID (público)
+// Buscar produto por ID (público)
 app.get('/api/products/:id', async (req, res) => {
     const { id } = req.params;
 
     try {
-        const product = await new Promise((resolve, reject) => {
-            db.get('SELECT * FROM products WHERE id = ? AND active = 1', [id], (err, row) => {
-                if (err) reject(err);
-                else resolve(row);
+        let product;
+        if (db.isPostgres) {
+            const result = await db.query('SELECT * FROM products WHERE id = $1 AND active = 1', [id]);
+            product = result.rows[0];
+        } else {
+            product = await new Promise((resolve, reject) => {
+                db.get('SELECT * FROM products WHERE id = ? AND active = 1', [id], (err, row) => {
+                    if (err) reject(err);
+                    else resolve(row);
+                });
             });
-        });
+        }
 
         if (!product) {
             return res.status(404).json({ error: 'Produto não encontrado' });
