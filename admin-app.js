@@ -3965,26 +3965,32 @@ async function manageCollectionProducts(collectionId) {
                     </div>
                     
                     <div class="modal-body" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; overflow: hidden; padding: 24px;">
-                        <div style="display: flex; flex-direction: column; background: var(--bg-darker); padding: 16px; border-radius: 8px; border: 1px solid var(--border);">
+                        <div style="display: flex; flex-direction: column; background: var(--bg-darker); padding: 16px; border-radius: 8px; border: 1px solid var(--border); max-height: 500px;">
                             <h3 style="margin-bottom: 12px; font-size: 16px;">
                                 Na Coleção (${productsIn.length})
                                 <small style="color: var(--text-muted); font-size: 11px; font-weight: normal; display: block;">Arraste para reordenar</small>
                             </h3>
-                            <div id="inCollectionList" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
+                            <div id="inCollectionList" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; max-height: 450px;">
                                 ${productsIn.map(p => renderManageProductItem(p, true, collectionId)).join('')}
                             </div>
                         </div>
 
-                        <div style="display: flex; flex-direction: column; background: var(--bg-card); padding: 16px; border-radius: 8px; border: 1px solid var(--border);">
+                        <div style="display: flex; flex-direction: column; background: var(--bg-card); padding: 16px; border-radius: 8px; border: 1px solid var(--border); max-height: 500px;">
                             <h3 style="margin-bottom: 12px; font-size: 16px;">Produtos Disponíveis</h3>
                             <input type="text" placeholder="🔍 Buscar produto..." onkeyup="filterPMList(this)" style="margin-bottom: 10px; padding: 10px; background: var(--bg-darker); border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary);">
-                            <div id="outCollectionList" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
+                            <div id="outCollectionList" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; max-height: 400px;">
                                 ${productsOut.map(p => renderManageProductItem(p, false, collectionId)).join('')}
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button class="btn btn-secondary" onclick="closeModal()">Fechar</button>
+                        <button class="btn btn-primary" onclick="saveCollectionProductOrder(${collectionId}); showToast('Ordem salva com sucesso!', 'success');">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Salvar Alterações
+                        </button>
                     </div>
                 </div>
             </div>
