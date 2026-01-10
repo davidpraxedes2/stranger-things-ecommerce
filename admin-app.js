@@ -711,7 +711,7 @@ async function renderAnalytics(container) {
         </div>
 
         <!-- Live View Grid -->
-        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-bottom: 32px;">
+        <div style="display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 24px; margin-bottom: 32px;">
             <!-- Brazil Map -->
             <div class="chart-container">
                 <div class="chart-header">
@@ -757,16 +757,34 @@ async function renderAnalytics(container) {
     initializeLiveView();
 }
 
-function generateTopProductsRows() {
-    const products = [
-        { name: 'Camiseta Hellfire Club', sales: 245, revenue: 12250, growth: 15 },
-        { name: 'Moletom Upside Down', sales: 198, revenue: 19800, growth: 22 },
-        { name: 'Caneca Demogorgon', sales: 156, revenue: 4680, growth: -3 },
-        { name: 'Poster Stranger Things', sales: 142, revenue: 4260, growth: 8 },
-        { name: 'Action Figure Eleven', sales: 128, revenue: 11520, growth: 12 }
-    ];
+// ... helper ...
+function generateSessionsHTML(sessions) {
+    if (!sessions || sessions.length === 0) return '<div class="text-muted">Nenhum visitante ativo no momento</div>';
 
-    return products.map(p => `
+    return sessions.map(s => `
+        <div class="session-card" style="margin-bottom: 12px; padding: 12px; background: var(--bg-hover); border-radius: 8px; border-left: 3px solid #10B981;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                <span style="font-weight: 700; color: #FFF; font-size: 13px;">${s.city || 'Desconhecido'}</span>
+                <span style="font-size: 11px; color: #A0A0A0;">${s.device || 'Desktop'}</span>
+            </div>
+            <div style="font-size: 11px; color: #A0A0A0; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${s.page}">
+                ${s.page}
+            </div>
+             <div style="font-size: 10px; color: #666;">
+                ${s.utm_source ? `<span style="color: #F59E0B">Via ${s.utm_source}</span> • ` : ''} Há ${s.duration || '0m'}
+            </div>
+        </div>
+    `).join('');
+}
+const products = [
+    { name: 'Camiseta Hellfire Club', sales: 245, revenue: 12250, growth: 15 },
+    { name: 'Moletom Upside Down', sales: 198, revenue: 19800, growth: 22 },
+    { name: 'Caneca Demogorgon', sales: 156, revenue: 4680, growth: -3 },
+    { name: 'Poster Stranger Things', sales: 142, revenue: 4260, growth: 8 },
+    { name: 'Action Figure Eleven', sales: 128, revenue: 11520, growth: 12 }
+];
+
+return products.map(p => `
         <tr>
             <td><strong>${p.name}</strong></td>
             <td>${p.sales} unidades</td>
