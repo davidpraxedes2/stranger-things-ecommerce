@@ -11,29 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Teko:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <style>
-        /* CSS CRÍTICO INLINE - FORÇAR desde o início - SEM BRECHA */
-        body:has(.announcement-bar:not(.hidden)),
-        body.has-announcement {
-            padding-top: 48px !important;
-        }
 
-        /* Header SEMPRE abaixo do announcement bar */
-        body:has(.announcement-bar:not(.hidden)) .header,
-        body.has-announcement .header,
-        .announcement-bar:not(.hidden)~.header {
-            top: 48px !important;
-            z-index: 1003 !important;
-        }
-
-        /* Announcement bar SEMPRE no topo */
-        .announcement-bar:not(.hidden) {
-            position: fixed !important;
-            top: 0 !important;
-            z-index: 1004 !important;
-            height: 48px !important;
-        }
-    </style>
     <script>
         // FORÇAR layout correto IMEDIATAMENTE - SEM MARGEM GIGANTE
         (function () {
@@ -122,15 +100,6 @@
 
     <!-- Grid Background -->
     <div class="grid-background"></div>
-
-    <!-- Top Announcement Bar -->
-    <div class="announcement-bar">
-        <div class="container">
-            <p>✨ <strong>OFERTA ESPECIAL:</strong> 20% OFF em todo o site com código <strong>STRANGER20</strong> -
-                Válido até 31/01</p>
-            <button class="announcement-close" aria-label="Fechar anúncio">&times;</button>
-        </div>
-    </div>
 
     <!-- Header -->
     <header class="header">
