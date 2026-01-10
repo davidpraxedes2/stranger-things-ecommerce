@@ -1778,6 +1778,7 @@ app.get('/api/cart', async (req, res) => {
 
 // Adicionar item ao carrinho
 // Adicionar item ao carrinho
+// Adicionar item ao carrinho
 app.post('/api/cart/add', async (req, res) => {
     const sessionId = getSessionId(req);
     const { product_id, quantity = 1, selected_variant, price } = req.body;
@@ -1787,47 +1788,51 @@ app.post('/api/cart/add', async (req, res) => {
     }
 
     try {
-        // Verificar se o produto já está no carrinho
-        const existing = await new Promise((resolve, reject) => {
-            db.get(`
-        SELECT * FROM cart_items 
-        WHERE session_id = ? AND product_id = ? AND selected_variant = ?
-            `, [sessionId, product_id, selected_variant || null], (err, row) => {
-                if (err) reject(err);
-                else resolve(row);
-            });
-        });
+        let existing;
 
-        if (existing) {
-            // Atualizar quantidade
-            const newQuantity = existing.quantity + quantity;
-            await new Promise((resolve, reject) => {
-                db.run(`
-                UPDATE cart_items 
-                SET quantity = ?, price = ?
-            WHERE id = ?
-                `, [newQuantity, price, existing.id], function (err) {
-                    if (err) reject(err);
-                    else resolve(this);
-                });
+        // 1. Check if item exists
+        if (db.isPostgres) {
+            const checkQ = `SELECT * FROM cart_items WHERE session_id = $1 AND product_id = $2 AND selected_variant ${selected_variant ? '= $3' : 'IS NULL'}`;
+            const params = selected_variant ? [sessionId, product_id, selected_variant] : [sessionId, product_id];
+            const checkRes = await db.query(checkQ, params);
+            existing = checkRes.rows[0];
+        } else {
+            existing = await new Promise((resolve, reject) => {
+                db.get(`SELECT * FROM cart_items WHERE session_id = ? AND product_id = ? AND selected_variant = ?`,
+                    [sessionId, product_id, selected_variant || null], (err, row) => {
+                        if (err) reject(err);
+                        else resolve(row);
+                    });
             });
+        }
+
+        // 2. Insert or Update
+        if (existing) {
+            const newQuantity = existing.quantity + quantity;
+            if (db.isPostgres) {
+                await db.query('UPDATE cart_items SET quantity = $1, price = $2 WHERE id = $3', [newQuantity, price, existing.id]);
+            } else {
+                await new Promise((resolve, reject) => {
+                    db.run('UPDATE cart_items SET quantity = ?, price = ? WHERE id = ?', [newQuantity, price, existing.id], (err) => {
+                        if (err) reject(err); else resolve();
+                    });
+                });
+            }
             res.json({ success: true, message: 'Item atualizado no carrinho', id: existing.id });
         } else {
-            // Adicionar novo item
-            await new Promise((resolve, reject) => {
-                db.run(`
-                INSERT INTO cart_items(session_id, product_id, quantity, selected_variant, price)
-        VALUES(?, ?, ?, ?, ?)
-            `, [sessionId, product_id, quantity, selected_variant || null, price], function (err) {
-                    if (err) reject(err);
-                    else resolve(this); // this.lastID accessible here? Wrapper logic dependent.
-                    // Better to rely on helper returning lastID in result object if Promise.
-                    // But db.run (sqlite-style) returns 'this'.
-                    // For Postgres wrapper, we need to check if lastID is passed.
+            if (db.isPostgres) {
+                await db.query(
+                    'INSERT INTO cart_items(session_id, product_id, quantity, selected_variant, price) VALUES($1, $2, $3, $4, $5)',
+                    [sessionId, product_id, quantity, selected_variant || null, price]
+                );
+            } else {
+                await new Promise((resolve, reject) => {
+                    db.run('INSERT INTO cart_items(session_id, product_id, quantity, selected_variant, price) VALUES(?, ?, ?, ?, ?)',
+                        [sessionId, product_id, quantity, selected_variant || null, price], (err) => {
+                            if (err) reject(err); else resolve();
+                        });
                 });
-            });
-            // Note: retrieving lastID with async wrapper might need specific handling if not returned in resolve.
-            // But usually for cart adds, just success is enough.
+            }
             res.json({ success: true, message: 'Item adicionado ao carrinho' });
         }
     } catch (err) {
