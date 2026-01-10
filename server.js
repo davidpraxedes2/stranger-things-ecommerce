@@ -1101,7 +1101,7 @@ async function getCollectionsWithProducts(onlyActive = true) {
     console.log(`🔍 Buscando coleções (onlyActive=${onlyActive}, Tabela=${db.isPostgres ? 'Postgres' : 'SQLite'})...`);
 
     try {
-        // Fetch all collections first
+        // 1. Fetch all collections
         const colsQuery = `
             SELECT c.*, 
             (SELECT COUNT(*) FROM collection_products WHERE collection_id = c.id) as explicit_count
@@ -1115,33 +1115,43 @@ async function getCollectionsWithProducts(onlyActive = true) {
 
         if (collections.length === 0) return [];
 
-        // Fetch products for ALL collections in one go (or efficient parallel)
-        // For simplicity and robustness with current helpers, let's use Promise.all 
-        // which runs them in parallel (better than sequential loop)
-        await Promise.all(collections.map(async (col) => {
-            try {
-                const prodsQuery = `
-                    SELECT p.*, cp.sort_order 
-                    FROM products p
-                    JOIN collection_products cp ON p.id = cp.product_id
-                    WHERE cp.collection_id = ${db.isPostgres ? '$1' : '?'} AND p.active = 1
-                    ORDER BY cp.sort_order ASC
-                `;
-                const products = await db.all(prodsQuery, [col.id]);
+        const collectionIds = collections.map(c => c.id);
 
-                // Parse JSON
-                products.forEach(p => {
-                    if (p.images_json) try { p.images = JSON.parse(p.images_json) } catch (e) { p.images = [] }
-                });
+        // 2. Fetch ALL products for these collections in ONE query
+        // "WHERE cp.collection_id IN (...)"
+        // Note: For large number of collections, might need chunking, but for <100 it's fine.
 
-                col.products = products;
-                col.product_count = products.length;
-            } catch (err) {
-                console.error(`❌ Erro produtos col ${col.id}:`, err);
-                col.products = [];
-                col.product_count = 0;
+        let products = [];
+        if (collectionIds.length > 0) {
+            const placeholders = collectionIds.map((_, i) => db.isPostgres ? `$${i + 1}` : '?').join(',');
+            const prodsQuery = `
+                SELECT p.*, cp.collection_id, cp.sort_order as cp_sort
+                FROM products p
+                JOIN collection_products cp ON p.id = cp.product_id
+                WHERE cp.collection_id IN (${placeholders}) AND p.active = 1
+                ORDER BY cp.sort_order ASC
+            `;
+            products = await db.all(prodsQuery, collectionIds);
+        }
+
+        // 3. Map products to their collections
+        const productsByCollection = {};
+
+        // Parse JSON and Group
+        products.forEach(p => {
+            if (p.images_json) try { p.images = JSON.parse(p.images_json) } catch (e) { p.images = [] }
+
+            if (!productsByCollection[p.collection_id]) {
+                productsByCollection[p.collection_id] = [];
             }
-        }));
+            productsByCollection[p.collection_id].push(p);
+        });
+
+        // Assign to collections
+        collections.forEach(col => {
+            col.products = productsByCollection[col.id] || [];
+            col.product_count = col.products.length;
+        });
 
         return collections;
 
