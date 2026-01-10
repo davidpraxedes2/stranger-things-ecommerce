@@ -1754,18 +1754,27 @@ function getSessionId(req) {
 // Buscar carrinho
 app.get('/api/cart', async (req, res) => {
     const sessionId = getSessionId(req);
+    console.log('🛒 Cart request - Session ID:', sessionId);
 
     try {
         let rows;
         if (db.isPostgres) {
-            const result = await db.query(`
-                SELECT ci.*, p.name, p.image_url, p.sku 
-                FROM cart_items ci
-                JOIN products p ON ci.product_id = p.id
-                WHERE ci.session_id = $1
-                ORDER BY ci.created_at DESC
-            `, [sessionId]);
-            rows = result.rows;
+            console.log('🔍 Using Postgres for cart query');
+            try {
+                const result = await db.query(`
+                    SELECT ci.*, p.name, p.image_url, p.sku 
+                    FROM cart_items ci
+                    JOIN products p ON ci.product_id = p.id
+                    WHERE ci.session_id = $1
+                    ORDER BY ci.created_at DESC
+                `, [sessionId]);
+                console.log('✅ Cart query successful, rows:', result.rows?.length || 0);
+                rows = result.rows;
+            } catch (pgErr) {
+                console.error('❌ Postgres cart query failed:', pgErr.message);
+                console.error('Stack:', pgErr.stack);
+                throw pgErr;
+            }
         } else {
             rows = await new Promise((resolve, reject) => {
                 db.all(`
@@ -1784,8 +1793,11 @@ app.get('/api/cart', async (req, res) => {
         const total = rows.reduce((sum, item) => sum + (item.price * item.quantity), 0);
         res.json({ items: rows, total: total });
     } catch (err) {
-        console.error('Erro ao buscar carrinho:', err);
-        res.status(500).json({ error: err.message });
+        console.error('❌ CART ERROR - Full details:', err);
+        console.error('Error name:', err.name);
+        console.error('Error message:', err.message);
+        console.error('Error stack:', err.stack);
+        res.status(500).json({ error: err.message, details: err.stack });
     }
 });
 
