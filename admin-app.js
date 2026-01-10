@@ -711,7 +711,7 @@ async function renderAnalytics(container) {
         </div>
 
         <!-- Live View Grid -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px;">
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-bottom: 32px;">
             <!-- Brazil Map -->
             <div class="chart-container">
                 <div class="chart-header">
