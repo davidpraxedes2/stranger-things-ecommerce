@@ -1465,9 +1465,13 @@ app.post('/api/orders', async (req, res) => {
         let orderId;
 
         if (db.isPostgres) {
-            // Postgres - Async await
-            // db.run returns { lastID, changes }
-            const result = await db.run(query, [
+            // Postgres - Use RETURNING id
+            const pgQuery = `
+                INSERT INTO orders (customer_name, customer_email, customer_phone, customer_cpf, customer_address, total, status, created_at)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP)
+                RETURNING id
+            `;
+            const result = await db.query(pgQuery, [
                 customer_name,
                 customer_email,
                 customer_phone,
@@ -1476,7 +1480,10 @@ app.post('/api/orders', async (req, res) => {
                 total,
                 status || 'pending'
             ]);
-            orderId = result.lastID;
+            // db.query no helper retorna o resultado nativo do pg (se for direto) ou algo custom?
+            // Vamos olhar db-helper.js: query retorna await client.query(convertedQuery, params); 
+            // Entao retorna o objeto Result do pg.
+            orderId = result.rows[0]?.id;
         } else {
             // SQLite - Sync (db.run returns result directly if no callback)
             // But db-helper wraps it. For consistency, let's use the callback-less promise version if supported, 
@@ -1801,6 +1808,29 @@ app.get('/api/cart', async (req, res) => {
         console.error('Error message:', err.message);
         console.error('Error stack:', err.stack);
         res.status(500).json({ error: err.message, details: err.stack });
+    }
+    res.status(500).json({ error: err.message, details: err.stack });
+}
+});
+
+// Gateways de Pagamento
+app.get('/api/gateways', async (req, res) => {
+    try {
+        let rows;
+        if (db.isPostgres) {
+            const result = await db.query('SELECT * FROM payment_gateways WHERE is_active = 1');
+            rows = result.rows;
+        } else {
+            rows = await new Promise((resolve, reject) => {
+                db.all('SELECT * FROM payment_gateways WHERE is_active = 1', [], (err, rows) => {
+                    if (err) reject(err); else resolve(rows);
+                });
+            });
+        }
+        res.json(rows || []);
+    } catch (error) {
+        console.error('Erro get gateways:', error);
+        res.status(500).json({ error: 'Erro ao buscar gateways' });
     }
 });
 
