@@ -14,6 +14,9 @@
     "stranger-things",
     "nodejs"
   ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {
