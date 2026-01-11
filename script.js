@@ -1393,63 +1393,63 @@ function setupCartEventDelegation() {
     });
 }
 
-// Checkout
-async function handleCheckout() {
-    const cart = window.cart || [];
-    if (cart.length === 0) {
-        showNotification('Sua sacola está vazia!', 'error');
-        return;
-    }
+// Checkout LEGACY (DESATIVADO - Usa checkout.js agora)
+// async function handleCheckout() {
+//     const cart = window.cart || [];
+//     if (cart.length === 0) {
+//         showNotification('Sua sacola está vazia!', 'error');
+//         return;
+//     }
 
-    const customerName = prompt('Digite seu nome:');
-    if (!customerName) return;
+//     const customerName = prompt('Digite seu nome:');
+//     if (!customerName) return;
 
-    const customerEmail = prompt('Digite seu email:');
-    if (!customerEmail) return;
+//     const customerEmail = prompt('Digite seu email:');
+//     if (!customerEmail) return;
 
-    const customerPhone = prompt('Digite seu telefone (opcional):') || '';
+//     const customerPhone = prompt('Digite seu telefone (opcional):') || '';
 
-    const total = cart.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 0)), 0);
-    const items = cart.map(item => ({
-        product_id: item.product_id || item.id,
-        quantity: item.quantity || 1,
-        price: item.price || 0
-    }));
+//     const total = cart.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 0)), 0);
+//     const items = cart.map(item => ({
+//         product_id: item.product_id || item.id,
+//         quantity: item.quantity || 1,
+//         price: item.price || 0
+//     }));
 
-    try {
-        const response = await fetch(`${window.API_URL}/orders`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                customer_name: customerName,
-                customer_email: customerEmail,
-                customer_phone: customerPhone,
-                items: items,
-                total: total
-            })
-        });
+//     try {
+//         const response = await fetch(`${window.API_URL}/orders`, {
+//             method: 'POST',
+//             headers: {
+//                 'Content-Type': 'application/json'
+//             },
+//             body: JSON.stringify({
+//                 customer_name: customerName,
+//                 customer_email: customerEmail,
+//                 customer_phone: customerPhone,
+//                 items: items,
+//                 total: total
+//             })
+//         });
 
-        const data = await response.json();
+//         const data = await response.json();
 
-        if (response.ok) {
-            showNotification('Pedido realizado com sucesso! Aguarde nosso contato.', 'success');
-            // Limpar carrinho no backend
-            await fetch(`${API_URL}/cart/clear`, {
-                method: 'DELETE',
-                headers: getCartHeaders()
-            });
-            await loadCartFromAPI();
-            closeCartDrawer();
-        } else {
-            showNotification(data.error || 'Erro ao realizar pedido', 'error');
-        }
-    } catch (error) {
-        console.error('Erro:', error);
-        showNotification('Erro ao conectar com o servidor', 'error');
-    }
-}
+//         if (response.ok) {
+//             showNotification('Pedido realizado com sucesso! Aguarde nosso contato.', 'success');
+//             // Limpar carrinho no backend
+//             await fetch(`${API_URL}/cart/clear`, {
+//                 method: 'DELETE',
+//                 headers: getCartHeaders()
+//             });
+//             await loadCartFromAPI();
+//             closeCartDrawer();
+//         } else {
+//             showNotification(data.error || 'Erro ao realizar pedido', 'error');
+//         }
+//     } catch (error) {
+//         console.error('Erro:', error);
+//         showNotification('Erro ao conectar com o servidor', 'error');
+//     }
+// }
 
 // Notification
 function showNotification(message, type = 'success') {
