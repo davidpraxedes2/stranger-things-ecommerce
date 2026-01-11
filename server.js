@@ -519,6 +519,11 @@ async function initializeDatabase() {
         await runMigration("ALTER TABLE order_items ALTER COLUMN selected_variant TYPE TEXT");
         await runMigration("ALTER TABLE cart_items ALTER COLUMN selected_variant TYPE TEXT");
 
+        // Migrações de Tracking (UTM)
+        await runMigration("ALTER TABLE orders ADD COLUMN utm_source TEXT");
+        await runMigration("ALTER TABLE orders ADD COLUMN utm_medium TEXT");
+        await runMigration("ALTER TABLE orders ADD COLUMN utm_campaign TEXT");
+
         // Tabela de coleções
         await runQuery(`CREATE TABLE IF NOT EXISTS collections (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -1456,10 +1461,29 @@ app.post('/api/orders', async (req, res) => {
     }
 
     try {
+        // Fetch UTM from session if available
+        let utm = {};
+        if (session_id) {
+            try {
+                const utmQuery = db.isPostgres ?
+                    'SELECT utm_source, utm_medium, utm_campaign FROM analytics_sessions WHERE session_id = $1' :
+                    'SELECT utm_source, utm_medium, utm_campaign FROM analytics_sessions WHERE session_id = ?';
+
+                const utmRes = db.isPostgres ?
+                    await db.query(utmQuery, [session_id]) :
+                    db.prepare(utmQuery).get(session_id);
+
+                if (db.isPostgres && utmRes.rows.length > 0) utm = utmRes.rows[0];
+                else if (!db.isPostgres && utmRes) utm = utmRes;
+            } catch (e) {
+                console.error('Error fetching UTM:', e);
+            }
+        }
+
         // Inserir pedido
         const query = `
-            INSERT INTO orders (customer_name, customer_email, customer_phone, customer_cpf, customer_address, total, status, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+            INSERT INTO orders (customer_name, customer_email, customer_phone, customer_cpf, customer_address, total, status, created_at, utm_source, utm_medium, utm_campaign)
+            VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?)
         `; // Changed datetime('now') to CURRENT_TIMESTAMP for compatibility
 
         let orderId;
@@ -1467,8 +1491,8 @@ app.post('/api/orders', async (req, res) => {
         if (db.isPostgres) {
             // Postgres - Use RETURNING id
             const pgQuery = `
-                INSERT INTO orders (customer_name, customer_email, customer_phone, customer_cpf, customer_address, total, status, created_at)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP)
+                INSERT INTO orders (customer_name, customer_email, customer_phone, customer_cpf, customer_address, total, status, created_at, utm_source, utm_medium, utm_campaign)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP, $8, $9, $10)
                 RETURNING id
             `;
             const result = await db.query(pgQuery, [
@@ -1478,7 +1502,10 @@ app.post('/api/orders', async (req, res) => {
                 customer_cpf,
                 customer_address,
                 total,
-                status || 'pending'
+                status || 'pending',
+                utm.utm_source || null,
+                utm.utm_medium || null,
+                utm.utm_campaign || null
             ]);
             // db.query no helper retorna o resultado nativo do pg (se for direto) ou algo custom?
             // Vamos olhar db-helper.js: query retorna await client.query(convertedQuery, params); 
@@ -1486,22 +1513,22 @@ app.post('/api/orders', async (req, res) => {
             orderId = result.rows[0]?.id;
         } else {
             // SQLite - Sync (db.run returns result directly if no callback)
-            // But db-helper wraps it. For consistency, let's use the callback-less promise version if supported, 
-            // OR use the specific logic. 
-            // db-helper db.run returns a Promise for Postgres but sync for SQLite?
-            // Checking db-helper wrapper again:
-            // runSQLite always returns (sync) if no callback? 
-            // No, runSQLite in db-helper uses callbacks. 
-            // db.run tries to handle both.
-
-            // Safer way: use db.run as Promise (db-helper supports it for Postgres, but for SQLite it might not)
-            // Let's stick to simple db.prepare for SQLite since it works well there.
-
             const stmt = db.prepare(`
-                INSERT INTO orders (customer_name, customer_email, customer_phone, customer_cpf, customer_address, total, status, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
+                INSERT INTO orders (customer_name, customer_email, customer_phone, customer_cpf, customer_address, total, status, created_at, utm_source, utm_medium, utm_campaign)
+                VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'), ?, ?, ?)
             `);
-            const result = stmt.run(customer_name, customer_email, customer_phone, customer_cpf, customer_address, total, status || 'pending');
+            const result = stmt.run(
+                customer_name,
+                customer_email,
+                customer_phone,
+                customer_cpf,
+                customer_address,
+                total,
+                status || 'pending',
+                utm.utm_source || null,
+                utm.utm_medium || null,
+                utm.utm_campaign || null
+            );
             orderId = result.lastInsertRowid;
         }
 
@@ -2329,12 +2356,47 @@ app.put('/api/admin/orders/:id', authenticateToken, (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    db.run('UPDATE orders SET status = ? WHERE id = ?', [status, id], function (err) {
-        if (err) {
-            res.status(500).json({ error: err.message });
-            return;
+    const performUpdate = async () => {
+        if (db.isPostgres) {
+            await db.query('UPDATE orders SET status = $1 WHERE id = $2', [status, id]);
+        } else {
+            db.prepare('UPDATE orders SET status = ? WHERE id = ?').run(status, id);
         }
+
+        // Notify if Paid
+        if (status === 'paid' || status === 'approved') {
+            try {
+                // Fetch Order Info for Notification
+                const orderRow = db.isPostgres ?
+                    (await db.query('SELECT total, payment_method FROM orders WHERE id = $1', [id])).rows[0] :
+                    db.prepare('SELECT total, payment_method FROM orders WHERE id = ?').get(id);
+
+                if (orderRow) {
+                    const itemQ = db.isPostgres ?
+                        'SELECT p.name FROM order_items oi JOIN products p ON oi.product_id = p.id WHERE oi.order_id = $1 LIMIT 1' :
+                        'SELECT p.name FROM order_items oi JOIN products p ON oi.product_id = p.id WHERE oi.order_id = ? LIMIT 1';
+
+                    const itemRes = db.isPostgres ?
+                        (await db.query(itemQ, [id])).rows[0] :
+                        db.prepare(itemQ).get(id);
+
+                    sendPushcutNotification('approved', {
+                        id: id,
+                        itemName: itemRes ? itemRes.name : 'Produto',
+                        total: orderRow.total,
+                        paymentMethod: orderRow.payment_method
+                    }).catch(e => console.error('Async Pushcut Fail:', e));
+                }
+            } catch (e) {
+                console.error('Notify Error:', e);
+            }
+        }
+    };
+
+    performUpdate().then(() => {
         res.json({ success: true, message: 'Status do pedido atualizado' });
+    }).catch(err => {
+        res.status(500).json({ error: err.message });
     });
 });
 

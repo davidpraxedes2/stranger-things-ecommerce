@@ -2200,16 +2200,43 @@ async function updateOrderStatus(orderId, newStatus) {
     }
 }
 
-function viewOrderDetails(orderId) {
-    const order = AppState.orders.find(o => o.id === orderId);
+// View Order Details
+async function viewOrderDetails(orderId) {
+    // 1. Fetch full details (to get items and fresh status)
+    let order = AppState.orders.find(o => o.id === orderId); // Fallback init
+
+    try {
+        const response = await fetch(`${API_URL}/admin/orders/${orderId}`, {
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
+        });
+        if (response.ok) {
+            order = await response.json();
+        }
+    } catch (e) {
+        console.error('Error fetching details:', e);
+    }
+
     if (!order) return;
 
-    // Helper para copiar ID
+    // Helper para copiar
     window.copyToClipboard = function (text) {
         navigator.clipboard.writeText(text).then(() => {
             showToast('Copiado para a área de transferência!', 'success');
         });
     };
+
+    // Parse Transaction Data for Pix Code
+    let pixCode = null;
+    let tData = null;
+    try {
+        if (order.transaction_data && typeof order.transaction_data === 'string') {
+            tData = JSON.parse(order.transaction_data);
+            pixCode = tData.qr_code || tData.pix_code || tData.copy_paste || tData.payload;
+        } else if (order.transaction_data) {
+            tData = order.transaction_data;
+            pixCode = tData.qr_code || tData.pix_code;
+        }
+    } catch (e) { console.log('Parse error', e); }
 
     const modal = `
         <div class="modal-overlay" onclick="closeModal()">
@@ -2218,10 +2245,6 @@ function viewOrderDetails(orderId) {
                     <div style="display: flex; align-items: center; gap: 12px;">
                         <h2>Pedido #${order.id.toString().padStart(4, '0')}</h2>
                         <span class="badge ${getStatusColor(order.status)}">${getStatusLabel(order.status)}</span>
-                        ${order.pix_copied_at ?
-            `<span class="badge badge-success" title="Copiado em ${formatDate(order.pix_copied_at)}">
-                                ✓ PIX Copiado
-                            </span>` : ''}
                     </div>
                     <button class="modal-close" onclick="closeModal()">×</button>
                 </div>
@@ -2229,108 +2252,77 @@ function viewOrderDetails(orderId) {
                     <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
                         <div>
                             <!-- Cliente -->
-                            <h3 style="margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                                Dados do Cliente
-                            </h3>
+                            <h3 style="margin-bottom: 16px;">Dados do Cliente</h3>
                             <div style="background: var(--bg-darker); padding: 16px; border-radius: 8px; margin-bottom: 24px;">
                                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                                    <div>
-                                        <small style="color: var(--text-muted); display: block; margin-bottom: 4px;">Nome</small>
-                                        <strong>${order.customer_name || 'N/A'}</strong>
-                                    </div>
-                                    <div>
-                                        <small style="color: var(--text-muted); display: block; margin-bottom: 4px;">Email</small>
-                                        <strong>${order.customer_email || 'N/A'}</strong>
-                                    </div>
-                                    <div>
-                                        <small style="color: var(--text-muted); display: block; margin-bottom: 4px;">CPF</small>
-                                        <strong>${order.customer_cpf || 'N/A'}</strong>
-                                    </div>
-                                    <div>
-                                        <small style="color: var(--text-muted); display: block; margin-bottom: 4px;">Telefone</small>
-                                        <strong>${order.customer_phone || 'N/A'}</strong>
-                                    </div>
-                                    <div style="grid-column: 1 / -1;">
-                                        <small style="color: var(--text-muted); display: block; margin-bottom: 4px;">Endereço</small>
-                                        <strong>${order.customer_address || 'Endereço não informado'}</strong>
-                                    </div>
+                                    <div><small>Nome</small><strong>${order.customer_name || 'N/A'}</strong></div>
+                                    <div><small>Email</small><strong>${order.customer_email || 'N/A'}</strong></div>
+                                    <div><small>CPF</small><strong>${order.customer_cpf || 'N/A'}</strong></div>
+                                    <div><small>Telefone</small><strong>${order.customer_phone || 'N/A'}</strong></div>
+                                    <div style="grid-column: 1 / -1;"><small>Endereço</small><strong>${order.customer_address || 'N/A'}</strong></div>
                                 </div>
                             </div>
                             
                             <!-- Itens -->
-                            <h3 style="margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-                                Itens do Pedido (${order.items_count})
-                            </h3>
+                            <h3 style="margin-bottom: 16px;">Itens do Pedido</h3>
                             <div style="background: var(--bg-darker); padding: 16px; border-radius: 8px;">
-                                <!-- Mock de itens se não tivermos os dados detalhados carregados -->
-                                ${order.items ? order.items.map(item => `
+                                ${order.items && order.items.length > 0 ? order.items.map(item => `
                                     <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border);">
-                                        <div>
-                                            <strong>${item.name}</strong>
-                                            <div style="font-size: 12px; color: var(--text-muted);">Qtd: ${item.quantity}</div>
+                                        <div style="display: flex; align-items: center; gap: 10px;">
+                                            ${item.image_url ? `<img src="${item.image_url}" style="width: 40px; height: 40px; border-radius: 4px; object-fit: cover;">` : ''}
+                                            <div>
+                                                <strong>${item.name}</strong>
+                                                <div style="font-size: 12px; color: var(--text-muted);">
+                                                    ${item.quantity}x R$ ${formatCurrency(item.price)}
+                                                    ${item.selected_variant ? `<br><span style="background:#333; padding:2px 4px; border-radius:4px;">${JSON.parse(item.selected_variant).name || 'Var'}</span>` : ''}
+                                                </div>
+                                            </div>
                                         </div>
                                         <div>R$ ${formatCurrency(item.price * item.quantity)}</div>
                                     </div>
-                                `).join('') : '<p style="color: var(--text-muted); text-align: center;">Itens detalhados não carregados na lista.</p>'}
+                                `).join('') : '<p>Sem itens listados.</p>'}
+                            </div>
+
+                            <!-- Tracking Info (UTM) -->
+                             <h3 style="margin-bottom: 16px; margin-top: 24px;">Origem da Venda</h3>
+                            <div style="background: var(--bg-darker); padding: 16px; border-radius: 8px;">
+                                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+                                    <div><small>Source</small><strong>${order.utm_source || '-'}</strong></div>
+                                    <div><small>Medium</small><strong>${order.utm_medium || '-'}</strong></div>
+                                    <div><small>Campaign</small><strong>${order.utm_campaign || '-'}</strong></div>
+                                </div>
                             </div>
                         </div>
                         
                         <div>
-                            <!-- Transação -->
+                             <!-- Info PIX -->
+                            ${(order.payment_method === 'pix' && pixCode) ? `
+                                <div style="background: rgba(70, 211, 105, 0.1); border: 1px solid #46d369; padding: 16px; border-radius: 8px; margin-bottom: 24px;">
+                                    <h4 style="color: #46d369; margin-bottom: 8px;">Código PIX (Copia e Cola)</h4>
+                                    <div style="display: flex; gap: 8px;">
+                                        <input type="text" value="${pixCode}" readonly style="background: #000; color: #fff; border: none; padding: 8px; border-radius: 4px; width: 100%; font-size: 12px;">
+                                        <button class="btn btn-sm btn-primary" onclick="copyToClipboard('${pixCode}')">Copiar</button>
+                                    </div>
+                                </div>
+                            ` : ''}
+
+                            <!-- Pagamento Geral -->
                             <h3 style="margin-bottom: 16px;">Pagamento</h3>
                             <div style="background: var(--bg-darker); padding: 16px; border-radius: 8px; margin-bottom: 24px;">
-                                <div style="margin-bottom: 12px;">
-                                    <small style="color: var(--text-muted); display: block; margin-bottom: 4px;">Método</small>
-                                    <div style="display: flex; align-items: center; gap: 8px;">
-                                        <strong>${order.payment_method || 'PIX'}</strong>
-                                        ${order.payment_method === 'pix' || !order.payment_method ?
-            '<img src="https://upload.wikimedia.org/wikipedia/commons/a/a2/Logo_Pix_Banco_Central_do_Brasil.svg" height="16" alt="PIX">' :
-            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>'}
-                                    </div>
-                                </div>
-                                <div style="margin-bottom: 12px;">
-                                    <small style="color: var(--text-muted); display: block; margin-bottom: 4px;">ID da Transação</small>
-                                    <div style="display: flex; gap: 8px;">
-                                        <code style="background: #000; padding: 4px 8px; border-radius: 4px; font-size: 12px; flex: 1; overflow: hidden; text-overflow: ellipsis;">
-                                            ${order.transaction_id || 'N/A'}
-                                        </code>
-                                        ${order.transaction_id ?
-            `<button class="btn-icon" onclick="copyToClipboard('${order.transaction_id}')" title="Copiar ID">
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                                            </button>` : ''}
-                                    </div>
-                                </div>
-                                ${order.transaction_id ?
-            `<a href="https://bestfy.com.br/transactions/${order.transaction_id}" target="_blank" class="btn btn-secondary btn-sm btn-block" style="text-align: center; margin-top: 8px;">Ver no Gateway</a>`
-            : ''}
+                                <div><small>Método</small><strong>${order.payment_method || 'PIX'}</strong></div>
+                                <div style="margin-top: 10px;"><small>Transação ID</small><code>${order.transaction_id || 'N/A'}</code></div>
                             </div>
 
-                            <!-- Valores -->
+                            <!-- Resumo -->
                             <h3 style="margin-bottom: 16px;">Resumo</h3>
                             <div style="background: var(--bg-darker); padding: 16px; border-radius: 8px;">
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
-                                    <span>Subtotal:</span>
-                                    <strong>R$ ${formatCurrency(order.total * 0.9)}</strong>
-                                </div>
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
-                                    <span>Frete:</span>
-                                    <strong>R$ ${formatCurrency(order.total * 0.1)}</strong>
-                                </div>
-                                <div style="border-top: 1px solid var(--border); margin: 12px 0; padding-top: 12px;">
-                                    <div style="display: flex; justify-content: space-between; font-size: 18px;">
-                                        <strong>Total:</strong>
-                                        <strong style="color: var(--success);">R$ ${formatCurrency(order.total)}</strong>
-                                    </div>
-                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span>Total:</span><strong style="color: var(--success); font-size: 1.2em;">R$ ${formatCurrency(order.total)}</strong></div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer">
+                 <div class="modal-footer">
                     <button class="btn btn-secondary" onclick="closeModal()">Fechar</button>
-                    <button class="btn btn-primary" onclick="printInvoice(${orderId}); closeModal();">Imprimir Nota</button>
                 </div>
             </div>
         </div>
