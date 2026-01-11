@@ -799,7 +799,7 @@ function generateSessionsHTML(sessions) {
                 </div>
             </div>
             <div style="font-size: 11px; color: #A0A0A0; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;" title="${s.title || s.page}">
-                ${s.title || s.page}
+                ${(s.title && s.title !== 'Stranger Things Store') ? s.title : (s.page.includes('/product') ? 'Visualizando Produto ' + (s.page.match(/id=(\d+)/)?.[1] ? '(ID: ' + s.page.match(/id=(\d+)/)?.[1] + ')' : '') : s.page)}
             </div>
              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: #666;">
                 <span>Há ${s.duration || '0m'}</span>
