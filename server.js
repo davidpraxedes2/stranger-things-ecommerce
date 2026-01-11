@@ -1809,8 +1809,6 @@ app.get('/api/cart', async (req, res) => {
         console.error('Error stack:', err.stack);
         res.status(500).json({ error: err.message, details: err.stack });
     }
-    res.status(500).json({ error: err.message, details: err.stack });
-}
 });
 
 // Gateways de Pagamento
