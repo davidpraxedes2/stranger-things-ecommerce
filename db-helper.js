@@ -122,7 +122,11 @@ async function performSchemaMigration() {
             'ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS utm_medium TEXT',
             'ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS utm_campaign TEXT',
             'ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS page_title TEXT',
-            'ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS last_action TEXT'
+            'ALTER TABLE analytics_sessions ADD COLUMN IF NOT EXISTS last_action TEXT',
+            'ALTER TABLE products ADD COLUMN IF NOT EXISTS has_variants INTEGER DEFAULT 0',
+            'ALTER TABLE products ADD COLUMN IF NOT EXISTS variant_options TEXT',
+            'ALTER TABLE products ADD COLUMN IF NOT EXISTS options_json TEXT',
+            'ALTER TABLE user_sessions ADD COLUMN IF NOT EXISTS user_id INTEGER' // Just in case
         ];
 
         for (const m of migrations) {

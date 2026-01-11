@@ -1,0 +1,25 @@
+PASSO A PASSO SIMPLIFICADO - CONECTAR BANCO NO RAILWAY
+
+1. Abra seu projeto no https://railway.app
+2. Você verá dois serviços: o "Postgres" e o seu "App" (Node/Github).
+
+3. Clique no serviço do **SEU APP**.
+4. Vá na aba **Variables**.
+
+5. Adicione estas variáveis (Copie e Cole):
+
+   NOME            | VALOR (Exatamente assim)
+   ----------------|------------------------------------
+   DATABASE_URL    | ${{Postgres.DATABASE_URL}}
+   POSTGRES_URL    | ${{Postgres.DATABASE_URL}}
+   NODE_ENV        | production
+   PORT            | 3000
+   
+   ⚠️ Dica: Quando você digita "${{" o Railway autocompleta para você!
+
+6. Adicione as suas senhas (Crie você mesmo):
+   
+   ADMIN_PASSWORD  | (Sua senha do painel)
+   JWT_SECRET      | (Bata a mão no teclado para gerar uma senha longa)
+
+7. O Railway vai reiniciar o site automaticamente. Pronto! 🚀
