@@ -2708,7 +2708,7 @@ app.get('/api/admin/analytics/visitor-locations', authenticateToken, async (req,
 });
 
 // API: Sessões ativas detalhadas
-app.get('/api/admin/sessions/active', authenticateToken, (req, res) => {
+app.get('/api/admin/sessions/active', authenticateToken, async (req, res) => {
     try {
         const query = db.isPostgres ?
             "SELECT * FROM analytics_sessions WHERE last_active_at > NOW() - INTERVAL '3 minutes' ORDER BY last_active_at DESC LIMIT 50" :
@@ -2718,7 +2718,7 @@ app.get('/api/admin/sessions/active', authenticateToken, (req, res) => {
             return (rows || []).map(s => {
                 const now = new Date();
                 const lastActive = new Date(s.last_active_at);
-                const durationMs = now - new Date(s.created_at);
+                const durationMs = now - (s.created_at ? new Date(s.created_at) : lastActive);
                 const minutes = Math.floor(durationMs / 60000);
 
                 return {
@@ -2727,10 +2727,11 @@ app.get('/api/admin/sessions/active', authenticateToken, (req, res) => {
                     state: s.region || '',
                     ip: s.ip,
                     page: s.current_page,
-                    pageTitle: s.page_title,
+                    title: s.page_title, // Frontend uses .title or .page
+                    pageTitle: s.page_title, // Backup
                     action: s.last_action,
                     duration: `${minutes} min`,
-                    device: s.device,
+                    device: s.device || 'Desktop',
                     browser: s.browser,
                     utm_source: s.utm_source,
                     utm_medium: s.utm_medium,
@@ -2741,12 +2742,8 @@ app.get('/api/admin/sessions/active', authenticateToken, (req, res) => {
         };
 
         if (db.isPostgres) {
-            db.query(query, []).then(result => {
-                res.json(processRows(result.rows));
-            }).catch(err => {
-                console.error('Error active sessions PG:', err);
-                res.status(500).json([]);
-            });
+            const result = await db.query(query);
+            res.json(processRows(result.rows));
         } else {
             db.all(query, [], (err, rows) => {
                 if (err) {
