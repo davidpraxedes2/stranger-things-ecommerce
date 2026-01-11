@@ -2615,24 +2615,63 @@ app.delete('/api/admin/customers/:id', authenticateToken, async (req, res) => {
 });
 
 // Atualizar cliente (admin)
-app.put('/api/admin/customers/:id', authenticateToken, (req, res) => {
+// Atualizar produto (admin)
+app.put('/api/admin/products/:id', authenticateToken, async (req, res) => {
     const { id } = req.params;
-    const { name, email, phone, cpf, address, city, state, zip_code } = req.body;
+    const { name, description, price, category, image_url, stock, active, original_price, sku, images } = req.body;
 
-    db.run(`
-        UPDATE customers 
-        SET name = ?, email = ?, phone = ?, cpf = ?, address = ?, city = ?, state = ?, zip_code = ?, updated_at = CURRENT_TIMESTAMP
-        WHERE id = ?
-            `, [name, email, phone, cpf, address, city, state, zip_code, id], function (err) {
-        if (err) {
-            res.status(500).json({ error: err.message });
-            return;
+    // Convert keys to correct types
+    const priceVal = parseFloat(price);
+    const originalPriceVal = original_price ? parseFloat(original_price) : null;
+    const stockVal = parseInt(stock);
+    const activeVal = active ? 1 : 0;
+    const imagesJson = images ? JSON.stringify(images) : null;
+
+    try {
+        if (db.isPostgres) {
+            const query = `
+                UPDATE products 
+                SET name = $1, description = $2, price = $3, category = $4, image_url = $5, 
+                    stock = $6, active = $7, original_price = $8, sku = $9, images_json = $10,
+                    updated_at = NOW()
+                WHERE id = $11
+                RETURNING *
+            `;
+            const result = await db.query(query, [
+                name, description, priceVal, category, image_url, stockVal, activeVal,
+                originalPriceVal, sku, imagesJson, id
+            ]);
+
+            if (result.rows.length === 0) return res.status(404).json({ error: 'Produto não encontrado' });
+            res.json(result.rows[0]);
+        } else {
+            const query = `
+                UPDATE products 
+                SET name = ?, description = ?, price = ?, category = ?, image_url = ?, 
+                    stock = ?, active = ?, original_price = ?, sku = ?, images_json = ?,
+                    updated_at = datetime('now')
+                WHERE id = ?
+            `;
+            const stmt = db.prepare(query);
+            const info = stmt.run(
+                name, description, priceVal, category, image_url, stockVal, activeVal,
+                originalPriceVal, sku, imagesJson, id
+            );
+
+            if (info.changes === 0) return res.status(404).json({ error: 'Produto não encontrado' });
+
+            // Fetch updated
+            const updated = db.prepare('SELECT * FROM products WHERE id = ?').get(id);
+            res.json(updated);
         }
-        if (this.changes === 0) {
-            res.status(404).json({ error: 'Cliente não encontrado' });
-            return;
+    } catch (err) {
+        console.error('Erro ao atualizar produto:', err);
+        res.status(500).json({ error: err.message });
+    }
+}); res.status(404).json({ error: 'Cliente não encontrado' });
+return;
         }
-        res.json({ success: true, message: 'Cliente atualizado com sucesso' });
+res.json({ success: true, message: 'Cliente atualizado com sucesso' });
     });
 });
 
