@@ -2665,7 +2665,11 @@ app.get('/api/admin/analytics/visitor-locations', authenticateToken, async (req,
     try {
         if (db.isPostgres) {
             try {
-                const query = "SELECT city, region, lat, lon, COUNT(*) as count FROM analytics_sessions WHERE last_active_at > NOW() - INTERVAL '5 minutes' GROUP BY city, region, lat, lon";
+                // Debug Timezone
+                const timeCheck = await db.query('SELECT NOW() as server_time');
+                console.log('🕒 Server Time (PG):', timeCheck.rows[0].server_time);
+
+                const query = "SELECT city, region, lat, lon, COUNT(*) as count FROM analytics_sessions WHERE last_active_at > NOW() - INTERVAL '10 minutes' GROUP BY city, region, lat, lon";
                 const result = await db.query(query);
 
                 const locations = (result.rows || []).map(r => ({
@@ -2678,10 +2682,10 @@ app.get('/api/admin/analytics/visitor-locations', authenticateToken, async (req,
                 res.json(locations);
             } catch (pgErr) {
                 console.error('Error visitor locations PG:', pgErr);
-                res.json([]); // Return empty array instead of 500
+                res.json([]);
             }
         } else {
-            const query = "SELECT city, region, lat, lon, COUNT(*) as count FROM analytics_sessions WHERE last_active_at > datetime('now', '-5 minutes') GROUP BY city, region, lat, lon";
+            const query = "SELECT city, region, lat, lon, COUNT(*) as count FROM analytics_sessions WHERE last_active_at > datetime('now', '-10 minutes') GROUP BY city, region, lat, lon";
             db.all(query, [], (err, rows) => {
                 if (err) {
                     console.error('Error visitor locations SQLite:', err);
@@ -2707,8 +2711,8 @@ app.get('/api/admin/analytics/visitor-locations', authenticateToken, async (req,
 app.get('/api/admin/sessions/active', authenticateToken, (req, res) => {
     try {
         const query = db.isPostgres ?
-            "SELECT * FROM analytics_sessions WHERE last_active_at > NOW() - INTERVAL '5 minutes' ORDER BY last_active_at DESC LIMIT 50" :
-            "SELECT * FROM analytics_sessions WHERE last_active_at > datetime('now', '-5 minutes') ORDER BY last_active_at DESC LIMIT 50";
+            "SELECT * FROM analytics_sessions WHERE last_active_at > NOW() - INTERVAL '10 minutes' ORDER BY last_active_at DESC LIMIT 50" :
+            "SELECT * FROM analytics_sessions WHERE last_active_at > datetime('now', '-10 minutes') ORDER BY last_active_at DESC LIMIT 50";
 
         const processRows = (rows) => {
             return (rows || []).map(s => {
