@@ -68,11 +68,12 @@ class BestfyService {
     }
 
     async createPixTransaction(orderData) {
-        const { amount, customer, items, orderId } = orderData;
+        const { amount, customer, items, orderId, notificationUrl } = orderData; // Added notificationUrl
 
         const transactionData = {
             amount: Math.round(amount * 100),
             paymentMethod: 'pix',
+            postback_url: notificationUrl, // Bestfy field assumption
             customer: {
                 name: customer.name,
                 email: customer.email,
@@ -126,11 +127,12 @@ class BestfyService {
     }
 
     async createCreditCardTransaction(orderData) {
-        const { amount, customer, items, card, installments, orderId } = orderData;
+        const { amount, customer, items, card, installments, orderId, notificationUrl } = orderData; // Added notificationUrl
 
         const transactionData = {
             amount: Math.round(amount * 100),
             paymentMethod: 'credit_card',
+            postback_url: notificationUrl, // Bestfy
             card: {
                 number: card.number.replace(/\s/g, ''),
                 cvv: card.cvv,

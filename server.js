@@ -3600,13 +3600,20 @@ app.post('/api/payments/bestfy/pix', async (req, res) => {
             }
         };
 
+        // Webhook URL (Dynamic based on request Host)
+        // Ensure https protocol unless localhost
+        const protocol = req.get('host').includes('localhost') ? 'http' : 'https';
+        const notificationUrl = `${protocol}://${req.get('host')}/api/webhooks/bestfy`;
+        console.log('🔗 Setting Bestfy Webhook:', notificationUrl);
+
         // Criar transação PIX
         const transaction = await bestfy.createPixTransaction({
             amount,
             customer: sanitizedCustomer,
             items,
             shipping,
-            orderId
+            orderId,
+            notificationUrl // Pass Webhook URL
         });
 
         // Atualizar pedido com dados da transação
